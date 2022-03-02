@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP</title>
+</head>
+<style>
+    @font-face{
+    font-family: 'DIN-Regular';
+    src: url(assets/font/D-DIN.otf);
+    font-style: normal;
+    }
+    @font-face{
+        font-family: 'DIN-Bold';
+        src: url(assets/font/D-DIN-Bold.otf);
+        font-style: normal;
+    }
+    body{
+        background: rgba(185, 35, 98, 0.56);
+    }
+    .card{
+        background: #FFFFFF;
+        border: 1px solid #CECECE;
+        box-sizing: border-box;
+        border-radius: 10px;
+        padding: 1rem;
+        height: 100%;
+        width: 650px;
+    }
+    .text-center{
+        text-align: center;
+    }
+    .text{
+        border-top: 1px solid #CECECE;
+        border-bottom: 1px solid #CECECE;
+    }
+    .mt-1{
+        margin-top: 1rem;
+    }
+    .mt-2{
+        margin-top: 2rem;
+    }
+    .mt-3{
+        margin-top: 3rem;
+    }
+    .mt-4{
+        margin-top: 4rem;
+    }
+    .mt-5{
+        margin-top: 5rem;
+    }
+    .mb-1{
+        margin-bottom: 1rem;
+    }
+    .mb-2{
+        margin-bottom: 2rem;
+    }
+    .m-0auto{
+        margin: 0 auto;
+    }
+    .din24{
+        font-family: Din-Regular;
+        font-size: 24px;
+    }
+    .din36{
+        font-family: Din-Bold;
+        font-size: 24px;
+    }
+    .din16{
+        font-family: Din-Regular;
+        font-size: 16px;
+    }
+    .text-gray{
+        color: #838383;
+    }
+    @media (max-width: 376px) {
+    .card{
+        width: 350px;
+    }
+    }
+    
+</style>
+<body>
+    <div class="card m-0auto ">
+        <div class="image text-center mb-1">
+            <img src="#image_header#">
+        </div>
+        <div class="text">
+            <div class="din24 mt-2">To Authenticate, Please use the following One Time Password (OTP) :</div>
+            <div class="din36 mt-3">#otp_number#</div>
+            <div class="din16 mt-3 mb-2">This OTP is valid  only for 10minutes. If you having any issues with your account, please dont hestitate to contact us by email to support@hellobisnis.com</div>
+        </div>
+        <div class="din16 text-gray mt-1">Please do not reply this email as it is auto-generated</div>
+    </div>
+</body>
+</html>

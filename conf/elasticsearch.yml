@@ -1,0 +1,4 @@
+##################### ElasticSearch Configuration exemple on local mode #####################
+
+#path.data: /Users/hendriksaragih/MatakJangar/Java/hokeba/hokeba-elasticsearch
+path.data: elastic

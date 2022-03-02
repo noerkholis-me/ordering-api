@@ -1,0 +1,12 @@
+@(model: Product, url: String)
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>@model.name</title>
+        <meta name="author" content="hladal.com"/>
+        <meta property="og:title" content="@model.name"/>
+        <meta property="og:description" content="@model.description"/>
+        <meta property="og:image" content="@model.getThumbnailUrl()"/>
+        <meta http-equiv="refresh" content="0;url=@url">
+    </head>
+</html>

@@ -1,0 +1,216 @@
+@(name: String, url: String, path: String, so: SalesOrder)
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Email </title>
+    </head>
+    <body style="background: #eee;font-family:Arial,sans-serif;color:#333">
+        <table style="max-width: 600px; width: 100%; margin: auto; background: #fff; padding: 0px" cellpadding="0" cellspacing="0">
+            <thead>
+                <tr style="text-align: left;background:url(@path/header-bg.png) no-repeat right #426DB4">
+                    <td style="padding:20px;"><img src="@path/logo.png" style="margin-bottom: 0px"></td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td align="left" valign="middle" style="padding:25px 30px 0;font-family: arial, sans-serif; font-size: 16px;line-height:normal">
+                        <p style="margin:10px 0;font-size:20px;font-weight:bold">Thanks for your Order, @name</p>
+                        <p style="margin:15px 0;font-size:14px;line-height:22px">Tracking information will be emailed to you as soon as your order shipped.</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding:0 35px;">
+                        <table style="width:100%;font-size:14px;" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <td colspan="4">
+                                    <p style="margin:0;font-size:18px;color:#fff;background:#333;padding:15px;text-align:center">
+                              Order Number : @so.orderNumber
+                                    </p>
+                                </td>
+                            </tr>
+                            @for(sod <- so.salesOrderDetail){
+                                <tr>
+                                    <td style="border-bottom:1px solid #ddd">
+                                        <a href="@sod.getProductUrl()"><img src="@sod.getProductImage()" width="70px" /> </a>
+                                    </td>
+                                    <td style="border-bottom:1px solid #ddd; width: 70%; padding-left:3px;  " colspan="2">
+                                        <p style="margin-bottom: 5px; font-size: 13px"><b>@sod.productName</b><br /></p>
+                                        <p style="margin-top: 0px; font-size: 12px; margin-bottom:5px">SKU: <b>@sod.getProductSku()</b></p>
+                                        @if(sod.existColor()){
+                                            <p style="margin-top: 0px; font-size: 12px; margin-bottom:5px">Color: <b>@sod.getColor()</b></p>
+                                        }
+                                        @if(sod.existSize()){
+                                            <p style="margin-top: 0px; font-size: 12px; margin-bottom:5px">Size: <b>@sod.sizeName</b></p>
+                                        }
+                                        <p style="font-size: 12px;margin-top: 0;">Quantity:<b>@sod.quantity</b></p>
+                                    </td>
+                                    <td style="border-bottom:1px solid #ddd; text-align: right; padding-left: 3px; font-size: 12px;">
+                                        <p>@sod.getPriceString()</p>
+                                    </td>
+                                </tr>
+                            }
+
+                        </table>
+                    </td>
+                </tr>
+
+                <tr style="vertical-align:top">
+                    <td style="padding: 0 35px;">
+
+                        <hr style=" border-color: transparent;
+                            background: transparent;
+                            box-shadow: none;
+                            margin-bottom: 20px;"/>
+
+                        <table style="width:100%;font-size:14px;" cellpadding="0" cellspacing="0">
+                            <tr>
+                                <th style="background:#ddd;color:#333;padding:10px;border-right:2px solid #fff;font-weight:bold; text-align: left;">Your Shipping Address</th>
+                                <th style="background:#ddd;color:#333;padding:10px;font-weight:bold; text-align: left;">Your Billing Address</th>
+                            </tr>
+                            <tr style="vertical-align:top">
+                                <td colspan="" style="width:50%; min-height: 36; max-width: 68px;">
+                                    <p>@Html(HtmlFormat.escape(so.getShippingAddress()).toString.replace("\n", "<br />"))</p>
+                                </td>
+                                <td colspan="" style="width:50%; min-height: 36; max-width: 68px;">
+                                    <p>@Html(HtmlFormat.escape(so.getPaymentAddress()).toString.replace("\n", "<br />"))</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="padding:0 35px;">
+                        <table style="width:100%;font-size:14px;" cellpadding="0" cellspacing="0">
+                            <tr style="vertical-align:top">
+                                <td colspan="4" style="width:50%">
+                                    <p style="background:#ddd;color:#333;padding:10px;border-right:2px solid #fff;text-align:center;font-weight:bold">Order Totals</p>
+                                </td>
+                            </tr>
+
+                            <tr style="vertical-align:top">
+                                <td colspan="2" style="width:50%">
+                                    <p style="margin:5px 0;font-size:14px;">Subtotal</p>
+                                </td>
+                                <td colspan="2" style="width:50%">
+                                    <p style="margin:5px 0;font-size:14px;text-align:right">@so.getSubTotalFormat()</p>
+                                </td>
+                            </tr>
+
+                            @if(so.discount > 0D){
+                                <tr style="vertical-align:top">
+                                    <td colspan="2" style="width:50%">
+                                        <p style="margin:5px 0;font-size:14px;">Discount</p>
+                                    </td>
+                                    <td colspan="2" style="width:50%">
+                                        <p style="margin:5px 0;font-size:14px;text-align:right">@so.getDiscountFormat()</p>
+                                    </td>
+
+                                </tr>
+                            }
+
+                            <tr style="vertical-align:top">
+                                <td colspan="2" style="width:50%">
+                                    <p style="margin:5px 0;font-size:14px;">Shipping</p>
+                                </td>
+                                <td colspan="2" style="width:50%">
+                                    <p style="margin:5px 0;font-size:14px;text-align:right">@so.getShippingFormat()</p>
+                                </td>
+
+                            </tr>
+                            @if(so.voucher > 0D){
+                                <tr style="vertical-align:top">
+                                    <td colspan="2" style="width:50%">
+                                        <p style="margin:5px 0;font-size:14px;">Voucher</p>
+                                    </td>
+                                    <td colspan="2" style="width:50%">
+                                        <p style="margin:5px 0;font-size:14px;text-align:right">@so.getVoucherFormat()</p>
+                                    </td>
+
+                                </tr>
+                            }
+                            <tr style="vertical-align:top">
+                                <td colspan="2" style="width:50%">
+                                    <p style="margin:5px 0;font-size:14px;font-weight:bold">Grand Total</p>
+                                </td>
+                                <td colspan="2" style="width:50%">
+                                    <p style="margin:5px 0;font-size:14px;font-weight:bold;text-align:right">@so.getTotalFormat()</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                @if(!so.isCOD()) {
+                    <tr>
+                        <td align="center" valign="middle" style="padding: 20px 35px">
+                            <hr style=" border: 1px solid #eee;
+                                background: none;
+                                box-shadow: none;
+                                margin-bottom: 20px;
+                            "/>
+
+                            <p style="margin: 0;
+                                font-size: 14px;
+                                color: #112951;
+                                background: rgba(66, 109, 180, 0.6);
+                                padding: 15px;
+                                text-align: center;
+                                margin-bottom: 20px;
+                                border: 1.2px solid #112951;">
+                                Please transfer payment to:<b> @so.bank.bankName (@so.bank.accountNumber), @so.bank.accountName</b>
+                            </p>
+
+                            <a href="@url" style="display: inline-block;
+                                color: #fff;
+                                background: #F46F25;
+                                padding: 15px 50px;
+                                text-decoration: none;
+                                font-family: arial, 'sans-serif';
+                                font-size: 16px;
+                                border-radius: 5px;"> Confirm Your Order</a><br />
+                        </td>
+                    </tr>
+                }
+
+                <tr>
+                    <td style="padding:20px 20px 0">
+                        <hr style="    border: 1px solid #eee;
+                            background: none;
+                            box-shadow: none;
+                        "/>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td align="center" valign="middle" style="background: #E9E9E9; padding: 15px 0; color: #333; font-family: arial, 'sans-serif'">
+                        <p style="font-size: 13px; font-weight:bold;">WHIZLIZ PARTNER SUPPORT CENTER</p>
+                        <p style="font-size: 12px; ">Do you have any suggestions, ideas or thoughts on how we can improve?</p>
+                        <p style="font-size: 12px; ">Email us at <a href="mailto:partnersupport&#64;whizliz.com" style="color:#426DB4">partnersupport&#64;whizliz.com</a></p>
+                        <p style="font-size: 12px; ">Mon-Fri 9.00am - 6.00pm</p>
+                        <p style="font-size: 12px; ">Excluding Weekends & Public Holidays
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:center;background:#426DB4;padding:20px">
+                        <a href="" style="padding:0 10px">
+                            <img src="@path/ic_email.png" />
+                        </a>
+                        <a href="" style="padding:0 10px">
+                            <img src="@path/ic_fb.png" />
+                        </a>
+                        <a href="" style="padding:0 10px">
+                            <img src="@path/ic_twitter.png" />
+                        </a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <p style="text-align:center;font-size: 11px; margin:20px">© Whizliz 2019. All right reserved. </p>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </body>
+</html>
