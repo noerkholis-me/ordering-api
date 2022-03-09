@@ -45,6 +45,15 @@ public class UserSession {
         this.setFeatures(null);
     }
 
+    public UserSession(String access_token, String expired_date, String user_type, HashMap<String, Boolean> features) {
+        super();
+        this.access_token = access_token;
+        this.expired_date = expired_date;
+        this.user_type = user_type;
+        this.setProfile_data(null);
+        this.features = features;
+    }
+
     public HashMap<String, Boolean> getFeatures() {
         return features;
     }
