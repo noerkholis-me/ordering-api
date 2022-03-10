@@ -1,6 +1,7 @@
 package com.hokeba.api;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import dtos.FeatureAndPermissionSession;
 
 import java.util.HashMap;
@@ -16,6 +17,7 @@ public class UserSession {
     private Object profile_data;
     @JsonIgnore
     private HashMap<String, Boolean> features;
+    @JsonProperty("features_and_permissions")
     private List<FeatureAndPermissionSession> featureAndPermissions;
 
     public String getAccess_token() {
