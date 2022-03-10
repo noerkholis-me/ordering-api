@@ -1,0 +1,83 @@
+stages:
+  - prepare
+  - build
+  - deploy
+cache:
+  key: "$CI_BUILD_REF_NAME"
+  untracked: true    
+  paths:
+    - target/
+    - sbt-cache/
+prepare:
+  stage: prepare
+  image: hseeberger/scala-sbt:8u151-2.12.5-1.1.2
+  variables:
+    SBT_VERSION: "1.3.10"
+    SBT_OPTS: >
+      -Dsbt.global.base=$CI_PROJECT_DIR/sbt-cache/sbtboot
+      -Dsbt.boot.directory=$CI_PROJECT_DIR/sbt-cache/boot
+      -Dsbt.ivy.home=$CI_PROJECT_DIR/sbt-cache/ivy    
+    SBT_CACHE_DIR: "$CI_PROJECT_DIR/sbt-cache/.ivy/cache"
+  script:
+    - sbt clean compile
+    - sbt dist
+  only:
+    - staging
+  timeout: 180m
+  artifacts:
+    paths:
+      - "target"
+  #    - "project/target"
+  #    - "project/project/target"
+  #    - "*/target"
+  #    - "*/project/target"
+  #    - "*/project/project/target"
+    expire_in: 1 days
+
+build:
+  stage: build
+  image: docker:18.09.7
+  services:
+    - name: docker:18.09.7-dind
+  script:
+    - ls -lah target
+    - docker info
+    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry.stagingapps.net
+    - docker build -t "${CI_REGISTRY_IMAGE}:latest" .
+    - docker tag "${CI_REGISTRY_IMAGE}:latest" "${CI_REGISTRY_IMAGE}:$CI_BUILD_REF"
+    - docker push "${CI_REGISTRY_IMAGE}:latest"
+    - docker push "${CI_REGISTRY_IMAGE}:$CI_BUILD_REF"
+  only:
+    - staging
+
+deploy_staging:
+  image: registry.cn-hangzhou.aliyuncs.com/haoshuwei24/kubectl:1.16.6
+  stage: deploy
+  environment:
+    name: stg-sandbox-api
+    url: https://${URL_STAGING}
+  script:
+    - kubectl version
+    - cd manifest/
+    - |
+      if kubectl get secret | grep regcred; then
+          echo "already exist"
+          kubectl delete secret regcred
+          kubectl create secret docker-registry regcred --docker-server=registry.stagingapps.net --docker-username="${CI_REGISTRY_USER}" --docker-password="${CI_REGISTRY_PASSWORD}" || exit 1
+      else
+         kubectl create secret docker-registry regcred --docker-server=registry.stagingapps.net --docker-username="${CI_REGISTRY_USER}" --docker-password="${CI_REGISTRY_PASSWORD}" || exit 1
+      fi 
+    - sed -i "s/__CI_ENVIRONMENT_SLUG__/${CI_ENVIRONMENT_SLUG}/" deployment.yaml service.yaml ingress.yaml
+    - sed -i "s/__CI_PROJECT_NAME__/${CI_PROJECT_NAME}/" deployment.yaml service.yaml ingress.yaml pvc.yaml
+#    - sed -i "s/__VERSION__/$CI_BUILD_REF/" deployment.yaml
+    - sed -i "s/__URL_STAGING__/${URL_STAGING}/" ingress.yaml
+    - sed -i "s,__IMAGE__:__VERSION__,${CI_REGISTRY_IMAGE}:$CI_BUILD_REF," deployment.yaml
+    - kubectl apply -f pvc.yaml
+    - kubectl apply -f deployment.yaml
+    - kubectl apply -f service.yaml
+    - kubectl apply -f ingress.yaml
+    - kubectl rollout status -f deployment.yaml
+    - kubectl get all,ing  -n "${KUBE_NAMESPACE}"
+  only:
+    - staging
+
