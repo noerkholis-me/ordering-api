@@ -1,0 +1,8 @@
+stages:
+  - sonar
+
+sonar:
+  stage: sonar
+  script: 
+  # sonar whizliz-api
+  - mvn package sonar:sonar -Dsonar.host.url=https://sonar.stagingapps.net/
