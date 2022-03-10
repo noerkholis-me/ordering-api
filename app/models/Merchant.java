@@ -15,6 +15,7 @@ import com.hokeba.mapping.response.MapProductRatting;
 import com.hokeba.util.CommonFunction;
 import com.hokeba.util.Constant;
 import com.hokeba.util.Encryption;
+import dtos.FeatureAndPermissionSession;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -613,6 +614,21 @@ public class Merchant extends BaseModel{
     
     public static Merchant fetchOwnMerchant() {
     	return Merchant.find.where().eq("t0.own_merchant", true).orderBy("t0.id asc").setMaxRows(1).findUnique();
+    }
+
+    public List<FeatureAndPermissionSession> checkFeatureAndPermissions() {
+        List<RoleFeature> myFeature = this.role.featureList;
+        List<FeatureAndPermissionSession> featureAndPermissionSessionList = new ArrayList<>();
+        for (RoleFeature feature : myFeature) {
+            FeatureAndPermissionSession featureAndPermissionSession = new FeatureAndPermissionSession();
+            featureAndPermissionSession.setFeatureName(feature.feature.key);
+            featureAndPermissionSession.setIsView(feature.isView());
+            featureAndPermissionSession.setIsAdd(feature.isAdd());
+            featureAndPermissionSession.setIsEdit(feature.isEdit());
+            featureAndPermissionSession.setIsDelete(feature.isDelete());
+            featureAndPermissionSessionList.add(featureAndPermissionSession);
+        }
+        return featureAndPermissionSessionList;
     }
 
     public HashMap<String, Boolean> checkPrivilegeList() {

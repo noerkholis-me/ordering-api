@@ -18,6 +18,7 @@ import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
+import dtos.FeatureAndPermissionSession;
 import dtos.MerchantSessionResponse;
 import models.*;
 import play.Logger;
@@ -36,10 +37,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by hendriksaragih on 2/28/17.
@@ -83,11 +81,12 @@ public class SessionsController extends BaseController {
                         // modify session response for merchant can be reusable for property
                         MerchantSessionResponse profileData = toMerchantSessionResponse(member);
                         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                        HashMap<String, Boolean> features = member.checkPrivilegeList();
-                        UserSession session = new UserSession(log.token, df.format(log.expiredDate), log.memberType, features);
                         ObjectMapper om = new ObjectMapper();
                         om.addMixIn(Merchant.class, JsonMask.class);
-                        session.setProfile_data(Json.parse(om.writeValueAsString(profileData)));
+//                        HashMap<String, Boolean> features = member.checkPrivilegeList();
+                        List<FeatureAndPermissionSession> featureAndPermissionSessions = member.checkFeatureAndPermissions();
+                        UserSession session = new UserSession(log.token, df.format(log.expiredDate), log.memberType, Json.parse(om.writeValueAsString(profileData)), featureAndPermissionSessions);
+//                        session.setProfile_data(Json.parse(om.writeValueAsString(profileData)));
                         response.setBaseResponse(1, 0, 1, success, session);
                         return ok(Json.toJson(response));
                     } catch (Exception e) {
