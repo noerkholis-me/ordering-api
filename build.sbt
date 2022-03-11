@@ -22,6 +22,9 @@ libraryDependencies ++= Seq(
   "org.jsoup" % "jsoup" % "1.7.2",
   "com.amazonaws" % "aws-java-sdk" % "1.3.11",
   "com.sendinblue" % "sib-api-v3-sdk" % "5.1.0",
+  "jakarta.xml.bind" % "jakarta.xml.bind-api" % "2.3.2",
+  "javax.xml.ws" % "jaxws-api" % "2.3.1",
+  "org.projectlombok" % "lombok" % "1.16.16",
   ("com.clever-age" % "play2-elasticsearch" % "1.4-SNAPSHOT")
           .exclude("com.typesafe.play", "play-functional_2.4.6")
           .exclude("com.typesafe.akka", "akka-actor_2.10")

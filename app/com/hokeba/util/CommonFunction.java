@@ -24,7 +24,7 @@ public class CommonFunction {
 //			+ "((?=.*[0-9])(?=.*[^\\w])(?=.*[A-Z]))|"
 //			+ "((?=.*[^\\w])(?=.*[a-z])(?=.*[A-Z])))"
 //			+ "(?=\\S+$)(.{7,})$";
-	public static final String passwordRegex = "^(?=.*\\d)(?=.*[a-zA-Z])(?=.*[^a-zA-Z0-9])(?!.*\\s).{6,}$";
+	public static final String passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,20}$";
 	public static final String emailRegex =
 			"^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
 					+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
