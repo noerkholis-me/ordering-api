@@ -18,6 +18,8 @@ import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
+import dtos.FeatureAndPermissionSession;
+import dtos.MerchantSessionResponse;
 import models.*;
 import play.Logger;
 import play.libs.Json;
@@ -35,10 +37,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by hendriksaragih on 2/28/17.
@@ -79,11 +78,15 @@ public class SessionsController extends BaseController {
                             response.setBaseResponse(0, 0, 0, inputParameter, null);
                             return badRequest(Json.toJson(response));
                         }
+                        // modify session response for merchant can be reusable for property
+                        MerchantSessionResponse profileData = toMerchantSessionResponse(member);
                         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                        UserSession session = new UserSession(log.token, df.format(log.expiredDate), log.memberType);
                         ObjectMapper om = new ObjectMapper();
-                        om.addMixInAnnotations(Merchant.class, JsonMask.class);
-                        session.setProfile_data(Json.parse(om.writeValueAsString(member)));
+                        om.addMixIn(Merchant.class, JsonMask.class);
+//                        HashMap<String, Boolean> features = member.checkPrivilegeList();
+                        List<FeatureAndPermissionSession> featureAndPermissionSessions = member.checkFeatureAndPermissions();
+                        UserSession session = new UserSession(log.token, df.format(log.expiredDate), log.memberType, Json.parse(om.writeValueAsString(profileData)), featureAndPermissionSessions);
+//                        session.setProfile_data(Json.parse(om.writeValueAsString(profileData)));
                         response.setBaseResponse(1, 0, 1, success, session);
                         return ok(Json.toJson(response));
                     } catch (Exception e) {
@@ -102,6 +105,45 @@ public class SessionsController extends BaseController {
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
+    }
+
+    private static MerchantSessionResponse toMerchantSessionResponse(Merchant member) {
+
+        MerchantSessionResponse profileData = new MerchantSessionResponse();
+        profileData.setEmail(member.email);
+        profileData.setBirthDate(member.birthDate);
+        profileData.setGender(member.gender);
+        profileData.setFullName(member.fullName);
+        profileData.setDomain(member.domain);
+        profileData.setAccountNumber(member.accountNumber);
+        profileData.setMerchantCode(member.getCode());
+        profileData.setName(member.name);
+        profileData.setLogo(member.getLogo());
+        profileData.setDisplay(member.display);
+        profileData.setType(member.getType());
+        profileData.setStatus(member.status);
+        profileData.setCompanyName(member.companyName);
+        profileData.setCityName(member.cityName);
+        profileData.setPostalCode(member.postalCode);
+        profileData.setProvince(member.province);
+        profileData.setCommissionType(member.commissionType);
+        profileData.setAddress(member.address);
+        profileData.setPhone(member.phone);
+        profileData.setMetaDescription(member.metaDescription);
+        profileData.setStory(member.story);
+        profileData.setUrl(member.url);
+        profileData.setMerchantUrlPage(member.merchantUrlPage);
+        profileData.setAnchor(member.anchor);
+        profileData.setUrlBanner(member.urlBanner);
+        profileData.setQuickResponse(member.quickResponse);
+        profileData.setProductAvailability(member.productAvailability);
+        profileData.setRating(member.rating);
+        profileData.setCountRating(member.countRating);
+        profileData.setBalance(member.getBalance());
+        profileData.setResetTime(member.resetTime);
+        profileData.setActive(member.isActive);
+
+        return profileData;
     }
 
 

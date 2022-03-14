@@ -15,6 +15,7 @@ import com.hokeba.mapping.response.MapProductRatting;
 import com.hokeba.util.CommonFunction;
 import com.hokeba.util.Constant;
 import com.hokeba.util.Encryption;
+import dtos.FeatureAndPermissionSession;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -26,10 +27,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name="merchant")
@@ -192,6 +190,9 @@ public class Merchant extends BaseModel{
     @javax.persistence.Transient
     @JsonProperty("lists")
     public List<MapMerchantPayment> lists = new ArrayList<>();
+
+    @ManyToOne(cascade = { CascadeType.ALL })
+    public Role role;
 
     public void setOrderStat(){
         orderStat.add(new MapKeyValue("Successful Transactions", String.valueOf(SalesOrderSeller.getOrderByStatus(id,
@@ -613,6 +614,36 @@ public class Merchant extends BaseModel{
     
     public static Merchant fetchOwnMerchant() {
     	return Merchant.find.where().eq("t0.own_merchant", true).orderBy("t0.id asc").setMaxRows(1).findUnique();
+    }
+
+    public List<FeatureAndPermissionSession> checkFeatureAndPermissions() {
+        List<RoleFeature> myFeature = this.role.featureList;
+        List<FeatureAndPermissionSession> featureAndPermissionSessionList = new ArrayList<>();
+        for (RoleFeature feature : myFeature) {
+            FeatureAndPermissionSession featureAndPermissionSession = new FeatureAndPermissionSession();
+            featureAndPermissionSession.setFeatureName(feature.feature.key);
+            featureAndPermissionSession.setIsView(feature.isView());
+            featureAndPermissionSession.setIsAdd(feature.isAdd());
+            featureAndPermissionSession.setIsEdit(feature.isEdit());
+            featureAndPermissionSession.setIsDelete(feature.isDelete());
+            featureAndPermissionSessionList.add(featureAndPermissionSession);
+        }
+        return featureAndPermissionSessionList;
+    }
+
+    public HashMap<String, Boolean> checkPrivilegeList() {
+        LinkedHashMap<String, Boolean> result = new LinkedHashMap<String, Boolean>();
+        List<Feature> allFeature = Feature.find.all();
+        List<RoleFeature> myFeature = this.role.featureList;
+        for (Feature targetFeature : allFeature) {
+            String keyTarget = targetFeature.key;
+            result.put(keyTarget, false);
+        }
+        for (RoleFeature feature : myFeature) {
+            String keyTarget = feature.feature.key;
+            result.put(keyTarget, true);
+        }
+        return result;
     }
 
 }
