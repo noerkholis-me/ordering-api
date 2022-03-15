@@ -19,3 +19,4 @@ conf/application.conf
 .gitbitbucket
 public/uploads
 elastic
+.vscode
