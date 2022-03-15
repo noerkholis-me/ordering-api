@@ -1,0 +1,104 @@
+package models;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.hokeba.util.CommonFunction;
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
+import javax.validation.constraints.Size;
+import java.util.Date;
+
+/**
+ * this class for entity / domain model
+ * repository / DAO create on model (need to refactor to repository pattern)
+ * Don't put business logical on this class
+ */
+
+@Entity
+public class UserMerchant extends BaseModel {
+
+    private static final long serialVersionUID = 1L;
+
+    @JsonIgnore
+    @Getter @Setter
+    public String password;
+
+    @Getter @Setter
+    @JsonProperty("first_name")
+    public String firstName;
+
+    @Getter @Setter
+    @JsonProperty("last_name")
+    public String lastName;
+
+    @Column(unique = true)
+    public String email;
+
+    @JsonProperty("full_name")
+    public String fullName;
+
+    public String phone;
+
+    @Size(max = 1)
+    @Column(length = 1)
+    @Setter
+    public String gender;
+
+    @Setter
+    @Temporal(TemporalType.DATE)
+    @Column(name = "birth_date")
+    @JsonProperty("birth_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Jakarta")
+    public Date birthDate;
+
+    @JsonIgnore
+    @Column(name = "activation_code")
+    @Getter @Setter
+    public String activationCode;
+
+    @JsonProperty("is_active")
+    @Column(name = "is_active")
+    public boolean isActive;
+
+    @ManyToOne(cascade = { CascadeType.ALL })
+    public Role role;
+
+    @OneToOne(cascade = { CascadeType.ALL })
+    public Merchant merchant;
+
+    @javax.persistence.Transient
+    public String save;
+
+    public UserMerchant() {
+    }
+
+    @Transient
+    public String getIsActive() {
+        String statusName = "";
+        if(isActive)
+            statusName = "Active";
+        else statusName = "Inactive";
+
+        return statusName;
+    }
+
+    @Transient
+    public String getGenderView() {
+        String result = "";
+        if("M".equals(gender)){
+            result = "Male";
+        }else if ("F".equals(gender)){
+            result = "Female";
+        }
+        return result;
+    }
+
+    @Transient
+    public String getBirthDateFormat() {
+        return CommonFunction.getDate(birthDate);
+    }
+
+}
