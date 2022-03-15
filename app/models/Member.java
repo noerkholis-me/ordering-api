@@ -310,6 +310,35 @@ public class Member extends BaseModel {
 		  
 		  this.referral_code = referral_code;
 		
+        }
+        
+        public Member(String emailAddress, String phone, String fullName) throws ParseException {
+		  super();
+		  String[] split = fullName.split(" ");
+		  String firstName = split[0];
+		  String lastName = " " + firstName;
+		  if (split.length > 1){
+		       lastName = fullName.replaceFirst(firstName+" ", "");
+		  }
+		
+		  this.firstName = firstName;
+		  this.lastName = lastName;
+		  this.fullName = fullName;
+		  this.emailNotifikasi = this.email = emailAddress;
+		  if (!phone.isEmpty()){
+		      this.phone = phone;
+		  }
+		  SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+			Date date = new Date();
+			String actCode = email+formatter.format(date);
+		  this.activationCode = Encryption.EncryptAESCBCPCKS5Padding(actCode);
+		  LocalDateTime exp = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime().plusDays(1);
+			Date expCode = Date.from(exp.atZone(ZoneId.systemDefault()).toInstant());
+		  this.codeExpire = expCode;
+		  this.isActive = true;
+		  
+		  this.referral_code = referral_code;
+		
 		}
     
     
@@ -391,7 +420,7 @@ public class Member extends BaseModel {
             }
         }
         if (!CommonFunction.passwordValidation(password)) {
-            return "Password must be at least 6 character";
+            return "Password must be at least 8 character";
         }
         if (!confPassword.equals(password)) {
             return "Password and confirm password did not match.";
@@ -403,6 +432,7 @@ public class Member extends BaseModel {
         }
         return null;
     }
+    
 
     public static String validation(Long id, String email, String phone) {
         if (email != null && !email.matches(CommonFunction.emailRegex)) {
@@ -426,6 +456,39 @@ public class Member extends BaseModel {
             if (memberPhone != null) {
                 return "The phone is already registered.";
             }
+        }
+
+        return null;
+    }
+
+    public static String validation(String email, String phone, String fullName) {
+        if (email != null && !email.matches(CommonFunction.emailRegex)) {
+            return "Email format not valid.";
+        }
+        String[] mails = email.split("@");
+        Integer row = BlacklistEmail.find.where().eq("name", "@"+mails[1]).eq("is_deleted", false).findRowCount();
+        if (row > 0){
+            return "The email service provider that you are using can not be used in Whizliz Please use another email service provider.";
+        }
+        Member member = Member.find.where().eq("email", email).setMaxRows(1).findUnique();
+        if (member != null) {
+            return "The email is already registered.";
+        }
+
+        if (!phone.isEmpty()){
+            if (!phone.matches(CommonFunction.phoneRegex)){
+                return "Phone format not valid.";
+            }
+            Member memberPhone = Member.find.where().eq("phone", phone).setMaxRows(1).findUnique();
+            if (memberPhone != null) {
+                return "The phone is already registered.";
+            }
+        }
+
+        if(!fullName.isEmpty()) {
+        	if(!fullName.matches(CommonFunction.nameRegex)) {
+        		return "Name format not valid.";
+        	}
         }
 
         return null;
