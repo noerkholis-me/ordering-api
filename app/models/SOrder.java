@@ -66,6 +66,7 @@ public class SOrder extends BaseModel{
 	public String originAddress;
 	public String destinationAddress;
 	public String orderIdShipper;
+	public String shipperId;
 	
     @OneToOne(mappedBy = "order")
     @JsonProperty("order_payment")
