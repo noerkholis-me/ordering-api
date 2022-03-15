@@ -238,7 +238,6 @@ create table brand (
   is_deleted                boolean,
   name                      varchar(255),
   title                     varchar(255),
-  description               varchar(255),
   keyword                   varchar(255),
   slug                      varchar(255),
   status                    boolean,
