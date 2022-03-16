@@ -332,14 +332,12 @@ public class SessionsController extends BaseController {
         JsonNode json = request().body().asJson();
         if (checkAccessAuthorization("guest") == 200 && json.has("email")) {
             String email = json.findPath("email").asText();
-
             Merchant member = Merchant.find.where().eq("is_active", true).eq("email", email).setMaxRows(1).findUnique();
-            Long merchantId = member.id;
-            Long currentTime = System.currentTimeMillis();
-            String forgotPasswordCode = Encryption.EncryptAESCBCPCKS5Padding(String.valueOf(merchantId) + "-" + String.valueOf(currentTime));
-            String redirect = Constant.getInstance().getMerchantUrl() + "/reset-password" + "/" + forgotPasswordCode;
             if (member != null) {
                 Long now = System.currentTimeMillis();
+                String merchantEmail = member.email;
+                String forgotPasswordCode = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
+                String redirect = Constant.getInstance().getMerchantUrl() + "/reset-password" + "/" + forgotPasswordCode;
                 try {
                     member.resetToken = Encryption.EncryptAESCBCPCKS5Padding(member.email+now);
                     member.resetTime = now;
