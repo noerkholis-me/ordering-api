@@ -284,6 +284,8 @@ GET 	/merchants/pickup/get/:id					controllers.merchants.PickUpPointController.g
 PATCH 	/merchants/pickup/edit/:id					controllers.merchants.PickUpPointController.editEntry(id: Long)
 DELETE 	/merchants/pickup/delete/:id				controllers.merchants.PickUpPointController.removeEntry(id: Long)
 
+POST    /merchants/user/add                         controllers.merchants.UserMerchantController.createUser()
+
 
 
 ############################## FOR DEVELOPMENT ONLY ######################################
