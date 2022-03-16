@@ -35,9 +35,11 @@ public class UserMerchant extends BaseModel {
     public String lastName;
 
     @Column(unique = true)
+    @Getter @Setter
     public String email;
 
     @JsonProperty("full_name")
+    @Getter @Setter
     public String fullName;
 
     public String phone;
@@ -59,18 +61,27 @@ public class UserMerchant extends BaseModel {
     @Getter @Setter
     public String activationCode;
 
+    @Setter
     @JsonProperty("is_active")
     @Column(name = "is_active")
     public boolean isActive;
 
     @ManyToOne(cascade = { CascadeType.ALL })
+    @Getter @Setter
     public Role role;
 
     @OneToOne(cascade = { CascadeType.ALL })
+    @Getter @Setter
     public Merchant merchant;
 
     @javax.persistence.Transient
     public String save;
+
+    @javax.persistence.Transient
+    public Long roleId;
+
+    @javax.persistence.Transient
+    public Long merchantId;
 
     public UserMerchant() {
     }

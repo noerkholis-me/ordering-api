@@ -19,7 +19,7 @@ import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
 import dtos.FeatureAndPermissionSession;
-import dtos.MerchantSessionResponse;
+import dtos.merchant.MerchantSessionResponse;
 import models.*;
 import play.Logger;
 import play.libs.Json;
@@ -185,15 +185,15 @@ public class SessionsController extends BaseController {
                         //odoo
 //                        OdooService.getInstance().createVendor(newMember);
 
-                        Thread thread = new Thread(() -> {
-                            try {
-                                MailConfig.sendmail2(newMember.email, MailConfig.subjectActivation,
-                                        MailConfig.renderMailActivationTemplate(newMember, redirect));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        });
-                        thread.start();
+//                        Thread thread = new Thread(() -> {
+//                            try {
+//                                MailConfig.sendmail2(newMember.email, MailConfig.subjectActivation,
+//                                        MailConfig.renderMailActivationTemplate(newMember, redirect));
+//                            } catch (Exception e) {
+//                                e.printStackTrace();
+//                            }
+//                        });
+//                        thread.start();
 
                         txn.commit();
                         response.setBaseResponse(1, offset, 1, success + ", please check your mail", null);
