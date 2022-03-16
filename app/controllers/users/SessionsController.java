@@ -1419,12 +1419,12 @@ public class SessionsController extends BaseController {
 	public static Result signUp() {
 		JsonNode json = request().body().asJson();
 		if (checkAccessAuthorization("guest") == 200) {
-			if (json.has("email") && json.has("full_name") && json.has("confirm_password") && json.has("password")) {
+			if (json.has("email")) {
 				String email = json.findPath("email").asText();
 				// String username= json.findPath("username").asText();
 				String username = null;
-				String password = json.findPath("password").asText();
-				String confPassword = json.findPath("confirm_password").asText();
+				String password = json.has("password") ? json.findPath("password").asText() : "";
+				String confPassword = json.has("confirm_password") ? json.findPath("confirm_password").asText() : "";
 				String fullName = json.findPath("full_name").asText();
 				String gender = json.has("gender") ? json.findPath("gender").asText() : "";
 				String birthDate = json.has("birth_date") ? json.findPath("birth_date").asText() : "";
@@ -1435,6 +1435,7 @@ public class SessionsController extends BaseController {
 				Boolean newsLetter = !json.has("newsletter") || json.findPath("newsletter").asBoolean();
 				String googleId = json.has("google_id") ? json.findPath("google_id").asText() : "";
 				String fbId = json.has("fb_id") ? json.findPath("fb_id").asText() : "";
+				Boolean isActive = true;
 
 				// buat 1 field inputan refferal code
 				String input_referral_code = json.has("input_referral_code")
@@ -1454,15 +1455,14 @@ public class SessionsController extends BaseController {
 					referral_code_new = generateReferralCode();
 				}
 
-				String validation = Member.validation(email, username, password, confPassword, phone, fullName);
+				String validation = Member.validation(email, phone, fullName);
 				if (validation == null) {
 					Transaction txn = Ebean.beginTransaction();
 					try {
 						ObjectMapper mapper = new ObjectMapper();
 						String redirect = Constant.getInstance().getFrontEndUrl() + "/activate/";
 
-						Member newMember = new Member(confPassword, fullName, email, username, phone, gender, birthDate,
-								newsLetter, googleId, fbId, referral_code_new);
+						Member newMember = new Member(email, phone, fullName);
 						newMember.save();
 
 						// pengecekan ke table member refferal code tsb untuk menjadi id
@@ -1499,7 +1499,7 @@ public class SessionsController extends BaseController {
 						txn.commit();
 
 						// mailchimp
-						mailchimpAddOrUpdateCustomer(newMember);
+						// mailchimpAddOrUpdateCustomer(newMember);
 
 						response.setBaseResponse(1, offset, 1, success + ", please check your mail", null);
 						return ok(Json.toJson(response));

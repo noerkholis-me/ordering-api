@@ -19,7 +19,7 @@ import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
 import dtos.FeatureAndPermissionSession;
-import dtos.MerchantSessionResponse;
+import dtos.merchant.MerchantSessionResponse;
 import models.*;
 import play.Logger;
 import play.libs.Json;
@@ -185,15 +185,15 @@ public class SessionsController extends BaseController {
                         //odoo
 //                        OdooService.getInstance().createVendor(newMember);
 
-                        Thread thread = new Thread(() -> {
-                            try {
-                                MailConfig.sendmail2(newMember.email, MailConfig.subjectActivation,
-                                        MailConfig.renderMailActivationTemplate(newMember, redirect));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        });
-                        thread.start();
+//                        Thread thread = new Thread(() -> {
+//                            try {
+//                                MailConfig.sendmail2(newMember.email, MailConfig.subjectActivation,
+//                                        MailConfig.renderMailActivationTemplate(newMember, redirect));
+//                            } catch (Exception e) {
+//                                e.printStackTrace();
+//                            }
+//                        });
+//                        thread.start();
 
                         txn.commit();
                         response.setBaseResponse(1, offset, 1, success + ", please check your mail", null);
@@ -332,9 +332,12 @@ public class SessionsController extends BaseController {
         JsonNode json = request().body().asJson();
         if (checkAccessAuthorization("guest") == 200 && json.has("email")) {
             String email = json.findPath("email").asText();
-            String redirect = Constant.getInstance().getMerchantUrl() + "/reset-password";
 
             Merchant member = Merchant.find.where().eq("is_active", true).eq("email", email).setMaxRows(1).findUnique();
+            Long merchantId = member.id;
+            Long currentTime = System.currentTimeMillis();
+            String forgotPasswordCode = Encryption.EncryptAESCBCPCKS5Padding(String.valueOf(merchantId) + "-" + String.valueOf(currentTime));
+            String redirect = Constant.getInstance().getMerchantUrl() + "/reset-password" + "/" + forgotPasswordCode;
             if (member != null) {
                 Long now = System.currentTimeMillis();
                 try {
@@ -346,9 +349,7 @@ public class SessionsController extends BaseController {
                 }
                 Thread thread = new Thread(() -> {
                     try {
-                        MailConfig.sendmail2(member.email, MailConfig.subjectForgotPassword,
-                                MailConfig.renderMailForgotPasswordMerchantTemplate(member, redirect));
-
+                        MailConfig.sendmail(member.email, MailConfig.subjectForgotPassword, MailConfig.renderMailForgotPasswordMerchantTemplate(member, redirect));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

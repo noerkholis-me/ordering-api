@@ -45,6 +45,7 @@ public class MailConfig {
 		props.put("mail.smtp.sendpartial", "true");
 		props.put("mail.smtp.ssl.enable", "false");
 		props.put("mail.smtp.ssl.trust", "*");
+		props.put("mail.smtp.ssl.protocols", "TLSv1.2");
 
 		Session session = Session.getInstance(props, new javax.mail.Authenticator() {
 			@Override
@@ -86,7 +87,7 @@ public class MailConfig {
     }
 
     public static String renderMailForgotPasswordMerchantTemplate(Merchant member, String url) {
-        return views.html.forgotPasswordMail
+        return views.html.ForgotPasswordEmail
                 .render(member.name, url + "/" + member.resetToken, Constant.getInstance().getImageUrl().concat("mail"))
                 .toString();
 

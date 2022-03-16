@@ -57,18 +57,18 @@ public class Global extends GlobalSettings {
 	@Override
 	public void onStart(Application app) {
 		super.onStart(app);
-		SeedDefaultConfiguration.seedFeature();
-		SeedDefaultConfiguration.seedUser();
-		SeedDefaultConfiguration.seedConfigSetting();
-		SeedDefaultConfiguration.seedPaymentExpiration();
-		SeedDefaultConfiguration.seedRegionDistrictTownshipVillage();
-		SeedDefaultConfiguration.seedLoyaltyPageBanner();
-		SeedDefaultConfiguration.seedCurrency();
-		SeedDefaultConfiguration.seedMobileVersion();
-		SeedDefaultConfiguration.seedRegionDistrictFromRajaOngkir();
-		SeedDefaultConfiguration.seedCourier();
-		SeedDefaultConfiguration.seedOwnMerchant();
-		SeedDefaultConfiguration.seedMasterVariance();
+//		SeedDefaultConfiguration.seedFeature();
+//		SeedDefaultConfiguration.seedUser();
+//		SeedDefaultConfiguration.seedConfigSetting();
+//		SeedDefaultConfiguration.seedPaymentExpiration();
+//		SeedDefaultConfiguration.seedRegionDistrictTownshipVillage();
+//		SeedDefaultConfiguration.seedLoyaltyPageBanner();
+//		SeedDefaultConfiguration.seedCurrency();
+//		SeedDefaultConfiguration.seedMobileVersion();
+//		SeedDefaultConfiguration.seedRegionDistrictFromRajaOngkir();
+//		SeedDefaultConfiguration.seedCourier();
+//		SeedDefaultConfiguration.seedOwnMerchant();
+//		SeedDefaultConfiguration.seedMasterVariance();
 //        SynchronizeController.syncSeed();
 
 //		jobs.add(new ServiceJob("* * * * * ?").scheduleIntervalMinutes());
