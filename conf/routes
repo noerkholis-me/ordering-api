@@ -316,3 +316,13 @@ GET     /web/products/:id                    		controllers.web.ProductController
 
 GET	   /users/memberreferral/testgenerate			controllers.users.ReferralController.GenerateCode()
 GET		/users/register_with_referral      			controllers.users.ProfileController.registerWithReferral()
+
+
+############################## NEW POINTING ROUTES ######################################
+
+#MERCHANTS
+GET     /merchant/users/list                        controllers.merchants.UserMerchantController.listUsers(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+
+#ROLE
+GET     /merchant/role/list                        controllers.merchants.RoleMerchantController.listRole(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+POST    /merchant/role                             controllers.merchants.RoleMerchantController.createRole()

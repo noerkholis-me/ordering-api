@@ -12,7 +12,7 @@ import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
-import dtos.merchant.UserMerchantRequest;
+import dtos.merchant.*;
 import models.Merchant;
 import models.Role;
 import models.UserMerchant;
@@ -20,6 +20,10 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.UserMerchantRepository;
+import controllers.BaseController;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import com.avaje.ebean.Query;
 
 import java.io.IOException;
 
@@ -46,6 +50,7 @@ public class UserMerchantController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
+                        // need to refactor to role_merchant
                         Role role = Role.find.byId(request.getRoleId());
                         if (role == null) {
                             response.setBaseResponse(0, 0, 0, error + " Role id not found.", null);
@@ -99,6 +104,7 @@ public class UserMerchantController extends BaseController {
                             response.setBaseResponse(0, 0, 0, error + " User merchant not found.", null);
                             return badRequest(Json.toJson(response));
                         }
+                        // need to refactor to role_merchant
                         Role role = Role.find.byId(request.getRoleId());
                         if (role == null) {
                             response.setBaseResponse(0, 0, 0, error + " Role id not found.", null);
@@ -135,8 +141,6 @@ public class UserMerchantController extends BaseController {
         userMerchant.setFirstName(request.getFirstName());
         userMerchant.setLastName(request.getLastName());
         userMerchant.setFullName(request.getFirstName() + " " + request.getLastName());
-        userMerchant.setEmail(request.getEmail());
-        userMerchant.setPassword(Encryption.EncryptAESCBCPCKS5Padding(request.getPassword()));
         userMerchant.setActive(Boolean.TRUE);
         userMerchant.setRole(role);
         userMerchant.setMerchant(merchant);
@@ -158,21 +162,52 @@ public class UserMerchantController extends BaseController {
             return "First name cannot be more than 50 characters.";
         if (request.getLastName() != null && request.getLastName().length() > 50)
             return "Last name cannot be more than 50 characters.";
-        if (request.getPassword() == null)
-            return "Password is null or empty";
-        if (!request.getPassword().isEmpty()){
-            if (!CommonFunction.passwordValidation(request.getPassword())) {
-                return "Password must be at least 8 character";
-            }
-            if (!request.getConfirmPassword().equals(request.getPassword())) {
-                return "Password and confirm password did not match.";
-            }
-        }
         // =============================================================================================================== //
         UserMerchant userMerchant = UserMerchantRepository.findByEmailAndMerchantId(request.getEmail(), request.getMerchantId());
         if (userMerchant != null)
             return "User email has been used.";
         return null;
+    }
+
+    @ApiOperation(value = "Get all user list.", notes = "Returns list of user.\n" + swaggerInfo
+            + "", response = UserMerchant.class, responseContainer = "List", httpMethod = "GET")
+    public static Result listUsers(String filter, String sort, int offset, int limit) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            Query<UserMerchant> query = UserMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+            try {
+                List<UserMerchantResponse> responses = new ArrayList<>();
+                List<UserMerchant> totalData = UserMerchantRepository.getTotalData(query);
+                List<UserMerchant> responseIndex = UserMerchantRepository.getDataUser(query, sort, filter, offset, limit);
+                for (UserMerchant data : responseIndex) {
+                    UserMerchantResponse response = new UserMerchantResponse();
+                    Boolean statusActive = false;
+                    if(data.getIsActive() == "Active"){
+                        statusActive = true;
+                    }
+                    response.setId(data.getId());
+                    response.setFullName(data.getFullName());
+                    response.setFirstName(data.getFirstName());
+                    response.setLastName(data.getLastName());
+                    response.setEmail(data.getEmail());
+                    response.setIsActive(statusActive);
+                    response.setGender(data.getGender());
+                    response.setMerchantId(data.getMerchantId());
+                    response.setRoleId(data.getRoleId());
+                    responses.add(response);
+                }
+                response.setBaseResponse(filter == null || filter == "" ? totalData.size() : responseIndex.size() , offset, limit, success + " showing data", responses);
+                // System.out.println(ok(Json.toJson(response)));
+                return ok(Json.toJson(response));
+            } catch (IOException e) {
+                Logger.error("allDetail", e);
+            }
+        } else if (ownMerchant == null) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
     }
 
 }
