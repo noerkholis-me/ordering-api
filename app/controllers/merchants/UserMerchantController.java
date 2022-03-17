@@ -52,14 +52,7 @@ public class UserMerchantController extends BaseController {
                             return badRequest(Json.toJson(response));
                         }
                         UserMerchant newUserMerchant = new UserMerchant();
-                        newUserMerchant.setFirstName(request.getFirstName());
-                        newUserMerchant.setLastName(request.getLastName());
-                        newUserMerchant.setFullName(request.getFirstName() + " " + request.getLastName());
-                        newUserMerchant.setEmail(request.getEmail());
-                        newUserMerchant.setRole(role);
-                        newUserMerchant.setPassword(Encryption.EncryptAESCBCPCKS5Padding(request.getPassword()));
-                        newUserMerchant.setActive(Boolean.TRUE);
-                        newUserMerchant.setMerchant(ownMerchant);
+                        constructRequestModel(newUserMerchant, request, role, ownMerchant);
                         newUserMerchant.save();
 
                         trx.commit();
@@ -85,6 +78,69 @@ public class UserMerchantController extends BaseController {
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
+    }
+
+    @ApiOperation(value = "Edit User", notes = "Edit User.\n" + swaggerInfo
+            + "", response = BaseResponse.class, httpMethod = "PUT")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "user form", dataType = "temp.swaggermap.UserForm", required = true, paramType = "body", value = "user form") })
+    public static Result editUser(Long id) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            JsonNode json = request().body().asJson();
+            try {
+                UserMerchantRequest request = objectMapper.readValue(json.toString(), UserMerchantRequest.class);
+                String validate = validateCreateUserRequest(request);
+                if (validate == null) {
+                    Transaction trx = Ebean.beginTransaction();
+                    try {
+                        UserMerchant userMerchant = UserMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        if (userMerchant == null) {
+                            response.setBaseResponse(0, 0, 0, error + " User merchant not found.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        Role role = Role.find.byId(request.getRoleId());
+                        if (role == null) {
+                            response.setBaseResponse(0, 0, 0, error + " Role id not found.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        constructRequestModel(userMerchant, request, role, ownMerchant);
+                        userMerchant.update();
+                        trx.commit();
+
+                        response.setBaseResponse(1,offset, 1, success + " User created successfully", null);
+                        return ok(Json.toJson(response));
+                    } catch (Exception e) {
+                        logger.error("Error while creating user", e);
+                        e.printStackTrace();
+                        trx.rollback();
+                    } finally {
+                        trx.end();
+                    }
+                    response.setBaseResponse(0, 0, 0, error, null);
+                    return badRequest(Json.toJson(response));
+                }
+                response.setBaseResponse(0, 0, 0, validate, null);
+                return badRequest(Json.toJson(response));
+            } catch (IOException e) {
+                logger.error("Error while parsing json", e);
+                e.printStackTrace();
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    private static UserMerchant constructRequestModel(UserMerchant userMerchant, UserMerchantRequest request, Role role, Merchant merchant) {
+        userMerchant.setFirstName(request.getFirstName());
+        userMerchant.setLastName(request.getLastName());
+        userMerchant.setFullName(request.getFirstName() + " " + request.getLastName());
+        userMerchant.setEmail(request.getEmail());
+        userMerchant.setPassword(Encryption.EncryptAESCBCPCKS5Padding(request.getPassword()));
+        userMerchant.setActive(Boolean.TRUE);
+        userMerchant.setRole(role);
+        userMerchant.setMerchant(merchant);
+        return userMerchant;
     }
 
     public static String validateCreateUserRequest(UserMerchantRequest request) {

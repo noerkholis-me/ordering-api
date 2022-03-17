@@ -15,4 +15,12 @@ public class UserMerchantRepository extends Model {
             .findUnique();
     }
 
+    public static UserMerchant findByIdAndMerchantId(Long id, Long merchantId) {
+        return find.where()
+            .eq("id", id)
+            .eq("merchantId", merchantId)
+            .eq("isActive", Boolean.TRUE)
+            .findUnique();
+    }
+
 }
