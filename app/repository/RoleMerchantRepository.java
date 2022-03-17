@@ -1,0 +1,69 @@
+package repository;
+
+import models.*;
+import play.db.ebean.Model;
+import dtos.role.*;
+import com.avaje.ebean.Expr;
+import com.avaje.ebean.ExpressionList;
+import com.avaje.ebean.Query;
+import java.io.IOException;
+import com.hokeba.api.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import play.mvc.BodyParser;
+import play.mvc.Http;
+import play.mvc.Result;
+import play.mvc.Security;
+import java.util.*;
+import java.text.SimpleDateFormat;
+
+public class RoleMerchantRepository extends Model {
+    public static Finder<Long, RoleMerchant> find = new Finder<>(Long.class, RoleMerchant.class);
+
+    public static List<RoleMerchant> getDataRole(Query<RoleMerchant> reqQuery, String sort, String filter, int offset, int limit)
+			throws IOException {
+		Query<RoleMerchant> query = reqQuery;
+
+		if (!"".equals(sort)) {
+            query = query.orderBy(sort);
+		} else {
+			query = query.orderBy("t0.created_at desc");
+		}
+
+		ExpressionList<RoleMerchant> exp = query.where();
+
+
+		exp = exp.disjunction();
+		exp = exp.or(Expr.ilike("t0.name", "%" + filter + "%"),Expr.ilike("t0.description", "%" + filter + "%"));
+        // exp = exp.endjunction();
+
+		query = exp.query();
+
+		int total = query.findList().size();
+
+		if (limit != 0) {
+			query = query.setMaxRows(limit);
+		}
+
+		List<RoleMerchant> resData = query.findPagingList(limit).getPage(offset).getList();
+
+		return resData;
+
+		
+	}
+
+	public static List<RoleMerchant> getTotalData(Query<RoleMerchant> reqQuery)
+			throws IOException {
+		Query<RoleMerchant> query = reqQuery;
+
+		ExpressionList<RoleMerchant> exp = query.where();
+
+		query = exp.query();
+
+		int total = query.findList().size();
+
+		List<RoleMerchant> resData = query.findPagingList(0).getPage(0).getList();
+
+		return resData;
+	}
+}

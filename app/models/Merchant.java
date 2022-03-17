@@ -28,6 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import lombok.*;
 
 @Entity
 @Table(name="merchant")

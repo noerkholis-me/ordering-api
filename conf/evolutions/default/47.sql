@@ -2,7 +2,7 @@
 
 
 create table store (
-id                        bigint not null,
+ id                        bigint not null,
  is_deleted                boolean,
  status                    boolean,
  store_code                varchar(4) not null,

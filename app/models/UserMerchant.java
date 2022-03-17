@@ -50,7 +50,7 @@ public class UserMerchant extends BaseModel {
 
     @Size(max = 1)
     @Column(length = 1)
-    @Getter @Setter
+    @Setter
     public String gender;
 
     @Setter
@@ -109,16 +109,16 @@ public class UserMerchant extends BaseModel {
         return statusName;
     }
 
-    // @Transient
-    // public String getGender() {
-    //     String result = "";
-    //     if("M".equals(gender)){
-    //         result = "Male";
-    //     }else if ("F".equals(gender)){
-    //         result = "Female";
-    //     }
-    //     return result;
-    // }
+    @Transient
+    public String getGender() {
+        String result = "";
+        if("M".equals(gender)){
+            result = "Male";
+        }else if ("F".equals(gender)){
+            result = "Female";
+        }
+        return result;
+    }
 
     @Transient
     public String getBirthDateFormat() {
