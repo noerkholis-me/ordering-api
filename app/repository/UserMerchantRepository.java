@@ -43,10 +43,10 @@ public class UserMerchantRepository extends Model {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
 
-        exp = exp.conjunction();
-		exp = exp.or(Expr.ilike("t0.full_name", filter + "%"),Expr.ilike("t0.first_name", filter + "%"));
-		// exp = exp.or(Expr.ilike("t0.last_name", filter + "%"),Expr.ilike("t0.email", filter + "%"));
-        exp = exp.endJunction();
+		exp = exp.disjunction();
+		exp = exp.or(Expr.ilike("t0.full_name", "%" + filter + "%"),Expr.ilike("t0.first_name", "%" + filter + "%"));
+		exp = exp.or(Expr.ilike("t0.email", "%"+filter+"%"),Expr.ilike("t0.last_name", "%" + filter + "%"));
+        // exp = exp.endjunction();
 
 		query = exp.query();
 
@@ -57,8 +57,6 @@ public class UserMerchantRepository extends Model {
 		}
 
 		List<UserMerchant> resData = query.findPagingList(limit).getPage(offset).getList();
-
-		System.out.println(query.getGeneratedSql());
 
 		return resData;
 	}

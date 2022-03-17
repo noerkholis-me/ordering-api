@@ -150,7 +150,7 @@ public class UserMerchantController extends BaseController {
                     response.setRoleId(data.getRoleId());
                     responses.add(response);
                 }
-                response.setBaseResponse(totalData.size(), offset, limit, success + " showing data", responses);
+                response.setBaseResponse(filter == null || filter == "" ? totalData.size() : responseIndex.size() , offset, limit, success + " showing data", responses);
                 // System.out.println(ok(Json.toJson(response)));
                 return ok(Json.toJson(response));
             } catch (IOException e) {
