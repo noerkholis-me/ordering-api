@@ -14,7 +14,7 @@ create table syncshipper (
  sync_name                 varchar(4) not null,
  sync_description          TEXT,
  created_at                timestamp not null,
- updated_at                timestamp not null,
+ updated_at                timestamp not null
  constraint pk_syncshipper primary key (id))
 ;
 

@@ -27,6 +27,10 @@ public class UserMerchant extends BaseModel {
     public String password;
 
     @Getter @Setter
+    @JsonProperty("id")
+    public Long id;
+
+    @Getter @Setter
     @JsonProperty("first_name")
     public String firstName;
 
@@ -71,6 +75,7 @@ public class UserMerchant extends BaseModel {
     public Role role;
 
     @OneToOne(cascade = { CascadeType.ALL })
+    @JsonProperty("merchant")
     @Getter @Setter
     public Merchant merchant;
 
@@ -78,9 +83,17 @@ public class UserMerchant extends BaseModel {
     public String save;
 
     @javax.persistence.Transient
-    public Long roleId;
+    public Long rolesId;
 
     @javax.persistence.Transient
+    public Long merchantsId;
+
+    @JsonProperty("role_id")
+    @Getter @Setter
+    public Long roleId;
+
+    @JsonProperty("merchant_id")
+    @Getter @Setter
     public Long merchantId;
 
     public UserMerchant() {
@@ -97,7 +110,7 @@ public class UserMerchant extends BaseModel {
     }
 
     @Transient
-    public String getGenderView() {
+    public String getGender() {
         String result = "";
         if("M".equals(gender)){
             result = "Male";
