@@ -286,6 +286,8 @@ DELETE 	/merchants/pickup/delete/:id				controllers.merchants.PickUpPointControl
 
 POST    /merchants/user/add                         controllers.merchants.UserMerchantController.createUser()
 
+POST    /users/createpassword/:activationcode/updatepassword     controllers.merchants.UserMerchantController.createNewPassword(activationcode: String)
+
 
 
 ############################## FOR DEVELOPMENT ONLY ######################################

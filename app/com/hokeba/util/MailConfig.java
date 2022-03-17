@@ -9,6 +9,7 @@ import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.Properties;
+import play.data.Form;
 
 public class MailConfig {
 
@@ -107,6 +108,20 @@ public class MailConfig {
 		try {
 			return views.html.activationMail
 					.render(member.fullName, url + "" + member.activationCode, Constant.getInstance().getImageUrl().concat("mail")).toString();
+		} catch (Exception ignored) {
+
+		}
+		return "";
+	}
+
+	public static String renderMailSendCreatePasswordCMSTemplate(String activationCode, String fullName) {
+		Merchant dt = new Merchant();
+		Form<Merchant> formData = Form.form(Merchant.class).fill(dt);
+		String url = Helper.API_URL+"account-activation/"+activationCode;
+
+		try {
+			String html = views.html.verificationEmail.render(fullName, url).toString();
+			return html;
 		} catch (Exception ignored) {
 
 		}

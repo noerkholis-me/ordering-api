@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.util.CommonFunction;
 import com.hokeba.util.Encryption;
+import com.hokeba.util.MailConfig;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
@@ -15,15 +16,18 @@ import controllers.BaseController;
 import dtos.merchant.*;
 import models.Merchant;
 import models.Role;
+import models.RoleMerchant;
 import models.UserMerchant;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.UserMerchantRepository;
+import repository.RoleMerchantRepository;
 import controllers.BaseController;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import com.avaje.ebean.Query;
+import play.data.Form;
 
 import java.io.IOException;
 
@@ -50,21 +54,40 @@ public class UserMerchantController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        Role role = Role.find.byId(request.getRoleId());
+                        RoleMerchant role = RoleMerchantRepository.find.byId(request.getRoleId());
                         if (role == null) {
                             response.setBaseResponse(0, 0, 0, error + " Role id not found.", null);
                             return badRequest(Json.toJson(response));
                         }
+
                         UserMerchant newUserMerchant = new UserMerchant();
                         newUserMerchant.setFirstName(request.getFirstName());
                         newUserMerchant.setLastName(request.getLastName());
                         newUserMerchant.setFullName(request.getFirstName() + " " + request.getLastName());
                         newUserMerchant.setEmail(request.getEmail());
                         newUserMerchant.setRole(role);
-                        newUserMerchant.setPassword(Encryption.EncryptAESCBCPCKS5Padding(request.getPassword()));
-                        newUserMerchant.setActive(Boolean.TRUE);
+                        // newUserMerchant.setPassword(Encryption.EncryptAESCBCPCKS5Padding(request.getPassword()));
+                        newUserMerchant.setActive(Boolean.FALSE);
                         newUserMerchant.setMerchant(ownMerchant);
                         newUserMerchant.save();
+
+                        String forActivation = String.valueOf(newUserMerchant.getId()) + String.valueOf(System.currentTimeMillis());
+                        System.out.println(forActivation);
+
+                        newUserMerchant.setActivationCode(Encryption.EncryptAESCBCPCKS5Padding(forActivation));
+                        newUserMerchant.update();
+
+                        Thread thread = new Thread(() -> {
+                            try {
+                                MailConfig.sendmail(newUserMerchant.getEmail(), MailConfig.subjectActivation,
+                                        MailConfig.renderMailSendCreatePasswordCMSTemplate(newUserMerchant.getActivationCode(), newUserMerchant.getFullName()));
+            
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        });
+
+                        thread.start();
 
                         trx.commit();
 
@@ -94,8 +117,8 @@ public class UserMerchantController extends BaseController {
     public static String validateCreateUserRequest(UserMerchantRequest request) {
         if (request == null)
             return "Request is null or empty";
-        if (request.getMerchantId() == null || request.getMerchantId() < 0)
-            return "Merchant id is null or empty";
+        // if (request.getMerchantId() == null || request.getMerchantId() < 0)
+        //     return "Merchant id is null or empty";
         if (request.getEmail() == null)
             return "Email is null or empty";
         if (request.getEmail() != null && !request.getEmail().matches(CommonFunction.emailRegex))
@@ -106,16 +129,16 @@ public class UserMerchantController extends BaseController {
             return "First name cannot be more than 50 characters.";
         if (request.getLastName() != null && request.getLastName().length() > 50)
             return "Last name cannot be more than 50 characters.";
-        if (request.getPassword() == null)
-            return "Password is null or empty";
-        if (!request.getPassword().isEmpty()){
-            if (!CommonFunction.passwordValidation(request.getPassword())) {
-                return "Password must be at least 8 character";
-            }
-            if (!request.getConfirmPassword().equals(request.getPassword())) {
-                return "Password and confirm password did not match.";
-            }
-        }
+        // if (request.getPassword() == null)
+        //     return "Password is null or empty";
+        // if (!request.getPassword().isEmpty()){
+        //     if (!CommonFunction.passwordValidation(request.getPassword())) {
+        //         return "Password must be at least 8 character";
+        //     }
+        //     if (!request.getConfirmPassword().equals(request.getPassword())) {
+        //         return "Password and confirm password did not match.";
+        //     }
+        // }
         // =============================================================================================================== //
         UserMerchant userMerchant = UserMerchantRepository.findByEmailAndMerchantId(request.getEmail(), request.getMerchantId());
         if (userMerchant != null)
@@ -146,8 +169,8 @@ public class UserMerchantController extends BaseController {
                     response.setEmail(data.getEmail());
                     response.setIsActive(statusActive);
                     response.setGender(data.getGender());
-                    response.setMerchantId(data.getMerchantId());
-                    response.setRoleId(data.getRoleId());
+                    response.setMerchantId(data.getMerchantsId());
+                    response.setRoleId(data.getRolesId());
                     responses.add(response);
                 }
                 response.setBaseResponse(filter == null || filter == "" ? totalData.size() : responseIndex.size() , offset, limit, success + " showing data", responses);
@@ -162,6 +185,73 @@ public class UserMerchantController extends BaseController {
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
+    }
+
+    // ===================================== FOR VERIFICATION =========================================
+    
+    @ApiOperation(value = "Create New Password", notes = "Create New Password.\n" + swaggerInfo
+            + "", response = BaseResponse.class, httpMethod = "POST")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "new password form", dataType = "temp.swaggermap.NewPasswordForm", required = true, paramType = "body", value = "new password form") })
+    public static Result createNewPassword(String activationCode) {
+            JsonNode json = request().body().asJson();
+            try {
+                UserMerchantRequest request = objectMapper.readValue(json.toString(), UserMerchantRequest.class);
+                String validate = validateNewPassword(request);
+                if (validate == null) {
+                    Transaction trx = Ebean.beginTransaction();
+                    try {
+                        UserMerchant activationCodes = UserMerchantRepository.findDataActivationCode(activationCode);
+                        Date simpleDateFormat = new Date();
+                        if (activationCodes == null) {
+                            response.setBaseResponse(0, 0, 0, error + " Activation Code id not found.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        UserMerchant newUserMerchant = new UserMerchant();
+                        newUserMerchant.isDeleted = false;
+                        newUserMerchant.password = Encryption.EncryptAESCBCPCKS5Padding(request.getPassword());
+                        newUserMerchant.isActive = true;
+                        newUserMerchant.activationCode = "";
+                        newUserMerchant.id = activationCodes.id;
+                        newUserMerchant.update();
+
+                        trx.commit();
+
+                        response.setBaseResponse(1,offset, 1, success + " Password created successfully", newUserMerchant);
+                        return ok(Json.toJson(response));
+                    } catch (Exception e) {
+                        logger.error("Error while creating password", e);
+                        e.printStackTrace();
+                        trx.rollback();
+                    } finally {
+                        trx.end();
+                    }
+                    response.setBaseResponse(0, 0, 0, error, null);
+                    return badRequest(Json.toJson(response));
+                }
+                response.setBaseResponse(0, 0, 0, validate, null);
+                return badRequest(Json.toJson(response));
+            } catch (IOException e) {
+                logger.error("Error while parsing json", e);
+                e.printStackTrace();
+            }
+            return null;
+    }
+
+    public static String validateNewPassword(UserMerchantRequest request) {
+        if (request == null)
+            return "Request is null or empty";
+        if (request.getPassword() == null)
+            return "Password is null or empty";
+        if (!request.getPassword().isEmpty()){
+            if (!CommonFunction.passwordValidation(request.getPassword())) {
+                return "Password must be at least 8 character";
+            }
+            if (!request.getConfirmPassword().equals(request.getPassword())) {
+                return "Password and confirm password did not match.";
+            }
+        }
+        return null;
     }
 
 }

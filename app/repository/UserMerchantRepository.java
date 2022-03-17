@@ -24,8 +24,8 @@ public class UserMerchantRepository extends Model {
     public static UserMerchant findByEmailAndMerchantId(String email, Long merchantId) {
         return find.where()
             .eq("email", email)
-            .eq("merchantId", merchantId)
-            .eq("isActive", Boolean.TRUE)
+            .eq("merchant_id", merchantId)
+            .eq("is_active", Boolean.TRUE)
             .findUnique();
     }
 
@@ -78,5 +78,10 @@ public class UserMerchantRepository extends Model {
 
 		return resData;
 	}
+
+	public static UserMerchant findDataActivationCode(String activationCode) {
+        UserMerchant data = find.where().eq("t0.activation_code", activationCode).findUnique();
+        return data;
+    }
 
 }

@@ -1,0 +1,107 @@
+@(name: String, url: String)
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html" charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Aktivasi Akun</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            font-family: "Roboto", sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            background-color: #f5f5f5;
+        }
+
+        .card {
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+            transition: 0.3s;
+            width: 50%;
+            text-align: center;
+        }
+
+        .card-image {
+            padding: 10px;
+            width: 20%;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .btn {
+            font-size: 16px;
+            font-weight: 300;
+            margin-top: 20px;
+            border: none;
+            /* Remove borders */
+            color: white;
+            /* Add a text color */
+            padding: 14px 28px;
+            /* Add some padding */
+            cursor: pointer;
+            /* Add a pointer cursor on mouse-over */
+        }
+
+        .btn-warning {
+            background-color: #ff9800;
+        }
+
+        .btn-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            text-align: center;
+        }
+
+        span {
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <center>
+        <div class="card-image" style="margin-left: auto; margin-right: auto; text-align: center;">
+            <span style="width: 100px;">
+                <img src='http://sandbox-backend.stagingapps.net/assets/img/logoSandbox.png' alt="Whizliz" width="100%">
+            </span>
+        </div>
+        <div class="card"
+            style="border: 2px solid #000000; text-align: center; margin-left: auto; margin-right: auto; width: 650px;">
+            <div style="padding: 30px;">
+                <p>Tinggal selangkah lagi, akun anda akan aktif.</p>
+                <p>Untuk lanjut, klik tombol di bawah ini:</p>
+                <div style="margin-left: auto; margin-right: auto; padding-top: 20px; padding-bottom: 10px;">
+                    <a href="@url" class="btn" style="background-color: #FFC535; color: #ffffff; padding:6px 60px;">Aktifkan Akun</a>
+                </div>
+                <div>Atau salin link berikut:</div>
+                <a href="@url">@url</a>
+            </div>
+        </div>
+        <div style="text-align: center;">
+            <p style="font-size: small;">Jika kamu tidak membuat permintaan ini, harap hubungi kami di <a
+                    href="mailto:hello&#64;sandbox.co.id">hello&#64;sandbox.co.id</a></p>
+
+            <div style="padding: 1px; background-color: #000000; width: 60px; margin-left: auto; margin-right: auto; border-radius: 50%;">
+            </div>
+            <p style="font-size: small;">Copyright © 2021 PT. Wira Global Solusi (Sandbox). All Right Reserved.</p>
+
+        </div>
+    </center>
+</body>
+
+</html>

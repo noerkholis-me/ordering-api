@@ -26,9 +26,9 @@ public class UserMerchant extends BaseModel {
     @Getter @Setter
     public String password;
 
-    @Getter @Setter
-    @JsonProperty("id")
-    public Long id;
+    // @Getter @Setter
+    // @JsonProperty("id")
+    // public Long id;
 
     @Getter @Setter
     @JsonProperty("first_name")
@@ -59,6 +59,11 @@ public class UserMerchant extends BaseModel {
     @JsonProperty("birth_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Jakarta")
     public Date birthDate;
+    
+    @Setter
+    @JsonProperty("updated_at")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Jakarta")
+    public Date updatedAt;
 
     @JsonIgnore
     @Column(name = "activation_code")
@@ -72,7 +77,7 @@ public class UserMerchant extends BaseModel {
 
     @ManyToOne(cascade = { CascadeType.ALL })
     @Getter @Setter
-    public Role role;
+    public RoleMerchant role;
 
     @OneToOne(cascade = { CascadeType.ALL })
     @JsonProperty("merchant")
@@ -83,18 +88,21 @@ public class UserMerchant extends BaseModel {
     public String save;
 
     @javax.persistence.Transient
+    @Getter @Setter
     public Long rolesId;
 
     @javax.persistence.Transient
+    @Getter @Setter
     public Long merchantsId;
 
-    @JsonProperty("role_id")
-    @Getter @Setter
-    public Long roleId;
 
-    @JsonProperty("merchant_id")
-    @Getter @Setter
-    public Long merchantId;
+    // @JsonProperty("role_id")
+    // @Getter @Setter
+    // public Long roleId;
+
+    // @JsonProperty("merchant_id")
+    // @Getter @Setter
+    // public Long merchantId;
 
     public UserMerchant() {
     }
