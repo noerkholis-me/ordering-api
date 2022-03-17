@@ -39,7 +39,9 @@ public class Merchant extends BaseModel{
     public static final String STATUS_REJECT = "REJECT";
 
 	@JsonIgnore
-	public String password;
+    public String password;
+    @JsonProperty("id")
+    public Long id;
     @JsonProperty("email")
     @Column(unique = true)
     public String email;

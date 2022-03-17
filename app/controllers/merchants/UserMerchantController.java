@@ -12,7 +12,7 @@ import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
-import dtos.merchant.UserMerchantRequest;
+import dtos.merchant.*;
 import models.Merchant;
 import models.Role;
 import models.UserMerchant;
@@ -20,6 +20,10 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.UserMerchantRepository;
+import controllers.BaseController;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import com.avaje.ebean.Query;
 
 import java.io.IOException;
 
@@ -117,6 +121,47 @@ public class UserMerchantController extends BaseController {
         if (userMerchant != null)
             return "User email has been used.";
         return null;
+    }
+
+    @ApiOperation(value = "Get all user list.", notes = "Returns list of user.\n" + swaggerInfo
+            + "", response = UserMerchant.class, responseContainer = "List", httpMethod = "GET")
+    public static Result listUsers(String filter, String sort, int offset, int limit) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            Query<UserMerchant> query = UserMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+            try {
+                List<UserMerchantResponse> responses = new ArrayList<>();
+                List<UserMerchant> totalData = UserMerchantRepository.getTotalData(query);
+                List<UserMerchant> responseIndex = UserMerchantRepository.getDataUser(query, sort, filter, offset, limit);
+                for (UserMerchant data : responseIndex) {
+                    UserMerchantResponse response = new UserMerchantResponse();
+                    Boolean statusActive = false;
+                    if(data.getIsActive() == "Active"){
+                        statusActive = true;
+                    }
+                    response.setId(data.getId());
+                    response.setFullName(data.getFullName());
+                    response.setFirstName(data.getFirstName());
+                    response.setLastName(data.getLastName());
+                    response.setEmail(data.getEmail());
+                    response.setIsActive(statusActive);
+                    response.setGender(data.getGender());
+                    response.setMerchantId(data.getMerchantId());
+                    response.setRoleId(data.getRoleId());
+                    responses.add(response);
+                }
+                response.setBaseResponse(totalData.size(), offset, limit, success + " showing data", responses);
+                // System.out.println(ok(Json.toJson(response)));
+                return ok(Json.toJson(response));
+            } catch (IOException e) {
+                Logger.error("allDetail", e);
+            }
+        } else if (ownMerchant == null) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
     }
 
 }
