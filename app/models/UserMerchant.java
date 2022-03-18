@@ -26,6 +26,10 @@ public class UserMerchant extends BaseModel {
     @Getter @Setter
     public String password;
 
+    // @Getter @Setter
+    // @JsonProperty("id")
+    // public Long id;
+
     @Getter @Setter
     @JsonProperty("first_name")
     public String firstName;
@@ -55,6 +59,11 @@ public class UserMerchant extends BaseModel {
     @JsonProperty("birth_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Jakarta")
     public Date birthDate;
+    
+    @Setter
+    @JsonProperty("updated_at")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Jakarta")
+    public Date updatedAt;
 
     @JsonIgnore
     @Column(name = "activation_code")
@@ -66,22 +75,29 @@ public class UserMerchant extends BaseModel {
     @Column(name = "is_active")
     public boolean isActive;
 
+    @JsonIgnore
     @ManyToOne(cascade = { CascadeType.ALL })
     @Getter @Setter
-    public Role role;
+    public RoleMerchant role;
 
     @OneToOne(cascade = { CascadeType.ALL })
+    @JsonProperty("merchant")
     @Getter @Setter
     public Merchant merchant;
 
+    @JsonIgnore
     @javax.persistence.Transient
     public String save;
 
+    @JsonIgnore
     @javax.persistence.Transient
-    public Long roleId;
+    @Getter @Setter
+    public Long rolesId;
 
+    @JsonIgnore
     @javax.persistence.Transient
-    public Long merchantId;
+    @Getter @Setter
+    public Long merchantsId;
 
     public UserMerchant() {
     }
@@ -97,7 +113,7 @@ public class UserMerchant extends BaseModel {
     }
 
     @Transient
-    public String getGenderView() {
+    public String getGender() {
         String result = "";
         if("M".equals(gender)){
             result = "Male";

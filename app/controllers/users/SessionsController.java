@@ -1484,16 +1484,16 @@ public class SessionsController extends BaseController {
 
 						}
 
-						Thread thread = new Thread(() -> {
-							try {
+						// Thread thread = new Thread(() -> {
+						// 	try {
 
-								MailConfig.sendmail2(newMember.email, MailConfig.subjectActivation,
-										MailConfig.renderMailActivationMember(newMember, redirect));
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-						});
-						thread.start();
+						// 		MailConfig.sendmail2(newMember.email, MailConfig.subjectActivation,
+						// 				MailConfig.renderMailActivationMember(newMember, redirect));
+						// 	} catch (Exception e) {
+						// 		e.printStackTrace();
+						// 	}
+						// });
+						// thread.start();
 						// odoo
 						// OdooService.getInstance().createCustomer(newMember);
 						txn.commit();
@@ -1501,7 +1501,7 @@ public class SessionsController extends BaseController {
 						// mailchimp
 						// mailchimpAddOrUpdateCustomer(newMember);
 
-						response.setBaseResponse(1, offset, 1, success + ", please check your mail", null);
+						response.setBaseResponse(1, offset, 1, success + " registering your account", null);
 						return ok(Json.toJson(response));
 
 					} catch (Exception e) {

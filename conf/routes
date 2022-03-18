@@ -285,6 +285,9 @@ PATCH 	/merchants/pickup/edit/:id					controllers.merchants.PickUpPointControlle
 DELETE 	/merchants/pickup/delete/:id				controllers.merchants.PickUpPointController.removeEntry(id: Long)
 
 POST    /merchants/user/add                         controllers.merchants.UserMerchantController.createUser()
+PUT    /merchants/user/edit/:id                         controllers.merchants.UserMerchantController.editUser(id: Long)
+
+POST    /users/createpassword/:activationcode/updatepassword     controllers.merchants.UserMerchantController.createNewPassword(activationcode: String)
 
 
 
@@ -315,3 +318,16 @@ GET     /web/products/:id                    		controllers.web.ProductController
 
 GET	   /users/memberreferral/testgenerate			controllers.users.ReferralController.GenerateCode()
 GET		/users/register_with_referral      			controllers.users.ProfileController.registerWithReferral()
+
+
+############################## NEW POINTING ROUTES ######################################
+
+#MERCHANTS
+GET     /merchant/users/list                        controllers.merchants.UserMerchantController.listUsers(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+
+#ROLE
+GET     /merchant/role/list                        controllers.merchants.RoleMerchantController.listRole(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+POST    /merchant/role                             controllers.merchants.RoleMerchantController.createRole()
+PUT     /merchant/role/:id/updaterole              controllers.merchants.RoleMerchantController.editRole(id:Long)
+DELETE  /merchant/role/:id/deleterole              controllers.merchants.RoleMerchantController.deleteRole(id:Long)
+GET     /merchant/role/:id/detailrole              controllers.merchants.RoleMerchantController.viewRole(id:Long)

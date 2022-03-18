@@ -78,6 +78,11 @@ create table shipper_area (
 
 # --- !Downs
 
+alter table product drop column if exists product_length;
+alter table product drop column if exists product_width;
+alter table product drop column if exists product_height;
+alter table product drop column if exists product_weight;
+
 drop table if exists syncshipper cascade;
 drop sequence if exists syncshipper_seq;
 drop table if exists shipper_area cascade;

@@ -28,6 +28,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import lombok.*;
 
 @Entity
 @Table(name="merchant")
@@ -39,7 +40,9 @@ public class Merchant extends BaseModel{
     public static final String STATUS_REJECT = "REJECT";
 
 	@JsonIgnore
-	public String password;
+    public String password;
+    @JsonProperty("id")
+    public Long id;
     @JsonProperty("email")
     @Column(unique = true)
     public String email;
@@ -151,6 +154,7 @@ public class Merchant extends BaseModel{
     public Date codeExpire;
 
     //odoo
+    @JsonIgnore
     @Column(name = "odoo_id")
     public Integer odooId;
 
