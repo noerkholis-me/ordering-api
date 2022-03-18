@@ -64,7 +64,7 @@ public class UserMerchantController extends BaseController {
                         constructRequestModel(newUserMerchant, request, role, ownMerchant);
                         newUserMerchant.save();
 
-                        String forActivation = Encryption.EncryptAESCBCPCKS5Padding(String.valueOf(newUserMerchant.getId()) + String.valueOf(System.currentTimeMillis()));
+                        String forActivation = Encryption.EncryptAESCBCPCKS5Padding(String.valueOf(newUserMerchant.id) + String.valueOf(System.currentTimeMillis()));
                         System.out.println(forActivation);
 
                         newUserMerchant.setActivationCode(forActivation);
@@ -208,7 +208,7 @@ public class UserMerchantController extends BaseController {
                     if(data.getIsActive() == "Active"){
                         statusActive = true;
                     }
-                    response.setId(data.getId());
+                    response.setId(data.id);
                     response.setFullName(data.getFullName());
                     response.setFirstName(data.getFirstName());
                     response.setLastName(data.getLastName());
