@@ -208,7 +208,7 @@ public class UserMerchantController extends BaseController {
                     if(data.getIsActive() == "Active"){
                         statusActive = true;
                     }
-                    response.setId(data.getId());
+                    response.setId(data.id);
                     response.setFullName(data.getFullName());
                     response.setFirstName(data.getFirstName());
                     response.setLastName(data.getLastName());
