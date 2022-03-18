@@ -19,6 +19,10 @@ public class UserMerchantRequest  {
     private Long roleId;
     @JsonProperty("is_active")
     private Boolean isActive;
+    private String password;
+    @JsonProperty("confirm_password")
+    private String confirmPassword;
+
 
     // ======================================== //
     @JsonProperty("merchant_id")

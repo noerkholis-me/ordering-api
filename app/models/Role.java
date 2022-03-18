@@ -2,12 +2,14 @@ package models;
 
 import com.avaje.ebean.Page;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.*;
 
 /**
  * Created by hendriksaragih on 2/4/17.
@@ -24,6 +26,7 @@ public class Role extends BaseModel{
     @OneToMany(mappedBy = "role")
     public List<RoleFeature> featureList;
 
+    @JsonIgnore
     @javax.persistence.Transient
     public String save;
 

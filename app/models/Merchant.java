@@ -154,6 +154,7 @@ public class Merchant extends BaseModel{
     public Date codeExpire;
 
     //odoo
+    @JsonIgnore
     @Column(name = "odoo_id")
     public Integer odooId;
 

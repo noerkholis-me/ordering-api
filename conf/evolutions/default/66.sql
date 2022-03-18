@@ -23,8 +23,8 @@ create table user_merchant (
 
 create sequence user_merchant_seq;
 
-alter table user_merchant add constraint fk_user_merchant_role_206 foreign key (role_id) references role (id);
-create index ix_user_merchant_role_206 on user_merchant (role_id);
+alter table user_merchant add constraint fk_user_merchant_role_merchant_206 foreign key (role_id) references role_merchant (id);
+create index ix_user_merchant_role_merchant_206 on user_merchant (role_id);
 
 alter table user_merchant add constraint fk_user_merchant_merchant_206 foreign key (merchant_id) references merchant (id);
 create index ix_user_merchant_merchant_206 on user_merchant (merchant_id);

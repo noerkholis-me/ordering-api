@@ -39,12 +39,14 @@ public class RoleMerchant extends BaseModel {
     @Getter @Setter
     public Merchant merchant;
 
+    @JsonIgnore
     @javax.persistence.Transient
     public String save;
 
+    @JsonIgnore
     @javax.persistence.Transient
     @Getter @Setter
-    public Long merchantsId;
+    public Long merchantId;
 
     public RoleMerchant(){
 

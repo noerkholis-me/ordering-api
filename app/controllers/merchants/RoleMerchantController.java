@@ -61,7 +61,7 @@ public class RoleMerchantController extends BaseController {
 
                         trx.commit();
 
-                        response.setBaseResponse(1, offset, 1, success + " creating new role", null);
+                        response.setBaseResponse(1, offset, 1, success + " creating new role", newRoleMerchant);
                         return ok(Json.toJson(response));
                     } catch (Exception e) {
                         logger.error("Error while creating role", e);
@@ -113,7 +113,7 @@ public class RoleMerchantController extends BaseController {
                     response.setDescription(data.getDescription());
                     response.setKey(data.getKey());
                     response.setIsDeleted(data.getIsDeleted());
-                    response.setMerchantId(data.getMerchantsId());
+                    response.setMerchantId(data.getMerchantId());
                     // response.setMerchant(data.getMerchant());
                     responses.add(response);
                 }
