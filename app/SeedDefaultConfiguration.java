@@ -22,123 +22,178 @@ public class SeedDefaultConfiguration {
 			role.save();
 		}
 
+		// create default data role merchant
+		RoleMerchant roleMerchant = new RoleMerchant();
+		if (RoleMerchant.find.findRowCount() == 0) {
+			roleMerchant = new RoleMerchant("Admin", "admin", "Administrator", true);
+			roleMerchant.save();
+		}
+
 		// create default data feature
 		if (Feature.find.findRowCount() == 0) {
 			List<Feature> features = new ArrayList<Feature>();
 			features.add(new Feature("Dashboard", "dashboard", "Dashboard", "Can view dashboard.", true));
 			features.add(new Feature("Main Banner", "mainbanner", "Information",
-					"Can view, create, and edit banner data.", true));
+					"Can view, create, and edit banner data.", true, false));
 			features.add(new Feature("Popular Banner This Week", "popularbannerthisweek", "Information",
-					"Can view, create, and edit popular banner this week data.", true));
+					"Can view, create, and edit popular banner this week data.", true, false));
 			features.add(new Feature("Category Banner", "categorybanner", "Information",
-					"Can view, create, and edit category banner data.", true));
+					"Can view, create, and edit category banner data.", true, false));
 			features.add(new Feature("Category Banner Menu", "categorybannermenu", "Information",
-					"Can view, create, and edit category banner data.", true));
+					"Can view, create, and edit category banner data.", true, false));
 			features.add(new Feature("Banner Product List", "bannerproductlist", "Information",
-					"Can view, create, and edit banner product list data.", true));
+					"Can view, create, and edit banner product list data.", true, false));
 			features.add(new Feature("Additional Category", "additionalcategory", "Information",
-					"Can view, create, and edit additional category data.", true));
-			features.add(new Feature("Promo", "promo", "Information", "Can view, create, and edit promo data.", true));
-			features.add(new Feature("FAQ", "faq", "Information", "Can view, create, and edit FAQ data.", true));
+					"Can view, create, and edit additional category data.", true, false));
+			features.add(new Feature("Promo", "promo", "Information", "Can view, create, and edit promo data.", true, false));
+			features.add(new Feature("FAQ", "faq", "Information", "Can view, create, and edit FAQ data.", true, false));
 			features.add(new Feature("Static Page", "staticpage", "Information",
-					"Can view, create, and edit static page data.", true));
+					"Can view, create, and edit static page data.", true, false));
 			features.add(new Feature("Liz Pedia", "lizpedia", "Information",
-					"Can view, create, and edit liz pedia data.", true));
+					"Can view, create, and edit liz pedia data.", true, false));
 			features.add(
-					new Feature("Footer", "footer", "Information", "Can view, create, and edit footer data.", true));
+					new Feature("Footer", "footer", "Information", "Can view, create, and edit footer data.", true, false));
 			features.add(
-					new Feature("Article", "article", "Information", "Can view, create, and edit article data.", true));
+					new Feature("Article", "article", "Information", "Can view, create, and edit article data.", true, false));
 			features.add(new Feature("Article Comment", "articlecomment", "Information",
-					"Can view, create, and edit article data.", true));
+					"Can view, create, and edit article data.", true, false));
 			features.add(new Feature("Customer List", "customer", "Customers",
-					"Can view, create, and edit customer data.", true));
+					"Can view, create, and edit customer data.", true, false));
 			features.add(new Feature("Blacklist Setting", "blacklist", "Customers",
-					"Can view, create, and edit blacklist data.", true));
+					"Can view, create, and edit blacklist data.", true, false));
 			features.add(new Feature("Categories", "category", "Master Products",
-					"Can view, create, and edit category data.", true));
+					"Can view, create, and edit category data.", true, false));
 			features.add(
-					new Feature("Brands", "brand", "Master Products", "Can view, create, and edit brand data.", true));
+					new Feature("Brands", "brand", "Master Products", "Can view, create, and edit brand data.", true, false));
 			features.add(new Feature("Master Attribute", "attribute", "Master Products",
-					"Can view, create, and edit attribute data.", true));
-			features.add(new Feature("New Product", "newproduct", "Products", "Can create product.", true));
+					"Can view, create, and edit attribute data.", true, false));
+			features.add(new Feature("New Product", "newproduct", "Products", "Can create product.", true, false));
 			features.add(new Feature("Purchase Order", "purchase", "Products",
-					"Can view, create, and edit purchase order data.", true));
+					"Can view, create, and edit purchase order data.", true, false));
 			features.add(new Feature("Grouping Product", "grouping", "Products",
-					"Can view, create, and edit grouping product data.", true));
+					"Can view, create, and edit grouping product data.", true, false));
 			features.add(new Feature("Grouping Variant Product", "variant", "Products",
-					"Can view, create, and edit grouping variant product data.", true));
+					"Can view, create, and edit grouping variant product data.", true, false));
 			features.add(new Feature("Product List", "product", "Products", "Can view, create, and edit product data.",
-					true));
+					true, false));
 			features.add(new Feature("Product Detail List", "productvariance", "Products",
-					"Can view, create, and edit product detail data.", true));
+					"Can view, create, and edit product detail data.", true, false));
 			features.add(new Feature("Product List Marketplace", "productmarketplace", "Products",
-					"Can view, create, and edit product marketplace data.", true));
+					"Can view, create, and edit product marketplace data.", true, false));
 			features.add(new Feature("Product Reviews", "productreview", "Products",
-					"Can view, create, and edit product review data.", true));
+					"Can view, create, and edit product review data.", true, false));
 			features.add(new Feature("Merchant List", "merchant", "Merchants",
-					"Can view, create, and edit merchant data.", true));
+					"Can view, create, and edit merchant data.", true, false));
 			features.add(new Feature("Whizliz Merchant", "ownmerchant", "Merchants",
-					"Can view, create, and edit own merchant data.", true));
-			features.add(new Feature("Orders", "order", "Shop", "Can view, create, and edit sales order data.", true));
-			features.add(new Feature("Settlement", "settlement", "Shop", "Can view and create settlement data.", true));
+					"Can view, create, and edit own merchant data.", true, false));
+			features.add(new Feature("Orders", "order", "Shop", "Can view, create, and edit sales order data.", true, false));
+			features.add(new Feature("Settlement", "settlement", "Shop", "Can view and create settlement data.", true, false));
 			features.add(new Feature("Payment Confirmation", "paymentconfirmation", "Shop",
-					"Can view, create, and edit payment confirmation data.", true));
-			features.add(new Feature("Bank Account", "bank", "Shop", "Can view, create, and edit bank data.", true));
+					"Can view, create, and edit payment confirmation data.", true, false));
+			features.add(new Feature("Bank Account", "bank", "Shop", "Can view, create, and edit bank data.", true, false));
 			features.add(new Feature("Shipping Area", "shippingarea", "Shop",
-					"Can view, create, and edit shipping area data.", true));
+					"Can view, create, and edit shipping area data.", true, false));
 			features.add(new Feature("Shipping Cost", "shippingcost", "Shop",
-					"Can view, create, and edit shipping cost data.", true));
+					"Can view, create, and edit shipping cost data.", true, false));
 			features.add(new Feature("Master Courier", "courier", "Shop",
-					"Can view, create, and edit master courier data.", true));
+					"Can view, create, and edit master courier data.", true, false));
 			features.add(
-					new Feature("Return Customer", "returncustomer", "Return", "Can view return customer data.", true));
-			features.add(new Feature("Return Vendor", "returnvendor", "Return", "Can view return vendor data.", true));
+					new Feature("Return Customer", "returncustomer", "Return", "Can view return customer data.", true, false));
+			features.add(new Feature("Return Vendor", "returnvendor", "Return", "Can view return vendor data.", true, false));
 			features.add(new Feature("Voucher List", "voucher", "Voucher", "Can view, create, and edit voucher data.",
-					true));
+					true, false));
 			features.add(
-					new Feature("Order Report", "orderreport", "Reports", "Can view report order report data.", true));
-			features.add(new Feature("Top Sales", "topsales", "Reports", "Can view report top sales data.", true));
-			features.add(new Feature("Role", "role", "User Management", "Can view, create, and edit role data.", true));
-			features.add(new Feature("User", "user", "User Management", "Can view, create, and edit user data.", true));
+					new Feature("Order Report", "orderreport", "Reports", "Can view report order report data.", true, false));
+			features.add(new Feature("Top Sales", "topsales", "Reports", "Can view report top sales data.", true, false));
+			features.add(new Feature("Role", "role", "User Management", "Can view, create, and edit role data.", true, false));
+			features.add(new Feature("User", "user", "User Management", "Can view, create, and edit user data.", true, false));
 			features.add(new Feature("Product List", "authproduct", "Authorization",
-					"Can view, approve, reject product data.", true));
+					"Can view, approve, reject product data.", true, false));
 			features.add(new Feature("Product Stoct", "authproductstock", "Authorization",
-					"Can view, approve, reject product stock data.", true));
+					"Can view, approve, reject product stock data.", true, false));
 			features.add(new Feature("SEO Setting", "seosetting", "Preference",
-					"Can view, create, and edit seo setting data.", true));
+					"Can view, create, and edit seo setting data.", true, false));
 			features.add(new Feature("Expire Payment Setting", "expirepaymentsetting", "Preference",
-					"Can view, create, and edit expire payment setting data.", true));
-			features.add(new Feature("Profile and Setting", "profile", "User Management", "Can", true));
+					"Can view, create, and edit expire payment setting data.", true, false));
+			features.add(new Feature("Profile and Setting", "profile", "User Management", "Can", true, false));
 			features.add(new Feature("SMS Gateway Setting", "smssetting", "Preference", "Can edit sms gateway setting",
-					true));
+					true, false));
 			features.add(new Feature("Push Notification", "smsblast", "Push Notification",
-					"Can view, create, edit sms blast data", true));
+					"Can view, create, edit sms blast data", true, false));
 			features.add(new Feature("Setting Maximum Shipping", "maximumshippingsetting", "Preference",
-					"Can view, create, edit setting maximum shipping", true));
+					"Can view, create, edit setting maximum shipping", true, false));
 			features.add(
-					new Feature("Master Size", "size", "Master Products", "Can view, create, edit size data.", true));
+					new Feature("Master Size", "size", "Master Products", "Can view, create, edit size data.", true, false));
 			features.add(new Feature("Master Color", "color", "Master Products", "Can view, create, edit color data.",
-					true));
+					true, false));
 			features.add(new Feature("Loyalty Point", "loyaltypoint", "Loyalty Point",
-					"Can view, create, and edit loyalty point data.", true));
+					"Can view, create, and edit loyalty point data.", true, false));
 			features.add(new Feature("Loyalty Banner", "loyaltybanner", "Loyalty Point",
-					"Can view, create, and edit loyalty banner data.", true));
+					"Can view, create, and edit loyalty banner data.", true, false));
 			features.add(new Feature("Mobile Version", "mobileversion", "Information",
-					"Can view, create, and edit mobile version data.", true));
+					"Can view, create, and edit mobile version data.", true, false));
 			features.add(
-					new Feature("Partner", "partner", "Information", "Can view, create, and edit partner data.", true));
+					new Feature("Partner", "partner", "Information", "Can view, create, and edit partner data.", true, false));
 			features.add(
-					new Feature("Catalog", "catalog", "Information", "Can view, create, and edit catalog data.", true));
+					new Feature("Catalog", "catalog", "Information", "Can view, create, and edit catalog data.", true, false));
 			features.add(
-					new Feature("Mega Menu Banner", "megamenubanner", "Information", "Can view, create, and edit mega menu banner data.", true));
+					new Feature("Mega Menu Banner", "megamenubanner", "Information", "Can view, create, and edit mega menu banner data.", true, false));
 			features.add(
-					new Feature("Product Price", "productprice", "Products", "Can view, create, and edit override product price data.", true));
+					new Feature("Product Price", "productprice", "Products", "Can view, create, and edit override product price data.", true, false));
 			features.add(
-					new Feature("Pick Up Point", "pickuppoint", "Merchant", "Can view, create, and edit pick up point data.", true));
+					new Feature("Pick Up Point", "pickuppoint", "Merchant", "Can view, create, and edit pick up point data.", true, false));
+
+			// ============================ FEATURE FOR MERCHANT================================================ //
+			features.add(
+					new Feature("Dashboard", "dashboard", "Dashboard", "Can view dashboard.", true, true));
+			features.add(
+					new Feature("Banner", "banner", "Information", "Can view, create and edit banner data.", true, true));
+			features.add(
+					new Feature("Customer", "customer", "Customers", "Can view, create and edit customer data.", true, true));
+			features.add(
+					new Feature("Product", "product", "Products", "Can view, create and edit product data.", true, true));
+			features.add(
+					new Feature("Brand", "brand", "Products", "Can view, create and edit brand data.", true, true));
+			features.add(
+					new Feature("Category", "category", "Products", "Can view, create and edit category data.", true, true));
+			features.add(
+					new Feature("Product Store", "productstore", "Products", "Can view, create and edit product store data.", true, true));
+			features.add(
+					new Feature("Store", "store", "Stores", "Can view, create and edit store data.", true, true));
+			features.add(
+					new Feature("Pickup Point Store", "pickuppointstore", "Stores", "Can view, create and edit pickup point store data.", true, true));
+			features.add(
+					new Feature("Pickup Point", "pickuppoint", "Stores", "Can view, create and edit pickup point data.", true, true));
+			features.add(
+					new Feature("Table Type", "tabletype", "Stores", "Can view, create and edit table type data.", true, true));
+			features.add(
+					new Feature("Table", "table", "Stores", "Can view, create and edit table type data.", true, true));
+			features.add(
+					new Feature("Order", "order", "Orders", "Can view, create and edit transaction data.", true, true));
+			features.add(
+					new Feature("Transaction", "transaction", "Finance", "Can view, create and edit transaction data.", true, true));
+			features.add(
+					new Feature("Withdraw", "withdraw", "Finance", "Can view, create and edit withdraw data.", true, true));
+			features.add(
+					new Feature("Bank", "bank", "Finance", "Can view, create and edit bank data.", true, true));
+			features.add(
+					new Feature("App Setting", "appsetting", "Settings", "Can view, create and edit app setting data.", true, true));
+			features.add(
+					new Feature("Fee Setting", "feesetting", "Settings", "Can view, create and edit fee setting data.", true, true));
+			features.add(
+					new Feature("Loyalty Setting", "feesetting", "Settings", "Can view, create and edit loyalty setting data.", true, true));
+			features.add(
+					new Feature("User", "user", "Users", "Can view, create and edit user data.", true, true));
+			features.add(
+					new Feature("Role", "role", "Users", "Can view, create and edit role data.", true, true));
+			features.add(
+					new Feature("Store Access", "storeaccess", "Users", "Can view, create and edit store access data.", true, true));
+			// ============================ ROLE FEATURE ================================================ //
 			// create default data Role Feature
 			for (Feature feature : features) {
 				feature.save();
 				new RoleFeature(feature, role, 210).save();
+				new RoleMerchantFeature(feature, roleMerchant, true, true, true, true).save();
 			}
 		}
 	}
@@ -153,6 +208,9 @@ public class SeedDefaultConfiguration {
 				UserCms sadmin = new UserCms("password", "sadmin", "", "sadmin@whizliz.com", "", "M", "1945-8-17");
 				sadmin.role = Role.find.where().eq("name", "Admin").findUnique();
 				sadmin.save();
+				Merchant merchant = new Merchant("qwerty123", "sandbox.wgs@gmail.com", "M", "Sandbox Merchant", "sandbox", "sandbox store", "APPROVED", "Bandung", "Jl. Soekarno Hatta No. 112", "62899436521", true);
+				merchant.roleMerchant = RoleMerchant.find.where().eq("name", "Admin").findUnique();
+				merchant.save();
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}

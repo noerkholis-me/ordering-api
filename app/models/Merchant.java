@@ -196,7 +196,21 @@ public class Merchant extends BaseModel{
     public List<MapMerchantPayment> lists = new ArrayList<>();
 
     @ManyToOne(cascade = { CascadeType.ALL })
-    public Role role;
+    public RoleMerchant roleMerchant;
+
+    public Merchant(String password, String email, String gender, String fullName, String name, String companyName, String status, String cityName, String address, String phone, boolean isActive) {
+        this.password = password;
+        this.email = email;
+        this.gender = gender;
+        this.fullName = fullName;
+        this.name = name;
+        this.companyName = companyName;
+        this.status = status;
+        this.cityName = cityName;
+        this.address = address;
+        this.phone = phone;
+        this.isActive = isActive;
+    }
 
     public void setOrderStat(){
         orderStat.add(new MapKeyValue("Successful Transactions", String.valueOf(SalesOrderSeller.getOrderByStatus(id,
@@ -621,15 +635,15 @@ public class Merchant extends BaseModel{
     }
 
     public List<FeatureAndPermissionSession> checkFeatureAndPermissions() {
-        List<RoleFeature> myFeature = this.role.featureList;
+        List<RoleMerchantFeature> myFeature = roleMerchant.getFeatureList();
         List<FeatureAndPermissionSession> featureAndPermissionSessionList = new ArrayList<>();
-        for (RoleFeature feature : myFeature) {
+        for (RoleMerchantFeature feature : myFeature) {
             FeatureAndPermissionSession featureAndPermissionSession = new FeatureAndPermissionSession();
             featureAndPermissionSession.setFeatureName(feature.feature.key);
-            featureAndPermissionSession.setIsView(feature.isView());
-            featureAndPermissionSession.setIsAdd(feature.isAdd());
-            featureAndPermissionSession.setIsEdit(feature.isEdit());
-            featureAndPermissionSession.setIsDelete(feature.isDelete());
+            featureAndPermissionSession.setIsView(feature.getIsView());
+            featureAndPermissionSession.setIsAdd(feature.getIsAdd());
+            featureAndPermissionSession.setIsEdit(feature.getIsEdit());
+            featureAndPermissionSession.setIsDelete(feature.getIsDelete());
             featureAndPermissionSessionList.add(featureAndPermissionSession);
         }
         return featureAndPermissionSessionList;
@@ -638,12 +652,12 @@ public class Merchant extends BaseModel{
     public HashMap<String, Boolean> checkPrivilegeList() {
         LinkedHashMap<String, Boolean> result = new LinkedHashMap<String, Boolean>();
         List<Feature> allFeature = Feature.find.all();
-        List<RoleFeature> myFeature = this.role.featureList;
+        List<RoleMerchantFeature> myFeature = roleMerchant.getFeatureList();
         for (Feature targetFeature : allFeature) {
             String keyTarget = targetFeature.key;
             result.put(keyTarget, false);
         }
-        for (RoleFeature feature : myFeature) {
+        for (RoleMerchantFeature feature : myFeature) {
             String keyTarget = feature.feature.key;
             result.put(keyTarget, true);
         }

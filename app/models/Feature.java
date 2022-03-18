@@ -5,6 +5,8 @@ import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,6 +38,10 @@ public class Feature extends BaseModel{
     @JsonProperty("is_active")
     public boolean isActive;
 
+    @JsonIgnore
+    @Getter @Setter
+    public boolean isMerchant;
+
 //    @JsonIgnore
 //    @ManyToMany(mappedBy="features", cascade=CascadeType.ALL)
 //    public List<Feature> roles;
@@ -50,6 +56,24 @@ public class Feature extends BaseModel{
         this.section     = section;
         this.description = description;
         this.isActive    = isActive;
+    }
+
+    public Feature(String name, String key, String section, String description, boolean isActive, boolean isMerchant){
+        super();
+        this.name        = name;
+        this.key         = key;
+        this.section     = section;
+        this.description = description;
+        this.isActive    = isActive;
+        this.isMerchant  = isMerchant;
+    }
+
+    public static List<Feature> getAllFeatures(){
+        return find.all();
+    }
+
+    public static List<Feature> getAllFeatures(boolean isMerchant){
+        return find.where().eq("is_merchant", isMerchant).findList();
     }
 
 
