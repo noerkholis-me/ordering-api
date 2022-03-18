@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: __CI_PROJECT_NAME__-__CI_ENVIRONMENT_SLUG__-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+  - secretName: stagingapps.net
+  rules:
+  - host: __URL_STAGING__
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: __CI_PROJECT_NAME__-__CI_ENVIRONMENT_SLUG__
+          servicePort: 80
+

@@ -1,0 +1,40 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: __CI_PROJECT_NAME__-__CI_ENVIRONMENT_SLUG__
+spec:
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: __CI_PROJECT_NAME__-__CI_ENVIRONMENT_SLUG__
+  replicas: 1 
+  template: 
+    metadata:
+      labels:
+        app: __CI_PROJECT_NAME__-__CI_ENVIRONMENT_SLUG__
+    spec:
+      containers:
+      - name: __CI_PROJECT_NAME__-__CI_ENVIRONMENT_SLUG__
+        image: __IMAGE__:__VERSION__
+        volumeMounts:
+        - name: __CI_PROJECT_NAME__-vol
+          mountPath: /app/whiz-media/
+          subPath: whiz-media
+        - name: __CI_PROJECT_NAME__-vol
+          mountPath: /app/whiz-elasticsearch/
+          subPath: whiz-elasticsearch
+        - name: __CI_PROJECT_NAME__-vol
+          mountPath: /app/whiz-export/
+          subPath: whiz-export
+        ports:
+        - containerPort: 9001
+        imagePullPolicy: IfNotPresent
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: regcred
+      volumes:
+      - name: __CI_PROJECT_NAME__-vol
+        persistentVolumeClaim:
+          claimName: __CI_PROJECT_NAME__-pv-claim
+

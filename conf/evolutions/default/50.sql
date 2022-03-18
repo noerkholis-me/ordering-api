@@ -14,7 +14,7 @@ create table syncshipper (
  sync_name                 varchar(4) not null,
  sync_description          TEXT,
  created_at                timestamp not null,
- updated_at                timestamp not null
+ updated_at                timestamp not null,
  constraint pk_syncshipper primary key (id))
 ;
 
@@ -77,6 +77,11 @@ create table shipper_area (
 
 
 # --- !Downs
+
+alter table product drop column if exists product_length;
+alter table product drop column if exists product_width;
+alter table product drop column if exists product_height;
+alter table product drop column if exists product_weight;
 
 drop table if exists syncshipper cascade;
 drop sequence if exists syncshipper_seq;
