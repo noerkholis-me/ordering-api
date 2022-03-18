@@ -53,7 +53,7 @@ public class RoleMerchantController extends BaseController {
                         newRoleMerchant.setName(request.getName());
                         newRoleMerchant.setDescription(request.getDescription());
                         newRoleMerchant.setKey(request.getName().toLowerCase().replace(' ', '_'));
-                        newRoleMerchant.setIsDeleted(Boolean.FALSE);
+//                        newRoleMerchant.setIsDeleted(Boolean.FALSE);
                         newRoleMerchant.setMerchant(ownMerchant);
                         newRoleMerchant.save();
 
@@ -112,7 +112,7 @@ public class RoleMerchantController extends BaseController {
                     response.setName(data.getName());
                     response.setDescription(data.getDescription());
                     response.setKey(data.getKey());
-                    response.setIsDeleted(data.getIsDeleted());
+//                    response.setIsDeleted(data.getIsDeleted());
                     response.setMerchantId(data.getMerchantId());
                     // response.setMerchant(data.getMerchant());
                     responses.add(response);
