@@ -1,5 +1,6 @@
 package dtos.role;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -11,6 +12,7 @@ import lombok.*;
 public class RoleMerchantResponse  {
     @JsonProperty("id")
     private Long id;
+    @JsonIgnore
     @JsonProperty("is_deleted")
     private Boolean isDeleted;
     @JsonProperty("name")
