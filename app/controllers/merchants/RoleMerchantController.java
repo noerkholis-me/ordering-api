@@ -223,4 +223,49 @@ public class RoleMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
+    @ApiOperation(value = "Read Role", notes = "Read Role.\n" + swaggerInfo
+            + "", response = BaseResponse.class, httpMethod = "GET")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "role form", dataType = "temp.swaggermap.RoleForm", required = true, paramType = "body", value = "role form") })
+    public static Result viewRole(Long id) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+                if (id != null) {
+                    Transaction trx = Ebean.beginTransaction();
+                    try {
+                        RoleMerchant roleMerchant = RoleMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        if (roleMerchant == null) {
+                            response.setBaseResponse(0, 0, 0, error + " role merchant not found.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        
+                        
+                        // roleMerchant.setId(data.getId());
+                        // roleMerchant.setName(data.getName());
+                        // roleMerchant.setDescription(data.getDescription());
+                        // roleMerchant.setKey(data.getKey());
+                        // roleMerchant.setIsDeleted(data.getIsDeleted());
+                        // roleMerchant.setMerchantId(data.getMerchantId());
+                        // roleMerchant.add(roleMerchant);
+                        // trx.commit();
+
+                        response.setBaseResponse(1,offset, 1, success + " showing detail role", roleMerchant);
+                        return ok(Json.toJson(response));
+                    } catch (Exception e) {
+                        logger.error("Error while showing detail role", e);
+                        e.printStackTrace();
+                        trx.rollback();
+                    } finally {
+                        trx.end();
+                    }
+                    response.setBaseResponse(0, 0, 0, error, null);
+                    return badRequest(Json.toJson(response));
+                }
+                response.setBaseResponse(0, 0, 0, "Cannot find role Id", null);
+                return badRequest(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
 }

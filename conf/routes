@@ -330,3 +330,4 @@ GET     /merchant/role/list                        controllers.merchants.RoleMer
 POST    /merchant/role                             controllers.merchants.RoleMerchantController.createRole()
 PUT     /merchant/role/:id/updaterole              controllers.merchants.RoleMerchantController.editRole(id:Long)
 DELETE  /merchant/role/:id/deleterole              controllers.merchants.RoleMerchantController.deleteRole(id:Long)
+GET     /merchant/role/:id/detailrole              controllers.merchants.RoleMerchantController.viewRole(id:Long)
