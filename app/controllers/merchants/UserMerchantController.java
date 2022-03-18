@@ -73,7 +73,7 @@ public class UserMerchantController extends BaseController {
                         Thread thread = new Thread(() -> {
                             try {
                                 MailConfig.sendmail(newUserMerchant.getEmail(), MailConfig.subjectActivation,
-                                        MailConfig.renderMailSendCreatePasswordCMSTemplate(forActivation, newUserMerchant.getFullName()));
+                                        MailConfig.renderMailSendCreatePasswordCMSTemplate(forActivation, newUserMerchant.fullName));
             
                             } catch (Exception e) {
                                 e.printStackTrace();

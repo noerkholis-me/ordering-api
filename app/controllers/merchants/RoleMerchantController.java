@@ -131,4 +131,96 @@ public class RoleMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
+    @ApiOperation(value = "Edit Role", notes = "Edit Role.\n" + swaggerInfo
+            + "", response = BaseResponse.class, httpMethod = "PUT")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "role form", dataType = "temp.swaggermap.RoleForm", required = true, paramType = "body", value = "role form") })
+    public static Result editRole(Long id) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            JsonNode json = request().body().asJson();
+            try {
+                RoleMerchantResponse request = objectMapper.readValue(json.toString(), RoleMerchantResponse.class);
+                String validate = validateCreateRole(request);
+                if (validate == null) {
+                    Transaction trx = Ebean.beginTransaction();
+                    try {
+                        RoleMerchant roleMerchant = RoleMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        if (roleMerchant == null) {
+                            response.setBaseResponse(0, 0, 0, error + " role merchant not found.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        
+                        
+                        roleMerchant.setName(request.getName());
+                        roleMerchant.setDescription(request.getDescription());
+                        roleMerchant.setKey(request.getName().toLowerCase().replace(' ', '_'));
+                        roleMerchant.setId(id);
+                        roleMerchant.update();
+                        trx.commit();
+
+                        response.setBaseResponse(1,offset, 1, success + " updating role", roleMerchant);
+                        return ok(Json.toJson(response));
+                    } catch (Exception e) {
+                        logger.error("Error while updating role", e);
+                        e.printStackTrace();
+                        trx.rollback();
+                    } finally {
+                        trx.end();
+                    }
+                    response.setBaseResponse(0, 0, 0, error, null);
+                    return badRequest(Json.toJson(response));
+                }
+                response.setBaseResponse(0, 0, 0, validate, null);
+                return badRequest(Json.toJson(response));
+            } catch (IOException e) {
+                logger.error("Error while parsing json", e);
+                e.printStackTrace();
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    @ApiOperation(value = "Delete Role", notes = "Delete Role.\n" + swaggerInfo
+            + "", response = BaseResponse.class, httpMethod = "DELETE")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "role form", dataType = "temp.swaggermap.RoleForm", required = true, paramType = "body", value = "role form") })
+    public static Result deleteRole(Long id) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+                if (id != null) {
+                    Transaction trx = Ebean.beginTransaction();
+                    try {
+                        RoleMerchant roleMerchant = RoleMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        if (roleMerchant == null) {
+                            response.setBaseResponse(0, 0, 0, error + " role merchant not found.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        
+                        
+                        roleMerchant.isDeleted = true;
+                        roleMerchant.setId(id);
+                        roleMerchant.update();
+                        trx.commit();
+
+                        response.setBaseResponse(1,offset, 1, success + " deleting role", roleMerchant);
+                        return ok(Json.toJson(response));
+                    } catch (Exception e) {
+                        logger.error("Error while deleting role", e);
+                        e.printStackTrace();
+                        trx.rollback();
+                    } finally {
+                        trx.end();
+                    }
+                    response.setBaseResponse(0, 0, 0, error, null);
+                    return badRequest(Json.toJson(response));
+                }
+                response.setBaseResponse(0, 0, 0, "Cannot find role Id", null);
+                return badRequest(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
 }

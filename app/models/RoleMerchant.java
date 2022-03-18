@@ -17,11 +17,10 @@ public class RoleMerchant extends BaseModel {
     @Getter @Setter
     private Long id;
 
-    @JsonProperty("is_deleted")
-    @Setter
-    @Getter
-    @Column(name = "is_deleted")
-    private Boolean isDeleted;
+    // @JsonProperty("is_deleted")
+    // @Column(name = "is_deleted")
+    // @Setter
+    // private Boolean isDeleted;
 
     @JsonProperty("name")
     @Getter @Setter
