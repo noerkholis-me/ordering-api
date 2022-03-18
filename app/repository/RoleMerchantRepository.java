@@ -18,7 +18,15 @@ import java.util.*;
 import java.text.SimpleDateFormat;
 
 public class RoleMerchantRepository extends Model {
-    public static Finder<Long, RoleMerchant> find = new Finder<>(Long.class, RoleMerchant.class);
+	public static Finder<Long, RoleMerchant> find = new Finder<>(Long.class, RoleMerchant.class);
+	
+	public static RoleMerchant findByIdAndMerchantId(Long id, Long merchantId) {
+        return find.where()
+            .eq("id", id)
+            .eq("merchant_id", merchantId)
+            .eq("is_deleted", Boolean.FALSE)
+            .findUnique();
+    }
 
     public static List<RoleMerchant> getDataRole(Query<RoleMerchant> reqQuery, String sort, String filter, int offset, int limit)
 			throws IOException {

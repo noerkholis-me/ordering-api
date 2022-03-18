@@ -64,7 +64,7 @@ public class UserMerchantController extends BaseController {
                         constructRequestModel(newUserMerchant, request, role, ownMerchant);
                         newUserMerchant.save();
 
-                        String forActivation = Encryption.EncryptAESCBCPCKS5Padding(String.valueOf(newUserMerchant.getId()) + String.valueOf(System.currentTimeMillis()));
+                        String forActivation = Encryption.EncryptAESCBCPCKS5Padding(String.valueOf(newUserMerchant.id) + String.valueOf(System.currentTimeMillis()));
                         System.out.println(forActivation);
 
                         newUserMerchant.setActivationCode(forActivation);
@@ -73,7 +73,7 @@ public class UserMerchantController extends BaseController {
                         Thread thread = new Thread(() -> {
                             try {
                                 MailConfig.sendmail(newUserMerchant.getEmail(), MailConfig.subjectActivation,
-                                        MailConfig.renderMailSendCreatePasswordCMSTemplate(forActivation, newUserMerchant.getFullName()));
+                                        MailConfig.renderMailSendCreatePasswordCMSTemplate(forActivation, newUserMerchant.fullName));
             
                             } catch (Exception e) {
                                 e.printStackTrace();
