@@ -285,6 +285,7 @@ PATCH 	/merchants/pickup/edit/:id					controllers.merchants.PickUpPointControlle
 DELETE 	/merchants/pickup/delete/:id				controllers.merchants.PickUpPointController.removeEntry(id: Long)
 
 POST    /merchants/user/add                         controllers.merchants.UserMerchantController.createUser()
+PUT    /merchants/user/edit/:id                         controllers.merchants.UserMerchantController.editUser(id: Long)
 
 POST    /users/createpassword/:activationcode/updatepassword     controllers.merchants.UserMerchantController.createNewPassword(activationcode: String)
 

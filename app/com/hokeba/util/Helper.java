@@ -33,6 +33,7 @@ public class Helper {
     public final static String CONTACT_NAME = Play.application().configuration().getString("whizliz.contact_name");
     public final static String BASE_IMAGE = Play.application().configuration().getString("whizliz.base_image");
     public final static String API_URL = Play.application().configuration().getString("whizliz.api.url");
+    public final static String MERCHANT_URL = Play.application().configuration().getString("whizliz.merchant.url");
     
     /*public static void email(String to, String name, String htmlMsg, String subject) throws Exception {
         // Create the email message

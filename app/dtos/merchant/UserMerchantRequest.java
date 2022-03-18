@@ -23,6 +23,7 @@ public class UserMerchantRequest  {
     @JsonProperty("confirm_password")
     private String confirmPassword;
 
+
     // ======================================== //
     @JsonProperty("merchant_id")
     private Long merchantId;

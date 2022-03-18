@@ -75,6 +75,7 @@ public class UserMerchant extends BaseModel {
     @Column(name = "is_active")
     public boolean isActive;
 
+    @JsonIgnore
     @ManyToOne(cascade = { CascadeType.ALL })
     @Getter @Setter
     public RoleMerchant role;
@@ -84,25 +85,19 @@ public class UserMerchant extends BaseModel {
     @Getter @Setter
     public Merchant merchant;
 
+    @JsonIgnore
     @javax.persistence.Transient
     public String save;
 
+    @JsonIgnore
     @javax.persistence.Transient
     @Getter @Setter
     public Long rolesId;
 
+    @JsonIgnore
     @javax.persistence.Transient
     @Getter @Setter
     public Long merchantsId;
-
-
-    // @JsonProperty("role_id")
-    // @Getter @Setter
-    // public Long roleId;
-
-    // @JsonProperty("merchant_id")
-    // @Getter @Setter
-    // public Long merchantId;
 
     public UserMerchant() {
     }

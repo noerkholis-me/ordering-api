@@ -117,7 +117,7 @@ public class MailConfig {
 	public static String renderMailSendCreatePasswordCMSTemplate(String activationCode, String fullName) {
 		Merchant dt = new Merchant();
 		Form<Merchant> formData = Form.form(Merchant.class).fill(dt);
-		String url = Helper.API_URL+"account-activation/"+activationCode;
+		String url = Helper.MERCHANT_URL+"account-activation/"+activationCode;
 
 		try {
 			String html = views.html.verificationEmail.render(fullName, url).toString();
