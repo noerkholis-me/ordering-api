@@ -65,22 +65,6 @@ public class RoleMerchantRepository extends Model {
 		return resData;
 	}
 
-	public static List<RoleMerchantFeature> getFeaturesByRole(Long id){
-		String sql = "SELECT role_id, feature_id, is_view, is_add, is_edit, is_delete FROM role_merchant_feature " +
-				"WHERE role_merchant_id = "+id+" " +
-				"ORDER BY feature_id ASC";
 
-		RawSql rawSql = RawSqlBuilder.parse(sql)
-				.columnMapping("role_merchant_id", "roleMerchantId")
-				.columnMapping("feature_id", "featureId")
-				.columnMapping("is_view", "isView")
-				.columnMapping("is_add", "isAdd")
-				.columnMapping("is_edit", "isEdit")
-				.columnMapping("is_delete", "isDelete")
-				.create();
-		Query<RoleMerchantFeature> query = Ebean.find(RoleMerchantFeature.class);
-		query.setRawSql(rawSql);
-		return query.findList();
-	}
 
 }

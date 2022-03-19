@@ -108,7 +108,7 @@ public class RoleMerchantController extends BaseController {
                 for (RoleMerchant data : responseIndex) {
                     RoleMerchantResponse response = new RoleMerchantResponse();
 
-                    response.setId(data.getId());
+                    response.setId(data.id);
                     response.setName(data.getName());
                     response.setDescription(data.getDescription());
                     response.setKey(data.getKey());
@@ -155,7 +155,7 @@ public class RoleMerchantController extends BaseController {
                         roleMerchant.setName(request.getName());
                         roleMerchant.setDescription(request.getDescription());
                         roleMerchant.setKey(request.getName().toLowerCase().replace(' ', '_'));
-                        roleMerchant.setId(id);
+//                        roleMerchant.id(id);
                         roleMerchant.update();
                         trx.commit();
 
@@ -200,7 +200,7 @@ public class RoleMerchantController extends BaseController {
                         
                         
                         roleMerchant.isDeleted = true;
-                        roleMerchant.setId(id);
+//                        roleMerchant.id(id);
                         roleMerchant.update();
                         trx.commit();
 

@@ -3,6 +3,8 @@ package models;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
+import com.avaje.ebean.annotation.ConcurrencyMode;
+import com.avaje.ebean.annotation.EntityConcurrencyMode;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
@@ -12,6 +14,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 
 /**
@@ -40,7 +44,7 @@ public class Feature extends BaseModel{
 
     @JsonIgnore
     @Getter @Setter
-    public boolean isMerchant;
+    public Boolean isMerchant;
 
 //    @JsonIgnore
 //    @ManyToMany(mappedBy="features", cascade=CascadeType.ALL)
@@ -69,7 +73,15 @@ public class Feature extends BaseModel{
     }
 
     public static List<Feature> getAllFeatures(){
-        return find.all();
+        return find.order().asc("id").findList();
+    }
+
+    public static Set<Feature> getAllFeaturesSet(){
+        return find.findSet();
+    }
+
+    public static Feature getFeatureByKey(String key){
+        return find.where().eq("key", key).findUnique();
     }
 
     public static List<Feature> getAllFeatures(boolean isMerchant){
@@ -98,4 +110,16 @@ public class Feature extends BaseModel{
         return resData;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Feature feature = (Feature) o;
+        return id != null && Objects.equals(id, feature.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
