@@ -1,6 +1,6 @@
 # --- !Ups
 
-alter table feature add column if not exists is_merchant boolean;
+alter table feature add column is_merchant boolean;
 
 
 # --- !Downs
