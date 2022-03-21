@@ -1,26 +1,15 @@
 package models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.hokeba.util.CommonFunction;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import javax.validation.constraints.Size;
-import java.util.Date;
+import java.util.List;
 
 @Entity
 public class RoleMerchant extends BaseModel {
-    @JsonProperty("id")
-    @Getter @Setter
-    private Long id;
-
-    // @JsonProperty("is_deleted")
-    // @Column(name = "is_deleted")
-    // @Setter
-    // private Boolean isDeleted;
 
     @JsonProperty("name")
     @Getter @Setter
@@ -34,10 +23,18 @@ public class RoleMerchant extends BaseModel {
     @Getter @Setter
     private String description;
 
-    @OneToOne(cascade = { CascadeType.ALL })
-    @JsonProperty("merchant")
+    @JsonProperty("is_active")
+    @Getter @Setter
+    @Column(name = "is_active")
+    public boolean isActive;
+
+    @ManyToOne(cascade = { CascadeType.ALL })
     @Getter @Setter
     public Merchant merchant;
+
+    @OneToMany(mappedBy = "roleMerchant")
+    @Getter @Setter
+    public List<RoleMerchantFeature> featureList;
 
     @JsonIgnore
     @javax.persistence.Transient
@@ -48,7 +45,26 @@ public class RoleMerchant extends BaseModel {
     @Getter @Setter
     public Long merchantId;
 
+
     public RoleMerchant(){
 
     }
+
+    public RoleMerchant(String name, String key, String description, boolean isActive) {
+        this.name = name;
+        this.key = key;
+        this.description = description;
+        this.isActive = isActive;
+    }
+
+    public RoleMerchant(String name, String key, String description, boolean isActive, Merchant merchant, List<RoleMerchantFeature> featureList) {
+        this.name = name;
+        this.key = key;
+        this.description = description;
+        this.isActive = isActive;
+        this.merchant = merchant;
+        this.featureList = featureList;
+    }
+
+    public static Finder<Long, RoleMerchant> find = new Finder<>(Long.class, RoleMerchant.class);
 }

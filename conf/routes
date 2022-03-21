@@ -331,3 +331,6 @@ POST    /merchant/role                             controllers.merchants.RoleMer
 PUT     /merchant/role/:id/updaterole              controllers.merchants.RoleMerchantController.editRole(id:Long)
 DELETE  /merchant/role/:id/deleterole              controllers.merchants.RoleMerchantController.deleteRole(id:Long)
 GET     /merchant/role/:id/detailrole              controllers.merchants.RoleMerchantController.viewRole(id:Long)
+
+#FEATURE
+GET     /master/feature/list                       controllers.masters.FeatureController.getAllFeatureMerchant(isMerchant:Boolean ?= false)

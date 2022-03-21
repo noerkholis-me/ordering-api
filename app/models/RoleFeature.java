@@ -4,6 +4,8 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.Setter;
 import play.db.ebean.Model;
 
 import javax.persistence.Entity;
@@ -15,6 +17,8 @@ import java.util.List;
  * Created by nugraha on 7/28/17.
  */
 @Entity
+@Getter
+@Setter
 public class RoleFeature extends Model{
 
     @ManyToOne
