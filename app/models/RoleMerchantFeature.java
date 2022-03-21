@@ -49,6 +49,8 @@ public class RoleMerchantFeature extends Model {
     @javax.persistence.Transient
     public Long featureId;
 
+    public static Finder<Long, RoleMerchantFeature> find = new Finder<>(Long.class, RoleMerchantFeature.class);
+
     public RoleMerchantFeature() {
     }
 
