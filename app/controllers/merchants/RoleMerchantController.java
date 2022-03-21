@@ -57,7 +57,13 @@ public class RoleMerchantController extends BaseController {
                         newRoleMerchant.setActive(Boolean.TRUE);
                         newRoleMerchant.save();
                         // ============================ start to set role feature ============================ //
-                        saveOrUpdateRoleFeature(request, newRoleMerchant);
+                        if (request.getFeatures() != null) {
+                            for (FeatureAssignRequest featureAssignRequest : request.getFeatures()) {
+                                Feature feature = Feature.find.where().eq("id", featureAssignRequest.getFeatureId()).findUnique();
+                                RoleMerchantFeature newRoleMerchantFeature = new RoleMerchantFeature();
+                                newRoleMerchantFeature(newRoleMerchant, newRoleMerchantFeature, featureAssignRequest, feature);
+                            }
+                        }
                         // ============================ end to set role feature ============================ //
                         newRoleMerchant.update();
                         trx.commit();
@@ -84,16 +90,14 @@ public class RoleMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    private static void newRoleMerchantFeature(RoleMerchant newRoleMerchant, FeatureAssignRequest featureAssignRequest, Feature feature, List<RoleMerchantFeature> roleMerchantFeatures) {
-        RoleMerchantFeature newRoleMerchantFeatureNotExist = new RoleMerchantFeature();
-        newRoleMerchantFeatureNotExist.setFeature(feature);
-        newRoleMerchantFeatureNotExist.setRoleMerchant(newRoleMerchant);
-        newRoleMerchantFeatureNotExist.setIsView(featureAssignRequest.getIsView());
-        newRoleMerchantFeatureNotExist.setIsAdd(featureAssignRequest.getIsAdd());
-        newRoleMerchantFeatureNotExist.setIsEdit(featureAssignRequest.getIsEdit());
-        newRoleMerchantFeatureNotExist.setIsDelete(featureAssignRequest.getIsDelete());
-        newRoleMerchantFeatureNotExist.save();
-        roleMerchantFeatures.add(newRoleMerchantFeatureNotExist);
+    private static void newRoleMerchantFeature(RoleMerchant newRoleMerchant, RoleMerchantFeature roleMerchantFeature, FeatureAssignRequest featureAssignRequest, Feature feature) {
+        roleMerchantFeature.setFeature(feature);
+        roleMerchantFeature.setRoleMerchant(newRoleMerchant);
+        roleMerchantFeature.setIsView(featureAssignRequest.getIsView());
+        roleMerchantFeature.setIsAdd(featureAssignRequest.getIsAdd());
+        roleMerchantFeature.setIsEdit(featureAssignRequest.getIsEdit());
+        roleMerchantFeature.setIsDelete(featureAssignRequest.getIsDelete());
+        roleMerchantFeature.save();
     }
 
     public static String validateCreateRole(RoleMerchantRequest request) {
@@ -168,7 +172,26 @@ public class RoleMerchantController extends BaseController {
                         roleMerchant.setMerchant(ownMerchant);
                         roleMerchant.setActive(Boolean.TRUE);
                         // ============================ start to set role feature ============================ //
-                        saveOrUpdateRoleFeature(request, roleMerchant);
+                        if (request.getFeatures() != null) {
+                            for (FeatureAssignRequest featureAssignRequest : request.getFeatures()) {
+                                Feature feature = Feature.find.where().eq("id", featureAssignRequest.getFeatureId()).findUnique();
+                                RoleMerchantFeature roleMerchantFeature = RoleMerchantFeature.find.where().eq("roleMerchant", roleMerchant).eq("feature", feature).findUnique();
+                                if (roleMerchantFeature == null) {
+                                    RoleMerchantFeature newRoleMerchantFeature = new RoleMerchantFeature();
+                                    newRoleMerchantFeature(roleMerchant, newRoleMerchantFeature, featureAssignRequest, feature);
+                                } else {
+                                    roleMerchantFeature.setFeature(feature);
+                                    roleMerchantFeature.setRoleMerchant(roleMerchant);
+                                    roleMerchantFeature.setIsView(featureAssignRequest.getIsView());
+                                    roleMerchantFeature.setIsAdd(featureAssignRequest.getIsAdd());
+                                    roleMerchantFeature.setIsEdit(featureAssignRequest.getIsEdit());
+                                    roleMerchantFeature.setIsDelete(featureAssignRequest.getIsDelete());
+                                    roleMerchantFeature.save();
+                                }
+                            }
+
+
+                        }
                         // ============================ end to set role feature ============================ //
                         roleMerchant.update();
                         trx.commit();
@@ -193,34 +216,6 @@ public class RoleMerchantController extends BaseController {
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
-    }
-
-    private static void saveOrUpdateRoleFeature(RoleMerchantRequest request, RoleMerchant roleMerchant) {
-        for (FeatureAssignRequest featureAssignRequest : request.getFeatures()) {
-            Feature feature = Feature.find.where().eq("id", featureAssignRequest.getFeatureId()).findUnique();
-            List<RoleMerchantFeature> roleMerchantFeatures = RoleMerchantFeature.getFeaturesByRole(roleMerchant.id);
-            if (roleMerchantFeatures.isEmpty()) {
-                newRoleMerchantFeature(roleMerchant, featureAssignRequest, feature, roleMerchantFeatures);
-                roleMerchant.setFeatureList(roleMerchantFeatures);
-            } else {
-                // this is for edit role feature
-                for (RoleMerchantFeature roleMerchantFeature : roleMerchantFeatures) {
-                    if (roleMerchantFeature.getFeature().id.equals(feature.id) ||
-                            roleMerchantFeature.getFeature().key.equals(feature.key)) {
-                        roleMerchantFeature.setFeature(feature);
-                        roleMerchantFeature.setRoleMerchant(roleMerchant);
-                        roleMerchantFeature.setIsView(featureAssignRequest.getIsView());
-                        roleMerchantFeature.setIsAdd(featureAssignRequest.getIsAdd());
-                        roleMerchantFeature.setIsEdit(featureAssignRequest.getIsEdit());
-                        roleMerchantFeature.setIsDelete(featureAssignRequest.getIsDelete());
-                        roleMerchantFeature.update();
-                        roleMerchantFeatures.add(roleMerchantFeature);
-                    } else {
-                        newRoleMerchantFeature(roleMerchant, featureAssignRequest, feature, roleMerchantFeatures);
-                    }
-                }
-            }
-        }
     }
 
     @ApiOperation(value = "Delete Role", notes = "Delete Role.\n" + swaggerInfo
