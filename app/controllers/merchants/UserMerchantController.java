@@ -121,7 +121,7 @@ public class UserMerchantController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        UserMerchant userMerchant = UserMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        UserMerchant userMerchant = UserMerchantRepository.findUsers(id, ownMerchant.id);
                         if (userMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " User merchant not found.", null);
                             return badRequest(Json.toJson(response));
@@ -154,6 +154,80 @@ public class UserMerchantController extends BaseController {
                 logger.error("Error while parsing json", e);
                 e.printStackTrace();
             }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    @ApiOperation(value = "Delete User", notes = "Delete User.\n" + swaggerInfo
+            + "", response = BaseResponse.class, httpMethod = "DELETE")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "user form", dataType = "temp.swaggermap.UserForm", required = true, paramType = "body", value = "user form") })
+    public static Result deleteUsers(Long id) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            Transaction trx = Ebean.beginTransaction();
+            try {
+                UserMerchant userMerchant = UserMerchantRepository.findUsers(id, ownMerchant.id);
+                if (userMerchant == null) {
+                    response.setBaseResponse(0, 0, 0, error + " User merchant not found.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                userMerchant.isDeleted = true;
+                userMerchant.update();
+                trx.commit();
+
+                response.setBaseResponse(1,offset, 1, success + " delete user successfully", userMerchant.isDeleted);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                logger.error("Error while delete user", e);
+                e.printStackTrace();
+                trx.rollback();
+            } finally {
+                trx.end();
+            }
+            response.setBaseResponse(0, 0, 0, error, null);
+            return badRequest(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    @ApiOperation(value = "Read User", notes = "Read User.\n" + swaggerInfo
+            + "", response = BaseResponse.class, httpMethod = "GET")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "user form", dataType = "temp.swaggermap.UserForm", required = true, paramType = "body", value = "user form") })
+    public static Result viewUser(Long id) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+                if (id != null) {
+                    Transaction trx = Ebean.beginTransaction();
+                    try {
+                        UserMerchant userMerchant = UserMerchantRepository.findUsers(id, ownMerchant.id);
+                        if (userMerchant == null) {
+                            response.setBaseResponse(0, 0, 0, error + " user merchant not found.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+
+                        if (userMerchant.isDeleted != true) {
+                            response.setBaseResponse(1,offset, 1, success + " showing detail user", userMerchant);
+                            return ok(Json.toJson(response));
+                        } else { 
+                            response.setBaseResponse(0, 0, 0, error + " users not found", null);
+                            return ok(Json.toJson(response));
+                        }
+                    } catch (Exception e) {
+                        logger.error("Error while showing detail user", e);
+                        e.printStackTrace();
+                        trx.rollback();
+                    } finally {
+                        trx.end();
+                    }
+                    response.setBaseResponse(0, 0, 0, error, null);
+                    return badRequest(Json.toJson(response));
+                }
+                response.setBaseResponse(0, 0, 0, "Cannot find user Id", null);
+                return badRequest(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
