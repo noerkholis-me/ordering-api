@@ -18,9 +18,9 @@ public class MailConfig {
 	public static String smtp = Constant.getInstance().getEmailSmtp();
 	public static String sender = Constant.getInstance().getEmailSender();
 
-	public static String subjectForgotPassword = "[Whizliz] Forgot Password Verification";
-	public static final String subjectActivation = "[Whizliz] Email Activation";
-	public static final String subjectConfirmOrder = "[Whizliz] Order Confirmation";
+	public static String subjectForgotPassword = "[Sandbox] Forgot Password Verification";
+	public static final String subjectActivation = "[Sandbox] Email Activation";
+	public static final String subjectConfirmOrder = "[Sandbox] Order Confirmation";
 
 	// Using send grid api
 	public static boolean sendmail2(String recipients, String subject, String contentTemplate) {
