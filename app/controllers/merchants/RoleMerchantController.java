@@ -5,22 +5,22 @@ import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
-import com.hokeba.util.CommonFunction;
-import com.hokeba.util.Encryption;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
+import dtos.feature.FeatureAssignRequest;
 import dtos.role.*;
+import models.Feature;
 import models.Merchant;
 import models.RoleMerchant;
+import models.RoleMerchantFeature;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.RoleMerchantRepository;
-import controllers.BaseController;
-import java.text.SimpleDateFormat;
+
 import java.util.*;
 import com.avaje.ebean.Query;
 
@@ -44,7 +44,7 @@ public class RoleMerchantController extends BaseController {
         if (ownMerchant != null) {
             JsonNode json = request().body().asJson();
             try {
-                RoleMerchantResponse request = objectMapper.readValue(json.toString(), RoleMerchantResponse.class);
+                RoleMerchantRequest request = objectMapper.readValue(json.toString(), RoleMerchantRequest.class);
                 String validate = validateCreateRole(request);
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
@@ -53,15 +53,15 @@ public class RoleMerchantController extends BaseController {
                         newRoleMerchant.setName(request.getName());
                         newRoleMerchant.setDescription(request.getDescription());
                         newRoleMerchant.setKey(request.getName().toLowerCase().replace(' ', '_'));
-                        newRoleMerchant.setIsDeleted(Boolean.FALSE);
                         newRoleMerchant.setMerchant(ownMerchant);
+                        newRoleMerchant.setActive(Boolean.TRUE);
                         newRoleMerchant.save();
-
-                        // FeatureMerchant newFeatureMerchant = newFeatureMerchant();
-
+                        // ============================ start to set role feature ============================ //
+                        saveOrUpdateRoleFeature(request, newRoleMerchant);
+                        // ============================ end to set role feature ============================ //
+                        newRoleMerchant.update();
                         trx.commit();
-
-                        response.setBaseResponse(1, offset, 1, success + " creating new role", newRoleMerchant);
+                        response.setBaseResponse(1, offset, 1, success + " creating new role", null);
                         return ok(Json.toJson(response));
                     } catch (Exception e) {
                         logger.error("Error while creating role", e);
@@ -84,7 +84,19 @@ public class RoleMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static String validateCreateRole(RoleMerchantResponse request) {
+    private static void newRoleMerchantFeature(RoleMerchant newRoleMerchant, FeatureAssignRequest featureAssignRequest, Feature feature, List<RoleMerchantFeature> roleMerchantFeatures) {
+        RoleMerchantFeature newRoleMerchantFeatureNotExist = new RoleMerchantFeature();
+        newRoleMerchantFeatureNotExist.setFeature(feature);
+        newRoleMerchantFeatureNotExist.setRoleMerchant(newRoleMerchant);
+        newRoleMerchantFeatureNotExist.setIsView(featureAssignRequest.getIsView());
+        newRoleMerchantFeatureNotExist.setIsAdd(featureAssignRequest.getIsAdd());
+        newRoleMerchantFeatureNotExist.setIsEdit(featureAssignRequest.getIsEdit());
+        newRoleMerchantFeatureNotExist.setIsDelete(featureAssignRequest.getIsDelete());
+        newRoleMerchantFeatureNotExist.save();
+        roleMerchantFeatures.add(newRoleMerchantFeatureNotExist);
+    }
+
+    public static String validateCreateRole(RoleMerchantRequest request) {
         if (request == null)
             return "Field must not null or empty";
         if (request.getName() == null)
@@ -108,11 +120,11 @@ public class RoleMerchantController extends BaseController {
                 for (RoleMerchant data : responseIndex) {
                     RoleMerchantResponse response = new RoleMerchantResponse();
 
-                    response.setId(data.getId());
+                    response.setId(data.id);
                     response.setName(data.getName());
                     response.setDescription(data.getDescription());
                     response.setKey(data.getKey());
-                    response.setIsDeleted(data.getIsDeleted());
+//                    response.setIsDeleted(data.getIsDeleted());
                     response.setMerchantId(data.getMerchantId());
                     // response.setMerchant(data.getMerchant());
                     responses.add(response);
@@ -140,7 +152,7 @@ public class RoleMerchantController extends BaseController {
         if (ownMerchant != null) {
             JsonNode json = request().body().asJson();
             try {
-                RoleMerchantResponse request = objectMapper.readValue(json.toString(), RoleMerchantResponse.class);
+                RoleMerchantRequest request = objectMapper.readValue(json.toString(), RoleMerchantRequest.class);
                 String validate = validateCreateRole(request);
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
@@ -150,16 +162,17 @@ public class RoleMerchantController extends BaseController {
                             response.setBaseResponse(0, 0, 0, error + " role merchant not found.", null);
                             return badRequest(Json.toJson(response));
                         }
-                        
-                        
                         roleMerchant.setName(request.getName());
                         roleMerchant.setDescription(request.getDescription());
                         roleMerchant.setKey(request.getName().toLowerCase().replace(' ', '_'));
-                        roleMerchant.setId(id);
+                        roleMerchant.setMerchant(ownMerchant);
+                        roleMerchant.setActive(Boolean.TRUE);
+                        // ============================ start to set role feature ============================ //
+                        saveOrUpdateRoleFeature(request, roleMerchant);
+                        // ============================ end to set role feature ============================ //
                         roleMerchant.update();
                         trx.commit();
-
-                        response.setBaseResponse(1,offset, 1, success + " updating role", roleMerchant);
+                        response.setBaseResponse(1,offset, 1, success + " updating role", null);
                         return ok(Json.toJson(response));
                     } catch (Exception e) {
                         logger.error("Error while updating role", e);
@@ -182,6 +195,34 @@ public class RoleMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
+    private static void saveOrUpdateRoleFeature(RoleMerchantRequest request, RoleMerchant roleMerchant) {
+        for (FeatureAssignRequest featureAssignRequest : request.getFeatures()) {
+            Feature feature = Feature.find.where().eq("id", featureAssignRequest.getFeatureId()).findUnique();
+            List<RoleMerchantFeature> roleMerchantFeatures = RoleMerchantFeature.getFeaturesByRole(roleMerchant.id);
+            if (roleMerchantFeatures.isEmpty()) {
+                newRoleMerchantFeature(roleMerchant, featureAssignRequest, feature, roleMerchantFeatures);
+                roleMerchant.setFeatureList(roleMerchantFeatures);
+            } else {
+                // this is for edit role feature
+                for (RoleMerchantFeature roleMerchantFeature : roleMerchantFeatures) {
+                    if (roleMerchantFeature.getFeature().id.equals(feature.id) ||
+                            roleMerchantFeature.getFeature().key.equals(feature.key)) {
+                        roleMerchantFeature.setFeature(feature);
+                        roleMerchantFeature.setRoleMerchant(roleMerchant);
+                        roleMerchantFeature.setIsView(featureAssignRequest.getIsView());
+                        roleMerchantFeature.setIsAdd(featureAssignRequest.getIsAdd());
+                        roleMerchantFeature.setIsEdit(featureAssignRequest.getIsEdit());
+                        roleMerchantFeature.setIsDelete(featureAssignRequest.getIsDelete());
+                        roleMerchantFeature.update();
+                        roleMerchantFeatures.add(roleMerchantFeature);
+                    } else {
+                        newRoleMerchantFeature(roleMerchant, featureAssignRequest, feature, roleMerchantFeatures);
+                    }
+                }
+            }
+        }
+    }
+
     @ApiOperation(value = "Delete Role", notes = "Delete Role.\n" + swaggerInfo
             + "", response = BaseResponse.class, httpMethod = "DELETE")
     @ApiImplicitParams({
@@ -197,10 +238,8 @@ public class RoleMerchantController extends BaseController {
                             response.setBaseResponse(0, 0, 0, error + " role merchant not found.", null);
                             return badRequest(Json.toJson(response));
                         }
-                        
-                        
+
                         roleMerchant.isDeleted = true;
-                        roleMerchant.setId(id);
                         roleMerchant.update();
                         trx.commit();
 

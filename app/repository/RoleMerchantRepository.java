@@ -1,21 +1,11 @@
 package repository;
 
+import com.avaje.ebean.*;
 import models.*;
 import play.db.ebean.Model;
-import dtos.role.*;
-import com.avaje.ebean.Expr;
-import com.avaje.ebean.ExpressionList;
-import com.avaje.ebean.Query;
-import java.io.IOException;
-import com.hokeba.api.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import play.mvc.BodyParser;
-import play.mvc.Http;
-import play.mvc.Result;
-import play.mvc.Security;
+import java.io.IOException;
 import java.util.*;
-import java.text.SimpleDateFormat;
 
 public class RoleMerchantRepository extends Model {
 	public static Finder<Long, RoleMerchant> find = new Finder<>(Long.class, RoleMerchant.class);
@@ -74,4 +64,7 @@ public class RoleMerchantRepository extends Model {
 
 		return resData;
 	}
+
+
+
 }
