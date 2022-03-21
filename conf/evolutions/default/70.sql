@@ -1,6 +1,6 @@
 # --- !Ups
 
-create table if not exists role_merchant_feature (
+create table role_merchant_feature (
       feature_id                bigint,
       role_merchant_id          bigint,
       is_view                    boolean,
