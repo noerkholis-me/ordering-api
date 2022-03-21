@@ -289,8 +289,8 @@ public class UserMerchantController extends BaseController {
                     response.setEmail(data.getEmail());
                     response.setIsActive(statusActive);
                     response.setGender(data.getGender());
-                    response.setMerchantId(data.getMerchantsId());
-                    response.setRoleId(data.getRolesId());
+                    response.setMerchantId(data.getMerchantId());
+                    response.setRoleId(data.getRoleId());
                     responses.add(response);
                 }
                 response.setBaseResponse(filter == null || filter == "" ? totalData.size() : responseIndex.size() , offset, limit, success + " showing data", responses);
