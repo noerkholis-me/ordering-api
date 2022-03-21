@@ -99,6 +99,14 @@ public class UserMerchant extends BaseModel {
     @Getter @Setter
     public Long merchantsId;
 
+    @JsonProperty("merchant_id")
+    @Getter @Setter
+    public Long merchantId;
+
+    @JsonProperty("role_id")
+    @Getter @Setter
+    public Long roleId;
+
     public UserMerchant() {
     }
 

@@ -123,18 +123,17 @@ public class RoleMerchantController extends BaseController {
                 List<RoleMerchant> responseIndex = RoleMerchantRepository.getDataRole(query, sort, filter, offset, limit);
                 for (RoleMerchant data : responseIndex) {
                     RoleMerchantResponse response = new RoleMerchantResponse();
-
+                    List<RoleMerchantFeature> roleMerchantFeatures = RoleMerchantFeature.findByRoleMerchantId(data.id);
+                    List<FeatureAssignRequest> featureAssignResponses = toFeaturesResponse(roleMerchantFeatures);
                     response.setId(data.id);
                     response.setName(data.getName());
                     response.setDescription(data.getDescription());
                     response.setKey(data.getKey());
-//                    response.setIsDeleted(data.getIsDeleted());
-                    response.setMerchantId(data.getMerchantId());
-                    // response.setMerchant(data.getMerchant());
+                    response.setMerchantId(data.getMerchant().id);
+                    response.setFeatures(featureAssignResponses);
                     responses.add(response);
                 }
-                response.setBaseResponse(filter == null || filter == "" ? totalData.size() : responseIndex.size() , offset, limit, success + " showing data", responses);
-                // System.out.println(ok(Json.toJson(response)));
+                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size() , offset, limit, success + " showing data", responses);
                 return ok(Json.toJson(response));
             } catch (IOException e) {
                 Logger.error("allDetail", e);
@@ -145,6 +144,22 @@ public class RoleMerchantController extends BaseController {
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
+    }
+
+    private static List<FeatureAssignRequest> toFeaturesResponse(List<RoleMerchantFeature> roleMerchantFeatures) {
+        List<FeatureAssignRequest> featureAssignRequests = new ArrayList<>();
+        for (RoleMerchantFeature roleMerchantFeature : roleMerchantFeatures) {
+            FeatureAssignRequest featureAssignRequest = new FeatureAssignRequest();
+            featureAssignRequest.setFeatureId(roleMerchantFeature.getFeature().id);
+            featureAssignRequest.setFeatureName(roleMerchantFeature.getFeature().name);
+            featureAssignRequest.setKey(roleMerchantFeature.getFeature().key);
+            featureAssignRequest.setIsView(roleMerchantFeature.getIsView());
+            featureAssignRequest.setIsAdd(roleMerchantFeature.getIsAdd());
+            featureAssignRequest.setIsEdit(roleMerchantFeature.getIsEdit());
+            featureAssignRequest.setIsDelete(roleMerchantFeature.getIsDelete());
+            featureAssignRequests.add(featureAssignRequest);
+        }
+        return featureAssignRequests;
     }
 
     @ApiOperation(value = "Edit Role", notes = "Edit Role.\n" + swaggerInfo
@@ -264,39 +279,38 @@ public class RoleMerchantController extends BaseController {
     public static Result viewRole(Long id) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-                if (id != null) {
-                    Transaction trx = Ebean.beginTransaction();
-                    try {
-                        RoleMerchant roleMerchant = RoleMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
-                        if (roleMerchant == null) {
-                            response.setBaseResponse(0, 0, 0, error + " role merchant not found.", null);
-                            return badRequest(Json.toJson(response));
-                        }
-                        
-                        
-                        // roleMerchant.setId(data.getId());
-                        // roleMerchant.setName(data.getName());
-                        // roleMerchant.setDescription(data.getDescription());
-                        // roleMerchant.setKey(data.getKey());
-                        // roleMerchant.setIsDeleted(data.getIsDeleted());
-                        // roleMerchant.setMerchantId(data.getMerchantId());
-                        // roleMerchant.add(roleMerchant);
-                        // trx.commit();
-
-                        response.setBaseResponse(1,offset, 1, success + " showing detail role", roleMerchant);
-                        return ok(Json.toJson(response));
-                    } catch (Exception e) {
-                        logger.error("Error while showing detail role", e);
-                        e.printStackTrace();
-                        trx.rollback();
-                    } finally {
-                        trx.end();
+            if (id != null) {
+                Transaction trx = Ebean.beginTransaction();
+                try {
+                    RoleMerchant roleMerchant = RoleMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                    if (roleMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, error + " role merchant not found.", null);
+                        return badRequest(Json.toJson(response));
                     }
-                    response.setBaseResponse(0, 0, 0, error, null);
-                    return badRequest(Json.toJson(response));
+                    RoleMerchantResponse roleMerchantResponse = new RoleMerchantResponse();
+                    List<RoleMerchantFeature> roleMerchantFeatures = RoleMerchantFeature.findByRoleMerchantId(roleMerchant.id);
+                    List<FeatureAssignRequest> featureAssignResponses = toFeaturesResponse(roleMerchantFeatures);
+                    roleMerchantResponse.setId(roleMerchant.id);
+                    roleMerchantResponse.setName(roleMerchant.getName());
+                    roleMerchantResponse.setDescription(roleMerchant.getDescription());
+                    roleMerchantResponse.setKey(roleMerchant.getKey());
+                    roleMerchantResponse.setMerchantId(roleMerchant.getMerchantId());
+                    roleMerchantResponse.setFeatures(featureAssignResponses);
+
+                    response.setBaseResponse(1,offset, 1, success + " showing detail role", roleMerchantResponse);
+                    return ok(Json.toJson(response));
+                } catch (Exception e) {
+                    logger.error("Error while showing detail role", e);
+                    e.printStackTrace();
+                    trx.rollback();
+                } finally {
+                    trx.end();
                 }
-                response.setBaseResponse(0, 0, 0, "Cannot find role Id", null);
+                response.setBaseResponse(0, 0, 0, error, null);
                 return badRequest(Json.toJson(response));
+            }
+            response.setBaseResponse(0, 0, 0, "Cannot find role Id", null);
+            return badRequest(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));

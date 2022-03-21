@@ -1,8 +1,10 @@
 package dtos.role;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dtos.feature.FeatureAssignRequest;
 import lombok.*;
+
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -12,9 +14,6 @@ import lombok.*;
 public class RoleMerchantResponse  {
     @JsonProperty("id")
     private Long id;
-    @JsonIgnore
-    @JsonProperty("is_deleted")
-    private Boolean isDeleted;
     @JsonProperty("name")
     private String name;
     @JsonProperty("key")
@@ -23,4 +22,5 @@ public class RoleMerchantResponse  {
     private String description;
     @JsonProperty("merchant_id")
     private Long merchantId;
+    private List<FeatureAssignRequest> features;
 }
