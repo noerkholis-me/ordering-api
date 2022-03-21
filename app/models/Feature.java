@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,6 +23,7 @@ import java.util.Set;
  * Created by hendriksaragih on 2/4/17.
  */
 @Entity
+@ToString
 public class Feature extends BaseModel{
     //overloading data from BaseModel to be ignored
     @JsonIgnore

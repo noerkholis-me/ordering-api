@@ -7,6 +7,7 @@ import com.avaje.ebean.RawSqlBuilder;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import play.db.ebean.Model;
 
 import javax.persistence.Column;

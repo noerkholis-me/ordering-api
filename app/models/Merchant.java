@@ -196,7 +196,7 @@ public class Merchant extends BaseModel{
     public List<MapMerchantPayment> lists = new ArrayList<>();
 
     @ManyToOne(cascade = { CascadeType.ALL })
-    public RoleMerchant roleMerchant;
+    public Role role;
 
     public Merchant(String password, String email, String gender, String fullName, String name, String companyName, String status, String cityName, String address, String phone, boolean isActive) {
         this.password = password;
@@ -635,15 +635,15 @@ public class Merchant extends BaseModel{
     }
 
     public List<FeatureAndPermissionSession> checkFeatureAndPermissions() {
-        List<RoleMerchantFeature> myFeature = roleMerchant.getFeatureList();
+        List<RoleFeature> myFeature = this.role.featureList;
         List<FeatureAndPermissionSession> featureAndPermissionSessionList = new ArrayList<>();
-        for (RoleMerchantFeature feature : myFeature) {
+        for (RoleFeature feature : myFeature) {
             FeatureAndPermissionSession featureAndPermissionSession = new FeatureAndPermissionSession();
-            featureAndPermissionSession.setFeatureName(feature.feature.key);
-            featureAndPermissionSession.setIsView(feature.getIsView());
-            featureAndPermissionSession.setIsAdd(feature.getIsAdd());
-            featureAndPermissionSession.setIsEdit(feature.getIsEdit());
-            featureAndPermissionSession.setIsDelete(feature.getIsDelete());
+            featureAndPermissionSession.setFeatureName(feature.getFeature().name);
+            featureAndPermissionSession.setIsView(feature.isView());
+            featureAndPermissionSession.setIsAdd(feature.isAdd());
+            featureAndPermissionSession.setIsEdit(feature.isEdit());
+            featureAndPermissionSession.setIsDelete(feature.isDelete());
             featureAndPermissionSessionList.add(featureAndPermissionSession);
         }
         return featureAndPermissionSessionList;
@@ -652,12 +652,12 @@ public class Merchant extends BaseModel{
     public HashMap<String, Boolean> checkPrivilegeList() {
         LinkedHashMap<String, Boolean> result = new LinkedHashMap<String, Boolean>();
         List<Feature> allFeature = Feature.find.all();
-        List<RoleMerchantFeature> myFeature = roleMerchant.getFeatureList();
+        List<RoleFeature> myFeature = role.featureList;
         for (Feature targetFeature : allFeature) {
             String keyTarget = targetFeature.key;
             result.put(keyTarget, false);
         }
-        for (RoleMerchantFeature feature : myFeature) {
+        for (RoleFeature feature : myFeature) {
             String keyTarget = feature.feature.key;
             result.put(keyTarget, true);
         }

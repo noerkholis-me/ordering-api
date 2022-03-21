@@ -17,23 +17,29 @@ public class SeedDefaultConfiguration {
 	public static void seedFeature() {
 
 		// create default data role
-		Role role = new Role();
+		Role roleCms = new Role();
+		Role roleAdminMerchant = new Role();
 		if (Role.find.findRowCount() == 0) {
-			role = new Role("Admin", "Administrator", true);
-			role.save();
+			roleCms = new Role("Admin", "Administrator", true);
+			roleCms.save();
+			roleAdminMerchant = new Role("Admin Merchant", "Administrator Merchant", true);
+			roleAdminMerchant.save();
 		}
+
+
 
 		Merchant getMerchant = Merchant.find.where().eq("email", "sandbox.wgs@gmail.com").findUnique();
 		Merchant newMerchant;
 		if (getMerchant == null) {
-			newMerchant = new Merchant("qwerty123", "sandbox.wgs@gmail.com", "M", "Sandbox Merchant", "sandbox", "sandbox store", "APPROVED", "Bandung", "Jl. Soekarno Hatta No. 112", "62899436521", true);
-			newMerchant.roleMerchant = RoleMerchant.find.where().eq("name", "Admin").findUnique();
+			String password = Encryption.EncryptAESCBCPCKS5Padding("qwerty123");
+			newMerchant = new Merchant(password, "sandbox.wgs@gmail.com", "M", "Sandbox Merchant", "sandbox", "sandbox store", "APPROVED", "Bandung", "Jl. Soekarno Hatta No. 112", "62899436521", true);
+			newMerchant.role = Role.find.where().eq("name", "Admin Merchant").findUnique();
 			newMerchant.save();
 		}
 		newMerchant = getMerchant;
 		// create default data role merchant
-		RoleMerchant roleMerchant = new RoleMerchant();
-		if (RoleMerchant.find.findRowCount() == 0) {
+		RoleMerchant roleMerchant = RoleMerchant.find.where().eq("name", "Admin").findUnique();
+		if (roleMerchant == null) {
 			roleMerchant = new RoleMerchant("Admin", "admin", "Administrator", true);
 			roleMerchant.setMerchant(newMerchant);
 			roleMerchant.save();
@@ -206,10 +212,11 @@ public class SeedDefaultConfiguration {
 			// create default data Role Feature
 			for (Feature feature : featureIsNotMerchant) {
 				feature.save();
-				new RoleFeature(feature, role, 210).save();
+				new RoleFeature(feature, roleCms, 210).save();
 			}
 			for (Feature feature : featureIsMerchant) {
 				feature.save();
+				new RoleFeature(feature, roleAdminMerchant, 210).save();
 				new RoleMerchantFeature(feature, roleMerchant, true, true, true, true).save();
 			}
 		} else {
@@ -229,6 +236,7 @@ public class SeedDefaultConfiguration {
 						new RoleMerchantFeature(feature, roleMerchant, true, true, true, true).save();
 					}
 				}
+				new RoleFeature(feature, roleAdminMerchant, 210).save();
 			}
 		}
 	}
