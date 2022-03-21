@@ -231,7 +231,7 @@ public class SeedDefaultConfiguration {
 				Feature getByKey = Feature.getFeatureByKey(feature.key);
 				if (getByKey == null) {
 					feature.save();
-					List<RoleMerchantFeature> roleMerchantFeatures = RoleMerchantFeature.getFeaturesByRole(roleMerchant.id);
+					List<RoleMerchantFeature> roleMerchantFeatures = RoleMerchantFeature.findByRoleMerchantId(roleMerchant.id);
 					if (roleMerchantFeatures.isEmpty()) {
 						new RoleMerchantFeature(feature, roleMerchant, true, true, true, true).save();
 					}
