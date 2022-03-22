@@ -4,11 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.List;
 
 @Entity
+@ToString
 public class RoleMerchant extends BaseModel {
 
     @JsonProperty("name")
@@ -29,21 +31,14 @@ public class RoleMerchant extends BaseModel {
     public boolean isActive;
 
     @ManyToOne(cascade = { CascadeType.ALL })
+    @JoinColumn(name = "merchant_id", referencedColumnName = "id")
+    @JsonIgnore
     @Getter @Setter
     public Merchant merchant;
 
     @OneToMany(mappedBy = "roleMerchant")
     @Getter @Setter
     public List<RoleMerchantFeature> featureList;
-
-    @JsonIgnore
-    @javax.persistence.Transient
-    public String save;
-
-    @JsonIgnore
-    @javax.persistence.Transient
-    @Getter @Setter
-    public Long merchantId;
 
 
     public RoleMerchant(){
