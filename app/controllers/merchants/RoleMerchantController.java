@@ -294,7 +294,7 @@ public class RoleMerchantController extends BaseController {
                     roleMerchantResponse.setName(roleMerchant.getName());
                     roleMerchantResponse.setDescription(roleMerchant.getDescription());
                     roleMerchantResponse.setKey(roleMerchant.getKey());
-                    roleMerchantResponse.setMerchantId(roleMerchant.getMerchantId());
+                    roleMerchantResponse.setMerchantId(roleMerchant.getMerchant().id);
                     roleMerchantResponse.setFeatures(featureAssignResponses);
 
                     response.setBaseResponse(1,offset, 1, success + " showing detail role", roleMerchantResponse);
