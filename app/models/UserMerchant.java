@@ -77,6 +77,7 @@ public class UserMerchant extends BaseModel {
 
     @JsonIgnore
     @ManyToOne(cascade = { CascadeType.ALL })
+    @JoinColumn(name="role_id", insertable = false, updatable = false)
     @Getter @Setter
     public RoleMerchant role;
 
