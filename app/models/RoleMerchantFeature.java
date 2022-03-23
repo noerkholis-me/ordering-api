@@ -7,7 +7,6 @@ import com.avaje.ebean.RawSqlBuilder;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import play.db.ebean.Model;
 
 import javax.persistence.Column;
@@ -64,10 +63,15 @@ public class RoleMerchantFeature extends Model {
         this.isDelete = isDelete;
     }
 
+    public static List<RoleMerchantFeature> findByRoleMerchantId(Long roleMerchantId) {
+        return find.where().eq("roleMerchantId", roleMerchantId).findList();
+    }
+
     public static List<RoleMerchantFeature> getFeaturesByRole(Long id){
-        String sql = "SELECT role_merchant_id, feature_id, is_view, is_add, is_edit, is_delete FROM role_merchant_feature " +
-                "WHERE role_merchant_id = "+id+" " +
-                "ORDER BY feature_id ASC";
+        String sql = "SELECT role_merchant_id, feature_id, is_view, is_add, is_edit, is_delete FROM role_merchant_feature rmf\n" +
+                "left join feature f on rmf.feature_id = f.id \n" +
+                "WHERE rmf.role_merchant_id = " + id + "\n" +
+                "ORDER BY feature_id asc";
 
         RawSql rawSql = RawSqlBuilder.parse(sql)
                 .columnMapping("role_merchant_id", "roleMerchantId")

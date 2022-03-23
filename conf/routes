@@ -326,6 +326,7 @@ GET		/users/register_with_referral      			controllers.users.ProfileController.r
 GET         /merchant/users/list                        controllers.merchants.UserMerchantController.listUsers(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET         /merchant/users/:id/view                    controllers.merchants.UserMerchantController.viewUser(id:Long)
 DELETE      /merchant/users/:id/delete                  controllers.merchants.UserMerchantController.deleteUsers(id:Long)
+PUT         /merchant/users/:id/edit                    controllers.merchants.UserMerchantController.editUser(id:Long)
 
 #ROLE
 GET     /merchant/role/list                        controllers.merchants.RoleMerchantController.listRole(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)

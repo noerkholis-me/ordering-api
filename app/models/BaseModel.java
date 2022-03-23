@@ -5,6 +5,8 @@ import com.avaje.ebean.annotation.UpdatedTimestamp;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.wordnik.swagger.annotations.ApiModelProperty;
+import lombok.Getter;
+import lombok.Setter;
 import play.db.ebean.Model;
 
 import javax.persistence.*;

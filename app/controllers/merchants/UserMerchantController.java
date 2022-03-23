@@ -15,7 +15,6 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
 import dtos.merchant.*;
 import models.Merchant;
-import models.Role;
 import models.RoleMerchant;
 import models.UserMerchant;
 import play.Logger;
@@ -23,11 +22,9 @@ import play.libs.Json;
 import play.mvc.Result;
 import repository.UserMerchantRepository;
 import repository.RoleMerchantRepository;
-import controllers.BaseController;
-import java.text.SimpleDateFormat;
+
 import java.util.*;
 import com.avaje.ebean.Query;
-import play.data.Form;
 
 import java.io.IOException;
 
@@ -50,7 +47,7 @@ public class UserMerchantController extends BaseController {
             JsonNode json = request().body().asJson();
             try {
                 UserMerchantRequest request = objectMapper.readValue(json.toString(), UserMerchantRequest.class);
-                String validate = validateCreateUserRequest(request);
+                String validate = validateCreateUserRequest(request, ownMerchant, Boolean.FALSE);
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
@@ -65,7 +62,6 @@ public class UserMerchantController extends BaseController {
                         newUserMerchant.save();
 
                         String forActivation = Encryption.EncryptAESCBCPCKS5Padding(String.valueOf(newUserMerchant.id) + String.valueOf(System.currentTimeMillis()));
-                        System.out.println(forActivation);
 
                         newUserMerchant.setActivationCode(forActivation);
                         newUserMerchant.update();
@@ -117,11 +113,11 @@ public class UserMerchantController extends BaseController {
             JsonNode json = request().body().asJson();
             try {
                 UserMerchantRequest request = objectMapper.readValue(json.toString(), UserMerchantRequest.class);
-                String validate = validateCreateUserRequest(request);
+                String validate = validateCreateUserRequest(request, ownMerchant, Boolean.TRUE);
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        UserMerchant userMerchant = UserMerchantRepository.findUsers(id, ownMerchant.id);
+                        UserMerchant userMerchant = UserMerchantRepository.findById(id, ownMerchant);
                         if (userMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " User merchant not found.", null);
                             return badRequest(Json.toJson(response));
@@ -168,7 +164,7 @@ public class UserMerchantController extends BaseController {
         if (ownMerchant != null) {
             Transaction trx = Ebean.beginTransaction();
             try {
-                UserMerchant userMerchant = UserMerchantRepository.findUsers(id, ownMerchant.id);
+                UserMerchant userMerchant = UserMerchantRepository.findById(id, ownMerchant);
                 if (userMerchant == null) {
                     response.setBaseResponse(0, 0, 0, error + " User merchant not found.", null);
                     return badRequest(Json.toJson(response));
@@ -200,34 +196,34 @@ public class UserMerchantController extends BaseController {
     public static Result viewUser(Long id) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-                if (id != null) {
-                    Transaction trx = Ebean.beginTransaction();
-                    try {
-                        UserMerchant userMerchant = UserMerchantRepository.findUsers(id, ownMerchant.id);
-                        if (userMerchant == null) {
-                            response.setBaseResponse(0, 0, 0, error + " user merchant not found.", null);
-                            return badRequest(Json.toJson(response));
-                        }
-
-                        if (userMerchant.isDeleted != true) {
-                            response.setBaseResponse(1,offset, 1, success + " showing detail user", userMerchant);
-                            return ok(Json.toJson(response));
-                        } else { 
-                            response.setBaseResponse(0, 0, 0, error + " users not found", null);
-                            return ok(Json.toJson(response));
-                        }
-                    } catch (Exception e) {
-                        logger.error("Error while showing detail user", e);
-                        e.printStackTrace();
-                        trx.rollback();
-                    } finally {
-                        trx.end();
+            if (id != null) {
+                Transaction trx = Ebean.beginTransaction();
+                try {
+                    UserMerchant userMerchant = UserMerchantRepository.findById(id, ownMerchant);
+                    if (userMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, error + " user merchant not found.", null);
+                        return badRequest(Json.toJson(response));
                     }
-                    response.setBaseResponse(0, 0, 0, error, null);
-                    return badRequest(Json.toJson(response));
+
+                    if (userMerchant.isDeleted != true) {
+                        response.setBaseResponse(1,offset, 1, success + " showing detail user", userMerchant);
+                        return ok(Json.toJson(response));
+                    } else {
+                        response.setBaseResponse(0, 0, 0, error + " users not found", null);
+                        return ok(Json.toJson(response));
+                    }
+                } catch (Exception e) {
+                    logger.error("Error while showing detail user", e);
+                    e.printStackTrace();
+                    trx.rollback();
+                } finally {
+                    trx.end();
                 }
-                response.setBaseResponse(0, 0, 0, "Cannot find user Id", null);
+                response.setBaseResponse(0, 0, 0, error, null);
                 return badRequest(Json.toJson(response));
+            }
+            response.setBaseResponse(0, 0, 0, "Cannot find user Id", null);
+            return badRequest(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
@@ -240,15 +236,12 @@ public class UserMerchantController extends BaseController {
         userMerchant.setEmail(request.getEmail());
         userMerchant.setActive(Boolean.TRUE);
         userMerchant.setRole(role);
-        userMerchant.setMerchant(merchant);
         return userMerchant;
     }
 
-    public static String validateCreateUserRequest(UserMerchantRequest request) {
+    public static String validateCreateUserRequest(UserMerchantRequest request, Merchant merchant, Boolean isEdit) {
         if (request == null)
             return "Request is null or empty";
-        // if (request.getMerchantId() == null || request.getMerchantId() < 0)
-        //     return "Merchant id is null or empty";
         if (request.getEmail() == null)
             return "Email is null or empty";
         if (request.getEmail() != null && !request.getEmail().matches(CommonFunction.emailRegex))
@@ -260,9 +253,11 @@ public class UserMerchantController extends BaseController {
         if (request.getLastName() != null && request.getLastName().length() > 50)
             return "Last name cannot be more than 50 characters.";
         // =============================================================================================================== //
-        UserMerchant userMerchant = UserMerchantRepository.findByEmailAndMerchantId(request.getEmail(), request.getMerchantId());
-        if (userMerchant != null)
-            return "User email has been used.";
+        if (isEdit == Boolean.FALSE) {
+            UserMerchant userMerchant = UserMerchantRepository.findByEmailAndRole_MerchantId(request.getEmail(), merchant);
+            if (userMerchant != null)
+                return "User email has been used.";
+        }
         return null;
     }
 
@@ -271,7 +266,7 @@ public class UserMerchantController extends BaseController {
     public static Result listUsers(String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<UserMerchant> query = UserMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+            Query<UserMerchant> query = UserMerchantRepository.find.where().eq("isDeleted", false).eq("role.merchant", ownMerchant).order("id");
             try {
                 List<UserMerchantResponse> responses = new ArrayList<>();
                 List<UserMerchant> totalData = UserMerchantRepository.getTotalData(query);
@@ -289,8 +284,8 @@ public class UserMerchantController extends BaseController {
                     response.setEmail(data.getEmail());
                     response.setIsActive(statusActive);
                     response.setGender(data.getGender());
-                    response.setMerchantId(data.getMerchantId());
-                    response.setRoleId(data.getRoleId());
+                    response.setMerchantId(data.getRole().getMerchant().id);
+                    response.setRoleId(data.getRole().id);
                     responses.add(response);
                 }
                 response.setBaseResponse(filter == null || filter == "" ? totalData.size() : responseIndex.size() , offset, limit, success + " showing data", responses);

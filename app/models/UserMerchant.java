@@ -26,10 +26,6 @@ public class UserMerchant extends BaseModel {
     @Getter @Setter
     public String password;
 
-    // @Getter @Setter
-    // @JsonProperty("id")
-    // public Long id;
-
     @Getter @Setter
     @JsonProperty("first_name")
     public String firstName;
@@ -76,38 +72,20 @@ public class UserMerchant extends BaseModel {
     public boolean isActive;
 
     @JsonIgnore
-    @ManyToOne(cascade = { CascadeType.ALL })
+    @ManyToOne
+    @JoinColumn(name="role_id", referencedColumnName = "id")
     @Getter @Setter
     public RoleMerchant role;
 
-    @OneToOne(cascade = { CascadeType.ALL })
-    @JsonProperty("merchant")
-    @Getter @Setter
-    public Merchant merchant;
+//    @OneToOne
+//    @JsonProperty("merchant")
+//    @JoinColumn(name="merchant_id", referencedColumnName = "id")
+//    @Getter @Setter
+//    public Merchant merchant;
 
-    @JsonIgnore
-    @javax.persistence.Transient
-    public String save;
-
-    @JsonIgnore
-    @javax.persistence.Transient
-    @Getter @Setter
-    public Long rolesId;
-
-    @JsonIgnore
-    @javax.persistence.Transient
-    @Getter @Setter
-    public Long merchantsId;
-
-    @JsonProperty("merchant_id")
-    @Getter @Setter
-    public Long merchantId;
-
-    @JsonProperty("role_id")
-    @Getter @Setter
-    public Long roleId;
 
     public UserMerchant() {
+        super();
     }
 
     @Transient

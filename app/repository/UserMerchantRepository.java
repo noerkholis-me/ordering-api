@@ -1,47 +1,44 @@
 package repository;
 
+import models.Merchant;
 import models.UserMerchant;
 import play.db.ebean.Model;
-import dtos.merchant.UserMerchantRequest;
 import com.avaje.ebean.Expr;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import java.io.IOException;
-import com.hokeba.api.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import play.mvc.BodyParser;
-import play.mvc.Http;
-import play.mvc.Result;
-import play.mvc.Security;
+import javax.persistence.PersistenceException;
 import java.util.*;
 import java.text.SimpleDateFormat;
 
+/**
+ * @author kudo
+ * @version 1.0
+ * this is just for sample repository, please refactor to generic class. It can be resuable for other models.
+ */
 public class UserMerchantRepository extends Model {
 
     public static Finder<Long, UserMerchant> find = new Finder<>(Long.class, UserMerchant.class);
 
-    public static UserMerchant findByEmailAndMerchantId(String email, Long merchantId) {
-        return find.where()
-            .eq("email", email)
-            .eq("merchant_id", merchantId)
-            .eq("is_active", Boolean.TRUE)
-            .findUnique();
-    }
-
-    public static UserMerchant findByIdAndMerchantId(Long id, Long merchantId) {
-        return find.where()
-            .eq("id", id)
-            .eq("merchantId", merchantId)
-            .eq("isActive", Boolean.TRUE)
-            .findUnique();
+    public static UserMerchant findByEmailAndRole_MerchantId(String email, Merchant merchant) {
+		try {
+			return find.where()
+				.eq("email", email)
+				.eq("role.merchant", merchant)
+				.eq("isActive", Boolean.TRUE)
+				.findUnique();
+		} catch (PersistenceException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
-    public static UserMerchant findUsers(Long id, Long merchantId) {
+    public static UserMerchant findById(Long id, Merchant merchant) {
         return find.where()
             .eq("id", id)
-            .eq("merchant_id", merchantId)
-            .eq("is_active", Boolean.TRUE)
+            .eq("role.merchant", merchant)
+            .eq("isActive", Boolean.TRUE)
             .findUnique();
     }
 
