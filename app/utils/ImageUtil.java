@@ -1,6 +1,5 @@
 package utils;
 
-import com.hokeba.aws.s3.S3Service;
 import com.hokeba.util.CommonFunction;
 import com.hokeba.util.Constant;
 import play.mvc.Http;
