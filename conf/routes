@@ -337,3 +337,10 @@ GET     /merchant/role/:id/detailrole              controllers.merchants.RoleMer
 
 #FEATURE
 GET     /master/feature/list                       controllers.masters.FeatureController.getAllFeatureMerchant(isMerchant:Boolean ?= false)
+
+#BRAND
+GET     /merchant/brand/list                        controllers.brand.BrandMerchantController.listBrand(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+POST    /merchant/brand                             controllers.brand.BrandMerchantController.createBrand()
+DELETE  /merchant/brand/:id/delete                  controllers.brand.BrandMerchantController.deleteBrand(id:Long)
+PUT     /merchant/brand/:id/update                  controllers.brand.BrandMerchantController.editBrand(id:Long)
+GET     /merchant/brand/:id/detail                  controllers.brand.BrandMerchantController.viewBrand(id:Long)
