@@ -19,14 +19,14 @@ spec:
         image: __IMAGE__:__VERSION__
         volumeMounts:
         - name: __CI_PROJECT_NAME__-vol
-          mountPath: /app/whiz-media/
-          subPath: whiz-media
+          mountPath: /app/sandbox-media/
+          subPath: sandbox-media
         - name: __CI_PROJECT_NAME__-vol
-          mountPath: /app/whiz-elasticsearch/
-          subPath: whiz-elasticsearch
+          mountPath: /app/sandbox-elasticsearch/
+          subPath: sandbox-elasticsearch
         - name: __CI_PROJECT_NAME__-vol
-          mountPath: /app/whiz-export/
-          subPath: whiz-export
+          mountPath: /app/sandbox-export/
+          subPath: sandbox-export
         ports:
         - containerPort: 9001
         imagePullPolicy: IfNotPresent
