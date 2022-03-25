@@ -116,7 +116,7 @@ public class RoleMerchantController extends BaseController {
     public static Result listRole(String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<RoleMerchant> query = RoleMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+            Query<RoleMerchant> query = RoleMerchantRepository.find.where().eq("isDeleted", false).eq("merchant", ownMerchant).order("id");
             try {
                 List<RoleMerchantResponse> responses = new ArrayList<>();
                 List<RoleMerchant> totalData = RoleMerchantRepository.getTotalData(query);
@@ -176,7 +176,7 @@ public class RoleMerchantController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        RoleMerchant roleMerchant = RoleMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        RoleMerchant roleMerchant = RoleMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (roleMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " role merchant not found.", null);
                             return badRequest(Json.toJson(response));
@@ -243,7 +243,7 @@ public class RoleMerchantController extends BaseController {
                 if (id != null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        RoleMerchant roleMerchant = RoleMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        RoleMerchant roleMerchant = RoleMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (roleMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " role merchant not found.", null);
                             return badRequest(Json.toJson(response));
@@ -282,7 +282,7 @@ public class RoleMerchantController extends BaseController {
             if (id != null) {
                 Transaction trx = Ebean.beginTransaction();
                 try {
-                    RoleMerchant roleMerchant = RoleMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                    RoleMerchant roleMerchant = RoleMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                     if (roleMerchant == null) {
                         response.setBaseResponse(0, 0, 0, error + " role merchant not found.", null);
                         return badRequest(Json.toJson(response));
