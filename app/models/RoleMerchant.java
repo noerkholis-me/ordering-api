@@ -45,11 +45,12 @@ public class RoleMerchant extends BaseModel {
 
     }
 
-    public RoleMerchant(String name, String key, String description, boolean isActive) {
+    public RoleMerchant(String name, String key, String description, boolean isActive, Merchant merchant) {
         this.name = name;
         this.key = key;
         this.description = description;
         this.isActive = isActive;
+        this.merchant = merchant;
     }
 
     public RoleMerchant(String name, String key, String description, boolean isActive, Merchant merchant, List<RoleMerchantFeature> featureList) {
