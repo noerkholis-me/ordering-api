@@ -10,11 +10,12 @@ import java.util.*;
 public class RoleMerchantRepository extends Model {
 	public static Finder<Long, RoleMerchant> find = new Finder<>(Long.class, RoleMerchant.class);
 	
-	public static RoleMerchant findByIdAndMerchantId(Long id, Long merchantId) {
+	public static RoleMerchant findByIdAndMerchantId(Long id, Merchant merchant) {
         return find.where()
             .eq("id", id)
-            .eq("merchant_id", merchantId)
-            .eq("is_deleted", Boolean.FALSE)
+            .eq("merchant", merchant)
+			.eq("isActive", Boolean.TRUE)
+            .eq("isDeleted", Boolean.FALSE)
             .findUnique();
     }
 
