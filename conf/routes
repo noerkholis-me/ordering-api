@@ -346,3 +346,9 @@ POST    /merchant/brand                             controllers.brand.BrandMerch
 DELETE  /merchant/brand/:id/delete                  controllers.brand.BrandMerchantController.deleteBrand(id:Long)
 PUT     /merchant/brand/:id/update                  controllers.brand.BrandMerchantController.editBrand(id:Long)
 GET     /merchant/brand/:id/detail                  controllers.brand.BrandMerchantController.viewBrand(id:Long)
+
+#SHIPPER
+GET     /master/province                            controllers.masters.ShipperController.getAllProvince(provinceName: String ?= "")
+GET     /master/city/:id/province                   controllers.masters.ShipperController.getAllCityByProvinceId(id: Long, cityName: String ?= "")
+GET     /master/suburb/:id/city                     controllers.masters.ShipperController.getAllSuburbByCityId(id: Long, suburbName: String ?= "")
+GET     /master/area/:id/suburb                     controllers.masters.ShipperController.getAllAreaBySuburbId(id: Long, areaName: String ?= "")

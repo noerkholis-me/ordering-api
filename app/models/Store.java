@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.Getter;
+import lombok.Setter;
 import play.libs.Json;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
@@ -75,6 +77,13 @@ public class Store extends BaseModel{
 
     @Column(name="store_lat")
     public Double storeLatitude;
+
+    @ManyToOne(cascade = { CascadeType.ALL })
+    @JoinColumn(name = "merchant_id", referencedColumnName = "id")
+    @JsonIgnore
+    @Getter
+    @Setter
+    public Merchant merchant;
 
     public static Finder<Long, Store> find = new Finder<Long, Store>(Long.class, Store.class);
 

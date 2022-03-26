@@ -1,3 +1,5 @@
+import com.amazonaws.util.json.JSONArray;
+import com.amazonaws.util.json.JSONObject;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
 import com.hokeba.shipping.rajaongkir.RajaOngkirService;
@@ -7,12 +9,29 @@ import models.*;
 import models.Currency;
 import play.Logger;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class SeedDefaultConfiguration {
+
+	private static final String API_KEY_SHIPPER = "Q2JSCJ6lPZcraO4P6zDBr6vmoQVWsa3j6HLvaHWbgoPMyKrWljKG9vOteIELOz2u";
+	private static final String API_SHIPPER_ADDRESS = "https://api.sandbox.shipper.id/public/v1/";
+	private static final String API_SHIPPER_PROVINCE = "provinces?apiKey=";
+	private static final String API_SHIPPER_CITY = "cities?apiKey=";
+	private static final String API_SHIPPER_SUBURB = "suburbs?apiKey=";
+	private static final String API_SHIPPER_AREA = "areas?apiKey=";
+
+
+	private static HttpURLConnection connProvince;
+	private static HttpURLConnection connCity;
+	private static HttpURLConnection connSuburb;
+	private static HttpURLConnection connArea;
 
 	public static void seedFeature() {
 
@@ -553,6 +572,265 @@ public class SeedDefaultConfiguration {
 			masterSize.eu = 0;
 			masterSize.userCms = UserCms.find.byId(1L);
 			masterSize.save();
+		}
+	}
+
+	static void seedSyncShipper() {
+		Integer shipperProvince = ShipperProvince.find.findRowCount();
+		Logger.info("SEED - shipper province count : " + shipperProvince);
+		if (shipperProvince.equals(0)) {
+			Logger.info(">>>>> start sync shipper <<<<< ");
+			Transaction txnSync = Ebean.beginTransaction();
+			try {
+				UserCms cmsSync = UserCms.find.byId(1L);
+				txnSync.commit();
+				// ============================= BEGIN ADD SHIPPER
+
+				String provinceUrlApi = "";
+				String cityUrlApi = "";
+				String suburbUrlApi = "";
+				String areaUrlApi = "";
+
+				provinceUrlApi = API_SHIPPER_ADDRESS + API_SHIPPER_PROVINCE + API_KEY_SHIPPER;
+				cityUrlApi = API_SHIPPER_ADDRESS + API_SHIPPER_CITY + API_KEY_SHIPPER;
+				suburbUrlApi = API_SHIPPER_ADDRESS + API_SHIPPER_SUBURB + API_KEY_SHIPPER;
+				areaUrlApi = API_SHIPPER_ADDRESS + API_SHIPPER_AREA + API_KEY_SHIPPER;
+
+				try {
+
+					BufferedReader readerProvince;
+					String lineProvince;
+					StringBuffer responseContentProvince = new StringBuffer();
+
+					URL url = new URL(provinceUrlApi);
+					connProvince = (HttpURLConnection) url.openConnection();
+					connProvince.addRequestProperty("User-Agent", "Shipper/");
+
+					int status = connProvince.getResponseCode();
+					if(status==200){
+
+						// BEGIN READING AND ADDING PROVINCE
+						readerProvince = new BufferedReader(new InputStreamReader(connProvince.getInputStream()));
+						while((lineProvince = readerProvince.readLine())!=null){
+							responseContentProvince.append(lineProvince);
+						}
+						readerProvince.close();
+						// END READING AND ADDING PROVINCE
+
+
+
+						JSONObject jsonProvince = new JSONObject(responseContentProvince.toString());
+						JSONArray arrayProvince = jsonProvince.getJSONObject("data").getJSONArray("rows");
+						for (int i=0;i<arrayProvince.length();i++){
+
+							JSONObject pve = arrayProvince.getJSONObject(i);
+
+							Transaction txn = Ebean.beginTransaction();
+							ShipperProvince objShipperProvince = new ShipperProvince();
+
+							try{
+
+								UserCms cms = cmsSync;
+								objShipperProvince.id = Long.valueOf(pve.getInt("id"));
+								objShipperProvince.shipperProvincename = pve.getString("name");
+								objShipperProvince.userCms = cms;
+								objShipperProvince.save();
+
+
+								BufferedReader readerCity;
+								String lineCity;
+								StringBuffer responseContentCity = new StringBuffer();
+
+								URL urlCity = new URL(cityUrlApi+"&province="+pve.getInt("id"));
+								connCity = (HttpURLConnection) urlCity.openConnection();
+								connCity.addRequestProperty("User-Agent", "Shipper/");
+
+
+								int statusCity = connCity.getResponseCode();
+								if(statusCity==200){
+									txn.commit();
+
+									// BEGIN READING AND ADDING CITY
+									readerCity = new BufferedReader(new InputStreamReader(connCity.getInputStream()));
+									while((lineCity = readerCity.readLine())!=null){
+										responseContentCity.append(lineCity);
+									}
+
+									readerCity.close();
+									// END READING AND ADDING CITY
+
+
+									JSONObject jsonCity = new JSONObject(responseContentCity.toString());
+									JSONArray arrayCity = jsonCity.getJSONObject("data").getJSONArray("rows");
+									for (int a=0;a<arrayCity.length();a++){
+
+										Transaction txnCity = Ebean.beginTransaction();
+										JSONObject cty = arrayCity.getJSONObject(a);
+										ShipperCity objShipperCity = new ShipperCity();
+										try{
+
+											objShipperCity.id = Long.valueOf(cty.getInt("id"));
+											objShipperCity.userCms = objShipperProvince.userCms;
+											objShipperCity.shipperCityname = cty.getString("name");
+											objShipperCity.shipperProvince = objShipperProvince;
+											objShipperCity.provinceName = objShipperProvince.shipperProvincename;
+											objShipperCity.save();
+											//txnCity.commit();
+
+
+											BufferedReader readerSuburb;
+											String lineSuburb;
+											StringBuffer responseContentSuburb = new StringBuffer();
+
+											URL urlSuburb = new URL(suburbUrlApi+"&city="+cty.getInt("id"));
+											connSuburb = (HttpURLConnection) urlSuburb.openConnection();
+											connSuburb.addRequestProperty("User-Agent", "Shipper/");
+
+
+											int statusSuburb = connSuburb.getResponseCode();
+											if(statusSuburb==200){
+												txnCity.commit();
+
+												// BEGIN READING AND ADDING SUBURB
+												readerSuburb = new BufferedReader(new InputStreamReader(connSuburb.getInputStream()));
+												while((lineSuburb = readerSuburb.readLine())!=null){
+													responseContentSuburb.append(lineSuburb);
+												}
+
+												readerSuburb.close();
+												// END READING AND ADDING SUBURB
+
+
+												JSONObject jsonSuburb = new JSONObject(responseContentSuburb.toString());
+												JSONArray arraySuburb = jsonSuburb.getJSONObject("data").getJSONArray("rows");
+												for (int x=0;x<arraySuburb.length();x++){
+
+													Transaction txnSuburb = Ebean.beginTransaction();
+													JSONObject sbr = arraySuburb.getJSONObject(x);
+													ShipperSuburb objShipperSuburb = new ShipperSuburb();
+
+													try{
+
+														objShipperSuburb.id = Long.valueOf(sbr.getInt("id"));
+														objShipperSuburb.userCms = objShipperProvince.userCms;
+														objShipperSuburb.shipperCity = objShipperCity;
+														objShipperSuburb.name = sbr.getString("name");
+														objShipperSuburb.alias = sbr.getString("alias");
+														objShipperSuburb.save();
+														//txnSuburb.commit();
+
+
+
+														BufferedReader readerArea;
+														String lineArea;
+														StringBuffer responseContentArea = new StringBuffer();
+
+														URL urlArea = new URL(areaUrlApi+"&suburb="+sbr.getInt("id"));
+														connArea = (HttpURLConnection) urlArea.openConnection();
+														connArea.addRequestProperty("User-Agent", "Shipper/");
+
+
+														int statusArea = connArea.getResponseCode();
+														if(statusArea==200){
+															txnSuburb.commit();
+
+															// BEGIN READING AND ADDING AREA
+															readerArea = new BufferedReader(new InputStreamReader(connArea.getInputStream()));
+															while((lineArea = readerArea.readLine())!=null){
+																responseContentArea.append(lineArea);
+															}
+
+															readerArea.close();
+															// END READING AND ADDING AREA
+
+															JSONObject jsonArea = new JSONObject(responseContentArea.toString());
+															JSONArray arrayArea = jsonArea.getJSONObject("data").getJSONArray("rows");
+															for (int y=0;y<arrayArea.length();y++){
+
+																Transaction txnArea = Ebean.beginTransaction();
+																JSONObject area = arrayArea.getJSONObject(y);
+																ShipperArea objShipperArea = new ShipperArea();
+
+																try{
+
+																	objShipperArea.id = Long.valueOf(area.getInt("id"));
+																	objShipperArea.userCms = objShipperProvince.userCms;
+																	objShipperArea.shipperSuburb = objShipperSuburb;
+																	objShipperArea.name = area.getString("name");
+																	objShipperArea.alias = area.getString("alias");
+																	objShipperArea.postCode = area.getString("postcode");
+																	objShipperArea.save();
+																	txnArea.commit();
+
+																}catch (Exception e) {
+																	e.printStackTrace();
+																	txnArea.rollback();
+																} finally {
+																	txnArea.end();
+																}
+
+															}
+														}
+
+
+													}catch (Exception e) {
+														e.printStackTrace();
+														txnSuburb.rollback();
+													} finally {
+														txnSuburb.end();
+													}
+
+												}
+
+
+											}else{
+												txnCity.rollback();
+											}
+
+										}catch (Exception e) {
+											e.printStackTrace();
+											txnCity.rollback();
+										} finally {
+											txnCity.end();
+										}
+
+									}
+
+								}else{
+									txn.rollback();
+								}
+
+
+							}catch (Exception e) {
+								e.printStackTrace();
+								txn.rollback();
+							} finally {
+								txn.end();
+							}
+
+						}
+
+					}
+
+				}catch(Exception e){
+					e.printStackTrace();
+				}finally{
+					connArea.disconnect();
+					connSuburb.disconnect();
+					connCity.disconnect();
+					connProvince.disconnect();
+				}
+
+
+				// ============================= END ADD SHIPPER
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				txnSync.rollback();
+			} finally {
+				txnSync.end();
+			}
+			Logger.info(">>>>> end sync shipper <<<<< ");
 		}
 	}
 }
