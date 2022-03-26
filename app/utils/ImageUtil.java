@@ -1,6 +1,5 @@
 package utils;
 
-import com.hokeba.aws.s3.S3Service;
 import com.hokeba.util.CommonFunction;
 import com.hokeba.util.Constant;
 import play.mvc.Http;
@@ -14,21 +13,23 @@ import java.io.IOException;
 public class ImageUtil {
 
     public static final int commonMaxWidth = 1200;
+    public static final int[] fullImageSize                         = {600,600};
+    public static final int[] mediumImageSize                       = {300,300};
 
     private static final String IMAGE_URL_PREFIX = Constant.getInstance().getImageUrl();
     private static final String IMAGE_PATH_PREFIX = Constant.getInstance().getImagePath();
 
 
     public static String createImageUrl (String key, String fileName) {
-        return IMAGE_URL_PREFIX + IMAGE_PATH_PREFIX + ImageDirectory.getImageDirectory(key) + "/" + fileName;
+        return IMAGE_URL_PREFIX + "/images" + "/" + ImageDirectory.getImageDirectory(key) + "/" + fileName;
     }
 
     public static File uploadImage(Http.MultipartFormData.FilePart image,
-                                   String key, String resName, int[] resolution, String formatFile) throws IOException{
+                                   String imageDirectory, String resName, int[] resolution, String formatFile) throws IOException{
         File result = null;
         if(image!=null){
             if(image.getContentType().startsWith("image")){
-                String filePath = IMAGE_PATH_PREFIX + ImageDirectory.getImageDirectory(key) + File.separator;
+                String filePath = IMAGE_PATH_PREFIX + imageDirectory + File.separator;
                 File dir = new File(filePath);
                 if(!dir.exists()){
                     return null;

@@ -13,13 +13,19 @@ import controllers.BaseController;
 import dtos.brand.*;
 import models.Merchant;
 import models.BrandMerchant;
+import models.Photo;
 import play.Logger;
 import play.libs.Json;
+import play.mvc.BodyParser;
+import play.mvc.Http;
 import play.mvc.Result;
 import repository.BrandMerchantRepository;
 
+import java.io.File;
 import java.util.*;
 import com.avaje.ebean.Query;
+import utils.ImageDirectory;
+import utils.ImageUtil;
 
 import java.io.IOException;
 
@@ -32,15 +38,25 @@ public class BrandMerchantController extends BaseController {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    @ApiOperation(value = "Create Brand", notes = "Create Brand.\n" + swaggerInfo
-            + "", response = BaseResponse.class, httpMethod = "POST")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "brand form", dataType = "temp.swaggermap.BrandForm", required = true, paramType = "body", value = "brand form") })
+//    @ApiOperation(value = "Create Brand", notes = "Create Brand.\n" + swaggerInfo
+//            + "", response = BaseResponse.class, httpMethod = "POST")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "brand form", dataType = "temp.swaggermap.BrandForm", required = true, paramType = "body", value = "brand form") })
+//    @BodyParser.Of(value = BodyParser.Json.class, maxLength = 50 * 1024 * 1024)
     public static Result createBrand() {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            JsonNode json = request().body().asJson();
             try {
+                Http.MultipartFormData body = request().body().asMultipartFormData();
+                JsonNode json = null;
+                if (body != null) {
+                    Map<String, String[]> data = body.asFormUrlEncoded();
+                    if (data != null) {
+                        json = Json.parse(data.get("data")[0]);
+                    }
+                } else {
+                    json = request().body().asJson();
+                }
                 BrandMerchantResponse request = objectMapper.readValue(json.toString(), BrandMerchantResponse.class);
                 String validate = validateCreateBrand(request);
                 if (validate == null) {
@@ -51,6 +67,18 @@ public class BrandMerchantController extends BaseController {
                         newBrandMerchant.setMerchant(ownMerchant);
                         newBrandMerchant.setActive(Boolean.TRUE);
                         newBrandMerchant.save();
+
+                        // ========================== update with image ========================== //
+                        /*
+                        ** do the same for the save image mobile
+                         */
+                        Http.MultipartFormData.FilePart imageFile = Objects.requireNonNull(body).getFile("image-web");
+                        File imageWeb = ImageUtil.uploadImage(imageFile, "brand", "brand-web", ImageUtil.fullImageSize, "jpg");
+                        String imageWebUrl = ImageUtil.createImageUrl("brand", imageWeb != null ? imageWeb.getName() : null);
+                        // ========================== update with image ========================== //
+                        newBrandMerchant.setImageWeb(imageWebUrl);
+                        newBrandMerchant.update();
+
                         trx.commit();
                         response.setBaseResponse(1, offset, 1, success + " membuat brand", null);
                         return ok(Json.toJson(response));
@@ -66,7 +94,7 @@ public class BrandMerchantController extends BaseController {
                 }
                 response.setBaseResponse(0, 0, 0, validate, null);
                 return badRequest(Json.toJson(response));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 logger.error("Error saat parsing json", e);
                 e.printStackTrace();
             }
@@ -101,8 +129,8 @@ public class BrandMerchantController extends BaseController {
                     response.setBrandName(data.getBrandName());
                     response.setImageWeb(data.getImageWeb());
                     response.setImageMobile(data.getImageMobile());
-                    response.setIsDeleted(data.getIsDeleted());
-                    response.setIsActive(data.getIsActive());
+                    response.setIsDeleted(data.isDeleted);
+                    response.setIsActive(data.isActive());
                     response.setMerchantId(data.getMerchant().id);
                     responses.add(response);
                 }
@@ -225,8 +253,8 @@ public class BrandMerchantController extends BaseController {
                     BrandMerchantResponse.setBrandName(BrandMerchant.getBrandName());
                     BrandMerchantResponse.setImageWeb(BrandMerchant.getImageWeb());
                     BrandMerchantResponse.setImageMobile(BrandMerchant.getImageMobile());
-                    BrandMerchantResponse.setIsDeleted(BrandMerchant.getIsDeleted());
-                    BrandMerchantResponse.setIsActive(BrandMerchant.getIsActive());
+                    BrandMerchantResponse.setIsDeleted(BrandMerchant.isDeleted);
+                    BrandMerchantResponse.setIsActive(BrandMerchant.isActive());
                     BrandMerchantResponse.setMerchantId(BrandMerchant.getMerchant().id);
 
                     response.setBaseResponse(1,offset, 1, success + " menampilkan detail brand", BrandMerchantResponse);
