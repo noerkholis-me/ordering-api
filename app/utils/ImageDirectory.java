@@ -28,10 +28,10 @@ public enum ImageDirectory {
         this.directory = directory;
     }
 
-    public static ImageDirectory getImageDirectory(String key) {
+    public static String getImageDirectory(String key) {
         for (ImageDirectory imageDirectory : ImageDirectory.values()) {
             if (imageDirectory.getKey().equals(key)) {
-                return imageDirectory;
+                return imageDirectory.getDirectory().toLowerCase();
             }
         }
         return null;

@@ -27,20 +27,10 @@ public class BrandMerchant extends BaseModel {
     @JsonProperty("image_mobile")
     public String imageMobile;
 
-    @Setter
-    @JsonProperty("updated_at")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm", timezone = "Asia/Jakarta")
-    public Date updatedAt;
-
     @Setter @Getter
     @JsonProperty("is_active")
     @Column(name = "is_active")
     public boolean isActive;
-
-    @Setter @Getter
-    @JsonProperty("is_deleted")
-    @Column(name = "is_deleted")
-    public boolean isDeleted;
 
     @JsonIgnore
     @ManyToOne
