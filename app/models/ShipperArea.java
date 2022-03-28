@@ -62,6 +62,10 @@ public class ShipperArea extends BaseModel{
 
     public static Finder<Long, ShipperArea> find = new Finder<Long, ShipperArea>(Long.class, ShipperArea.class);
 
+    public static ShipperArea findById(Long id) {
+        return find.where().eq("id", id).findUnique();
+    }
+
     public static List<ShipperArea> findAllBySuburb(ShipperSuburb shipperSuburb) {
         return find.where().eq("shipperSuburb", shipperSuburb).findList();
     }
