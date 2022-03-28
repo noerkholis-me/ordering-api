@@ -72,15 +72,22 @@ public class BrandMerchantController extends BaseController {
                         /*
                         ** do the same for the save image mobile
                          */
-                        Http.MultipartFormData.FilePart imageFile = Objects.requireNonNull(body).getFile("image-web");
-                        File imageWeb = ImageUtil.uploadImage(imageFile, "brand", "brand-web", ImageUtil.fullImageSize, "jpg");
+                        // for Website
+                        Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image-web");
+                        File imageWeb = ImageUtil.uploadImage(imageFileWeb, "brand", "brand-web", ImageUtil.fullImageSize, "jpg");
                         String imageWebUrl = ImageUtil.createImageUrl("brand", imageWeb != null ? imageWeb.getName() : null);
+
+                        // for Mobile
+                        Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image-mobile");
+                        File imageMobile = ImageUtil.uploadImage(imageFileMobile, "brand", "brand-mobile", ImageUtil.fullImageSize, "jpg");
+                        String imageMobileUrl = ImageUtil.createImageUrl("brand", imageMobile != null ? imageMobile.getName() : null);
                         // ========================== update with image ========================== //
                         newBrandMerchant.setImageWeb(imageWebUrl);
+                        newBrandMerchant.setImageMobile(imageMobileUrl);
                         newBrandMerchant.update();
 
                         trx.commit();
-                        response.setBaseResponse(1, offset, 1, success + " membuat brand", null);
+                        response.setBaseResponse(1, offset, 1, success + " membuat brand", newBrandMerchant);
                         return ok(Json.toJson(response));
                     } catch (Exception e) {
                         logger.error("Error saat membuat brand", e);
@@ -147,34 +154,58 @@ public class BrandMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    @ApiOperation(value = "Edit Brand", notes = "Edit Brand.\n" + swaggerInfo
-            + "", response = BaseResponse.class, httpMethod = "PUT")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "brand form", dataType = "temp.swaggermap.BrandForm", required = true, paramType = "body", value = "brand form") })
+    // @ApiOperation(value = "Edit Brand", notes = "Edit Brand.\n" + swaggerInfo
+    //         + "", response = BaseResponse.class, httpMethod = "PUT")
+    // @ApiImplicitParams({
+    //         @ApiImplicitParam(name = "brand form", dataType = "temp.swaggermap.BrandForm", required = true, paramType = "body", value = "brand form") })
     public static Result editBrand(Long id) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            JsonNode json = request().body().asJson();
             try {
+                Http.MultipartFormData body = request().body().asMultipartFormData();
+                JsonNode json = null;
+                if (body != null) {
+                    Map<String, String[]> data = body.asFormUrlEncoded();
+                    if (data != null) {
+                        json = Json.parse(data.get("data")[0]);
+                    }
+                } else {
+                    json = request().body().asJson();
+                }
                 BrandMerchantResponse request = objectMapper.readValue(json.toString(), BrandMerchantResponse.class);
                 String validate = validateCreateBrand(request);
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        BrandMerchant BrandMerchant = BrandMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
-                        if (BrandMerchant == null) {
-                            response.setBaseResponse(0, 0, 0, error + " brand tidak tersedia.", null);
-                            return badRequest(Json.toJson(response));
-                        }
-                        BrandMerchant.setBrandName(request.getBrandName());
-                        BrandMerchant.setMerchant(ownMerchant);
-                        BrandMerchant.setActive(Boolean.TRUE);
-                        BrandMerchant.update();
+                        BrandMerchant newBrandMerchant = new BrandMerchant();
+                        newBrandMerchant.setBrandName(request.getBrandName());
+                        newBrandMerchant.setMerchant(ownMerchant);
+                        newBrandMerchant.setActive(Boolean.TRUE);
+                        newBrandMerchant.save();
+
+                        // ========================== update with image ========================== //
+                        /*
+                        ** do the same for the save image mobile
+                         */
+                        // for Website
+                        Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image-web");
+                        File imageWeb = ImageUtil.uploadImage(imageFileWeb, "brand", "brand-web", ImageUtil.fullImageSize, "jpg");
+                        String imageWebUrl = ImageUtil.createImageUrl("brand", imageWeb != null ? imageWeb.getName() : null);
+
+                        // for Mobile
+                        Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image-mobile");
+                        File imageMobile = ImageUtil.uploadImage(imageFileMobile, "brand", "brand-mobile", ImageUtil.fullImageSize, "jpg");
+                        String imageMobileUrl = ImageUtil.createImageUrl("brand", imageMobile != null ? imageMobile.getName() : null);
+                        // ========================== update with image ========================== //
+                        newBrandMerchant.setImageWeb(imageWebUrl);
+                        newBrandMerchant.setImageMobile(imageMobileUrl);
+                        newBrandMerchant.update();
+
                         trx.commit();
-                        response.setBaseResponse(1,offset, 1, success + " mengubah brand", BrandMerchant);
+                        response.setBaseResponse(1, offset, 1, success + " mengubah brand", newBrandMerchant);
                         return ok(Json.toJson(response));
                     } catch (Exception e) {
-                        logger.error("Error mengubah brand", e);
+                        logger.error("Error saat mengubah brand", e);
                         e.printStackTrace();
                         trx.rollback();
                     } finally {
@@ -185,7 +216,7 @@ public class BrandMerchantController extends BaseController {
                 }
                 response.setBaseResponse(0, 0, 0, validate, null);
                 return badRequest(Json.toJson(response));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 logger.error("Error saat parsing json", e);
                 e.printStackTrace();
             }
