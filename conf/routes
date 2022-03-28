@@ -10,6 +10,7 @@ GET     /images/:id                                 controllers.ApplicationContr
 GET     /images/:folder/:id                         controllers.ApplicationController.imageByFolder(folder:String, id: String)
 GET     /images/:folder/:folder2/:id                controllers.ApplicationController.imageByFolder2(folder:String, folder2:String, id: String)
 GET     /banner/images/:folder/:name           		controllers.ApplicationController.getImage(folder:String, name: String)
+GET     /images/:key/:name                          controllers.ApplicationController.getImageByKey(key: String, name: String)
 
 GET     /catalogs/:filename                     	controllers.ApplicationController.catalog(filename: String)
 OPTIONS /*all                           		    controllers.ApplicationController.preflight(all)
@@ -338,3 +339,24 @@ GET     /merchant/role/:id/detailrole              controllers.merchants.RoleMer
 
 #FEATURE
 GET     /master/feature/list                       controllers.masters.FeatureController.getAllFeatureMerchant(isMerchant:Boolean ?= false)
+
+#BRAND
+GET     /merchant/brand/list                        controllers.brand.BrandMerchantController.listBrand(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+POST    /merchant/brand                             controllers.brand.BrandMerchantController.createBrand()
+DELETE  /merchant/brand/:id/delete                  controllers.brand.BrandMerchantController.deleteBrand(id:Long)
+PUT     /merchant/brand/:id/update                  controllers.brand.BrandMerchantController.editBrand(id:Long)
+GET     /merchant/brand/:id/detail                  controllers.brand.BrandMerchantController.viewBrand(id:Long)
+
+#SHIPPER
+GET     /master/province                            controllers.masters.ShipperController.getAllProvince(provinceName: String ?= "")
+GET     /master/city/:id/province                   controllers.masters.ShipperController.getAllCityByProvinceId(id: Long, cityName: String ?= "")
+GET     /master/suburb/:id/city                     controllers.masters.ShipperController.getAllSuburbByCityId(id: Long, suburbName: String ?= "")
+GET     /master/area/:id/suburb                     controllers.masters.ShipperController.getAllAreaBySuburbId(id: Long, areaName: String ?= "")
+
+#STORE
+POST    /merchant/store                             controllers.merchants.StoreController.createStore()
+PUT    /merchant/store/:id                          controllers.merchants.StoreController.editStore(id:Long)
+GET    /merchant/store                              controllers.merchants.StoreController.getAllStore(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/store/:id                          controllers.merchants.StoreController.getStoreById(id:Long)
+DELETE    /merchant/store/:id                       controllers.merchants.StoreController.deleteStore(id:Long)
+GET    /merchant/store/:storeCode/detail            controllers.merchants.StoreController.getStoreByStoreCode(storeCode: String)

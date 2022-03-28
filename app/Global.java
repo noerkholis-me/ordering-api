@@ -69,6 +69,7 @@ public class Global extends GlobalSettings {
 		SeedDefaultConfiguration.seedCourier();
 		SeedDefaultConfiguration.seedOwnMerchant();
 		SeedDefaultConfiguration.seedMasterVariance();
+		SeedDefaultConfiguration.seedSyncShipper();
 //        SynchronizeController.syncSeed();
 
 //		jobs.add(new ServiceJob("* * * * * ?").scheduleIntervalMinutes());

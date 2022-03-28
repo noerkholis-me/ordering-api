@@ -42,12 +42,29 @@ import play.twirl.api.Html;
 
 public class ApplicationController extends Controller {
 
+	private static final String IMAGE_PATH_PREFIX = Constant.getInstance().getImagePath();
+
 	public static Result preflight(String all) {
 		response().setHeader("Access-Control-Allow-Origin", "*");
 		response().setHeader("Allow", "*");
 		response().setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, PATCH, DELETE, OPTIONS");
 		response().setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Referer, User-Agent");
 		return ok();
+	}
+
+	public static Result getImageByKey (String key, String filename) {
+		ByteArrayInputStream input = null;
+		byte[] byteArray;
+		try {
+			File file = new File(IMAGE_PATH_PREFIX.concat(key).concat(filename));
+			byteArray = IOUtils.toByteArray(new FileInputStream(file));
+			input = new ByteArrayInputStream(byteArray);
+			String[] fileType = filename.split("\\.");
+			return ok(input).as("image/" + fileType[fileType.length - 1]);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return notFound();
 	}
 
 	public static Result image(String filename) {
