@@ -30,7 +30,6 @@ public class ImageUtil {
         if(image!=null){
             if(image.getContentType().startsWith("image")){
                 String filePath = IMAGE_PATH_PREFIX + imageDirectory + File.separator;
-                System.out.println(filePath);
                 File dir = new File(filePath);
                 if(!dir.exists()){
                     return null;

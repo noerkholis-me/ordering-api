@@ -74,13 +74,13 @@ public class CategoryMerchantController extends BaseController {
                          */
                         // for Website
                         Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image-web");
-                        File imageWeb = ImageUtil.uploadImage(imageFileWeb, "picture", "category-web", ImageUtil.fullImageSize, "jpg");
-                        String imageWebUrl = ImageUtil.createImageUrl("picture", imageWeb != null ? imageWeb.getName() : null);
+                        File imageWeb = ImageUtil.uploadImage(imageFileWeb, "category", "category-web", ImageUtil.fullImageSize, "jpg");
+                        String imageWebUrl = ImageUtil.createImageUrl("category", imageWeb != null ? imageWeb.getName() : null);
 
                         // for Mobile
                         Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image-mobile");
-                        File imageMobile = ImageUtil.uploadImage(imageFileMobile, "picture", "category-mobile", ImageUtil.fullImageSize, "jpg");
-                        String imageMobileUrl = ImageUtil.createImageUrl("picture", imageMobile != null ? imageMobile.getName() : null);
+                        File imageMobile = ImageUtil.uploadImage(imageFileMobile, "category", "category-mobile", ImageUtil.fullImageSize, "jpg");
+                        String imageMobileUrl = ImageUtil.createImageUrl("category", imageMobile != null ? imageMobile.getName() : null);
                         // ========================== update with image ========================== //
                         newCategoryMerchant.setImageWeb(imageWebUrl);
                         newCategoryMerchant.setImageMobile(imageMobileUrl);

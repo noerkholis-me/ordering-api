@@ -192,13 +192,13 @@ public class BrandMerchantController extends BaseController {
                          */
                         // for Website
                         Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image-web");
-                        File imageWeb = ImageUtil.uploadImage(imageFileWeb, "picture", "brand-web", ImageUtil.fullImageSize, "jpg");
-                        String imageWebUrl = ImageUtil.createImageUrl("picture", imageWeb != null ? imageWeb.getName() : null);
+                        File imageWeb = ImageUtil.uploadImage(imageFileWeb, "brand", "brand-web", ImageUtil.fullImageSize, "jpg");
+                        String imageWebUrl = ImageUtil.createImageUrl("brand", imageWeb != null ? imageWeb.getName() : null);
 
                         // for Mobile
                         Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image-mobile");
-                        File imageMobile = ImageUtil.uploadImage(imageFileMobile, "picture", "brand-mobile", ImageUtil.fullImageSize, "jpg");
-                        String imageMobileUrl = ImageUtil.createImageUrl("picture", imageMobile != null ? imageMobile.getName() : null);
+                        File imageMobile = ImageUtil.uploadImage(imageFileMobile, "brand", "brand-mobile", ImageUtil.fullImageSize, "jpg");
+                        String imageMobileUrl = ImageUtil.createImageUrl("brand", imageMobile != null ? imageMobile.getName() : null);
                         // ========================== update with image ========================== //
                         brandMerchant.setImageWeb(imageWebUrl);
                         brandMerchant.setImageMobile(imageMobileUrl);

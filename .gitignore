@@ -21,3 +21,5 @@ public/uploads
 sandbox-elasticsearch
 .vscode
 /sandbox-media/brand
+/sandbox-media/category
+/sandbox-media/picture
