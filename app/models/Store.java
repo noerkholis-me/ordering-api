@@ -1,10 +1,13 @@
 package models;
 
 import com.avaje.ebean.*;
+import com.avaje.ebean.Query;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.Getter;
+import lombok.Setter;
 import play.libs.Json;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
@@ -68,6 +71,7 @@ public class Store extends BaseModel{
     public ShipperArea shipperArea;    
 
     @Column(name="store_gmap")
+    @Getter @Setter
     public String storeGmap;
 
     @Column(name="store_long")
@@ -75,6 +79,20 @@ public class Store extends BaseModel{
 
     @Column(name="store_lat")
     public Double storeLatitude;
+
+    @ManyToOne(cascade = { CascadeType.ALL })
+    @JoinColumn(name = "merchant_id", referencedColumnName = "id")
+    @JsonIgnore
+    @Getter
+    @Setter
+    public Merchant merchant;
+
+    @Column(name = "store_qr_code")
+    @Getter @Setter
+    public String storeQrCode;
+
+    @Column(name = "is_active")
+    public Boolean isActive;
 
     public static Finder<Long, Store> find = new Finder<Long, Store>(Long.class, Store.class);
 
@@ -120,6 +138,13 @@ public class Store extends BaseModel{
 
     // }
 
+    public static Store findById(Long id) {
+        return find.where().eq("id", id).findUnique();
+    }
+
+    public static Store findByStoreCode(String storeCode) {
+        return find.where().eq("storeCode", storeCode).findUnique();
+    }
 
     public static Integer RowCount() {
         return find.where()
@@ -131,13 +156,24 @@ public class Store extends BaseModel{
         ExpressionList<Store> qry = Store.find
                 .where()
                 .ilike("storeName", "%" + filter + "%")
-                .eq("is_deleted", false);
+                .eq("is_deleted", false)
+                .eq("is_active", true);
 
         return
                 qry.orderBy(sortBy + " " + order)
                     .findPagingList(pageSize)
                     .setFetchAhead(false)
                     .getPage(page);
+    }
+
+    public static Page<Store> getPage(String filter, String sort, int offset, int limit, Merchant merchant) {
+        return find.where()
+                .eq("merchant", merchant)
+                .ilike("storeName", "%" + filter + "%")
+                .orderBy(sort)
+                .findPagingList(limit)
+                .setFetchAhead(false)
+                .getPage(offset);
     }
 
     public String getChangeLogData(Store data){
@@ -147,10 +183,10 @@ public class Store extends BaseModel{
         return Json.toJson(map).toString();
     }
 
-    @Override
-    public void save() {
-        super.save();
-        ChangeLog changeLog = new ChangeLog(LOG_TYPE, this.userCms.id, LOG_TABLE_NAME, this.id, "ADD", null, getChangeLogData(this));
-        changeLog.save();
-    }
+//    @Override
+//    public void save() {
+//        super.save();
+//        ChangeLog changeLog = new ChangeLog(LOG_TYPE, this.userCms.id, LOG_TABLE_NAME, this.id, "ADD", null, getChangeLogData(this));
+//        changeLog.save();
+//    }
 }

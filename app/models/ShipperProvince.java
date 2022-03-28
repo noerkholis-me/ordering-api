@@ -50,4 +50,18 @@ public class ShipperProvince extends BaseModel{
     }
 
     public static Finder<Long, ShipperProvince> find = new Finder<Long, ShipperProvince>(Long.class, ShipperProvince.class);
+
+
+    public static ShipperProvince findById(Long id) {
+        return find.where().eq("id", id).findUnique();
+    }
+
+    public static List<ShipperProvince> findAllProvinceByName(String provinceName) {
+        return find.where().ilike("shipperProvincename", "%" + provinceName + "%").findList();
+    }
+
+    public static List<ShipperProvince> findAllProvince() {
+        return find.where().findList();
+    }
+
 }
