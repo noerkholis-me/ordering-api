@@ -20,7 +20,7 @@ public class ImageUtil {
     private static final String IMAGE_PATH_PREFIX = Constant.getInstance().getImagePath();
 
 
-    public static String createImageUrl (String key, String fileName) {
+    public static String createImageUrl(String key, String fileName) {
         return IMAGE_URL_PREFIX + "/images" + "/" + ImageDirectory.getImageDirectory(key) + "/" + fileName;
     }
 
@@ -30,6 +30,7 @@ public class ImageUtil {
         if(image!=null){
             if(image.getContentType().startsWith("image")){
                 String filePath = IMAGE_PATH_PREFIX + imageDirectory + File.separator;
+                System.out.println(filePath);
                 File dir = new File(filePath);
                 if(!dir.exists()){
                     return null;

@@ -347,6 +347,13 @@ DELETE  /merchant/brand/:id/delete                  controllers.brand.BrandMerch
 PUT     /merchant/brand/:id/update                  controllers.brand.BrandMerchantController.editBrand(id:Long)
 GET     /merchant/brand/:id/detail                  controllers.brand.BrandMerchantController.viewBrand(id:Long)
 
+#CATEGORY
+GET     /merchant/category/list                        controllers.categories.CategoryMerchantController.listCategory(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+POST    /merchant/category                             controllers.categories.CategoryMerchantController.createCategory()
+DELETE  /merchant/category/:id/delete                  controllers.categories.CategoryMerchantController.deleteCategory(id:Long)
+PUT     /merchant/category/:id/update                  controllers.categories.CategoryMerchantController.editCategory(id:Long)
+GET     /merchant/category/:id/detail                  controllers.categories.CategoryMerchantController.viewCategory(id:Long)
+
 #SHIPPER
 GET     /master/province                            controllers.masters.ShipperController.getAllProvince(provinceName: String ?= "")
 GET     /master/city/:id/province                   controllers.masters.ShipperController.getAllCityByProvinceId(id: Long, cityName: String ?= "")
