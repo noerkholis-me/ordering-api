@@ -309,6 +309,7 @@ public class SeedDefaultConfiguration {
 			configSettingss.add(new ConfigSettings("loyaltysetting", "loyaltysetting", "loyaltysetting",
 					"1##2020-08-10##2020-08-31##200000##14##1##1##2020-07-23"));
 			configSettingss.add(new ConfigSettings("loyaltysetting_referral","max_referral_point_trx", "max_referral_point_trx", "1"));
+			configSettingss.add(new ConfigSettings("store","radius", "default_radius", "50"));
 			for (ConfigSettings configSettings : configSettingss) {
 				configSettings.save();
 			}

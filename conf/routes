@@ -367,3 +367,6 @@ GET    /merchant/store                              controllers.merchants.StoreC
 GET    /merchant/store/:id                          controllers.merchants.StoreController.getStoreById(id:Long)
 DELETE    /merchant/store/:id                       controllers.merchants.StoreController.deleteStore(id:Long)
 GET    /merchant/store/:storeCode/detail            controllers.merchants.StoreController.getStoreByStoreCode(storeCode: String)
+
+#CONFIG SETTING
+GET    /master/config-setting/:key                  controllers.masters.ConfigSettingController.getConfigSettingByKey(key: String)
