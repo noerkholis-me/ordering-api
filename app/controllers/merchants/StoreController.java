@@ -172,7 +172,7 @@ public class StoreController extends BaseController {
 
                     store.update();
                     trx.commit();
-                    response.setBaseResponse(1, 0, 0, success + " Showing data store", null);
+                    response.setBaseResponse(1, 0, 0, success + " Deleted data store", null);
                     return ok(Json.toJson(response));
                 } catch (Exception e) {
                     logger.error("Error while delete store", e);
