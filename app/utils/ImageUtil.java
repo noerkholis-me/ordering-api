@@ -32,10 +32,13 @@ public class ImageUtil {
                 String filePath = IMAGE_PATH_PREFIX + imageDirectory + File.separator;
                 File dir = new File(filePath);
                 if(!dir.exists()){
-                    return null;
+                    dir.mkdir();
+                    File srcFile = image.getFile();
+                    result = cropImage(srcFile, resName, resolution, filePath, formatFile);
+                } else {
+                    File srcFile = image.getFile();
+                    result = cropImage(srcFile, resName, resolution, filePath, formatFile);
                 }
-                File srcFile = image.getFile();
-                result = cropImage(srcFile, resName, resolution, filePath, formatFile);
             }
         }
         return result;
