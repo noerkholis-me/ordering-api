@@ -20,7 +20,7 @@ public class ImageUtil {
     private static final String IMAGE_PATH_PREFIX = Constant.getInstance().getImagePath();
 
 
-    public static String createImageUrl (String key, String fileName) {
+    public static String createImageUrl(String key, String fileName) {
         return IMAGE_URL_PREFIX + "/images" + "/" + ImageDirectory.getImageDirectory(key) + "/" + fileName;
     }
 
@@ -32,10 +32,13 @@ public class ImageUtil {
                 String filePath = IMAGE_PATH_PREFIX + imageDirectory + File.separator;
                 File dir = new File(filePath);
                 if(!dir.exists()){
-                    return null;
+                    dir.mkdir();
+                    File srcFile = image.getFile();
+                    result = cropImage(srcFile, resName, resolution, filePath, formatFile);
+                } else {
+                    File srcFile = image.getFile();
+                    result = cropImage(srcFile, resName, resolution, filePath, formatFile);
                 }
-                File srcFile = image.getFile();
-                result = cropImage(srcFile, resName, resolution, filePath, formatFile);
             }
         }
         return result;

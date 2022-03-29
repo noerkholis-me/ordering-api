@@ -30,6 +30,9 @@ public class ConfigSettings extends BaseModel{
 		this.value = value;
 	}
 
+    public static ConfigSettings findByKey(String key){
+        return find.where().eq("key", key).findUnique();
+    }
 
 
 	public static String validation(String name, String key, String value, String module) {
@@ -38,6 +41,9 @@ public class ConfigSettings extends BaseModel{
         }
         if (key.equals("")|| key==null) {
             return "Key must not empty.";
+        }
+        if (value.equals("")|| value==null) {
+            return "Value must not empty.";
         }
         if (module.equals("")|| module == null) {
             return "Description must not empty.";

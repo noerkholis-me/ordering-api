@@ -169,6 +169,8 @@ public class Store extends BaseModel{
     public static Page<Store> getPage(String filter, String sort, int offset, int limit, Merchant merchant) {
         return find.where()
                 .eq("merchant", merchant)
+                .eq("is_deleted", false)
+                .eq("is_active", true)
                 .ilike("storeName", "%" + filter + "%")
                 .orderBy(sort)
                 .findPagingList(limit)
