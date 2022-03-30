@@ -178,6 +178,36 @@ public class Store extends BaseModel{
                 .getPage(offset);
     }
 
+    public static Query<Store> findStoreIsActiveAndMerchant(Merchant merchant) {
+        return find.where().eq("isDeleted", false).eq("merchant", merchant).order("id");
+    }
+
+    public static List<Store> getTotalDataPage (Query<Store> reqQuery) {
+        Query<Store> query = reqQuery;
+        ExpressionList<Store> exp = query.where();
+        query = exp.query();
+        return query.findPagingList(0).getPage(0).getList();
+    }
+
+    public static List<Store> findStoreWithPaging(Query<Store> reqQuery, String sort, String filter, int offset, int limit) {
+        Query<Store> query = reqQuery;
+
+        if (!"".equals(sort)) {
+            query = query.orderBy(sort);
+        } else {
+            query = query.orderBy("t0.created_at desc");
+        }
+
+        ExpressionList<Store> exp = query.where();
+        exp = exp.disjunction();
+        exp = exp.or(Expr.ilike("t0.store_name", "%" + filter + "%"), Expr.ilike("t0.store_code", "%" + filter + "%"));
+        query = exp.query();
+        if (limit != 0) {
+            query = query.setMaxRows(limit);
+        }
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
     public String getChangeLogData(Store data){
         HashMap<String, String> map = new HashMap<>();
         map.put("store_code",(data.storeCode == null)? "":data.storeCode);
