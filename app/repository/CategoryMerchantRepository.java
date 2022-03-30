@@ -22,7 +22,6 @@ public class CategoryMerchantRepository extends Model {
 				.eq("id", id)
 				.eq("merchant_id", merchantId)
 				.eq("is_deleted", Boolean.FALSE)
-				.eq("is_active", Boolean.TRUE)
 				.findUnique();
 		} catch (PersistenceException e) {
 			e.printStackTrace();
