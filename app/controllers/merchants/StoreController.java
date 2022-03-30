@@ -2,6 +2,7 @@ package controllers.merchants;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Page;
+import com.avaje.ebean.Query;
 import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -119,10 +120,11 @@ public class StoreController extends BaseController {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
             try {
-                Page<Store> storePage = Store.getPage(filter, sort, offset, limit, ownMerchant);
-                List<Store> storeList = storePage.getList();
+                Query<Store> query = Store.findStoreIsActiveAndMerchant(ownMerchant);
+                List<Store> totalData = Store.getTotalDataPage(query);
+                List<Store> storeList = Store.findStoreWithPaging(query, sort, filter, offset, limit);
                 List<StoreResponse> storeResponses = toResponses(storeList);
-                response.setBaseResponse(storeResponses.size(), offset, limit, success + " Showing data stores", storeResponses);
+                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : storeList.size(), offset, limit, success + " Showing data stores", storeResponses);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 Logger.info("Error: " + e.getMessage());
