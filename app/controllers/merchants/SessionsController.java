@@ -125,7 +125,7 @@ public class SessionsController extends BaseController {
         profileData.setCompanyName(member.companyName);
         profileData.setCityName(member.cityName);
         profileData.setPostalCode(member.postalCode);
-        profileData.setProvince(member.province);
+        // profileData.setProvince(member.province);
         profileData.setCommissionType(member.commissionType);
         profileData.setAddress(member.address);
         profileData.setPhone(member.phone);
