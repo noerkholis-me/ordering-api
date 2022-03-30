@@ -654,7 +654,7 @@ public class Seed {
                 merchant2.productHandledDescription = "Product will be packaged using iron bars";
                 merchant2.productQuality = new Long(5);
                 merchant2.productShippedDescription = "Product will be send by flying courier";
-                merchant2.province = "Jawa Barat";
+                // merchant2.province = "Jawa Barat";
                 merchant2.quickResponse = new Long(5);
                 merchant2.rating = 0D;
                 merchant2.status = "Good";
@@ -692,7 +692,7 @@ public class Seed {
                 merchant.productHandledDescription = "Product will be packaged using iron bars";
                 merchant.productQuality = new Long(5);
                 merchant.productShippedDescription = "Product will be send by flying courier";
-                merchant.province = "Jawa Barat";
+                // merchant.province = "Jawa Barat";
                 merchant.quickResponse = new Long(5);
                 merchant.rating = 0D;
                 merchant.status = "Good";

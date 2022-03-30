@@ -83,7 +83,7 @@ public class Merchant extends BaseModel{
 	public String cityName;
 	@JsonProperty("postal_code")
 	public String postalCode;
-	public String province;
+	// public String province;
 	@JsonProperty("commission_type")
 	public String commissionType;
 	public String address;
@@ -133,6 +133,15 @@ public class Merchant extends BaseModel{
     public Village village;
     @ManyToOne
     public CourierPointLocation courierPointLocation;
+
+    @ManyToOne
+    public ShipperProvince province;
+    @ManyToOne
+    public ShipperCity city;
+    @ManyToOne
+    public ShipperSuburb suburb;
+    @ManyToOne
+    public ShipperArea area;
 
     @JsonProperty("couriers")
     @ManyToMany
