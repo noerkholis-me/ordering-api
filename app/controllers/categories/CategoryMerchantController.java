@@ -13,6 +13,7 @@ import controllers.BaseController;
 import dtos.category.*;
 import models.Merchant;
 import models.CategoryMerchant;
+import models.SubCategoryMerchant;
 import models.Photo;
 import play.Logger;
 import play.libs.Json;
@@ -20,6 +21,7 @@ import play.mvc.BodyParser;
 import play.mvc.Http;
 import play.mvc.Result;
 import repository.CategoryMerchantRepository;
+import repository.SubCategoryMerchantRepository;
 
 import java.io.File;
 import java.util.*;
@@ -73,12 +75,12 @@ public class CategoryMerchantController extends BaseController {
                         ** do the same for the save image mobile
                          */
                         // for Website
-                        Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image-web");
+                        Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image_web");
                         File imageWeb = ImageUtil.uploadImage(imageFileWeb, "category", "category-web", ImageUtil.fullImageSize, "jpg");
                         String imageWebUrl = ImageUtil.createImageUrl("category", imageWeb != null ? imageWeb.getName() : null);
 
                         // for Mobile
-                        Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image-mobile");
+                        Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image_mobile");
                         File imageMobile = ImageUtil.uploadImage(imageFileMobile, "category", "category-mobile", ImageUtil.fullImageSize, "jpg");
                         String imageMobileUrl = ImageUtil.createImageUrl("category", imageMobile != null ? imageMobile.getName() : null);
                         // ========================== update with image ========================== //
@@ -132,6 +134,9 @@ public class CategoryMerchantController extends BaseController {
                 List<CategoryMerchant> responseIndex = CategoryMerchantRepository.getDataCategory(query, sort, filter, offset, limit);
                 for (CategoryMerchant data : responseIndex) {
                     CategoryMerchantResponse response = new CategoryMerchantResponse();
+                    Query<SubCategoryMerchant> querySub = SubCategoryMerchantRepository.find.where().eq("t0.category_id", data.id).eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+                    List<SubCategoryMerchant> dataSub = SubCategoryMerchantRepository.getDataForCategory(querySub);
+                    List<CategoryMerchantResponse.SubCategoryMerchant> responsesSub = new ArrayList<>();
                     response.setId(data.id);
                     response.setCategoryName(data.getCategoryName());
                     response.setImageWeb(data.getImageWeb());
@@ -139,6 +144,17 @@ public class CategoryMerchantController extends BaseController {
                     response.setIsDeleted(data.isDeleted);
                     response.setIsActive(data.isActive());
                     response.setMerchantId(data.getMerchant().id);
+                    for(SubCategoryMerchant dataSubs : dataSub) {
+                        CategoryMerchantResponse.SubCategoryMerchant responseSub = new CategoryMerchantResponse.SubCategoryMerchant();
+                        responseSub.setId(dataSubs.id);
+                        responseSub.setSubcategoryName(dataSubs.getSubcategoryName());
+                        responseSub.setImageWeb(dataSubs.getImageWeb());
+                        responseSub.setImageMobile(dataSubs.getImageMobile());
+                        responseSub.setIsActive(dataSubs.isActive);
+                        responseSub.setIsDeleted(dataSubs.isDeleted);
+                        responsesSub.add(responseSub);
+                        response.setSubCategory(responseSub != null ? responsesSub : null);
+                    }
                     responses.add(response);
                 }
                 response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size() , offset, limit, success + " menampilkan data", responses);
@@ -191,12 +207,12 @@ public class CategoryMerchantController extends BaseController {
                         ** do the same for the save image mobile
                          */
                         // for Website
-                        Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image-web");
+                        Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image_web");
                         File imageWeb = ImageUtil.uploadImage(imageFileWeb, "category", "category-web", ImageUtil.fullImageSize, "jpg");
                         String imageWebUrl = ImageUtil.createImageUrl("category", imageWeb != null ? imageWeb.getName() : null);
 
                         // for Mobile
-                        Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image-mobile");
+                        Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image_mobile");
                         File imageMobile = ImageUtil.uploadImage(imageFileMobile, "category", "category-mobile", ImageUtil.fullImageSize, "jpg");
                         String imageMobileUrl = ImageUtil.createImageUrl("category", imageMobile != null ? imageMobile.getName() : null);
                         // ========================== update with image ========================== //

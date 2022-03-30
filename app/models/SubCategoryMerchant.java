@@ -12,16 +12,32 @@ import javax.validation.constraints.Size;
 import java.util.Date;
 
 @Entity
-public class CategoryMerchant extends BaseModel {
+public class SubCategoryMerchant extends BaseModel {
     private static final long serialVersionUID = 1L;
 
     @Getter @Setter
-    @JsonProperty("category_name")
-    public String categoryName;
+    @JsonProperty("subcategory_name")
+    public String subcategoryName;
 
     @Getter @Setter
     @JsonProperty("image_web")
     public String imageWeb;
+
+    // @Getter @Setter
+    // @JsonProperty("image_name")
+    // public String imageName;
+
+    // @Getter @Setter
+    // @JsonProperty("meta_title")
+    // public String metaTitle;
+
+    // @Getter @Setter
+    // @JsonProperty("meta_keyword")
+    // public String metaKeyword;
+
+    // @Getter @Setter
+    // @JsonProperty("meta_description")
+    // public String metaDescription;
 
     @Getter @Setter
     @JsonProperty("image_mobile")
@@ -32,12 +48,20 @@ public class CategoryMerchant extends BaseModel {
     @Column(name = "is_active")
     public boolean isActive;
 
+    @Setter @Getter
+    @JsonProperty("is_deleted")
+    @Column(name = "is_deleted")
+    public boolean isDeleted;
+
+    @JsonIgnore
+    @ManyToOne
+    @Getter @Setter
+    @JoinColumn(name="category_id", referencedColumnName = "id")
+    public CategoryMerchant categoryMerchant;
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="merchant_id", referencedColumnName = "id")
     @Getter @Setter
     public Merchant merchant;
-    
-    @Getter @Setter
-    public SubCategoryMerchant subCategory;
 }

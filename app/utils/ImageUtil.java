@@ -2,6 +2,8 @@ package utils;
 
 import com.hokeba.util.CommonFunction;
 import com.hokeba.util.Constant;
+import controllers.merchants.StoreController;
+import play.Logger;
 import play.mvc.Http;
 
 import javax.imageio.ImageIO;
@@ -11,6 +13,8 @@ import java.io.File;
 import java.io.IOException;
 
 public class ImageUtil {
+
+    private final static Logger.ALogger logger = Logger.of(ImageUtil.class);
 
     public static final int commonMaxWidth = 1200;
     public static final int[] fullImageSize                         = {600,600};
@@ -32,10 +36,12 @@ public class ImageUtil {
                 String filePath = IMAGE_PATH_PREFIX + imageDirectory + File.separator;
                 File dir = new File(filePath);
                 if(!dir.exists()){
+                    logger.info("Creating directory >>>>> " + filePath);
                     dir.mkdir();
                     File srcFile = image.getFile();
                     result = cropImage(srcFile, resName, resolution, filePath, formatFile);
                 } else {
+                    logger.info("Directory already exists >>>>> " + filePath);
                     File srcFile = image.getFile();
                     result = cropImage(srcFile, resName, resolution, filePath, formatFile);
                 }

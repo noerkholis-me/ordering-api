@@ -1,13 +1,15 @@
 package dtos.category;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
 public class CategoryMerchantResponse  {
 
     @JsonProperty("id")
@@ -30,6 +32,31 @@ public class CategoryMerchantResponse  {
 
     @JsonProperty("merchant_id")
     private Long merchantId;
+    
+    private List<SubCategoryMerchant> subCategory;
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    @Builder
+    public static class SubCategoryMerchant {
+        private Long id;
+        @JsonProperty("subcategory_name")
+        private String subcategoryName;
+
+        @JsonProperty("image_web")
+        private String imageWeb;
+
+        @JsonProperty("image_mobile")
+        private String imageMobile;
+
+        @JsonProperty("is_deleted")
+        private Boolean isDeleted;
+
+        @JsonProperty("is_active")
+        private Boolean isActive;
+    }
 
 
 }
