@@ -273,7 +273,7 @@ public class SubCategoryMerchantController extends BaseController {
                     subCategoryMerchantResponse.setSubcategoryName(subCategoryMerchant.getSubcategoryName());
                     subCategoryMerchantResponse.setImageWeb(subCategoryMerchant.getImageWeb());
                     subCategoryMerchantResponse.setImageMobile(subCategoryMerchant.getImageMobile());
-                    subCategoryMerchantResponse.setIsDeleted(subCategoryMerchant.getIsDeleted());
+                    subCategoryMerchantResponse.setIsDeleted(subCategoryMerchant.isDeleted);
                     subCategoryMerchantResponse.setIsActive(subCategoryMerchant.isActive);
                     subCategoryMerchantResponse.setCategoryId(subCategoryMerchant.getCategoryMerchant().id);
                     subCategoryMerchantResponse.setMerchantId(subCategoryMerchant.getMerchant().id);
@@ -313,7 +313,7 @@ public class SubCategoryMerchantController extends BaseController {
                     response.setSubcategoryName(data.getSubcategoryName());
                     response.setImageWeb(data.getImageWeb());
                     response.setImageMobile(data.getImageMobile());
-                    response.setIsDeleted(data.getIsDeleted());
+                    response.setIsDeleted(data.isDeleted);
                     response.setIsActive(data.isActive);
                     response.setMerchantId(data.getMerchant().id);
                     response.setCategoryId(data.getCategoryMerchant().id);
