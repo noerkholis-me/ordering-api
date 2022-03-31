@@ -4,7 +4,7 @@ import models.BaseModel;
 
 import javax.persistence.Entity;
 
-@Entity
+//@Entity
 public class ProductMerchant extends BaseModel {
 
 
