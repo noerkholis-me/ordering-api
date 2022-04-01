@@ -377,3 +377,7 @@ GET    /merchant/store/:storeCode/detail            controllers.merchants.StoreC
 
 #CONFIG SETTING
 GET    /master/config-setting/:key                  controllers.masters.ConfigSettingController.getConfigSettingByKey(key: String)
+
+#PRODUCT
+POST    /merchant/product                           controllers.product.ProductMerchantController.createProduct()
+PUT    /merchant/product/:id                        controllers.product.ProductMerchantController.editProduct(id: Long)
