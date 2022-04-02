@@ -1,5 +1,6 @@
 package repository;
 
+import models.CategoryMerchant;
 import models.Merchant;
 import models.SubCategoryMerchant;
 import play.db.ebean.Model;
@@ -15,6 +16,11 @@ import java.text.SimpleDateFormat;
 public class SubCategoryMerchantRepository extends Model {
 
     public static Finder<Long, SubCategoryMerchant> find = new Finder<>(Long.class, SubCategoryMerchant.class);
+
+
+	public static SubCategoryMerchant findById(Long id) {
+		return find.where().eq("id", id).findUnique();
+	}
 
     public static SubCategoryMerchant findByIdAndMerchantId(Long id, Long merchantId) {
         try {
