@@ -384,3 +384,4 @@ PUT    /merchant/product/:id                        controllers.product.ProductM
 GET    /merchant/product                            controllers.product.ProductMerchantController.getAllProduct(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, isActive: Boolean ?= true)
 GET    /merchant/product/:id                        controllers.product.ProductMerchantController.getProductById(id: Long)
 DELETE    /merchant/product/:id                     controllers.product.ProductMerchantController.deleteProduct(id: Long)
+PUT   /merchant/product/:id/status                  controllers.product.ProductMerchantController.updateStatusProduct(id: Long)

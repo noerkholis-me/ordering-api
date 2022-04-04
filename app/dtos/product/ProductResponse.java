@@ -3,10 +3,15 @@ package dtos.product;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import java.io.Serializable;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter @Setter
-public class ProductResponse {
+public class ProductResponse implements Serializable {
+
+    @JsonProperty("product_id")
+    private Long productId;
 
     // ======== Name and Category ========== //
     @JsonProperty("product_name")
@@ -17,6 +22,9 @@ public class ProductResponse {
     private SubCategoryResponse subCategory;
     @JsonProperty("brand")
     private BrandResponse brand;
+
+    @JsonProperty("status")
+    private Boolean isActive;
 
     // ======== Detail ========== //
     @JsonProperty("product_detail")
