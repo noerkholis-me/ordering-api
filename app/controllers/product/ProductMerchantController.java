@@ -7,10 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
 import controllers.BaseController;
-import dtos.product.ProductDescriptionResponse;
-import dtos.product.ProductDetailResponse;
-import dtos.product.ProductRequest;
-import dtos.product.ProductResponse;
+import dtos.product.*;
 import models.*;
 import models.merchant.ProductMerchant;
 import models.merchant.ProductMerchantDescription;
@@ -49,10 +46,22 @@ public class ProductMerchantController extends BaseController {
                     ProductMerchant newProductMerchant = new ProductMerchant();
                     CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(
                             productRequest.getCategoryId(), ownMerchant.id);
+                    if (categoryMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, " Category not found.", null);
+                        return badRequest(Json.toJson(response));
+                    }
                     SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(
                             productRequest.getSubCategoryId(), ownMerchant.id);
+                    if (subCategoryMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, " Sub Category not found.", null);
+                        return badRequest(Json.toJson(response));
+                    }
                     BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(
                             productRequest.getBrandId(), ownMerchant.id);
+                    if (brandMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, " Brand not found.", null);
+                        return badRequest(Json.toJson(response));
+                    }
                     constructProductEntityRequest(newProductMerchant, ownMerchant, productRequest, categoryMerchant,
                             subCategoryMerchant, brandMerchant);
                     newProductMerchant.save();
@@ -111,10 +120,22 @@ public class ProductMerchantController extends BaseController {
                 try {
                     CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(
                             productRequest.getCategoryId(), ownMerchant.id);
+                    if (categoryMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, " Category not found.", null);
+                        return badRequest(Json.toJson(response));
+                    }
                     SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(
                             productRequest.getSubCategoryId(), ownMerchant.id);
+                    if (subCategoryMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, " Sub Category not found.", null);
+                        return badRequest(Json.toJson(response));
+                    }
                     BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(
                             productRequest.getBrandId(), ownMerchant.id);
+                    if (brandMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, " Brand not found.", null);
+                        return badRequest(Json.toJson(response));
+                    }
                     constructProductEntityRequest(productMerchant, ownMerchant, productRequest, categoryMerchant,
                             subCategoryMerchant, brandMerchant);
                     productMerchant.update();
@@ -208,12 +229,41 @@ public class ProductMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
+    public static Result updateStatusProduct(Long id) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            JsonNode json = request().body().asJson();
+            try {
+                UpdateStatusRequest updateStatusRequest = objectMapper.readValue(json.toString(), UpdateStatusRequest.class);
+                ProductMerchant productMerchant = ProductMerchantRepository.findById(id, ownMerchant);
+                if (productMerchant != null) {
+                    ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productMerchant);
+                    if (updateStatusRequest.getIsActive() != productMerchant.getIsActive()) {
+                        productMerchant.setIsActive(updateStatusRequest.getIsActive());
+                        productMerchant.update();
+                    } else if (updateStatusRequest.getIsCustomizable() != productMerchantDetail.getIsCustomizable()) {
+                        productMerchantDetail.setIsCustomizable(updateStatusRequest.getIsCustomizable());
+                        productMerchantDetail.update();
+                    }
+                    response.setBaseResponse(1, 0, 1, success + " Update status data product", productMerchant.id);
+                    return ok(Json.toJson(response));
+                }
+            } catch (Exception e) {
+                Logger.info("Error: " + e.getMessage());
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
 
     // =============================================== construct =====================================================//
 
     private static ProductResponse toResponse(ProductMerchant productMerchant) {
         ProductResponse productResponse = new ProductResponse();
+        productResponse.setProductId(productMerchant.id);
         productResponse.setProductName(productMerchant.getProductName());
+        productResponse.setIsActive(productMerchant.getIsActive());
         // ================================================================ //
         CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getCategoryMerchant().id, productMerchant.getMerchant().id);
         if (categoryMerchant != null) {
