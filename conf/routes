@@ -11,6 +11,7 @@ GET     /images/:folder/:id                         controllers.ApplicationContr
 GET     /images/:folder/:folder2/:id                controllers.ApplicationController.imageByFolder2(folder:String, folder2:String, id: String)
 GET     /banner/images/:folder/:name           		controllers.ApplicationController.getImage(folder:String, name: String)
 GET     /images/:key/:name                          controllers.ApplicationController.getImageByKey(key: String, name: String)
+POST    /images/:key/upload                         controllers.ImagesController.uploadImages(key: String)
 
 GET     /catalogs/:filename                     	controllers.ApplicationController.catalog(filename: String)
 OPTIONS /*all                           		    controllers.ApplicationController.preflight(all)
@@ -360,6 +361,10 @@ POST    /merchant/subcategory/:id                         controllers.categories
 DELETE  /merchant/subcategory/:id/delete                  controllers.categories.SubCategoryMerchantController.deleteSubCategory(id:Long)
 PUT     /merchant/subcategory/:id/update                  controllers.categories.SubCategoryMerchantController.editSubCategory(id:Long)
 GET     /merchant/subcategory/:id/detail                  controllers.categories.SubCategoryMerchantController.viewSubCategory(id:Long)
+
+#SEQUENCE
+GET     /merchant/category/sequencelist                 controllers.categories.SubCategoryMerchantController.listSequence()
+PUT     /merchant/category/sequence                     controllers.categories.SubCategoryMerchantController.updateSequence()
 
 #SHIPPER
 GET     /master/province                            controllers.masters.ShipperController.getAllProvince(provinceName: String ?= "")

@@ -119,4 +119,28 @@ public class SubCategoryMerchantRepository extends Model {
 
 		return resData;
 	}
+
+	public static List<SubCategoryMerchant> getListSequence(Long merchantId) {
+		List<SubCategoryMerchant> lists = new ArrayList<>();
+        lists = find.where()
+                .eq("merchant_id", merchantId)
+				.eq("is_deleted", Boolean.FALSE)
+				.eq("is_active", Boolean.TRUE)
+				.orderBy("sequence ASC").findList();
+				
+				return lists;
+	}
+
+	public static SubCategoryMerchant getLatestSequence(Long merchantId) {
+		try {
+			return find.where()
+				.eq("merchant_id", merchantId)
+				.eq("is_deleted", Boolean.FALSE)
+				.orderBy("sequence DESC")
+				.setMaxRows(1).findUnique();
+		} catch (PersistenceException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 }

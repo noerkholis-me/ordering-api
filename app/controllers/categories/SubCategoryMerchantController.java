@@ -22,6 +22,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import repository.CategoryMerchantRepository;
 import repository.SubCategoryMerchantRepository;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.File;
 import java.util.*;
@@ -72,6 +73,13 @@ public class SubCategoryMerchantController extends BaseController {
                 }
                 SubCategoryMerchantResponse request = objectMapper.readValue(json.toString(), SubCategoryMerchantResponse.class);
                 String validate = validateCreateSubCategory(request);
+                SubCategoryMerchant latestSubCat = SubCategoryMerchantRepository.getLatestSequence(ownMerchant.id);
+                int lastSequence = 0;
+                if(latestSubCat == null) {
+                    lastSequence = lastSequence + 1;
+                } else {
+                    lastSequence = latestSubCat.getSequence() + 1;
+                }
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
@@ -80,6 +88,7 @@ public class SubCategoryMerchantController extends BaseController {
                         newSubCategoryMerchant.setMerchant(ownMerchant);
                         newSubCategoryMerchant.setCategoryMerchant(categoryMerchant);
                         newSubCategoryMerchant.setActive(request.getIsActive());
+                        newSubCategoryMerchant.setSequence(lastSequence);
                         newSubCategoryMerchant.save();
 
                         // ========================== update with image ========================== //
@@ -327,6 +336,89 @@ public class SubCategoryMerchantController extends BaseController {
         } else if (ownMerchant == null) {
             response.setBaseResponse(0, 0, 0, forbidden, null);
             return forbidden(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    @ApiOperation(value = "Get sequence list.", notes = "Returns list of sequence.\n" + swaggerInfo
+            + "", response = SubCategoryMerchant.class, responseContainer = "List", httpMethod = "GET")
+    public static Result listSequence() {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            Query<SubCategoryMerchant> query = SubCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+            try {
+                List<SubCategoryMerchantResponse> responses = new ArrayList<>();
+                List<SubCategoryMerchant> responseIndex = SubCategoryMerchantRepository.getListSequence(ownMerchant.id);
+                for (SubCategoryMerchant data : responseIndex) {
+                    SubCategoryMerchantResponse response = new SubCategoryMerchantResponse();
+                    response.setId(data.id);
+                    response.setSubcategoryName(data.getSubcategoryName());
+                    response.setImageWeb(data.getImageWeb());
+                    response.setImageMobile(data.getImageMobile());
+                    response.setIsDeleted(data.isDeleted);
+                    response.setIsActive(data.isActive());
+                    response.setSequence(data.getSequence());
+                    response.setMerchantId(data.getMerchant().id);
+                    response.setCategoryId(data.getCategoryMerchant().id);
+                    responses.add(response);
+                }
+                response.setBaseResponse(responseIndex.size() , offset, limit, success + " menampilkan data", responses);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                Logger.error("allDetail", e);
+            }
+        } else if (ownMerchant == null) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    @ApiOperation(value = "Update Sequence", notes = "Update Sequence.\n" + swaggerInfo
+            + "", response = BaseResponse.class, httpMethod = "PUT")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "sequence form", dataType = "temp.swaggermap.SequenceForm", required = true, paramType = "body", value = "sequence form") })
+    public static Result updateSequence() {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            try {
+                JsonNode json = request().body().asJson();
+                List<SubCategoryMerchantResponse> request = objectMapper.convertValue(json, new TypeReference<List<SubCategoryMerchantResponse>>(){});
+                    Transaction trx = Ebean.beginTransaction();
+                    try {
+
+                        List<SubCategoryMerchant> responses = new ArrayList<>();
+                        SubCategoryMerchant subCategoryMerchant = new SubCategoryMerchant();
+                        for (SubCategoryMerchantResponse data : request){
+                            subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(data.id, ownMerchant.id);
+                            if (subCategoryMerchant == null) {
+                                response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
+                                return badRequest(Json.toJson(response));
+                            }
+                            subCategoryMerchant.setSequence(data.sequence);
+                            
+                            subCategoryMerchant.update();
+                            responses.add(subCategoryMerchant);
+                        }
+
+                        trx.commit();
+                        response.setBaseResponse(1, offset, 1, success + " mengubah sub kategori", responses);
+                        return ok(Json.toJson(response));
+                    } catch (Exception e) {
+                        logger.error("Error saat mengubah sub kategori", e);
+                        e.printStackTrace();
+                        trx.rollback();
+                    } finally {
+                        trx.end();
+                    }
+                    response.setBaseResponse(0, 0, 0, error, null);
+                    return badRequest(Json.toJson(response));
+            } catch (Exception e) {
+                logger.error("Error saat parsing json", e);
+                e.printStackTrace();
+            }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));

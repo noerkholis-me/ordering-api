@@ -11,6 +11,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ImageUtil {
 
@@ -30,6 +32,7 @@ public class ImageUtil {
 
     public static File uploadImage(Http.MultipartFormData.FilePart image,
                                    String imageDirectory, String resName, int[] resolution, String formatFile) throws IOException{
+        System.out.println("Uploading image: " + image.getFilename());
         File result = null;
         if(image!=null){
             if(image.getContentType().startsWith("image")){
@@ -39,21 +42,21 @@ public class ImageUtil {
                     logger.info("Creating directory >>>>> " + filePath);
                     dir.mkdir();
                     File srcFile = image.getFile();
-                    result = cropImage(srcFile, resName, resolution, filePath, formatFile);
+                    result = cropImage(imageDirectory, srcFile, resName, resolution, filePath, formatFile);
                 } else {
                     logger.info("Directory already exists >>>>> " + filePath);
                     File srcFile = image.getFile();
-                    result = cropImage(srcFile, resName, resolution, filePath, formatFile);
+                    result = cropImage(imageDirectory, srcFile, resName, resolution, filePath, formatFile);
                 }
             }
         }
         return result;
     }
 
-    private static File cropImage(File srcFile, String resName, int[] resolution, String filePath, String resFormat) throws IOException {
+    private static File cropImage(String key, File srcFile, String resName, int[] resolution, String filePath, String resFormat) throws IOException {
         File dstFile = (resName==null) ?
                 File.createTempFile(CommonFunction.getCurrentTime("ddMMYY-HHmmss")+"_", "."+resFormat , new File(filePath)):
-                new File(filePath+CommonFunction.getCurrentTime("ddMMYY-HHmmss")+"_"+resName+"."+resFormat);
+                new File(filePath+CommonFunction.getCurrentTime("ddMMYY-HHmmss") + "_" + key + "_" + resName + "." + resFormat);
         BufferedImage imageR = ImageIO.read(srcFile);
         //original image size
         int width   = imageR.getWidth();
@@ -115,6 +118,32 @@ public class ImageUtil {
             heightR = (int) (widthRatio * height);
         }
         return new int[] {widthR, heightR};
+    }
+
+    public static List<File> uploadImages(List<Http.MultipartFormData.FilePart> images,
+                                                    String imageDirectory, String name, int[] resolution, String imageFormat) throws IOException{
+        List<File> newFiles = new ArrayList<File>();
+        boolean success = true;
+        int count = 1;
+        for (Http.MultipartFormData.FilePart image : images) {
+            File newFile = uploadImage(image, imageDirectory, name + "-" + count, resolution, imageFormat);
+            if(newFile!=null){
+                newFiles.add(newFile);
+                count++;
+            }
+            else{
+                success = false;
+                deleteFiles(newFiles);
+                break;
+            }
+        }
+        return success ? newFiles : null;
+    }
+
+    private static void deleteFiles(List<File> newFiles){
+        for (File file : newFiles) {
+            file.delete();
+        }
     }
 
 
