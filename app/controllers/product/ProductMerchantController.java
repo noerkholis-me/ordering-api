@@ -244,6 +244,11 @@ public class ProductMerchantController extends BaseController {
                     } else if (updateStatusRequest.getIsCustomizable() != productMerchantDetail.getIsCustomizable()) {
                         productMerchantDetail.setIsCustomizable(updateStatusRequest.getIsCustomizable());
                         productMerchantDetail.update();
+                    } else {
+                        productMerchant.setIsActive(updateStatusRequest.getIsActive());
+                        productMerchantDetail.setIsCustomizable(updateStatusRequest.getIsCustomizable());
+                        productMerchant.update();
+                        productMerchantDetail.update();
                     }
                     response.setBaseResponse(1, 0, 1, success + " Update status data product", productMerchant.id);
                     return ok(Json.toJson(response));
