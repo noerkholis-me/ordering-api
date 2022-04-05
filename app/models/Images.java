@@ -2,6 +2,8 @@ package models;
 
 import com.hokeba.util.Encryption;
 import com.hokeba.util.Helper;
+import lombok.Getter;
+import lombok.Setter;
 import play.db.ebean.Model;
 
 import javax.persistence.Column;
@@ -16,6 +18,8 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "images")
+@Getter
+@Setter
 public class Images extends Model {
     public static final long serialVersionUID = 1L;
 
@@ -24,6 +28,12 @@ public class Images extends Model {
 
     @Column(columnDefinition = "TEXT")
     public String images;
+
+    @Column(name = "module")
+    public String module;
+
+    @Column(name = "image_key")
+    public String imageKey;
 
     public static Finder<String, Images> find = new Finder<>(String.class, Images.class);
 

@@ -11,6 +11,7 @@ GET     /images/:folder/:id                         controllers.ApplicationContr
 GET     /images/:folder/:folder2/:id                controllers.ApplicationController.imageByFolder2(folder:String, folder2:String, id: String)
 GET     /banner/images/:folder/:name           		controllers.ApplicationController.getImage(folder:String, name: String)
 GET     /images/:key/:name                          controllers.ApplicationController.getImageByKey(key: String, name: String)
+POST    /images/:key/upload                         controllers.ImagesController.uploadImages(key: String)
 
 GET     /catalogs/:filename                     	controllers.ApplicationController.catalog(filename: String)
 OPTIONS /*all                           		    controllers.ApplicationController.preflight(all)

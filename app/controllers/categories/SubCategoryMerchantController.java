@@ -356,8 +356,8 @@ public class SubCategoryMerchantController extends BaseController {
                     response.setSubcategoryName(data.getSubcategoryName());
                     response.setImageWeb(data.getImageWeb());
                     response.setImageMobile(data.getImageMobile());
-                    response.setIsDeleted(data.getIsDeleted());
-                    response.setIsActive(data.getIsActive());
+                    response.setIsDeleted(data.isDeleted);
+                    response.setIsActive(data.isActive());
                     response.setSequence(data.getSequence());
                     response.setMerchantId(data.getMerchant().id);
                     response.setCategoryId(data.getCategoryMerchant().id);
