@@ -1,7 +1,5 @@
 # --- !Ups
-ALTER TABLE images ADD COLUMN module varchar(255);
-ALTER TABLE images ADD COLUMN image_key varchar(255);
+ALTER TABLE sub_category_merchant add column sequence int;
 
 # --- !Downs
-alter table images drop column if exists module;
-alter table images drop column if exists image_key;
+alter table sub_category_merchant drop column if exists sequence;

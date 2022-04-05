@@ -362,6 +362,10 @@ DELETE  /merchant/subcategory/:id/delete                  controllers.categories
 PUT     /merchant/subcategory/:id/update                  controllers.categories.SubCategoryMerchantController.editSubCategory(id:Long)
 GET     /merchant/subcategory/:id/detail                  controllers.categories.SubCategoryMerchantController.viewSubCategory(id:Long)
 
+#SEQUENCE
+GET     /merchant/category/sequencelist                 controllers.categories.SubCategoryMerchantController.listSequence()
+PUT     /merchant/category/sequence                     controllers.categories.SubCategoryMerchantController.updateSequence()
+
 #SHIPPER
 GET     /master/province                            controllers.masters.ShipperController.getAllProvince(provinceName: String ?= "")
 GET     /master/city/:id/province                   controllers.masters.ShipperController.getAllCityByProvinceId(id: Long, cityName: String ?= "")
