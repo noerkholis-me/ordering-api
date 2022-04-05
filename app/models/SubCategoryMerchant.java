@@ -15,6 +15,10 @@ import java.util.Date;
 public class SubCategoryMerchant extends BaseModel {
     private static final long serialVersionUID = 1L;
 
+    @Getter
+    @JsonProperty("id")
+    public Long id;
+
     @Getter @Setter
     @JsonProperty("subcategory_name")
     public String subcategoryName;
@@ -52,6 +56,10 @@ public class SubCategoryMerchant extends BaseModel {
     @JsonProperty("is_deleted")
     @Column(name = "is_deleted")
     public boolean isDeleted;
+
+    @Setter @Getter
+    @JsonProperty("sequence")
+    public int sequence;
 
     @JsonIgnore
     @ManyToOne

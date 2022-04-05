@@ -28,6 +28,9 @@ public class SubCategoryMerchantResponse  {
     @JsonProperty("is_active")
     public Boolean isActive;
 
+    @JsonProperty("sequence")
+    public int sequence;
+
     @JsonProperty("category_id")
     private Long categoryId;
 
