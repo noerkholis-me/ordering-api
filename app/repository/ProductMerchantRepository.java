@@ -15,7 +15,7 @@ public class ProductMerchantRepository extends Model {
     public static Finder<Long, ProductMerchant> find = new Finder<>(Long.class, ProductMerchant.class);
 
     public static ProductMerchant findById(Long id, Merchant merchant) {
-        return find.where().eq("id", id).eq("isActive", Boolean.TRUE).eq("merchant", merchant).findUnique();
+        return find.where().eq("id", id).eq("merchant", merchant).findUnique();
     }
 
     public static Query<ProductMerchant> findProductIsActiveAndMerchant(Merchant merchant, Boolean isActive) {
