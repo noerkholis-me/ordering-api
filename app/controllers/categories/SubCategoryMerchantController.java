@@ -324,6 +324,7 @@ public class SubCategoryMerchantController extends BaseController {
                     response.setImageMobile(data.getImageMobile());
                     response.setIsDeleted(data.isDeleted);
                     response.setIsActive(data.isActive);
+                    response.setSequence(data.getSequence());
                     response.setMerchantId(data.getMerchant().id);
                     response.setCategoryId(data.getCategoryMerchant().id);
                     responses.add(response);
@@ -423,5 +424,46 @@ public class SubCategoryMerchantController extends BaseController {
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
     }
+
+    @ApiOperation(value = "Status Sub Category", notes = "Status Sub Category.\n" + swaggerInfo
+            + "", response = BaseResponse.class, httpMethod = "PUT")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "sub category form", dataType = "temp.swaggermap.SubCategoryForm", required = true, paramType = "body", value = "sub category form") })
+        public static Result setStatus(Long id) {
+            Merchant ownMerchant = checkMerchantAccessAuthorization();
+            if (ownMerchant != null) {
+                try {
+                    JsonNode json = request().body().asJson();
+                    SubCategoryMerchantResponse request = objectMapper.readValue(json.toString(), SubCategoryMerchantResponse.class);
+                    Transaction trx = Ebean.beginTransaction();
+                    try {
+                        SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        if (subCategoryMerchant == null) {
+                            response.setBaseResponse(0, 0, 0, error + " sub category tidak tersedia.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        subCategoryMerchant.setActive(request.getIsActive());
+                        subCategoryMerchant.update();
+    
+                        trx.commit();
+                        response.setBaseResponse(1, offset, 1, success + " mengubah status sub category", subCategoryMerchant);
+                        return ok(Json.toJson(response));
+                    } catch (Exception e) {
+                        logger.error("Error saat mengubah status sub category", e);
+                        e.printStackTrace();
+                        trx.rollback();
+                    } finally {
+                        trx.end();
+                    }
+                    response.setBaseResponse(0, 0, 0, error, null);
+                    return badRequest(Json.toJson(response));
+                } catch (Exception e) {
+                    logger.error("Error saat parsing json", e);
+                    e.printStackTrace();
+                }
+            }
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
 
 }
