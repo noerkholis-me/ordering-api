@@ -326,4 +326,45 @@ public class CategoryMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
+    @ApiOperation(value = "Status Category", notes = "Status Category.\n" + swaggerInfo
+            + "", response = BaseResponse.class, httpMethod = "PUT")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "category form", dataType = "temp.swaggermap.CategoryForm", required = true, paramType = "body", value = "category form") })
+        public static Result setStatus(Long id) {
+            Merchant ownMerchant = checkMerchantAccessAuthorization();
+            if (ownMerchant != null) {
+                try {
+                    JsonNode json = request().body().asJson();
+                    CategoryMerchantResponse request = objectMapper.readValue(json.toString(), CategoryMerchantResponse.class);
+                    Transaction trx = Ebean.beginTransaction();
+                    try {
+                        CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        if (categoryMerchant == null) {
+                            response.setBaseResponse(0, 0, 0, error + " category tidak tersedia.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        categoryMerchant.setActive(request.getIsActive());
+                        categoryMerchant.update();
+    
+                        trx.commit();
+                        response.setBaseResponse(1, offset, 1, success + " mengubah status category", categoryMerchant);
+                        return ok(Json.toJson(response));
+                    } catch (Exception e) {
+                        logger.error("Error saat mengubah status category", e);
+                        e.printStackTrace();
+                        trx.rollback();
+                    } finally {
+                        trx.end();
+                    }
+                    response.setBaseResponse(0, 0, 0, error, null);
+                    return badRequest(Json.toJson(response));
+                } catch (Exception e) {
+                    logger.error("Error saat parsing json", e);
+                    e.printStackTrace();
+                }
+            }
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+
 }
