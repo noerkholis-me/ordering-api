@@ -124,8 +124,8 @@ public class BannersMerchantController extends BaseController {
                     response.setBannerName(data.getBannerName());
                     response.setBannerImageWeb(data.getBannerImageWeb());
                     response.setBannerImageMobile(data.getBannerImageMobile());
-                    response.setIsActive(data.isActive());
-                    response.setIsDeleted(data.isDeleted());
+                    response.setActive(data.isActive());
+                    response.setDeleted(data.isDeleted());
                     response.setDateFrom(data.getDateFrom());
                     response.setDateTo(data.getDateTo());
                     response.setMerchantId(data.getMerchant().id);
@@ -292,7 +292,7 @@ public class BannersMerchantController extends BaseController {
                             response.setBaseResponse(0, 0, 0, error + " banners tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
                         }
-                        banners.setActive(request.getIsActive());
+                        banners.setActive(request.isActive());
                         banners.update();
     
                         trx.commit();
