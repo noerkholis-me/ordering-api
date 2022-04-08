@@ -310,4 +310,44 @@ public class BrandMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
+    @ApiOperation(value = "Status Brand", notes = "Status Brand.\n" + swaggerInfo
+            + "", response = BaseResponse.class, httpMethod = "PUT")
+    @ApiImplicitParams({
+        @ApiImplicitParam(name = "brand form", dataType = "temp.swaggermap.BrandForm", required = true, paramType = "body", value = "brand form") })
+        public static Result setStatus(Long id) {
+            Merchant ownMerchant = checkMerchantAccessAuthorization();
+            if (ownMerchant != null) {
+                try {
+                    JsonNode json = request().body().asJson();
+                    BrandMerchantResponse request = objectMapper.readValue(json.toString(), BrandMerchantResponse.class);
+                    Transaction trx = Ebean.beginTransaction();
+                    try {
+                        BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        if (brandMerchant == null) {
+                            response.setBaseResponse(0, 0, 0, error + " brand tidak tersedia.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        brandMerchant.setActive(request.getIsActive());
+                        brandMerchant.update();
+    
+                        trx.commit();
+                        response.setBaseResponse(1, offset, 1, success + " mengubah status brand", brandMerchant);
+                        return ok(Json.toJson(response));
+                    } catch (Exception e) {
+                        logger.error("Error saat mengubah status brand", e);
+                        e.printStackTrace();
+                        trx.rollback();
+                    } finally {
+                        trx.end();
+                    }
+                    response.setBaseResponse(0, 0, 0, error, null);
+                    return badRequest(Json.toJson(response));
+                } catch (Exception e) {
+                    logger.error("Error saat parsing json", e);
+                    e.printStackTrace();
+                }
+            }
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
 }

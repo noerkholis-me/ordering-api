@@ -31,5 +31,4 @@ public class BrandMerchantResponse  {
     @JsonProperty("merchant_id")
     private Long merchantId;
 
-
 }

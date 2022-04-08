@@ -347,6 +347,7 @@ POST    /merchant/brand                             controllers.brand.BrandMerch
 DELETE  /merchant/brand/:id/delete                  controllers.brand.BrandMerchantController.deleteBrand(id:Long)
 PUT     /merchant/brand/:id/update                  controllers.brand.BrandMerchantController.editBrand(id:Long)
 GET     /merchant/brand/:id/detail                  controllers.brand.BrandMerchantController.viewBrand(id:Long)
+PUT     /merchant/brand/:id/status                  controllers.brand.BrandMerchantController.setStatus(id: Long)
 
 #CATEGORY
 GET     /merchant/category/list                        controllers.categories.CategoryMerchantController.listCategory(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
@@ -354,6 +355,7 @@ POST    /merchant/category                             controllers.categories.Ca
 DELETE  /merchant/category/:id/delete                  controllers.categories.CategoryMerchantController.deleteCategory(id:Long)
 PUT     /merchant/category/:id/update                  controllers.categories.CategoryMerchantController.editCategory(id:Long)
 GET     /merchant/category/:id/detail                  controllers.categories.CategoryMerchantController.viewCategory(id:Long)
+PUT     /merchant/category/:id/status                  controllers.categories.CategoryMerchantController.setStatus(id: Long)
 
 #SUB CATEGORY
 GET     /merchant/subcategory/list                        controllers.categories.SubCategoryMerchantController.listSubCategory(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
@@ -361,6 +363,7 @@ POST    /merchant/subcategory/:id                         controllers.categories
 DELETE  /merchant/subcategory/:id/delete                  controllers.categories.SubCategoryMerchantController.deleteSubCategory(id:Long)
 PUT     /merchant/subcategory/:id/update                  controllers.categories.SubCategoryMerchantController.editSubCategory(id:Long)
 GET     /merchant/subcategory/:id/detail                  controllers.categories.SubCategoryMerchantController.viewSubCategory(id:Long)
+PUT     /merchant/subcategory/:id/status                  controllers.categories.SubCategoryMerchantController.setStatus(id: Long)
 
 #SEQUENCE
 GET     /merchant/category/sequencelist                 controllers.categories.SubCategoryMerchantController.listSequence()
@@ -390,3 +393,11 @@ GET    /merchant/product                            controllers.product.ProductM
 GET    /merchant/product/:id                        controllers.product.ProductMerchantController.getProductById(id: Long)
 DELETE    /merchant/product/:id                     controllers.product.ProductMerchantController.deleteProduct(id: Long)
 PUT   /merchant/product/:id/status                  controllers.product.ProductMerchantController.updateStatusProduct(id: Long)
+
+#BANNERS
+POST    /merchant/banners                           controllers.banners.BannersMerchantController.createBanners()
+PUT     /merchant/banners/:id/update                controllers.banners.BannersMerchantController.editBanners(id: Long)
+GET     /merchant/banners/list                      controllers.banners.BannersMerchantController.listBanners(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET     /merchant/banners/:id/read                  controllers.banners.BannersMerchantController.viewBanner(id: Long)
+DELETE     /merchant/banners/:id/delete             controllers.banners.BannersMerchantController.deleteBrand(id: Long)
+PUT     /merchant/banners/:id/status                controllers.banners.BannersMerchantController.setStatus(id: Long)
