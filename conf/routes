@@ -348,6 +348,7 @@ DELETE  /merchant/brand/:id/delete                  controllers.brand.BrandMerch
 PUT     /merchant/brand/:id/update                  controllers.brand.BrandMerchantController.editBrand(id:Long)
 GET     /merchant/brand/:id/detail                  controllers.brand.BrandMerchantController.viewBrand(id:Long)
 PUT     /merchant/brand/:id/status                  controllers.brand.BrandMerchantController.setStatus(id: Long)
+GET     /brand/:merchantId                          controllers.brand.BrandMerchantController.listBrandHomepage(merchantId: Long, offset:Int ?= 0)
 
 #CATEGORY
 GET     /merchant/category/list                        controllers.categories.CategoryMerchantController.listCategory(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
@@ -401,3 +402,4 @@ GET     /merchant/banners/list                      controllers.banners.BannersM
 GET     /merchant/banners/:id/read                  controllers.banners.BannersMerchantController.viewBanner(id: Long)
 DELETE     /merchant/banners/:id/delete             controllers.banners.BannersMerchantController.deleteBrand(id: Long)
 PUT     /merchant/banners/:id/status                controllers.banners.BannersMerchantController.setStatus(id: Long)
+GET     /banners/:merchantId                        controllers.banners.BannersMerchantController.listBannersHomepage(merchantId: Long)

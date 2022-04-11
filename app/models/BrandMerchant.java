@@ -27,6 +27,22 @@ public class BrandMerchant extends BaseModel {
     @JsonProperty("image_mobile")
     public String imageMobile;
 
+    @Getter @Setter
+    @JsonProperty("icon_web")
+    public String iconWeb;
+
+    @Getter @Setter
+    @JsonProperty("icon_mobile")
+    public String iconMobile;
+
+    @Getter @Setter
+    @JsonProperty("brand_type")
+    public String brandType;
+
+    @Getter @Setter
+    @JsonProperty("brand_description")
+    public String brandDescription;
+
     @Setter @Getter
     @JsonProperty("is_active")
     @Column(name = "is_active")

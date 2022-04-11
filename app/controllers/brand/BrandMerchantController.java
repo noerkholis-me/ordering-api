@@ -64,6 +64,8 @@ public class BrandMerchantController extends BaseController {
                     try {
                         BrandMerchant newBrandMerchant = new BrandMerchant();
                         newBrandMerchant.setBrandName(request.getBrandName());
+                        newBrandMerchant.setBrandType(request.getBrandType());
+                        newBrandMerchant.setBrandDescription(request.getBrandDescription());
                         newBrandMerchant.setMerchant(ownMerchant);
                         newBrandMerchant.setActive(request.getIsActive());
                         newBrandMerchant.save();
@@ -73,17 +75,29 @@ public class BrandMerchantController extends BaseController {
                         ** do the same for the save image mobile
                          */
                         // for Website
-                        Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image-web");
+                        Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image_web");
                         File imageWeb = ImageUtil.uploadImage(imageFileWeb, "brand", "brand-web", ImageUtil.fullImageSize, "jpg");
                         String imageWebUrl = ImageUtil.createImageUrl("brand", imageWeb != null ? imageWeb.getName() : null);
 
                         // for Mobile
-                        Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image-mobile");
+                        Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image_mobile");
                         File imageMobile = ImageUtil.uploadImage(imageFileMobile, "brand", "brand-mobile", ImageUtil.fullImageSize, "jpg");
                         String imageMobileUrl = ImageUtil.createImageUrl("brand", imageMobile != null ? imageMobile.getName() : null);
+
+                        //for icon web
+                        Http.MultipartFormData.FilePart iconFileWeb = Objects.requireNonNull(body).getFile("icon_web");
+                        File iconWeb = ImageUtil.uploadImage(iconFileWeb, "brand", "icon-web", ImageUtil.fullImageSize, "jpg");
+                        String iconWebUrl = ImageUtil.createImageUrl("brand", iconWeb != null ? iconWeb.getName() : null);
+                        
+                        //for icon mobile
+                        Http.MultipartFormData.FilePart iconFileMobile = Objects.requireNonNull(body).getFile("icon_mobile");
+                        File iconMobile = ImageUtil.uploadImage(iconFileMobile, "brand", "icon-mobile", ImageUtil.fullImageSize, "jpg");
+                        String iconMobileUrl = ImageUtil.createImageUrl("brand", iconMobile != null ? iconMobile.getName() : null);
                         // ========================== update with image ========================== //
                         newBrandMerchant.setImageWeb(imageWebUrl);
                         newBrandMerchant.setImageMobile(imageMobileUrl);
+                        newBrandMerchant.setIconWeb(iconWebUrl);
+                        newBrandMerchant.setIconMobile(iconMobileUrl);
                         newBrandMerchant.update();
 
                         trx.commit();
@@ -134,8 +148,12 @@ public class BrandMerchantController extends BaseController {
                     BrandMerchantResponse response = new BrandMerchantResponse();
                     response.setId(data.id);
                     response.setBrandName(data.getBrandName());
+                    response.setBrandType(data.getBrandType());
+                    response.setBrandDescription(data.getBrandDescription());
                     response.setImageWeb(data.getImageWeb());
                     response.setImageMobile(data.getImageMobile());
+                    response.setIconWeb(data.getIconWeb());
+                    response.setIconMobile(data.getIconMobile());
                     response.setIsDeleted(data.isDeleted);
                     response.setIsActive(data.isActive());
                     response.setMerchantId(data.getMerchant().id);
@@ -183,6 +201,8 @@ public class BrandMerchantController extends BaseController {
                             return badRequest(Json.toJson(response));
                         }
                         brandMerchant.setBrandName(request.getBrandName());
+                        brandMerchant.setBrandType(request.getBrandType());
+                        brandMerchant.setBrandDescription(request.getBrandDescription());
                         brandMerchant.setMerchant(ownMerchant);
                         brandMerchant.setActive(request.getIsActive());
 
@@ -191,17 +211,29 @@ public class BrandMerchantController extends BaseController {
                         ** do the same for the save image mobile
                          */
                         // for Website
-                        Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image-web");
+                        Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image_web");
                         File imageWeb = ImageUtil.uploadImage(imageFileWeb, "brand", "brand-web", ImageUtil.fullImageSize, "jpg");
                         String imageWebUrl = ImageUtil.createImageUrl("brand", imageWeb != null ? imageWeb.getName() : null);
-
+ 
                         // for Mobile
-                        Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image-mobile");
+                        Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image_mobile");
                         File imageMobile = ImageUtil.uploadImage(imageFileMobile, "brand", "brand-mobile", ImageUtil.fullImageSize, "jpg");
                         String imageMobileUrl = ImageUtil.createImageUrl("brand", imageMobile != null ? imageMobile.getName() : null);
+ 
+                        //for icon web
+                        Http.MultipartFormData.FilePart iconFileWeb = Objects.requireNonNull(body).getFile("icon_web");
+                        File iconWeb = ImageUtil.uploadImage(iconFileWeb, "brand", "icon-web", ImageUtil.fullImageSize, "jpg");
+                        String iconWebUrl = ImageUtil.createImageUrl("brand", iconWeb != null ? iconWeb.getName() : null);
+                         
+                        //for icon mobile
+                        Http.MultipartFormData.FilePart iconFileMobile = Objects.requireNonNull(body).getFile("icon_mobile");
+                        File iconMobile = ImageUtil.uploadImage(iconFileMobile, "brand", "icon-mobile", ImageUtil.fullImageSize, "jpg");
+                        String iconMobileUrl = ImageUtil.createImageUrl("brand", iconMobile != null ? iconMobile.getName() : null);
                         // ========================== update with image ========================== //
                         brandMerchant.setImageWeb(imageWebUrl);
                         brandMerchant.setImageMobile(imageMobileUrl);
+                        brandMerchant.setIconWeb(iconWebUrl);
+                        brandMerchant.setIconMobile(iconMobileUrl);
                         brandMerchant.update();
 
                         trx.commit();
@@ -285,8 +317,12 @@ public class BrandMerchantController extends BaseController {
                     BrandMerchantResponse BrandMerchantResponse = new BrandMerchantResponse();
                     BrandMerchantResponse.setId(BrandMerchant.id);
                     BrandMerchantResponse.setBrandName(BrandMerchant.getBrandName());
+                    BrandMerchantResponse.setBrandType(BrandMerchant.getBrandType());
+                    BrandMerchantResponse.setBrandDescription(BrandMerchant.getBrandDescription());
                     BrandMerchantResponse.setImageWeb(BrandMerchant.getImageWeb());
                     BrandMerchantResponse.setImageMobile(BrandMerchant.getImageMobile());
+                    BrandMerchantResponse.setIconWeb(BrandMerchant.getIconWeb());
+                    BrandMerchantResponse.setIconMobile(BrandMerchant.getIconMobile());
                     BrandMerchantResponse.setIsDeleted(BrandMerchant.isDeleted);
                     BrandMerchantResponse.setIsActive(BrandMerchant.isActive());
                     BrandMerchantResponse.setMerchantId(BrandMerchant.getMerchant().id);
@@ -350,4 +386,42 @@ public class BrandMerchantController extends BaseController {
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         }
+
+        @ApiOperation(value = "Get all brand list.", notes = "Returns list of brand.\n" + swaggerInfo
+            + "", response = BrandMerchant.class, responseContainer = "List", httpMethod = "GET")
+    public static Result listBrandHomepage(Long merchantId, int offset) {
+        Merchant ownMerchant = Merchant.merchantGetId(merchantId);
+        if (ownMerchant != null) {
+            Query<BrandMerchant> query = BrandMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).order("t0.name");
+            try {
+                List<BrandMerchantResponse> responses = new ArrayList<>();
+                List<BrandMerchant> totalData = BrandMerchantRepository.getTotalData(query);
+                List<BrandMerchant> responseIndex = BrandMerchantRepository.getDataBrandHomepage(query, offset);
+                for (BrandMerchant data : responseIndex) {
+                    BrandMerchantResponse response = new BrandMerchantResponse();
+                    response.setId(data.id);
+                    response.setBrandName(data.getBrandName());
+                    response.setBrandType(data.getBrandType());
+                    response.setBrandDescription(data.getBrandDescription());
+                    response.setImageWeb(data.getImageWeb());
+                    response.setImageMobile(data.getImageMobile());
+                    response.setIconWeb(data.getIconWeb());
+                    response.setIconMobile(data.getIconMobile());
+                    response.setIsDeleted(data.isDeleted);
+                    response.setIsActive(data.isActive());
+                    response.setMerchantId(data.getMerchant().id);
+                    responses.add(response);
+                }
+                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size() , offset, limit, success + " menampilkan data", responses);
+                return ok(Json.toJson(response));
+            } catch (IOException e) {
+                Logger.error("allDetail", e);
+            }
+        } else if (ownMerchant == null) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
 }
