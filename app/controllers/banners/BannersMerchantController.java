@@ -29,6 +29,8 @@ import utils.ImageUtil;
 
 import java.io.IOException;
 
+import java.sql.Timestamp;
+
 @Api(value = "/merchants/banners", description = "Banners Merchant")
 public class BannersMerchantController extends BaseController {
 
@@ -315,5 +317,46 @@ public class BannersMerchantController extends BaseController {
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         }
+
+
+        // BANNERS FOR HOMEPAGE
+        @ApiOperation(value = "Get all banner list.", notes = "Returns list of banner.\n" + swaggerInfo
+            + "", response = Banners.class, responseContainer = "List", httpMethod = "GET")
+    public static Result listBannersHomepage(Long merchantId) {
+        Merchant ownMerchant = Merchant.merchantGetId(merchantId);
+
+        Timestamp dateNow = new Timestamp(System.currentTimeMillis()); 
+        System.out.println(dateNow);
+        if (ownMerchant != null) {
+            Query<Banners> query = BannersRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).betweenProperties("t0.date_from", "t0.date_to", dateNow).order("t0.date_from");
+            try {
+                List<BannersResponse> responses = new ArrayList<>();
+                List<Banners> totalData = BannersRepository.getTotalData(query);
+                List<Banners> responseIndex = BannersRepository.getForHomeBanners(query);
+                for (Banners data : responseIndex) {
+                    BannersResponse response = new BannersResponse();
+                    response.setId(data.id);
+                    response.setBannerName(data.getBannerName());
+                    response.setBannerImageWeb(data.getBannerImageWeb());
+                    response.setBannerImageMobile(data.getBannerImageMobile());
+                    response.setActive(data.isActive());
+                    response.setDeleted(data.isDeleted());
+                    response.setDateFrom(data.getDateFrom());
+                    response.setDateTo(data.getDateTo());
+                    response.setMerchantId(data.getMerchant().id);
+                    responses.add(response);
+                }
+                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size() , offset, limit, success + " menampilkan data", responses);
+                return ok(Json.toJson(response));
+            } catch (IOException e) {
+                Logger.error("allDetail", e);
+            }
+        } else if (ownMerchant == null) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
 
 }

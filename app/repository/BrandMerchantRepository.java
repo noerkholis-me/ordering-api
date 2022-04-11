@@ -77,4 +77,22 @@ public class BrandMerchantRepository extends Model {
 
 		return resData;
 	}
+
+	public static List<BrandMerchant> getDataBrandHomepage(Query<BrandMerchant> reqQuery, int offset)
+			throws IOException {
+		Query<BrandMerchant> query = reqQuery;
+		query = query.orderBy("t0.brand_name asc");
+
+		ExpressionList<BrandMerchant> exp = query.where();
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        // exp = exp.endjunction();
+
+		query = exp.query();
+
+		int total = query.findList().size();
+
+		List<BrandMerchant> resData = query.findPagingList(0).getPage(offset).getList();
+
+		return resData;
+	}
 }

@@ -31,4 +31,16 @@ public class BrandMerchantResponse  {
     @JsonProperty("merchant_id")
     private Long merchantId;
 
+    @JsonProperty("icon_web")
+    public String iconWeb;
+
+    @JsonProperty("icon_mobile")
+    public String iconMobile;
+
+    @JsonProperty("brand_type")
+    public String brandType;
+
+    @JsonProperty("brand_description")
+    public String brandDescription;
+
 }

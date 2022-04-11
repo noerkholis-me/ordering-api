@@ -221,6 +221,7 @@ public class StoreController extends BaseController {
     private static StoreResponse toResponse(Store store) {
         return StoreResponse.builder()
                 .id(store.id)
+                .storeCode(store.storeCode)
                 .storeName(store.storeName)
                 .storePhone(store.storePhone)
                 .address(store.storeAddress)

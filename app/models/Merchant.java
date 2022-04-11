@@ -673,4 +673,8 @@ public class Merchant extends BaseModel{
         return result;
     }
 
+    public static Merchant merchantGetId(Long merchantId) {
+    	return Merchant.find.where().eq("t0.id", merchantId).orderBy("t0.id asc").setMaxRows(1).findUnique();
+    }
+
 }
