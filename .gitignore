@@ -20,4 +20,4 @@ conf/application.conf
 public/uploads
 sandbox-elasticsearch
 .vscode
-/sandbox-media/picture
+/sandbox-media

@@ -15,6 +15,8 @@ import lombok.*;
 public class StoreResponse {
 
     private Long id;
+    @JsonProperty("store_code")
+    private String storeCode;
     @JsonProperty("store_name")
     private String storeName;
     @JsonProperty("store_phone")

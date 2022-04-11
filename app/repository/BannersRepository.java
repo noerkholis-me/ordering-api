@@ -60,6 +60,25 @@ public class BannersRepository extends Model {
 		return resData;
 	}
 
+	public static List<Banners> getForHomeBanners(Query<Banners> reqQuery)
+			throws IOException {
+
+		Query<Banners> query = reqQuery;
+		query = query.orderBy("t0.date_from desc");
+
+		ExpressionList<Banners> exp = query.where();
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        // exp = exp.endjunction();
+
+		query = exp.query();
+
+		int total = query.findList().size();
+
+		List<Banners> resData = query.findPagingList(0).getPage(0).getList();
+
+		return resData;
+	}
+
 	public static List<Banners> getTotalData(Query<Banners> reqQuery)
 			throws IOException {
 		Query<Banners> query = reqQuery;
