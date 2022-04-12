@@ -233,6 +233,7 @@ public class StoreController extends BaseController {
                 .latitude(store.storeLatitude)
                 .longitude(store.storeLongitude)
                 .storeQrCode(store.getStoreQrCode())
+                .merchantId(store.merchant.id)
                 .build();
     }
 
