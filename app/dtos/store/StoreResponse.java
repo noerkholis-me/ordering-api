@@ -37,5 +37,7 @@ public class StoreResponse {
     private Double longitude;
     @JsonProperty("store_qr_code")
     private String storeQrCode;
+    @JsonProperty("merchant_id")
+    private Long merchantId;
 
 }
