@@ -68,37 +68,36 @@ public class BrandMerchantController extends BaseController {
                         newBrandMerchant.setBrandDescription(request.getBrandDescription());
                         newBrandMerchant.setMerchant(ownMerchant);
                         newBrandMerchant.setActive(request.getIsActive());
-                        newBrandMerchant.save();
 
-                        // ========================== update with image ========================== //
-                        /*
-                        ** do the same for the save image mobile
-                         */
-                        // for Website
-                        Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image_web");
-                        File imageWeb = ImageUtil.uploadImage(imageFileWeb, "brand", "brand-web", ImageUtil.fullImageSize, "jpg");
-                        String imageWebUrl = ImageUtil.createImageUrl("brand", imageWeb != null ? imageWeb.getName() : null);
+                        // // ========================== update with image ========================== //
+                        // /*
+                        // ** do the same for the save image mobile
+                        //  */
+                        // // for Website
+                        // Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image_web");
+                        // File imageWeb = ImageUtil.uploadImage(imageFileWeb, "brand", "brand-web", ImageUtil.fullImageSize, "jpg");
+                        // String imageWebUrl = ImageUtil.createImageUrl("brand", imageWeb != null ? imageWeb.getName() : null);
 
-                        // for Mobile
-                        Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image_mobile");
-                        File imageMobile = ImageUtil.uploadImage(imageFileMobile, "brand", "brand-mobile", ImageUtil.fullImageSize, "jpg");
-                        String imageMobileUrl = ImageUtil.createImageUrl("brand", imageMobile != null ? imageMobile.getName() : null);
+                        // // for Mobile
+                        // Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image_mobile");
+                        // File imageMobile = ImageUtil.uploadImage(imageFileMobile, "brand", "brand-mobile", ImageUtil.fullImageSize, "jpg");
+                        // String imageMobileUrl = ImageUtil.createImageUrl("brand", imageMobile != null ? imageMobile.getName() : null);
 
-                        //for icon web
-                        Http.MultipartFormData.FilePart iconFileWeb = Objects.requireNonNull(body).getFile("icon_web");
-                        File iconWeb = ImageUtil.uploadImage(iconFileWeb, "brand", "icon-web", ImageUtil.fullImageSize, "jpg");
-                        String iconWebUrl = ImageUtil.createImageUrl("brand", iconWeb != null ? iconWeb.getName() : null);
+                        // //for icon web
+                        // Http.MultipartFormData.FilePart iconFileWeb = Objects.requireNonNull(body).getFile("icon_web");
+                        // File iconWeb = ImageUtil.uploadImage(iconFileWeb, "brand", "icon-web", ImageUtil.fullImageSize, "jpg");
+                        // String iconWebUrl = ImageUtil.createImageUrl("brand", iconWeb != null ? iconWeb.getName() : null);
                         
-                        //for icon mobile
-                        Http.MultipartFormData.FilePart iconFileMobile = Objects.requireNonNull(body).getFile("icon_mobile");
-                        File iconMobile = ImageUtil.uploadImage(iconFileMobile, "brand", "icon-mobile", ImageUtil.fullImageSize, "jpg");
-                        String iconMobileUrl = ImageUtil.createImageUrl("brand", iconMobile != null ? iconMobile.getName() : null);
-                        // ========================== update with image ========================== //
-                        newBrandMerchant.setImageWeb(imageWebUrl);
-                        newBrandMerchant.setImageMobile(imageMobileUrl);
-                        newBrandMerchant.setIconWeb(iconWebUrl);
-                        newBrandMerchant.setIconMobile(iconMobileUrl);
-                        newBrandMerchant.update();
+                        // //for icon mobile
+                        // Http.MultipartFormData.FilePart iconFileMobile = Objects.requireNonNull(body).getFile("icon_mobile");
+                        // File iconMobile = ImageUtil.uploadImage(iconFileMobile, "brand", "icon-mobile", ImageUtil.fullImageSize, "jpg");
+                        // String iconMobileUrl = ImageUtil.createImageUrl("brand", iconMobile != null ? iconMobile.getName() : null);
+                        // // ========================== update with image ========================== //
+                        newBrandMerchant.setImageWeb(request.getImageWeb());
+                        newBrandMerchant.setImageMobile(request.getImageMobile());
+                        newBrandMerchant.setIconWeb(request.getIconWeb());
+                        newBrandMerchant.setIconMobile(request.getIconMobile());
+                        newBrandMerchant.save();
 
                         trx.commit();
                         response.setBaseResponse(1, offset, 1, success + " membuat brand", newBrandMerchant);
@@ -206,34 +205,43 @@ public class BrandMerchantController extends BaseController {
                         brandMerchant.setMerchant(ownMerchant);
                         brandMerchant.setActive(request.getIsActive());
 
-                        // ========================== update with image ========================== //
-                        /*
-                        ** do the same for the save image mobile
-                         */
-                        // for Website
-                        Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image_web");
-                        File imageWeb = ImageUtil.uploadImage(imageFileWeb, "brand", "brand-web", ImageUtil.fullImageSize, "jpg");
-                        String imageWebUrl = ImageUtil.createImageUrl("brand", imageWeb != null ? imageWeb.getName() : null);
+                        // // ========================== update with image ========================== //
+                        // /*
+                        // ** do the same for the save image mobile
+                        //  */
+                        // // for Website
+                        // Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image_web");
+                        // File imageWeb = ImageUtil.uploadImage(imageFileWeb, "brand", "brand-web", ImageUtil.fullImageSize, "jpg");
+                        // String imageWebUrl = ImageUtil.createImageUrl("brand", imageWeb != null ? imageWeb.getName() : null);
  
-                        // for Mobile
-                        Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image_mobile");
-                        File imageMobile = ImageUtil.uploadImage(imageFileMobile, "brand", "brand-mobile", ImageUtil.fullImageSize, "jpg");
-                        String imageMobileUrl = ImageUtil.createImageUrl("brand", imageMobile != null ? imageMobile.getName() : null);
+                        // // for Mobile
+                        // Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image_mobile");
+                        // File imageMobile = ImageUtil.uploadImage(imageFileMobile, "brand", "brand-mobile", ImageUtil.fullImageSize, "jpg");
+                        // String imageMobileUrl = ImageUtil.createImageUrl("brand", imageMobile != null ? imageMobile.getName() : null);
  
-                        //for icon web
-                        Http.MultipartFormData.FilePart iconFileWeb = Objects.requireNonNull(body).getFile("icon_web");
-                        File iconWeb = ImageUtil.uploadImage(iconFileWeb, "brand", "icon-web", ImageUtil.fullImageSize, "jpg");
-                        String iconWebUrl = ImageUtil.createImageUrl("brand", iconWeb != null ? iconWeb.getName() : null);
+                        // //for icon web
+                        // Http.MultipartFormData.FilePart iconFileWeb = Objects.requireNonNull(body).getFile("icon_web");
+                        // File iconWeb = ImageUtil.uploadImage(iconFileWeb, "brand", "icon-web", ImageUtil.fullImageSize, "jpg");
+                        // String iconWebUrl = ImageUtil.createImageUrl("brand", iconWeb != null ? iconWeb.getName() : null);
                          
-                        //for icon mobile
-                        Http.MultipartFormData.FilePart iconFileMobile = Objects.requireNonNull(body).getFile("icon_mobile");
-                        File iconMobile = ImageUtil.uploadImage(iconFileMobile, "brand", "icon-mobile", ImageUtil.fullImageSize, "jpg");
-                        String iconMobileUrl = ImageUtil.createImageUrl("brand", iconMobile != null ? iconMobile.getName() : null);
-                        // ========================== update with image ========================== //
-                        brandMerchant.setImageWeb(imageWebUrl);
-                        brandMerchant.setImageMobile(imageMobileUrl);
-                        brandMerchant.setIconWeb(iconWebUrl);
-                        brandMerchant.setIconMobile(iconMobileUrl);
+                        // //for icon mobile
+                        // Http.MultipartFormData.FilePart iconFileMobile = Objects.requireNonNull(body).getFile("icon_mobile");
+                        // File iconMobile = ImageUtil.uploadImage(iconFileMobile, "brand", "icon-mobile", ImageUtil.fullImageSize, "jpg");
+                        // String iconMobileUrl = ImageUtil.createImageUrl("brand", iconMobile != null ? iconMobile.getName() : null);
+                        // // ========================== update with image ========================== //
+
+                        if(request.getImageWeb() != null){
+                            brandMerchant.setImageWeb(request.getImageWeb());
+                        }
+                        if(request.getImageMobile() != null){
+                            brandMerchant.setImageMobile(request.getImageMobile());
+                        }
+                        if(request.getIconWeb() != null){
+                            brandMerchant.setIconWeb(request.getIconWeb());
+                        }
+                        if(request.getIconMobile() != null){
+                            brandMerchant.setIconMobile(request.getIconMobile());
+                        }
                         brandMerchant.update();
 
                         trx.commit();

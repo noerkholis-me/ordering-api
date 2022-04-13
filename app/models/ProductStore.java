@@ -4,28 +4,35 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hokeba.util.CommonFunction;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import models.merchant.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Date;
 
+import utils.BigDecimalSerialize;
+import java.math.BigDecimal;
+
 @Entity
-public class CategoryMerchant extends BaseModel {
+public class ProductStore extends BaseModel {
     private static final long serialVersionUID = 1L;
 
     @Getter @Setter
-    @JsonProperty("category_name")
-    public String categoryName;
+    @JsonProperty("discount_type")
+    public String discountType;
 
     @Getter @Setter
-    @JsonProperty("image_web")
-    public String imageWeb;
+    @JsonProperty("discount")
+    public Double discount;
 
     @Getter @Setter
-    @JsonProperty("image_mobile")
-    public String imageMobile;
+    @JsonProperty("store_price")
+    public BigDecimal storePrice;
+
+    @Getter @Setter
+    @JsonProperty("final_price")
+    public BigDecimal finalPrice;
 
     @Setter @Getter
     @JsonProperty("is_active")
@@ -38,9 +45,15 @@ public class CategoryMerchant extends BaseModel {
     @Getter @Setter
     public Merchant merchant;
     
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name="product_id", referencedColumnName = "id")
     @Getter @Setter
-    public SubCategoryMerchant subCategory;
+    public ProductMerchant productMerchant;
 
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name="store_id", referencedColumnName = "id")
     @Getter @Setter
-    public SubsCategoryMerchant subsCategory;
+    public Store store;
 }
