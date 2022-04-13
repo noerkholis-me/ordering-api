@@ -15,6 +15,7 @@ import models.Merchant;
 import models.Photo;
 import models.CategoryMerchant;
 import models.SubCategoryMerchant;
+import models.SubsCategoryMerchant;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.BodyParser;
@@ -22,6 +23,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import repository.CategoryMerchantRepository;
 import repository.SubCategoryMerchantRepository;
+import repository.SubsCategoryMerchantRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.File;
@@ -89,25 +91,24 @@ public class SubCategoryMerchantController extends BaseController {
                         newSubCategoryMerchant.setCategoryMerchant(categoryMerchant);
                         newSubCategoryMerchant.setActive(request.getIsActive());
                         newSubCategoryMerchant.setSequence(lastSequence);
+
+                        // // ========================== update with image ========================== //
+                        // /*
+                        // ** do the same for the save image mobile
+                        //  */
+                        // // for Website
+                        // Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image_web");
+                        // File imageWeb = ImageUtil.uploadImage(imageFileWeb, "subcategory", "subcategory-web", ImageUtil.fullImageSize, "jpg");
+                        // String imageWebUrl = ImageUtil.createImageUrl("subcategory", imageWeb != null ? imageWeb.getName() : null);
+
+                        // // for Mobile
+                        // Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image_mobile");
+                        // File imageMobile = ImageUtil.uploadImage(imageFileMobile, "subcategory", "subcategory-mobile", ImageUtil.fullImageSize, "jpg");
+                        // String imageMobileUrl = ImageUtil.createImageUrl("subcategory", imageMobile != null ? imageMobile.getName() : null);
+                        // // ========================== update with image ========================== //
+                        newSubCategoryMerchant.setImageWeb(request.getImageWeb());
+                        newSubCategoryMerchant.setImageMobile(request.getImageMobile());
                         newSubCategoryMerchant.save();
-
-                        // ========================== update with image ========================== //
-                        /*
-                        ** do the same for the save image mobile
-                         */
-                        // for Website
-                        Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image_web");
-                        File imageWeb = ImageUtil.uploadImage(imageFileWeb, "subcategory", "subcategory-web", ImageUtil.fullImageSize, "jpg");
-                        String imageWebUrl = ImageUtil.createImageUrl("subcategory", imageWeb != null ? imageWeb.getName() : null);
-
-                        // for Mobile
-                        Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image_mobile");
-                        File imageMobile = ImageUtil.uploadImage(imageFileMobile, "subcategory", "subcategory-mobile", ImageUtil.fullImageSize, "jpg");
-                        String imageMobileUrl = ImageUtil.createImageUrl("subcategory", imageMobile != null ? imageMobile.getName() : null);
-                        // ========================== update with image ========================== //
-                        newSubCategoryMerchant.setImageWeb(imageWebUrl);
-                        newSubCategoryMerchant.setImageMobile(imageMobileUrl);
-                        newSubCategoryMerchant.update();
 
                         trx.commit();
                         response.setBaseResponse(1, offset, 1, success + " membuat sub kategori", newSubCategoryMerchant);
@@ -181,22 +182,26 @@ public class SubCategoryMerchantController extends BaseController {
                         subCategoryMerchant.setCategoryMerchant(categoryMerchant);
                         subCategoryMerchant.setActive(request.getIsActive());
 
-                        // ========================== update with image ========================== //
-                        /*
-                        ** do the same for the save image mobile
-                         */
-                        // for Website
-                        Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image_web");
-                        File imageWeb = ImageUtil.uploadImage(imageFileWeb, "subcategory", "subcategory-web", ImageUtil.fullImageSize, "jpg");
-                        String imageWebUrl = ImageUtil.createImageUrl("subcategory", imageWeb != null ? imageWeb.getName() : null);
+                        // // ========================== update with image ========================== //
+                        // /*
+                        // ** do the same for the save image mobile
+                        //  */
+                        // // for Website
+                        // Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image_web");
+                        // File imageWeb = ImageUtil.uploadImage(imageFileWeb, "subcategory", "subcategory-web", ImageUtil.fullImageSize, "jpg");
+                        // String imageWebUrl = ImageUtil.createImageUrl("subcategory", imageWeb != null ? imageWeb.getName() : null);
 
-                        // for Mobile
-                        Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image_mobile");
-                        File imageMobile = ImageUtil.uploadImage(imageFileMobile, "subcategory", "subcategory-mobile", ImageUtil.fullImageSize, "jpg");
-                        String imageMobileUrl = ImageUtil.createImageUrl("subcategory", imageMobile != null ? imageMobile.getName() : null);
-                        // ========================== update with image ========================== //
-                        subCategoryMerchant.setImageWeb(imageWebUrl);
-                        subCategoryMerchant.setImageMobile(imageMobileUrl);
+                        // // for Mobile
+                        // Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image_mobile");
+                        // File imageMobile = ImageUtil.uploadImage(imageFileMobile, "subcategory", "subcategory-mobile", ImageUtil.fullImageSize, "jpg");
+                        // String imageMobileUrl = ImageUtil.createImageUrl("subcategory", imageMobile != null ? imageMobile.getName() : null);
+                        // // ========================== update with image ========================== //
+                        if(request.getImageWeb() != null){
+                            subCategoryMerchant.setImageWeb(request.getImageWeb());
+                        }
+                        if(request.getImageMobile() != null){
+                            subCategoryMerchant.setImageMobile(request.getImageMobile());
+                        }
                         subCategoryMerchant.update();
 
                         trx.commit();
@@ -347,14 +352,14 @@ public class SubCategoryMerchantController extends BaseController {
     public static Result listSequence() {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<SubCategoryMerchant> query = SubCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+            Query<SubsCategoryMerchant> query = SubsCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
             try {
-                List<SubCategoryMerchantResponse> responses = new ArrayList<>();
-                List<SubCategoryMerchant> responseIndex = SubCategoryMerchantRepository.getListSequence(ownMerchant.id);
-                for (SubCategoryMerchant data : responseIndex) {
-                    SubCategoryMerchantResponse response = new SubCategoryMerchantResponse();
+                List<SubsCategoryMerchantResponse> responses = new ArrayList<>();
+                List<SubsCategoryMerchant> responseIndex = SubsCategoryMerchantRepository.getListSequence(ownMerchant.id);
+                for (SubsCategoryMerchant data : responseIndex) {
+                    SubsCategoryMerchantResponse response = new SubsCategoryMerchantResponse();
                     response.setId(data.id);
-                    response.setSubcategoryName(data.getSubcategoryName());
+                    response.setSubscategoryName(data.getSubscategoryName());
                     response.setImageWeb(data.getImageWeb());
                     response.setImageMobile(data.getImageMobile());
                     response.setIsDeleted(data.isDeleted);
@@ -362,6 +367,7 @@ public class SubCategoryMerchantController extends BaseController {
                     response.setSequence(data.getSequence());
                     response.setMerchantId(data.getMerchant().id);
                     response.setCategoryId(data.getCategoryMerchant().id);
+                    response.setSubCategoryId(data.getSubCategoryMerchant().id);
                     responses.add(response);
                 }
                 response.setBaseResponse(responseIndex.size() , offset, limit, success + " menampilkan data", responses);
@@ -386,22 +392,22 @@ public class SubCategoryMerchantController extends BaseController {
         if (ownMerchant != null) {
             try {
                 JsonNode json = request().body().asJson();
-                List<SubCategoryMerchantResponse> request = objectMapper.convertValue(json, new TypeReference<List<SubCategoryMerchantResponse>>(){});
+                List<SubsCategoryMerchantResponse> request = objectMapper.convertValue(json, new TypeReference<List<SubsCategoryMerchantResponse>>(){});
                     Transaction trx = Ebean.beginTransaction();
                     try {
 
-                        List<SubCategoryMerchant> responses = new ArrayList<>();
-                        SubCategoryMerchant subCategoryMerchant = new SubCategoryMerchant();
-                        for (SubCategoryMerchantResponse data : request){
-                            subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(data.id, ownMerchant.id);
-                            if (subCategoryMerchant == null) {
+                        List<SubsCategoryMerchant> responses = new ArrayList<>();
+                        SubsCategoryMerchant subsCategoryMerchant = new SubsCategoryMerchant();
+                        for (SubsCategoryMerchantResponse data : request){
+                            subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(data.id, ownMerchant.id);
+                            if (subsCategoryMerchant == null) {
                                 response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
                                 return badRequest(Json.toJson(response));
                             }
-                            subCategoryMerchant.setSequence(data.sequence);
+                            subsCategoryMerchant.setSequence(data.sequence);
                             
-                            subCategoryMerchant.update();
-                            responses.add(subCategoryMerchant);
+                            subsCategoryMerchant.update();
+                            responses.add(subsCategoryMerchant);
                         }
 
                         trx.commit();
@@ -464,6 +470,233 @@ public class SubCategoryMerchantController extends BaseController {
             }
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
+        }
+
+        // SUB CATEGORY LEVEL 3
+        public static Result createSubsCategory(Long catId, Long id) {
+            Merchant ownMerchant = checkMerchantAccessAuthorization();
+            if (ownMerchant != null) {
+                Query<SubsCategoryMerchant> query = SubsCategoryMerchantRepository.find.where().eq("t0.subcategory_id", id).eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+                try {
+                    Http.MultipartFormData body = request().body().asMultipartFormData();
+                    List<SubsCategoryMerchant> totalData = SubsCategoryMerchantRepository.getTotalSubsCategory(query);
+                    if(totalData.size() == 2) {
+                        response.setBaseResponse(0, 0, 0, error + " sub kategori sudah mencapai batas maksimum.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(catId, ownMerchant.id);
+                    if(categoryMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, error + " sub kategori tidak ditemukan.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    SubCategoryMerchant subcategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                    if(subcategoryMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, error + " sub kategori tidak ditemukan.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    JsonNode json = request().body().asJson();
+
+                    SubsCategoryMerchantResponse request = objectMapper.readValue(json.toString(), SubsCategoryMerchantResponse.class);
+                    String validate = validateCreateSubsCategory(request);
+                    SubsCategoryMerchant latestSubsCat = SubsCategoryMerchantRepository.getLatestSequence(ownMerchant.id);
+                    int lastSequence = 0;
+                    if(latestSubsCat == null) {
+                        lastSequence = lastSequence + 1;
+                    } else {
+                        lastSequence = latestSubsCat.getSequence() + 1;
+                    }
+                    if (validate == null) {
+                        Transaction trx = Ebean.beginTransaction();
+                        try {
+                            SubsCategoryMerchant newSubsCategoryMerchant = new SubsCategoryMerchant();
+                            newSubsCategoryMerchant.setSubscategoryName(request.getSubscategoryName());
+                            newSubsCategoryMerchant.setMerchant(ownMerchant);
+                            newSubsCategoryMerchant.setCategoryMerchant(categoryMerchant);
+                            newSubsCategoryMerchant.setSubCategoryMerchant(subcategoryMerchant);
+                            newSubsCategoryMerchant.setActive(request.getIsActive());
+                            newSubsCategoryMerchant.setSequence(lastSequence);
+                            newSubsCategoryMerchant.setImageWeb(request.getImageWeb());
+                            newSubsCategoryMerchant.setImageMobile(request.getImageMobile());
+                            newSubsCategoryMerchant.save();
+    
+                            trx.commit();
+                            response.setBaseResponse(1, offset, 1, success + " membuat sub kategori", newSubsCategoryMerchant);
+                            return ok(Json.toJson(response));
+                        } catch (Exception e) {
+                            logger.error("Error saat membuat sub kategori", e);
+                            e.printStackTrace();
+                            trx.rollback();
+                        } finally {
+                            trx.end();
+                        }
+                        response.setBaseResponse(0, 0, 0, error, null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    response.setBaseResponse(0, 0, 0, validate, null);
+                    return badRequest(Json.toJson(response));
+                } catch (Exception e) {
+                    logger.error("Error saat parsing json", e);
+                    e.printStackTrace();
+                }
+            }
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+
+        public static Result editSubsCategory(Long id) {
+            Merchant ownMerchant = checkMerchantAccessAuthorization();
+            if (ownMerchant != null) {
+                try {
+                    JsonNode json = request().body().asJson();
+                    
+                    SubsCategoryMerchantResponse request = objectMapper.readValue(json.toString(), SubsCategoryMerchantResponse.class);
+                    String validate = validateCreateSubsCategory(request);
+                    if (validate == null) {
+                        Transaction trx = Ebean.beginTransaction();
+                        try {
+                            SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                            if (subsCategoryMerchant == null) {
+                                response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
+                                return badRequest(Json.toJson(response));
+                            }
+                            CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(subsCategoryMerchant.getCategoryMerchant().id, ownMerchant.id);
+                            if(categoryMerchant == null) {
+                                response.setBaseResponse(0, 0, 0, error + " kategori tidak ditemukan.", null);
+                                return badRequest(Json.toJson(response));
+                            }
+                            SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                            if (subCategoryMerchant == null) {
+                                response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
+                                return badRequest(Json.toJson(response));
+                            }
+                            subsCategoryMerchant.setSubscategoryName(request.getSubscategoryName());
+                            subsCategoryMerchant.setMerchant(ownMerchant);
+                            subsCategoryMerchant.setCategoryMerchant(categoryMerchant);
+                            subsCategoryMerchant.setSubCategoryMerchant(subCategoryMerchant);
+                            subsCategoryMerchant.setActive(request.getIsActive());
+                            if(request.getImageWeb() != null){
+                                subsCategoryMerchant.setImageWeb(request.getImageWeb());
+                            }
+                            if(request.getImageMobile() != null){
+                                subsCategoryMerchant.setImageMobile(request.getImageMobile());
+                            }
+                            subsCategoryMerchant.update();
+    
+                            trx.commit();
+                            response.setBaseResponse(1, offset, 1, success + " mengubah sub kategori", subsCategoryMerchant);
+                            return ok(Json.toJson(response));
+                        } catch (Exception e) {
+                            logger.error("Error saat mengubah sub kategori", e);
+                            e.printStackTrace();
+                            trx.rollback();
+                        } finally {
+                            trx.end();
+                        }
+                        response.setBaseResponse(0, 0, 0, error, null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    response.setBaseResponse(0, 0, 0, validate, null);
+                    return badRequest(Json.toJson(response));
+                } catch (Exception e) {
+                    logger.error("Error saat parsing json", e);
+                    e.printStackTrace();
+                }
+            }
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+    
+        @ApiOperation(value = "Delete Subs Category", notes = "Delete Subs Category.\n" + swaggerInfo
+                + "", response = BaseResponse.class, httpMethod = "DELETE")
+        @ApiImplicitParams({
+                @ApiImplicitParam(name = "subs category form", dataType = "temp.swaggermap.SubsCategoryForm", required = true, paramType = "body", value = "subs category form") })
+        public static Result deleteSubsCategory(Long id) {
+            Merchant ownMerchant = checkMerchantAccessAuthorization();
+            if (ownMerchant != null) {
+                    if (id != null) {
+                        Transaction trx = Ebean.beginTransaction();
+                        try {
+                            SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                            if (subsCategoryMerchant == null) {
+                                response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
+                                return badRequest(Json.toJson(response));
+                            }
+    
+                            subsCategoryMerchant.isDeleted = true;
+                            subsCategoryMerchant.update();
+                            trx.commit();
+    
+                            response.setBaseResponse(1,offset, 1, success + " menghapus sub kategori", subsCategoryMerchant);
+                            return ok(Json.toJson(response));
+                        } catch (Exception e) {
+                            logger.error("Error saat menghapus sub kategori", e);
+                            e.printStackTrace();
+                            trx.rollback();
+                        } finally {
+                            trx.end();
+                        }
+                        response.setBaseResponse(0, 0, 0, error, null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    response.setBaseResponse(0, 0, 0, "Tidak dapat menemukan sub kategori id", null);
+                    return badRequest(Json.toJson(response));
+            }
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+    
+        @ApiOperation(value = "Read Subs Category", notes = "Read Subs Category.\n" + swaggerInfo
+                + "", response = BaseResponse.class, httpMethod = "GET")
+        @ApiImplicitParams({
+                @ApiImplicitParam(name = "subs kategori form", dataType = "temp.swaggermap.SubsCategoryForm", required = true, paramType = "body", value = "subs kategori form") })
+        public static Result viewSubsCategory(Long id) {
+            Merchant ownMerchant = checkMerchantAccessAuthorization();
+            if (ownMerchant != null) {
+                if (id != null) {
+                    Transaction trx = Ebean.beginTransaction();
+                    try {
+                        SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        if (subsCategoryMerchant == null) {
+                            response.setBaseResponse(0, 0, 0, error + " sub kategori merchant tidak tersedia.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        SubsCategoryMerchantResponse subsCategoryMerchantResponse = new SubsCategoryMerchantResponse();
+                        subsCategoryMerchantResponse.setId(subsCategoryMerchant.id);
+                        subsCategoryMerchantResponse.setSubscategoryName(subsCategoryMerchant.getSubscategoryName());
+                        subsCategoryMerchantResponse.setImageWeb(subsCategoryMerchant.getImageWeb());
+                        subsCategoryMerchantResponse.setImageMobile(subsCategoryMerchant.getImageMobile());
+                        subsCategoryMerchantResponse.setIsDeleted(subsCategoryMerchant.isDeleted);
+                        subsCategoryMerchantResponse.setIsActive(subsCategoryMerchant.isActive);
+                        subsCategoryMerchantResponse.setCategoryId(subsCategoryMerchant.getCategoryMerchant().id);
+                        subsCategoryMerchantResponse.setSubCategoryId(subsCategoryMerchant.getSubCategoryMerchant().id);
+                        subsCategoryMerchantResponse.setMerchantId(subsCategoryMerchant.getMerchant().id);
+    
+                        response.setBaseResponse(1,offset, 1, success + " menampilkan detail sub kategori", subsCategoryMerchantResponse);
+                        return ok(Json.toJson(response));
+                    } catch (Exception e) {
+                        logger.error("Error saat menampilkan detail sub kategori", e);
+                        e.printStackTrace();
+                        trx.rollback();
+                    } finally {
+                        trx.end();
+                    }
+                    response.setBaseResponse(0, 0, 0, error, null);
+                    return badRequest(Json.toJson(response));
+                }
+                response.setBaseResponse(0, 0, 0, "Tidak dapat menemukan sub kategori id", null);
+                return badRequest(Json.toJson(response));
+            }
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+
+        public static String validateCreateSubsCategory(SubsCategoryMerchantResponse request) {
+            if (request == null)
+                return "Bidang tidak boleh nol atau kosong";
+            if (request.getSubscategoryName() == null)
+                return "Nama Sub Category tidak boleh nol atau kosong";
+    
+            return null;
         }
 
 }
