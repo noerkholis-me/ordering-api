@@ -125,13 +125,13 @@ public class ProductStoreController extends BaseController {
                 List<ProductMerchant> totalData = ProductMerchantRepository.getTotalDataPage(query);
                 List<ProductMerchant> productMerchants = ProductMerchantRepository.findProductWithPaging(query, sort, filter, offset, limit);
                 for (ProductMerchant data : productMerchants) {
-                    ProductResponse response = new ProductResponse();
+                    ProductResponse responseProd = new ProductResponse();
                     Query<ProductStore> queryPS = ProductStoreRepository.find.where().eq("t0.product_id", data.id).eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
                     List<ProductStore> dataPS = ProductStoreRepository.getDataProductStore(queryPS);
                     List<ProductResponse.ProductStore> responsesProductStore = new ArrayList<>();
-                    response.setProductId(data.id);
-                    response.setProductName(data.getProductName());
-                    response.setIsActive(data.getIsActive());
+                    responseProd.setProductId(data.id);
+                    responseProd.setProductName(data.getProductName());
+                    responseProd.setIsActive(data.getIsActive());
                     // ================================================================ //
                     CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(data.getCategoryMerchant().id, data.getMerchant().id);
                     if (categoryMerchant != null) {
@@ -139,7 +139,7 @@ public class ProductStoreController extends BaseController {
                                 .id(categoryMerchant.id)
                                 .categoryName(categoryMerchant.getCategoryName())
                                 .build();
-                        response.setCategory(categoryResponse);
+                        responseProd.setCategory(categoryResponse);
                     }
                     SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(data.getSubCategoryMerchant().id, data.getMerchant().id);
                     if (subCategoryMerchant != null) {
@@ -147,7 +147,7 @@ public class ProductStoreController extends BaseController {
                                 .id(subCategoryMerchant.id)
                                 .subCategoryName(subCategoryMerchant.getSubcategoryName())
                                 .build();
-                        response.setSubCategory(subCategoryResponse);
+                        responseProd.setSubCategory(subCategoryResponse);
                     }
                     BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(data.getBrandMerchant().id, data.getMerchant().id);
                     if (brandMerchant != null) {
@@ -155,7 +155,7 @@ public class ProductStoreController extends BaseController {
                                 .id(brandMerchant.id)
                                 .brandName(brandMerchant.getBrandName())
                                 .build();
-                        response.setBrand(brandResponse);
+                        responseProd.setBrand(brandResponse);
                     }
                     // ================================================================ //
 
@@ -174,7 +174,7 @@ public class ProductStoreController extends BaseController {
                                 .productImage3(productMerchantDetail.getProductImage3())
                                 .productImage4(productMerchantDetail.getProductImage4())
                                 .build();
-                        response.setProductDetail(productDetailResponse);
+                        responseProd.setProductDetail(productDetailResponse);
                     }
 
                     ProductMerchantDescription productMerchantDescription = ProductMerchantDescriptionRepository.findByProductMerchantDetail(productMerchantDetail);
@@ -183,9 +183,9 @@ public class ProductStoreController extends BaseController {
                                 .shortDescription(productMerchantDescription.getShortDescription())
                                 .longDescription(productMerchantDescription.getLongDescription())
                                 .build();
-                        response.setProductDescription(productDescriptionResponse);
+                        responseProd.setProductDescription(productDescriptionResponse);
                     }
-                    response.setMerchantId(data.getMerchant().id);
+                    responseProd.setMerchantId(data.getMerchant().id);
                     for(ProductStore dataPStore : dataPS) {
                         ProductResponse.ProductStore responsePStore = new ProductResponse.ProductStore();
                         
@@ -199,10 +199,18 @@ public class ProductStoreController extends BaseController {
                         responsePStore.setDiscount(dataPStore.getDiscount());
                         responsePStore.setIsDeleted(dataPStore.isDeleted);
                         responsePStore.setFinalPrice(dataPStore.getFinalPrice());
+
+                        Store store = Store.findById(dataPStore.getStore().id);
+                        if (store == null) {
+                            response.setBaseResponse(0, 0, 0, " Store tidak ditemukan.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        responsePStore.setStoresName(store.storeName);
+                        
                         responsesProductStore.add(responsePStore);
-                        response.setProductStore(responsePStore != null ? responsesProductStore : null);
+                        responseProd.setProductStore(responsePStore != null ? responsesProductStore : null);
                     }
-                    responses.add(response);
+                    responses.add(responseProd);
                 }
                 response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : productMerchants.size() , offset, limit, success + " menampilkan data", responses);
                 return ok(Json.toJson(response));
@@ -414,7 +422,7 @@ public class ProductStoreController extends BaseController {
                             return badRequest(Json.toJson(response));
                         }
                         responsePStore.setStoresName(store.storeName);
-                        
+
                         responsesProductStore.add(responsePStore);
                         responseProduct.setProductStore(responsePStore != null ? responsesProductStore : null);
                     }

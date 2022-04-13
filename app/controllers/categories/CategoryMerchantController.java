@@ -317,6 +317,9 @@ public class CategoryMerchantController extends BaseController {
                         return badRequest(Json.toJson(response));
                     }
                     CategoryMerchantResponse CategoryMerchantResponse = new CategoryMerchantResponse();
+                    Query<SubCategoryMerchant> querySub = SubCategoryMerchantRepository.find.where().eq("t0.category_id", CategoryMerchant.id).eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+                    List<SubCategoryMerchant> dataSub = SubCategoryMerchantRepository.getDataForCategory(querySub);
+                    List<CategoryMerchantResponse.SubCategoryMerchant> responsesSub = new ArrayList<>();
                     CategoryMerchantResponse.setId(CategoryMerchant.id);
                     CategoryMerchantResponse.setCategoryName(CategoryMerchant.getCategoryName());
                     CategoryMerchantResponse.setImageWeb(CategoryMerchant.getImageWeb());
@@ -324,6 +327,33 @@ public class CategoryMerchantController extends BaseController {
                     CategoryMerchantResponse.setIsDeleted(CategoryMerchant.isDeleted);
                     CategoryMerchantResponse.setIsActive(CategoryMerchant.isActive());
                     CategoryMerchantResponse.setMerchantId(CategoryMerchant.getMerchant().id);
+                    for(SubCategoryMerchant dataSubs : dataSub) {
+                        CategoryMerchantResponse.SubCategoryMerchant responseSub = new CategoryMerchantResponse.SubCategoryMerchant();
+                        Query<SubsCategoryMerchant> querySubs = SubsCategoryMerchantRepository.find.where().eq("t0.subcategory_id", dataSubs.id).eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+                        List<SubsCategoryMerchant> dataSubThree = SubsCategoryMerchantRepository.getDataForCategory(querySubs);
+                        List<CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant> responsesSubs = new ArrayList<>();
+                        responseSub.setId(dataSubs.id);
+                        responseSub.setSubcategoryName(dataSubs.getSubcategoryName());
+                        responseSub.setImageWeb(dataSubs.getImageWeb());
+                        responseSub.setImageMobile(dataSubs.getImageMobile());
+                        responseSub.setIsActive(dataSubs.isActive);
+                        responseSub.setIsDeleted(dataSubs.isDeleted);
+                        for(SubsCategoryMerchant dataSubsThree : dataSubThree) {
+                            CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant responseSubs = new CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant();
+                            responseSubs.setId(dataSubsThree.id);
+                            responseSubs.setSubscategoryName(dataSubsThree.getSubscategoryName());
+                            responseSubs.setImageWeb(dataSubsThree.getImageWeb());
+                            responseSubs.setImageMobile(dataSubsThree.getImageMobile());
+                            responseSubs.setIsActive(dataSubsThree.isActive);
+                            responseSubs.setIsDeleted(dataSubsThree.isDeleted);
+                            responseSubs.setSequence(dataSubsThree.getSequence());
+                            responsesSubs.add(responseSubs);
+                            responseSub.setSubsCategory(responseSubs != null ? responsesSubs : null);
+                        }
+                        
+                        responsesSub.add(responseSub);
+                        CategoryMerchantResponse.setSubCategory(responseSub != null ? responsesSub : null);
+                    }
 
                     response.setBaseResponse(1,offset, 1, success + " menampilkan detail kategori", CategoryMerchantResponse);
                     return ok(Json.toJson(response));
