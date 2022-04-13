@@ -166,8 +166,15 @@ public class BannersMerchantController extends BaseController {
                             return badRequest(Json.toJson(response));
                         }
                         banners.setBannerName(request.getBannerName());
-                        banners.setMerchant(ownMerchant);
+                        if(request.getBannerImageWeb() != null){
+                            banners.setBannerImageWeb(request.getBannerImageWeb());
+                        }
+                        if(request.getBannerImageMobile() != null){
+                            banners.setBannerImageMobile(request.getBannerImageMobile());
+                        }
                         banners.setActive(request.isActive());
+                        banners.setDateFrom(request.getDateFrom());
+                        banners.setDateTo(request.getDateTo());
                         banners.update();
 
                         trx.commit();
