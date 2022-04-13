@@ -56,7 +56,37 @@ public class CategoryMerchantResponse  {
 
         @JsonProperty("is_active")
         private Boolean isActive;
-    }
 
+        private List<SubsCategoryMerchant> subsCategory;
+
+        @AllArgsConstructor
+        @NoArgsConstructor
+        @Getter
+        @Setter
+        @Builder
+        public static class SubsCategoryMerchant {
+
+            @JsonProperty("id")
+            public Long id;
+
+            @JsonProperty("subscategory_name")
+            public String subscategoryName;
+
+            @JsonProperty("image_web")
+            public String imageWeb;
+
+            @JsonProperty("image_mobile")
+            public String imageMobile;
+
+            @JsonProperty("is_deleted")
+            public Boolean isDeleted;
+
+            @JsonProperty("is_active")
+            public Boolean isActive;
+
+            @JsonProperty("sequence")
+            public int sequence;
+        }
+    }
 
 }
