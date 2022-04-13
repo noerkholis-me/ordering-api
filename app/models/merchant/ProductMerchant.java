@@ -37,6 +37,9 @@ public class ProductMerchant extends BaseModel {
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "merchant_id", referencedColumnName = "id")
     public Merchant merchant;
+    
+    @Getter @Setter
+    public SubsCategoryMerchant subsCategory;
 
 
 }

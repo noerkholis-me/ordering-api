@@ -408,3 +408,11 @@ GET     /merchant/banners/:id/read                  controllers.banners.BannersM
 DELETE     /merchant/banners/:id/delete             controllers.banners.BannersMerchantController.deleteBrand(id: Long)
 PUT     /merchant/banners/:id/status                controllers.banners.BannersMerchantController.setStatus(id: Long)
 GET     /banners/:merchantId                        controllers.banners.BannersMerchantController.listBannersHomepage(merchantId: Long)
+
+#PRODUCT STORE
+POST    /merchant/productstore                           controllers.product.ProductStoreController.createProductStore()
+PUT    /merchant/productstore/:id                        controllers.product.ProductStoreController.editProductStore(id: Long)
+GET    /merchant/productstore/list                       controllers.product.ProductStoreController.listProductStore(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/productstore/:id                        controllers.product.ProductStoreController.viewProductStore(id: Long)
+DELETE    /merchant/productstore/:id                     controllers.product.ProductStoreController.deleteProductStore(id: Long)
+PUT   /merchant/productstore/:id/status                  controllers.product.ProductStoreController.setStatus(id: Long)
