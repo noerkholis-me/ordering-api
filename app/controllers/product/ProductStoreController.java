@@ -189,7 +189,7 @@ public class ProductStoreController extends BaseController {
                     for(ProductStore dataPStore : dataPS) {
                         ProductResponse.ProductStore responsePStore = new ProductResponse.ProductStore();
                         
-                        responsePStore.setId(dataPStore.getId());
+                        responsePStore.setId(dataPStore.id);
                         responsePStore.setStoreId(dataPStore.getStore().id);
                         responsePStore.setProductId(dataPStore.getProductMerchant().id);
                         responsePStore.setMerchantId(dataPStore.getMerchant().id);
@@ -405,7 +405,7 @@ public class ProductStoreController extends BaseController {
                     for(ProductStore dataPStore : dataPS) {
                         ProductResponse.ProductStore responsePStore = new ProductResponse.ProductStore();
                         
-                        responsePStore.setId(dataPStore.getId());
+                        responsePStore.setId(dataPStore.id);
                         responsePStore.setStoreId(dataPStore.getStore().id);
                         responsePStore.setProductId(dataPStore.getProductMerchant().id);
                         responsePStore.setMerchantId(dataPStore.getMerchant().id);
