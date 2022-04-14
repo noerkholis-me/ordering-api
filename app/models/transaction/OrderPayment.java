@@ -2,6 +2,7 @@ package models.transaction;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import models.BaseModel;
 
 import javax.persistence.*;
@@ -11,6 +12,7 @@ import java.util.Date;
 @Entity
 @Table(name = "order_payment")
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class OrderPayment extends BaseModel {
 
     @Column(unique = true)
@@ -29,8 +31,8 @@ public class OrderPayment extends BaseModel {
     @Column(name = "total_amount")
     private BigDecimal totalAmount;
 
-    @Column(name = "payment_created_at")
-    private Date paymentCreatedAt;
+    @Column(name = "payment_date")
+    private Date paymentDate;
 
 
 
@@ -42,6 +44,6 @@ public class OrderPayment extends BaseModel {
     private Order order;
 
     @OneToOne(mappedBy = "orderPayment")
-    private XenditPayment xenditPayment;
+    private PaymentDetail paymentDetail;
 
 }

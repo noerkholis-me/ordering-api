@@ -2,6 +2,7 @@ package models.transaction;
 
 import com.avaje.ebean.annotation.CreatedTimestamp;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import models.BaseModel;
 import models.Member;
 import models.UserMerchant;
@@ -12,8 +13,9 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "order")
+@Table(name = "orders")
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class Order extends BaseModel {
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -24,7 +26,7 @@ public class Order extends BaseModel {
     @Column(unique = true, name = "order_number")
     private String orderNumber;
 
-    @Column(unique = true, name = "order_type")
+    @Column(name = "order_type")
     private String orderType;
 
     @Column(name = "sub_total")
@@ -39,14 +41,11 @@ public class Order extends BaseModel {
 
     private String status;
 
-    @ManyToOne(cascade = { CascadeType.ALL })
-    @JoinColumn(name = "user_merchant_id", referencedColumnName = "id")
-    private UserMerchant userMerchant;
-
     @Column(name = "approved_by")
     private String approvedBy;
 
     @Temporal(TemporalType.TIMESTAMP)
+    @CreatedTimestamp
     @Column(name = "approved_date")
     public Date approvedDate;
 

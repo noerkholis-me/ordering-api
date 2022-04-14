@@ -1,7 +1,9 @@
 package models.transaction;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import models.BaseModel;
+import models.ProductStore;
 import models.merchant.ProductMerchant;
 
 import javax.persistence.*;
@@ -10,23 +12,22 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "order_detail")
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class OrderDetail extends BaseModel {
 
     @ManyToOne(cascade = { CascadeType.ALL })
-    @JoinColumn(name = "product_merchant_id", referencedColumnName = "id")
-    private ProductMerchant productMerchant;
+    @JoinColumn(name = "product_store_id", referencedColumnName = "id")
+    private ProductStore productStore;
 
     @Column(name = "product_name")
     private String productName;
 
-    @Column(name = "product_type")
-    private String productType;
-
+    // set to final price from product store
     @Column(name = "product_price")
     private BigDecimal productPrice;
 
-    @Column(name = "qty")
-    private Integer qty;
+    @Column(name = "quantity")
+    private Integer quantity;
 
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
