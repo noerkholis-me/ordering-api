@@ -7,6 +7,7 @@ import models.BaseModel;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Entity
@@ -45,5 +46,26 @@ public class OrderPayment extends BaseModel {
 
     @OneToOne(mappedBy = "orderPayment")
     private PaymentDetail paymentDetail;
+
+    public static Finder<Long, OrderPayment> find = new Finder<>(Long.class, OrderPayment.class);
+
+    public static String generateInvoiceCode(){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyMM");
+        SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("yyyy-MM");
+        OrderPayment so = OrderPayment.find.where("t0.created_at > '"+simpleDateFormat2.format(new Date())+"-01 00:00:00' and invoice_no is not null")
+                .order("t0.created_at desc").setMaxRows(1).findUnique();
+        String seqNum = "";
+        if(so == null){
+            seqNum = "00001";
+        }else{
+            seqNum = so.invoiceNo.substring(so.invoiceNo.length() - 5);
+            int seq = Integer.parseInt(seqNum)+1;
+            seqNum = "00000" + String.valueOf(seq);
+            seqNum = seqNum.substring(seqNum.length() - 5);
+        }
+        String code = "INV";
+        code += simpleDateFormat.format(new Date()) + seqNum;
+        return code;
+    }
 
 }

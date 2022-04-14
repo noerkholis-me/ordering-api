@@ -19,6 +19,8 @@ public class ProductOrderDetail {
     @JsonProperty("product_price")
     private BigDecimal productPrice;
     @JsonProperty("product_qty")
-    private BigDecimal productQty;
+    private Integer productQty;
+    @JsonProperty("notes")
+    private String notes;
 
 }

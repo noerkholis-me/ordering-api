@@ -20,7 +20,5 @@ public class OrderTransaction {
     private List<ProductOrderDetail> productOrderDetail;
     @JsonProperty("payment_detail")
     private PaymentDetail paymentDetail;
-    @JsonProperty("store_info")
-    private StoreInfo storeInfo;
 
 }
