@@ -72,41 +72,6 @@ public class ProductResponse implements Serializable {
         @JsonProperty("brand_name")
         private String brandName;
     }
-
-    private List<ProductStore> productStore;
-
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Getter @Setter
-    @Builder
-    public static class ProductStore {
-        @JsonProperty("id")
-        private Long id;
-        @JsonProperty("product_id")
-        private Long productId;
-        @JsonProperty("store_id")
-        private Long storeId;
-        @JsonProperty("store_name")
-        private String storesName;
-        @JsonProperty("store_price")
-        @JsonSerialize(using = BigDecimalSerialize.class)
-        private BigDecimal storePrice;
-        @JsonProperty("discount_type")
-        private String discountType;
-        @JsonProperty("discount")
-        private Double discount;
-        @JsonProperty("final_price")
-        @JsonSerialize(using = BigDecimalSerialize.class)
-        private BigDecimal finalPrice;
-
-        @JsonProperty("is_active")
-        private Boolean isActive;
-        @JsonProperty("is_deleted")
-        private Boolean isDeleted;
-
-        @JsonProperty("merchant_id")
-        private Long merchantId;
-    }
     
 
 }
