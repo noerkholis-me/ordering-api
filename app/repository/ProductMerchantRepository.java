@@ -5,7 +5,7 @@ import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import models.Merchant;
 import models.Store;
-import models.merchant.ProductMerchant;
+import models.merchant.*;
 import play.db.ebean.Model;
 
 import java.util.List;
@@ -48,7 +48,13 @@ public class ProductMerchantRepository extends Model {
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
+    public static List<ProductMerchant> getDataProductStore(Query<ProductMerchant> reqQuery) {
+        Query<ProductMerchant> query = reqQuery;
 
+        query = query.orderBy("t0.created_at desc");
 
+        ExpressionList<ProductMerchant> exp = query.where();
+        return query.findPagingList(0).getPage(0).getList();
+    }
 
 }

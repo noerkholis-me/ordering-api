@@ -556,7 +556,7 @@ public class SubCategoryMerchantController extends BaseController {
                         try {
                             SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
                             if (subsCategoryMerchant == null) {
-                                response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
+                                response.setBaseResponse(0, 0, 0, error + " subs kategori tidak tersedia.", null);
                                 return badRequest(Json.toJson(response));
                             }
                             CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(subsCategoryMerchant.getCategoryMerchant().id, ownMerchant.id);
@@ -564,7 +564,7 @@ public class SubCategoryMerchantController extends BaseController {
                                 response.setBaseResponse(0, 0, 0, error + " kategori tidak ditemukan.", null);
                                 return badRequest(Json.toJson(response));
                             }
-                            SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                            SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(subsCategoryMerchant.getSubCategoryMerchant().id, ownMerchant.id);
                             if (subCategoryMerchant == null) {
                                 response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
                                 return badRequest(Json.toJson(response));

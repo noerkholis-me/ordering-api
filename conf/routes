@@ -350,6 +350,9 @@ GET     /merchant/brand/:id/detail                  controllers.brand.BrandMerch
 PUT     /merchant/brand/:id/status                  controllers.brand.BrandMerchantController.setStatus(id: Long)
 GET     /brand/:merchantId                          controllers.brand.BrandMerchantController.listBrandHomepage(merchantId: Long, offset:Int ?= 0)
 
+#BRAND DETAIL CUSTOMER
+GET     /brand/:id/detail                           controllers.brand.BrandMerchantController.detailBrandHome(id:Long, merchant_id:Long ?= 0, store_id:Long ?= 0)
+
 #CATEGORY
 GET     /merchant/category/list                        controllers.categories.CategoryMerchantController.listCategory(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 POST    /merchant/category                             controllers.categories.CategoryMerchantController.createCategory()
