@@ -48,6 +48,13 @@ public class ProductMerchantRepository extends Model {
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
+    public static List<ProductMerchant> getProductRecommendation(Query<ProductMerchant> reqQuery) {
+        Query<ProductMerchant> query = reqQuery;
+
+        ExpressionList<ProductMerchant> exp = query.where();
+        return query.findPagingList(0).getPage(0).getList();
+    }
+
     public static List<ProductMerchant> getDataProductStore(Query<ProductMerchant> reqQuery) {
         Query<ProductMerchant> query = reqQuery;
 

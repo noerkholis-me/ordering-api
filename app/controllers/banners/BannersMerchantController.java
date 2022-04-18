@@ -335,7 +335,7 @@ public class BannersMerchantController extends BaseController {
         Timestamp dateNow = new Timestamp(System.currentTimeMillis()); 
         System.out.println(dateNow);
         if (ownMerchant != null) {
-            Query<Banners> query = BannersRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).betweenProperties("t0.date_from", "t0.date_to", dateNow).order("t0.date_from");
+            Query<Banners> query = BannersRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).eq("t0.is_active", true).betweenProperties("t0.date_from", "t0.date_to", dateNow).order("t0.date_from");
             try {
                 List<BannersResponse> responses = new ArrayList<>();
                 List<Banners> totalData = BannersRepository.getTotalData(query);
