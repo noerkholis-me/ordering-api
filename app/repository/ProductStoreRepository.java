@@ -33,6 +33,20 @@ public class ProductStoreRepository extends Model {
 		}
     }
 
+    public static ProductStore findForCust(Long productId, Long storeId, Long merchantId) {
+        try {
+			return find.where()
+				.eq("product_id", productId)
+				.eq("store_id", storeId)
+				.eq("merchant_id", merchantId)
+				.eq("is_deleted", Boolean.FALSE)
+				.findUnique();
+		} catch (PersistenceException e) {
+			e.printStackTrace();
+			return null;
+		}
+    }
+
     public static List<ProductStore> getDataProductStores(Query<ProductStore> reqQuery, String sort, String filter, int offset, int limit)
 			throws IOException {
 		Query<ProductStore> query = reqQuery;
