@@ -56,6 +56,12 @@ public class ProductMerchantController extends BaseController {
                         response.setBaseResponse(0, 0, 0, " Sub Category not found.", null);
                         return badRequest(Json.toJson(response));
                     }
+                    SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(
+                            productRequest.getSubsCategoryId(), ownMerchant.id);
+                    if (subsCategoryMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, " Subs Category not found.", null);
+                        return badRequest(Json.toJson(response));
+                    }
                     BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(
                             productRequest.getBrandId(), ownMerchant.id);
                     if (brandMerchant == null) {
@@ -63,7 +69,7 @@ public class ProductMerchantController extends BaseController {
                         return badRequest(Json.toJson(response));
                     }
                     constructProductEntityRequest(newProductMerchant, ownMerchant, productRequest, categoryMerchant,
-                            subCategoryMerchant, brandMerchant);
+                            subCategoryMerchant, subsCategoryMerchant, brandMerchant);
                     newProductMerchant.save();
 
                     // do save to detail
@@ -130,6 +136,12 @@ public class ProductMerchantController extends BaseController {
                         response.setBaseResponse(0, 0, 0, " Sub Category not found.", null);
                         return badRequest(Json.toJson(response));
                     }
+                    SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(
+                            productRequest.getSubCategoryId(), ownMerchant.id);
+                    if (subsCategoryMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, " Subs Category not found.", null);
+                        return badRequest(Json.toJson(response));
+                    }
                     BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(
                             productRequest.getBrandId(), ownMerchant.id);
                     if (brandMerchant == null) {
@@ -137,7 +149,7 @@ public class ProductMerchantController extends BaseController {
                         return badRequest(Json.toJson(response));
                     }
                     constructProductEntityRequest(productMerchant, ownMerchant, productRequest, categoryMerchant,
-                            subCategoryMerchant, brandMerchant);
+                            subCategoryMerchant, subsCategoryMerchant, brandMerchant);
                     productMerchant.update();
 
                     // do save to detail
@@ -286,6 +298,14 @@ public class ProductMerchantController extends BaseController {
                     .build();
             productResponse.setSubCategory(subCategoryResponse);
         }
+        SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubsCategoryMerchant().id, productMerchant.getMerchant().id);
+        if (subCategoryMerchant != null) {
+            ProductResponse.SubsCategoryResponse subsCategoryResponse = ProductResponse.SubsCategoryResponse.builder()
+                    .id(subsCategoryMerchant.id)
+                    .subsCategoryName(subsCategoryMerchant.getSubscategoryName())
+                    .build();
+            productResponse.setSubsCategory(subsCategoryResponse);
+        }
         BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(productMerchant.getBrandMerchant().id, productMerchant.getMerchant().id);
         if (brandMerchant != null) {
             ProductResponse.BrandResponse brandResponse = ProductResponse.BrandResponse.builder()
@@ -335,11 +355,12 @@ public class ProductMerchantController extends BaseController {
 
     private static void constructProductEntityRequest(ProductMerchant newProductMerchant, Merchant merchant,
                                                       ProductRequest productRequest, CategoryMerchant categoryMerchant,
-                                                      SubCategoryMerchant subCategoryMerchant, BrandMerchant brandMerchant) {
+                                                      SubCategoryMerchant subCategoryMerchant, SubsCategoryMerchant subsCategoryMerchant, BrandMerchant brandMerchant) {
         newProductMerchant.setProductName(productRequest.getProductName());
         newProductMerchant.setIsActive(Boolean.TRUE);
         newProductMerchant.setCategoryMerchant(categoryMerchant);
         newProductMerchant.setSubCategoryMerchant(subCategoryMerchant);
+        newProductMerchant.setSubsCategoryMerchant(subsCategoryMerchant);
         newProductMerchant.setBrandMerchant(brandMerchant);
         newProductMerchant.setMerchant(merchant);
     }
@@ -357,6 +378,33 @@ public class ProductMerchantController extends BaseController {
         newProductMerchantDetail.setProductImage3(productRequest.getProductDetailRequest().getProductImage3());
         newProductMerchantDetail.setProductImage4(productRequest.getProductDetailRequest().getProductImage4());
         newProductMerchantDetail.setProductMerchant(newProductMerchant);
+    }
+
+    // PRODUK REKOMENDASI
+
+    public static Result listRecommendedProduct(Long merchantId){
+        if (merchantId != null) {
+            Transaction trx = Ebean.beginTransaction();
+            try {
+                Query<ProductMerchant> query = ProductMerchantRepository.find.where().eq("t0.merchant_id", merchantId).eq("t0.is_active", true).eq("t0.is_deleted", false).order("random()");
+                List<ProductMerchant> totalData = ProductMerchantRepository.getTotalDataPage(query);
+                List<ProductMerchant> productMerchants = ProductMerchantRepository.getProductRecommendation(query);
+                List<ProductResponse> productMerchantResponse = toResponses(productMerchants);
+                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : productMerchantResponse.size(), offset, limit, success + " Showing data products", productMerchantResponse);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                logger.error("Error saat menampilkan produk", e);
+                e.printStackTrace();
+                trx.rollback();
+            } finally {
+                trx.end();
+            }
+            response.setBaseResponse(0, 0, 0, error, null);
+            return badRequest(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, "Merchant tidak ditemukan", null);
+        return badRequest(Json.toJson(response));
+
     }
 
 }
