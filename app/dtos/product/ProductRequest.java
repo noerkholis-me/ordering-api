@@ -19,6 +19,8 @@ public class ProductRequest {
     private Long categoryId;
     @JsonProperty("sub_category_id")
     private Long subCategoryId;
+    @JsonProperty("subs_category_id")
+    private Long subsCategoryId;
     @JsonProperty("brand_id")
     private Long brandId;
 

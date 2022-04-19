@@ -65,15 +65,15 @@ public class ImageUtil {
             resolution = getScaledResolution(width, height);
         }
         //result image frame size
-        int widthF  = resolution[0];
-        int heightF = resolution[1];
+        int widthF  = width;
+        int heightF = height;
         int[]size = getAppliedResolution(width, height, widthF, heightF);
         // resize image size
-        int widthR = size[0];
-        int heightR = size[1];
+        int widthR = width;
+        int heightR = height;
         // start coordinate to drawing at result image frame
-        int widthS = (widthF - widthR) / 2;
-        int heightS = (heightF - heightR) / 2;
+        int widthS = width / 4;
+        int heightS = height / 4;
 
         Image imageR1 = imageR.getScaledInstance(widthR, heightR, Image.SCALE_SMOOTH);
         BufferedImage b1;
@@ -84,14 +84,14 @@ public class ImageUtil {
             bg.setComposite(AlphaComposite.Clear);
             bg.fillRect(0, 0, widthF, heightF);
             bg.setComposite(AlphaComposite.Src);
-            bg.drawImage(imageR1, widthS, heightS, null);
+            bg.drawImage(imageR1, 0, 0, null);
         } else {
             b1 = new BufferedImage(widthF, heightF, BufferedImage.TYPE_INT_RGB);
             bg = b1.createGraphics();
             bg.setColor(Color.WHITE);
             bg.fillRect(0, 0, widthF, heightF);
             bg.setComposite(AlphaComposite.Src);
-            bg.drawImage(imageR1, widthS, heightS, Color.WHITE, null);
+            bg.drawImage(imageR1, 0, 0, Color.WHITE, null);
         }
         bg.dispose();
         ImageIO.write(b1, resFormat, dstFile);

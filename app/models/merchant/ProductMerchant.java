@@ -31,6 +31,10 @@ public class ProductMerchant extends BaseModel {
     private SubCategoryMerchant subCategoryMerchant;
 
     @ManyToOne(cascade = { CascadeType.ALL })
+    @JoinColumn(name = "subs_category_merchant_id", referencedColumnName = "id")
+    private SubsCategoryMerchant subsCategoryMerchant;
+
+    @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "brand_merchant_id", referencedColumnName = "id")
     private BrandMerchant brandMerchant;
 
