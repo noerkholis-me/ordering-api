@@ -51,16 +51,8 @@ public class CategoryMerchantController extends BaseController {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
             try {
-                Http.MultipartFormData body = request().body().asMultipartFormData();
-                JsonNode json = null;
-                if (body != null) {
-                    Map<String, String[]> data = body.asFormUrlEncoded();
-                    if (data != null) {
-                        json = Json.parse(data.get("data")[0]);
-                    }
-                } else {
-                    json = request().body().asJson();
-                }
+                // Http.MultipartFormData body = request().body().asMultipartFormData();
+                JsonNode json = request().body().asJson();
                 CategoryMerchantResponse request = objectMapper.readValue(json.toString(), CategoryMerchantResponse.class);
                 String validate = validateCreateCategory(request);
                 if (validate == null) {
@@ -70,25 +62,24 @@ public class CategoryMerchantController extends BaseController {
                         newCategoryMerchant.setCategoryName(request.getCategoryName());
                         newCategoryMerchant.setMerchant(ownMerchant);
                         newCategoryMerchant.setActive(request.getIsActive());
+
+                        // // ========================== update with image ========================== //
+                        // /*
+                        // ** do the same for the save image mobile
+                        //  */
+                        // // for Website
+                        // Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image_web");
+                        // File imageWeb = ImageUtil.uploadImage(imageFileWeb, "category", "category-web", ImageUtil.fullImageSize, "jpg");
+                        // String imageWebUrl = ImageUtil.createImageUrl("category", imageWeb != null ? imageWeb.getName() : null);
+
+                        // // for Mobile
+                        // Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image_mobile");
+                        // File imageMobile = ImageUtil.uploadImage(imageFileMobile, "category", "category-mobile", ImageUtil.fullImageSize, "jpg");
+                        // String imageMobileUrl = ImageUtil.createImageUrl("category", imageMobile != null ? imageMobile.getName() : null);
+                        // // ========================== update with image ========================== //
+                        newCategoryMerchant.setImageWeb(request.getImageWeb());
+                        newCategoryMerchant.setImageMobile(request.getImageMobile());
                         newCategoryMerchant.save();
-
-                        // ========================== update with image ========================== //
-                        /*
-                        ** do the same for the save image mobile
-                         */
-                        // for Website
-                        Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image_web");
-                        File imageWeb = ImageUtil.uploadImage(imageFileWeb, "category", "category-web", ImageUtil.fullImageSize, "jpg");
-                        String imageWebUrl = ImageUtil.createImageUrl("category", imageWeb != null ? imageWeb.getName() : null);
-
-                        // for Mobile
-                        Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image_mobile");
-                        File imageMobile = ImageUtil.uploadImage(imageFileMobile, "category", "category-mobile", ImageUtil.fullImageSize, "jpg");
-                        String imageMobileUrl = ImageUtil.createImageUrl("category", imageMobile != null ? imageMobile.getName() : null);
-                        // ========================== update with image ========================== //
-                        newCategoryMerchant.setImageWeb(imageWebUrl);
-                        newCategoryMerchant.setImageMobile(imageMobileUrl);
-                        newCategoryMerchant.update();
 
                         trx.commit();
                         response.setBaseResponse(1, offset, 1, success + " membuat kategori", newCategoryMerchant);
@@ -196,16 +187,7 @@ public class CategoryMerchantController extends BaseController {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
             try {
-                Http.MultipartFormData body = request().body().asMultipartFormData();
-                JsonNode json = null;
-                if (body != null) {
-                    Map<String, String[]> data = body.asFormUrlEncoded();
-                    if (data != null) {
-                        json = Json.parse(data.get("data")[0]);
-                    }
-                } else {
-                    json = request().body().asJson();
-                }
+                JsonNode json = request().body().asJson();
                 CategoryMerchantResponse request = objectMapper.readValue(json.toString(), CategoryMerchantResponse.class);
                 String validate = validateCreateCategory(request);
                 if (validate == null) {
@@ -220,22 +202,22 @@ public class CategoryMerchantController extends BaseController {
                         categoryMerchant.setMerchant(ownMerchant);
                         categoryMerchant.setActive(request.getIsActive());
 
-                        // ========================== update with image ========================== //
-                        /*
-                        ** do the same for the save image mobile
-                         */
-                        // for Website
-                        Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image_web");
-                        File imageWeb = ImageUtil.uploadImage(imageFileWeb, "category", "category-web", ImageUtil.fullImageSize, "jpg");
-                        String imageWebUrl = ImageUtil.createImageUrl("category", imageWeb != null ? imageWeb.getName() : null);
+                        // // ========================== update with image ========================== //
+                        // /*
+                        // ** do the same for the save image mobile
+                        //  */
+                        // // for Website
+                        // Http.MultipartFormData.FilePart imageFileWeb = Objects.requireNonNull(body).getFile("image_web");
+                        // File imageWeb = ImageUtil.uploadImage(imageFileWeb, "category", "category-web", ImageUtil.fullImageSize, "jpg");
+                        // String imageWebUrl = ImageUtil.createImageUrl("category", imageWeb != null ? imageWeb.getName() : null);
 
-                        // for Mobile
-                        Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image_mobile");
-                        File imageMobile = ImageUtil.uploadImage(imageFileMobile, "category", "category-mobile", ImageUtil.fullImageSize, "jpg");
-                        String imageMobileUrl = ImageUtil.createImageUrl("category", imageMobile != null ? imageMobile.getName() : null);
-                        // ========================== update with image ========================== //
-                        categoryMerchant.setImageWeb(imageWebUrl);
-                        categoryMerchant.setImageMobile(imageMobileUrl);
+                        // // for Mobile
+                        // Http.MultipartFormData.FilePart imageFileMobile = Objects.requireNonNull(body).getFile("image_mobile");
+                        // File imageMobile = ImageUtil.uploadImage(imageFileMobile, "category", "category-mobile", ImageUtil.fullImageSize, "jpg");
+                        // String imageMobileUrl = ImageUtil.createImageUrl("category", imageMobile != null ? imageMobile.getName() : null);
+                        // // ========================== update with image ========================== //
+                        categoryMerchant.setImageWeb(request.getImageWeb());
+                        categoryMerchant.setImageMobile(request.getImageMobile());
                         categoryMerchant.update();
 
                         trx.commit();

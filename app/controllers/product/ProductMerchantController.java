@@ -137,7 +137,7 @@ public class ProductMerchantController extends BaseController {
                         return badRequest(Json.toJson(response));
                     }
                     SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(
-                            productRequest.getSubCategoryId(), ownMerchant.id);
+                            productRequest.getSubsCategoryId(), ownMerchant.id);
                     if (subsCategoryMerchant == null) {
                         response.setBaseResponse(0, 0, 0, " Subs Category not found.", null);
                         return badRequest(Json.toJson(response));
