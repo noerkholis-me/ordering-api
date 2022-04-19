@@ -465,7 +465,7 @@ public class BrandMerchantController extends BaseController {
                     brandDetailResponse.setMerchantId(brandMerchant.getMerchant().id);
                     for(SubsCategoryMerchant subsCategory : dataSubCategory){
                         BrandDetailResponse.SubsCategoryMerchant categoryResponses = new BrandDetailResponse.SubsCategoryMerchant();
-                        Query<ProductMerchant> queryProduct = ProductMerchantRepository.find.where().eq("t0.sub_category_merchant_id", subsCategory.id).eq("t0.brand_merchant_id", brandMerchant.id).eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.merchant_id", merchantId).order("t0.id");
+                        Query<ProductMerchant> queryProduct = ProductMerchantRepository.find.where().eq("t0.subs_category_merchant_id", subsCategory.id).eq("t0.brand_merchant_id", brandMerchant.id).eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.merchant_id", merchantId).order("t0.id");
                         List<ProductMerchant> dataProduct = ProductMerchantRepository.getDataProductStore(queryProduct);
 
                         List<BrandDetailResponse.SubsCategoryMerchant.ProductMerchant> productListResponses = new ArrayList<>();
