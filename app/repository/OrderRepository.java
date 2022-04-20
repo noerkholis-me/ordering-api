@@ -13,4 +13,8 @@ public class OrderRepository extends Model {
         return Optional.ofNullable(find.where().eq("id", id).findUnique());
     }
 
+    public static Optional<Order> findByOrderNumber(String orderNumber) {
+        return Optional.ofNullable(find.where().eq("orderNumber", orderNumber).findUnique());
+    }
+
 }

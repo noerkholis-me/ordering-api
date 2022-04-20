@@ -419,3 +419,7 @@ GET    /merchant/productstore/list                       controllers.product.Pro
 GET    /merchant/productstore/:id                        controllers.product.ProductStoreController.viewProductStore(id: Long)
 DELETE    /merchant/productstore/:id                     controllers.product.ProductStoreController.deleteProductStore(id: Long)
 PUT   /merchant/productstore/:id/status                  controllers.product.ProductStoreController.setStatus(id: Long)
+
+#ORDER
+POST /users/order/checkout                               controllers.users.CheckoutOrderController.checkoutOrder()
+POST /users/order/payment                                controllers.users.CheckoutOrderController.payment()

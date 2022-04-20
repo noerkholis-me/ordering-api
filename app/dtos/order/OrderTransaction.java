@@ -16,9 +16,13 @@ public class OrderTransaction {
 
     @JsonProperty("order_type")
     private String orderType;
+    @JsonProperty("device_type")
+    private String deviceType;
+    @JsonProperty("merchant_name")
+    private String merchantName;
     @JsonProperty("product_order_detail")
     private List<ProductOrderDetail> productOrderDetail;
     @JsonProperty("payment_detail")
-    private PaymentDetail paymentDetail;
+    private PaymentDetailResponse paymentDetailResponse;
 
 }

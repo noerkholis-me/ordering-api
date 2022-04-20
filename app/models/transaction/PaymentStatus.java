@@ -2,6 +2,7 @@ package models.transaction;
 
 public enum PaymentStatus {
 
+    PENDING("PENDING"),
     UNPAID("UNPAID"),
     PAID("PAID"),
     CANCELLED("CANCELLED");

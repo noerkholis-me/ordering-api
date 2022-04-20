@@ -18,7 +18,7 @@ create table orders (
     constraint pk_order primary key (id)
 );
 
-create sequence order_seq;
+create sequence orders_seq;
 alter table orders drop constraint if exists fk_order_user_id;
 alter table orders add constraint fk_order_user_id foreign key (user_id) references member (id);
 create index idx_order_user_id on orders (user_id);
