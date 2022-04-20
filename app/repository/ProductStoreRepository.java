@@ -1,5 +1,6 @@
 package repository;
 
+import jdk.nashorn.internal.runtime.options.Option;
 import models.*;
 import play.db.ebean.Model;
 import com.avaje.ebean.Expr;
@@ -14,6 +15,10 @@ import java.text.SimpleDateFormat;
 public class ProductStoreRepository extends Model {
 
     public static Finder<Long, ProductStore> find = new Finder<>(Long.class, ProductStore.class);
+
+	public static Optional<ProductStore> findById(Long id) {
+		return Optional.ofNullable(find.where().eq("id", id).findUnique());
+	}
 
     public static ProductStore findByIdAndMerchantId(Long id, Long merchantId) {
         try {

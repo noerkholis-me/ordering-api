@@ -1463,6 +1463,7 @@ public class SessionsController extends BaseController {
 						String redirect = Constant.getInstance().getFrontEndUrl() + "/activate/";
 
 						Member newMember = new Member(email, phone, fullName);
+						newMember.password = Encryption.EncryptAESCBCPCKS5Padding(password);
 						newMember.save();
 
 						// pengecekan ke table member refferal code tsb untuk menjadi id
