@@ -1,0 +1,71 @@
+package models.transaction;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import models.BaseModel;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+@Entity
+@Table(name = "order_payment")
+@Data
+@EqualsAndHashCode(callSuper = false)
+public class OrderPayment extends BaseModel {
+
+    @Column(unique = true)
+    @JsonProperty("invoice_no")
+    private String invoiceNo;
+
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "payment_type")
+    private String paymentType;
+
+    @Column(name = "payment_channel")
+    private String paymentChannel;
+
+    @Column(name = "total_amount")
+    private BigDecimal totalAmount;
+
+    @Column(name = "payment_date")
+    private Date paymentDate;
+
+
+
+
+    // ============================================================ //
+
+    @OneToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
+    private Order order;
+
+    @OneToOne(mappedBy = "orderPayment")
+    private PaymentDetail paymentDetail;
+
+    public static Finder<Long, OrderPayment> find = new Finder<>(Long.class, OrderPayment.class);
+
+    public static String generateInvoiceCode(){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyMM");
+        SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("yyyy-MM");
+        OrderPayment so = OrderPayment.find.where("t0.created_at > '"+simpleDateFormat2.format(new Date())+"-01 00:00:00' and invoice_no is not null")
+                .order("t0.created_at desc").setMaxRows(1).findUnique();
+        String seqNum = "";
+        if(so == null){
+            seqNum = "00001";
+        }else{
+            seqNum = so.invoiceNo.substring(so.invoiceNo.length() - 5);
+            int seq = Integer.parseInt(seqNum)+1;
+            seqNum = "00000" + String.valueOf(seq);
+            seqNum = seqNum.substring(seqNum.length() - 5);
+        }
+        String code = "INV";
+        code += simpleDateFormat.format(new Date()) + seqNum;
+        return code;
+    }
+
+}

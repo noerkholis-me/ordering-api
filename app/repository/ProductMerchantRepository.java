@@ -4,6 +4,7 @@ import com.avaje.ebean.Expr;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import models.Merchant;
+import models.Product;
 import models.Store;
 import models.merchant.*;
 import play.db.ebean.Model;
@@ -13,6 +14,10 @@ import java.util.List;
 public class ProductMerchantRepository extends Model {
 
     public static Finder<Long, ProductMerchant> find = new Finder<>(Long.class, ProductMerchant.class);
+
+    public static ProductMerchant findById(Long id) {
+        return find.where().eq("id", id).eq("isActive", Boolean.TRUE).findUnique();
+    }
 
     public static ProductMerchant findById(Long id, Merchant merchant) {
         return find.where().eq("id", id).eq("merchant", merchant).findUnique();
