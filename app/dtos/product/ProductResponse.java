@@ -26,6 +26,8 @@ public class ProductResponse implements Serializable {
     private CategoryResponse category;
     @JsonProperty("sub_category")
     private SubCategoryResponse subCategory;
+    @JsonProperty("subs_category")
+    private SubsCategoryResponse subsCategory;
     @JsonProperty("brand")
     private BrandResponse brand;
 
@@ -61,6 +63,16 @@ public class ProductResponse implements Serializable {
         private Long id;
         @JsonProperty("sub_category_name")
         private String subCategoryName;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter @Setter
+    @Builder
+    public static class SubsCategoryResponse {
+        private Long id;
+        @JsonProperty("subs_category_name")
+        private String subsCategoryName;
     }
 
     @AllArgsConstructor

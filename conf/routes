@@ -403,6 +403,9 @@ GET    /merchant/product/:id                        controllers.product.ProductM
 DELETE    /merchant/product/:id                     controllers.product.ProductMerchantController.deleteProduct(id: Long)
 PUT   /merchant/product/:id/status                  controllers.product.ProductMerchantController.updateStatusProduct(id: Long)
 
+#PRODUCT RECOMMENDATION
+GET     /product/recommendation                     controllers.product.ProductMerchantController.listRecommendedProduct(merchant_id: Long ?= 0)
+
 #BANNERS
 POST    /merchant/banners                           controllers.banners.BannersMerchantController.createBanners()
 PUT     /merchant/banners/:id/update                controllers.banners.BannersMerchantController.editBanners(id: Long)

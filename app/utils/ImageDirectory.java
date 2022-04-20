@@ -3,7 +3,10 @@ package utils;
 public enum ImageDirectory {
     BRAND("brand", "brand"),
     CATEGORY("category", "category"),
-    SUBCATEGORY("subcategory", "subcategory");
+    SUBCATEGORY("subcategory", "subcategory"),
+    SUBSCATEGORY("subscategory", "subscategory"),
+    PRODUCT("product", "product"),
+    BANNER("banner", "banner");
 
 
     private String key;
