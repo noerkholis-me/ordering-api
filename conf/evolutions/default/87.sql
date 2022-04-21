@@ -89,8 +89,8 @@ create index idx_payment_detail_order_payment_id on payment_detail (order_paymen
 
 # --- !Downs
 
-drop table if exists order cascade;
-drop sequence if exists order_seq;
+drop table if exists orders cascade;
+drop sequence if exists orders_seq;
 drop table if exists order_detail cascade;
 drop sequence if exists order_detail_seq;
 drop table if exists order_payment cascade;
