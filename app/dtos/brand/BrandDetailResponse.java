@@ -116,6 +116,22 @@ public class BrandDetailResponse {
             
             @JsonProperty("product_image_main")
             private String productImageMain;
+            
+            @JsonProperty("product_description")
+            private ProductDescriptionResponse productDescription;
+
+            @AllArgsConstructor
+            @NoArgsConstructor
+            @Getter
+            @Setter
+            @Builder
+            public static class ProductDescriptionResponse {
+                @JsonProperty("short_description")
+                private String shortDescription;
+
+                @JsonProperty("long_description")
+                private String longDescription;
+            }
         }
     }
 

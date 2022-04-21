@@ -23,6 +23,7 @@ import play.mvc.BodyParser;
 import play.mvc.Http;
 import play.mvc.Result;
 import repository.*;
+import dtos.product.*;
 
 import java.io.File;
 import java.util.*;
@@ -468,6 +469,11 @@ public class BrandMerchantController extends BaseController {
                         Query<ProductMerchant> queryProduct = ProductMerchantRepository.find.where().eq("t0.subs_category_merchant_id", subsCategory.id).eq("t0.brand_merchant_id", brandMerchant.id).eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.merchant_id", merchantId).order("t0.id");
                         List<ProductMerchant> dataProduct = ProductMerchantRepository.getDataProductStore(queryProduct);
 
+                        String querySql = "t0.product_merchant_id in (select id from product_merchant where is_active = "+true+" and is_deleted = "+false+")";
+                        Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("random()");
+                        List<ProductMerchantDetail> totalDataProductDetail = ProductMerchantDetailRepository.getTotalDataPage(query);
+                        List<ProductMerchantDetail> productMerchantDetails = ProductMerchantDetailRepository.forProductRecommendation(query);
+
                         List<BrandDetailResponse.SubsCategoryMerchant.ProductMerchant> productListResponses = new ArrayList<>();
 
                         categoryResponses.setId(subsCategory.id);
@@ -478,15 +484,14 @@ public class BrandMerchantController extends BaseController {
                         categoryResponses.setIsActive(subsCategory.isActive());
                         categoryListResponses.add(categoryResponses);
                         brandDetailResponse.setCategory(categoryResponses != null ? categoryListResponses : null);
-                        for(ProductMerchant products : dataProduct){
+                        for(ProductMerchantDetail productMerchantDetail : productMerchantDetails){
                             BrandDetailResponse.SubsCategoryMerchant.ProductMerchant productResponses = new BrandDetailResponse.SubsCategoryMerchant.ProductMerchant();
-                            ProductMerchantDetail productDetail = ProductMerchantDetailRepository.findByProduct(products);
-                            ProductStore productStore = ProductStoreRepository.findForCust(products.id, storeId, merchantId);
-                            
-                            productResponses.setProductId(products.id);
-                            productResponses.setProductName(products.getProductName());
-                            productResponses.setProductType(productDetail.getProductType());
-                            productResponses.setIsCustomizable(productDetail.getIsCustomizable());
+                            ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(productMerchantDetail.getProductMerchant().id, merchantId);
+                            ProductStore productStore = ProductStoreRepository.findForCust(productMerchant.id, storeId, merchantId);
+                            productResponses.setProductId(productMerchant.id);
+                            productResponses.setProductName(productMerchant.getProductName());
+                            productResponses.setProductType(productMerchantDetail.getProductType());
+                            productResponses.setIsCustomizable(productMerchantDetail.getIsCustomizable());
                             
                             if(productStore != null) {
                                 productResponses.setProductPrice(productStore.getStorePrice());
@@ -494,13 +499,21 @@ public class BrandMerchantController extends BaseController {
                                 productResponses.setDiscount(productStore.getDiscount());
                                 productResponses.setProductPriceAfterDiscount(productStore.getFinalPrice());
                             } else {
-                                productResponses.setProductPrice(productDetail.getProductPrice());
-                                productResponses.setDiscountType(productDetail.getDiscountType());
-                                productResponses.setDiscount(productDetail.getDiscount());
-                                productResponses.setProductPriceAfterDiscount(productDetail.getProductPriceAfterDiscount());
+                                productResponses.setProductPrice(productMerchantDetail.getProductPrice());
+                                productResponses.setDiscountType(productMerchantDetail.getDiscountType());
+                                productResponses.setDiscount(productMerchantDetail.getDiscount());
+                                productResponses.setProductPriceAfterDiscount(productMerchantDetail.getProductPriceAfterDiscount());
+                            }
+        
+                            ProductMerchantDescription productMerchantDescription = ProductMerchantDescriptionRepository.findByProductMerchantDetail(productMerchantDetail);
+                            if (productMerchantDescription != null) {
+                                BrandDetailResponse.SubsCategoryMerchant.ProductMerchant.ProductDescriptionResponse productDescriptionResponse = new BrandDetailResponse.SubsCategoryMerchant.ProductMerchant.ProductDescriptionResponse();
+                                productDescriptionResponse.setShortDescription(productMerchantDescription.getShortDescription());
+                                productDescriptionResponse.setLongDescription(productMerchantDescription.getLongDescription());
+                                productResponses.setProductDescription(productDescriptionResponse);
                             }
 
-                            productResponses.setProductImageMain(productDetail.getProductImageMain());
+                            productResponses.setProductImageMain(productMerchantDetail.getProductImageMain());
                             productListResponses.add(productResponses);
                             categoryResponses.setProduct(productResponses != null ? productListResponses : null);
                         }
