@@ -99,6 +99,7 @@ public class CheckoutOrderController extends BaseController {
                 orderPayment.setStatus(PaymentStatus.UNPAID.getStatus());
                 orderPayment.setPaymentType(orderRequest.getPaymentDetailResponse().getPaymentType());
                 orderPayment.setPaymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel());
+                orderPayment.setPaymentDate(new Date());
 
                 BigDecimal totalAmount = new BigDecimal(0);
                 BigDecimal fee = orderRequest.getPaymentDetailResponse().getPaymentFee()
@@ -133,6 +134,10 @@ public class CheckoutOrderController extends BaseController {
                     result.put("error_messages", Json.toJson(new String[]{"Request timeout, please try again later"}));
                     response.setBaseResponse(1, offset, 1, timeOut, result);
                     return badRequest(Json.toJson(response));
+                } else if (serviceResponse.getCode() == 400) {
+                    txn.rollback();
+                    response.setBaseResponse(1, offset, 1, inputParameter, serviceResponse.getData());
+                    return badRequest(Json.toJson(response));
                 } else {
                     // update payment status
                     order.setStatus(OrderStatus.PROCESS.getStatus());
@@ -162,7 +167,7 @@ public class CheckoutOrderController extends BaseController {
 
                     OrderTransactionResponse orderTransactionResponse = new OrderTransactionResponse();
                     orderTransactionResponse.setOrderNumber(order.getOrderNumber());
-                    orderTransactionResponse.setInvoiceNumber(order.getOrderPayment().getInvoiceNo());
+                    orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
                     orderTransactionResponse.setQrString(initiatePaymentResponse.getQrString());
                     orderTransactionResponse.setTotalAmount(initiatePaymentResponse.getTotalAmount());
                     orderTransactionResponse.setMerchantName(initiatePaymentResponse.getMerchantName());

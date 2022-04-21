@@ -10,8 +10,8 @@ public class OrderPaymentRepository extends Model {
 
     public static Finder<Long, OrderPayment> find = new Finder<>(Long.class, OrderPayment.class);
 
-    public static Optional<OrderPayment> findByOrderId(Order order) {
-        return Optional.ofNullable(find.where().eq("order_id", order).findUnique());
+    public static Optional<OrderPayment> findByOrderId(Long orderId) {
+        return Optional.ofNullable(find.where().eq("order_id", orderId).findUnique());
     }
 
 }

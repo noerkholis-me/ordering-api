@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "orders")
@@ -64,7 +65,7 @@ public class Order extends BaseModel {
     public static Finder<Long, Order> find = new Finder<>(Long.class, Order.class);
 
     public static String generateOrderNumber(){
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyMM");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyMMDD");
         SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("yyyy-MM");
         Order order = Order.find.where("t0.created_at > '"+simpleDateFormat2.format(new Date())+"-01 00:00:00'")
                 .order("t0.created_at desc").setMaxRows(1).findUnique();

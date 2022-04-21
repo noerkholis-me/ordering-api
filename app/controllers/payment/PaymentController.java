@@ -25,7 +25,7 @@ public class PaymentController extends BaseController {
                 response.setBaseResponse(0, 0, 0, inputParameter, null);
                 return badRequest(Json.toJson(response));
             }
-            Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderId(order.get());
+            Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderId(order.get().id);
             if (!orderPayment.isPresent()) {
                 response.setBaseResponse(0, 0, 0, inputParameter, null);
                 return badRequest(Json.toJson(response));
