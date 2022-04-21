@@ -16,8 +16,7 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = false)
 public class OrderPayment extends BaseModel {
 
-    @Column(unique = true)
-    @JsonProperty("invoice_no")
+    @Column(unique = true, name = "invoice_no")
     private String invoiceNo;
 
     @Column(name = "status")
