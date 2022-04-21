@@ -18,6 +18,10 @@ public class ProductMerchantRepository extends Model {
         return find.where().eq("id", id).eq("merchant", merchant).findUnique();
     }
 
+    public static ProductMerchant findByIdProductRecommend(Long id, Long merchantId) {
+        return find.where().eq("id", id).eq("merchant_id", merchantId).findUnique();
+    }
+
     public static Query<ProductMerchant> findProductIsActiveAndMerchant(Merchant merchant, Boolean isActive) {
         return find.where().eq("isDeleted", false).eq("isActive", isActive).eq("merchant", merchant).order("id");
     }
