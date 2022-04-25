@@ -432,3 +432,17 @@ POST /users/order/payment                                controllers.users.Check
 
 #PAYMENT
 GET  /users/order/:orderNumber/payment                   controllers.payment.PaymentController.checkStatusPayment(orderNumber: String)
+
+#TABLETYPE
+POST    /merchant/tabletypes                           controllers.merchants.TableTypeController.addTableType()
+PUT    /merchant/tabletypes/:id                        controllers.merchants.TableTypeController.editTableType(id: Long)
+GET    /merchant/tabletypes                       controllers.merchants.TableTypeController.getAllTableType(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/tabletypes/:id                      controllers.merchants.TableTypeController.getTableTypeById(id: Long)
+DELETE    /merchant/tabletypes/:id                     controllers.merchants.TableTypeController.deleteTableType(id: Long)
+
+#TABLE
+POST    /merchant/tables                           controllers.merchants.TableMerchantController.addTable()
+PUT    /merchant/tables/:id                        controllers.merchants.TableMerchantController.editTable(id: Long)
+GET    /merchant/tables                             controllers.merchants.TableMerchantController.getAllTable(storeId: Long, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/tables/:id                        controllers.merchants.TableMerchantController.getTableById(id: Long)
+DELETE    /merchant/tables/:id                     controllers.merchants.TableMerchantController.deleteTable(id: Long)
