@@ -388,7 +388,7 @@ public class ProductMerchantController extends BaseController {
             Transaction trx = Ebean.beginTransaction();
             try {
 
-                String querySql = "t0.product_merchant_id in (select id from product_merchant where is_active = "+true+" and is_deleted = "+false+")";
+                String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.is_active = "+true+" and pm.is_deleted = "+false+" and pm.merchant_id = "+merchantId+")";
                 Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("random()");
                 List<ProductMerchantDetail> totalDataProductDetail = ProductMerchantDetailRepository.getTotalDataPage(query);
                 List<ProductMerchantDetail> productMerchantDetails = ProductMerchantDetailRepository.forProductRecommendation(query);
@@ -583,7 +583,7 @@ public class ProductMerchantController extends BaseController {
             Transaction trx = Ebean.beginTransaction();
             try {
 
-                String querySql = "t0.product_merchant_id in (select id from product_merchant where is_active = "+true+" and is_deleted = "+false+")";
+                String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.is_active = "+true+" and pm.is_deleted = "+false+" and pm.merchant_id = "+merchantId+")";
                 Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "ADDITIONAL").order("t0.created_at desc");
                 List<ProductMerchantDetail> totalDataProductDetail = ProductMerchantDetailRepository.getTotalDataPage(query);
                 List<ProductMerchantDetail> productMerchantDetails = ProductMerchantDetailRepository.findProductAdditional(query);
