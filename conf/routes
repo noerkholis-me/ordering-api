@@ -446,3 +446,8 @@ PUT    /merchant/tables/:id                        controllers.merchants.TableMe
 GET    /merchant/tables                             controllers.merchants.TableMerchantController.getAllTable(storeId: Long, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET    /merchant/tables/:id                        controllers.merchants.TableMerchantController.getTableById(id: Long)
 DELETE    /merchant/tables/:id                     controllers.merchants.TableMerchantController.deleteTable(id: Long)
+
+#APP SETTING
+POST    /merchant/appsetting                       controllers.settings.AppSettingsController.createAppSetting()
+PUT    /merchant/appsetting/:id/update                        controllers.settings.AppSettingsController.updateAppSetting(id: Long, merchant_id: Long ?= 0)
+GET     /merchant/setting/getsetting                       controllers.settings.AppSettingsController.getAppSetting(merchant_id: Long ?= 0)
