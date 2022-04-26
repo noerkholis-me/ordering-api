@@ -16,28 +16,24 @@ public class TableMerchantRepository extends Model {
         return Optional.ofNullable(
                 find.where()
                         .eq("id", id)
-                        .eq("isActive", true)
                         .eq("isDeleted", false)
                         .findUnique());
     }
 
     public static List<TableMerchant> findAllTables() {
         return find.where()
-                .eq("isActive", true)
                 .eq("isDeleted", false)
                 .findList();
     }
 
     public static Query<TableMerchant> findAllTablesQuery() {
         return find.where()
-                .eq("isActive", true)
                 .eq("isDeleted", false)
                 .order("id");
     }
 
     public static Query<TableMerchant> findAllTablesByStoreIdQuery(Long storeId) {
         return find.where()
-                .eq("isActive", true)
                 .eq("isDeleted", false)
                 .eq("store_id", storeId)
                 .order("id");
