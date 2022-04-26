@@ -137,7 +137,7 @@ public class TableMerchantController extends BaseController {
                 tableMerchantQuery = TableMerchantRepository.findAllTablesByStoreIdQuery(storeId);
             }
             List<TableMerchant> totalDataPage = TableMerchantRepository.getTotalPage(tableMerchantQuery);
-            List<TableMerchant> tableMerchants = TableMerchantRepository.findTablesWithPaging(tableMerchantQuery, filter, sort, offset, limit);
+            List<TableMerchant> tableMerchants = TableMerchantRepository.findTablesWithPaging(tableMerchantQuery, sort, filter, offset, limit);
             List<TableMerchantResponse> tableMerchantResponses = new ArrayList<>();
             for (TableMerchant tableMerchant : tableMerchants) {
                 TableMerchantResponse tableMerchantResponse = toResponse(tableMerchant);
@@ -179,7 +179,6 @@ public class TableMerchantController extends BaseController {
                     response.setBaseResponse(0, 0, 0, "table id does not exists", null);
                     return badRequest(Json.toJson(response));
                 }
-                tableMerchant.get().setIsActive(Boolean.FALSE);
                 tableMerchant.get().isDeleted = Boolean.TRUE;
                 tableMerchant.get().update();
                 response.setBaseResponse(1, 0, 1, success + " Delete data table", tableMerchant.get().id);
