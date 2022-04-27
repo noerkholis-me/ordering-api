@@ -207,6 +207,17 @@ public class Store extends BaseModel{
         }
         return query.findPagingList(limit).getPage(offset).getList();
     }
+    
+    public static List<Store> findAllStore(Query<Store> reqQuery) {
+        Query<Store> query = reqQuery;
+
+        query = query.orderBy("t0.store_name asc");
+
+        ExpressionList<Store> exp = query.where();
+        query = exp.query();
+        
+        return query.findPagingList(0).getPage(0).getList();
+    }
 
     public String getChangeLogData(Store data){
         HashMap<String, String> map = new HashMap<>();
