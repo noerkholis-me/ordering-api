@@ -7,7 +7,8 @@ public enum ImageDirectory {
     SUBSCATEGORY("subscategory", "subscategory"),
     PRODUCT("product", "product"),
     BANNER("banner", "banner"),
-    SETTING("setting", "setting");
+    SETTING("setting", "setting"),
+    PICKUPPOINT("pickuppoint", "pickuppoint");
 
 
     private String key;

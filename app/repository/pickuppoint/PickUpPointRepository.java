@@ -2,29 +2,25 @@ package repository.pickuppoint;
 
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
-import models.Merchant;
-import models.Store;
 import models.pupoint.*;
 import play.db.ebean.Model;
-import com.avaje.ebean.Expr;
+
 import java.io.IOException;
 
-import javax.persistence.PersistenceException;
 import java.util.*;
-import java.text.SimpleDateFormat;
 
 public class PickUpPointRepository extends Model {
 
-    public static Finder<Long, PickUpPoint> find = new Finder<>(Long.class, PickUpPoint.class);
+    public static Finder<Long, PickUpPointMerchant> find = new Finder<>(Long.class, PickUpPointMerchant.class);
 
-    public static PickUpPoint findByMerchantId (Long merchantId) {
+    public static PickUpPointMerchant findByMerchantId (Long merchantId) {
 			return find.where()
 				.eq("merchant_id", merchantId)
 				.eq("is_deleted", Boolean.FALSE)
 				.findUnique();
     }
 
-    public static PickUpPoint findByStoreIdandMerchantId(Long storeId, Long merchantId) {
+    public static PickUpPointMerchant findByStoreIdandMerchantId(Long storeId, Long merchantId) {
 			return find.where()
 				.eq("store_id", storeId)
 				.eq("merchant_id", merchantId)
@@ -32,7 +28,7 @@ public class PickUpPointRepository extends Model {
 				.findUnique();
 	}
 
-	public static PickUpPoint findByIdandMerchantId(Long id, Long merchantId) {
+	public static PickUpPointMerchant findByIdandMerchantId(Long id, Long merchantId) {
 		return find.where()
 			.eq("id", id)
 			.eq("merchant_id", merchantId)
@@ -40,9 +36,9 @@ public class PickUpPointRepository extends Model {
 			.findUnique();
 	}
 	
-	public static List<PickUpPoint> getListPickUpPoint(Query<PickUpPoint> reqQuery, String sort, String filter, int offset, int limit)
+	public static List<PickUpPointMerchant> getListPickUpPoint(Query<PickUpPointMerchant> reqQuery, String sort, String filter, int offset, int limit)
 			throws IOException {
-		Query<PickUpPoint> query = reqQuery;
+		Query<PickUpPointMerchant> query = reqQuery;
 
 		if (!"".equals(sort)) {
             query = query.orderBy(sort);
@@ -50,7 +46,7 @@ public class PickUpPointRepository extends Model {
 			query = query.orderBy("t0.updated_at desc");
 		}
 
-		ExpressionList<PickUpPoint> exp = query.where();
+		ExpressionList<PickUpPointMerchant> exp = query.where();
 
 
 		exp = exp.disjunction();
@@ -65,22 +61,22 @@ public class PickUpPointRepository extends Model {
 			query = query.setMaxRows(limit);
 		}
 
-		List<PickUpPoint> resData = query.findPagingList(limit).getPage(offset).getList();
+		List<PickUpPointMerchant> resData = query.findPagingList(limit).getPage(offset).getList();
 
 		return resData;
 	}
 
-	public static List<PickUpPoint> getTotalData(Query<PickUpPoint> reqQuery)
+	public static List<PickUpPointMerchant> getTotalData(Query<PickUpPointMerchant> reqQuery)
 			throws IOException {
-		Query<PickUpPoint> query = reqQuery;
+		Query<PickUpPointMerchant> query = reqQuery;
 
-		ExpressionList<PickUpPoint> exp = query.where();
+		ExpressionList<PickUpPointMerchant> exp = query.where();
 
 		query = exp.query();
 
 		int total = query.findList().size();
 
-		List<PickUpPoint> resData = query.findPagingList(0).getPage(0).getList();
+		List<PickUpPointMerchant> resData = query.findPagingList(0).getPage(0).getList();
 
 		return resData;
 	}

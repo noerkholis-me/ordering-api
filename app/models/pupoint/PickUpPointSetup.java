@@ -12,7 +12,7 @@ import models.*;
 import javax.persistence.*;
 
 @Entity
-public class PickUpPoint extends BaseModel {
+public class PickUpPointSetup extends BaseModel {
     private static final long serialVersionUID = 1L;
 
     @Getter
@@ -20,12 +20,8 @@ public class PickUpPoint extends BaseModel {
     public Long id;
 
     @Getter @Setter
-    @JsonProperty("pupoint_name")
-    public String pupointName;
-
-    @Getter @Setter
-    @JsonProperty("is_active")
-    public Boolean isActive;
+    @JsonProperty("image_pupoint_setup")
+    public String imagePupointSetup;
 
     @JsonIgnore
     @ManyToOne
