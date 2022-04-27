@@ -459,3 +459,10 @@ PUT     /merchant/pickuppoint/:id/update            controllers.pickuppoint.Pick
 GET     /merchant/pickuppoint/:id/detail            controllers.pickuppoint.PickUpPointController.getPickupPoint(id: Long)
 DELETE  /merchant/pickuppoint/:id/delete            controllers.pickuppoint.PickUpPointController.deletePickUpPoint(id: Long)
 GET     /merchant/pickuppoint/listdata              controllers.pickuppoint.PickUpPointController.listPickupPoint(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+
+#PUPOINTSETUP
+POST    /merchant/setup/pickuppoint                       controllers.pickuppoint.PickUpPointSetupController.createPickUpPointSetup()
+PUT     /merchant/setup/pickuppoint/:id/update            controllers.pickuppoint.PickUpPointSetupController.updatePickUpPointSetup(id: Long)
+GET     /merchant/setup/pickuppoint/:id/detail            controllers.pickuppoint.PickUpPointSetupController.getPickupPointSetup(id: Long)
+DELETE  /merchant/setup/pickuppoint/:id/delete            controllers.pickuppoint.PickUpPointSetupController.deletePickUpPointSetup(id: Long)
+GET     /merchant/setup/pickuppoint/listdata              controllers.pickuppoint.PickUpPointSetupController.listPickupPointSetup(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
