@@ -185,7 +185,7 @@ public class AppSettingsController extends BaseController {
                     response.setBaseResponse(1, 0, 1, success + " menampilkan data", responseApp);
                     return ok(Json.toJson(response));
                 } else {
-                    response.setBaseResponse(0, 0, 0, error + " data tidak ditemukan", null);
+                    response.setBaseResponse(0, 0, 0, "Pengaturan Aplikasi masih kosong", null);
                     return ok(Json.toJson(response));
                 }
             } catch (Exception e) {
