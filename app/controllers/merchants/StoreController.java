@@ -14,6 +14,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
 import dtos.store.StoreRequest;
 import dtos.store.StoreResponse;
+import dtos.store.StoreResponsePuP;
 import models.*;
 import play.Logger;
 import play.libs.Json;
@@ -318,6 +319,37 @@ public class StoreController extends BaseController {
             return "Phone format not valid.";
         }
         return null;
+    }
+
+    public static Result getAllStoreMerchant() {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            try {
+                Query<Store> query = Store.findStoreIsActiveAndMerchant(ownMerchant);
+                List<Store> storeList = Store.findAllStore(query);
+                List<StoreResponsePuP> storeResponses = toResponsesPuP(storeList);
+                response.setBaseResponse(storeList.size(), 0, 0, "Berhasil menampilkan list store", storeResponses);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                Logger.info("Error: " + e.getMessage());
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    private static StoreResponsePuP toResponsePuP(Store store) {
+        return StoreResponsePuP.builder()
+                .id(store.id)
+                .storeCode(store.storeCode)
+                .storeName(store.storeName)
+                .build();
+    }
+
+    private static List<StoreResponsePuP> toResponsesPuP(List<Store> stores) {
+        List<StoreResponsePuP> storeResponses = new ArrayList<>();
+        stores.forEach(store -> storeResponses.add(toResponsePuP(store)));
+        return storeResponses;
     }
 
 }
