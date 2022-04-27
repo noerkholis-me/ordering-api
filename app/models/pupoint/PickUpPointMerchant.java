@@ -1,18 +1,16 @@
 package models.pupoint;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import models.*;
 
 import javax.persistence.*;
 
 @Entity
-public class PickUpPoint extends BaseModel {
+@Table(name = "pick_up_point_merchant")
+public class PickUpPointMerchant extends BaseModel {
     private static final long serialVersionUID = 1L;
 
     @Getter

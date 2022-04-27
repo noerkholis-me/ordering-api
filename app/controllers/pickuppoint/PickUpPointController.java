@@ -6,9 +6,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
 import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiImplicitParam;
-import com.wordnik.swagger.annotations.ApiImplicitParams;
-import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
 import dtos.pupoint.*;
 import models.Merchant;
@@ -16,18 +13,11 @@ import models.Store;
 import models.pupoint.*;
 import play.Logger;
 import play.libs.Json;
-import play.mvc.BodyParser;
-import play.mvc.Http;
 import play.mvc.Result;
 import repository.pickuppoint.*;
 
-import java.io.File;
 import java.util.*;
 import com.avaje.ebean.Query;
-import utils.ImageDirectory;
-import utils.ImageUtil;
-
-import java.io.IOException;
 
 @Api(value = "/merchants/pickuppoint", description = "Pick Up Point")
 public class PickUpPointController extends BaseController {
@@ -50,7 +40,7 @@ public class PickUpPointController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        PickUpPoint puPoint = new PickUpPoint();
+                        PickUpPointMerchant puPoint = new PickUpPointMerchant();
                         puPoint.setPupointName(request.getPupointName());
                         puPoint.setStore(store);
                         puPoint.setMerchant(ownMerchant);
@@ -93,7 +83,7 @@ public class PickUpPointController extends BaseController {
                 String validate = validateData(request);
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
-                    PickUpPoint pickuppoint = PickUpPointRepository.findByIdandMerchantId(id, ownMerchant.id);
+                    PickUpPointMerchant pickuppoint = PickUpPointRepository.findByIdandMerchantId(id, ownMerchant.id);
 
                     if(pickuppoint != null){
                         try {
@@ -151,7 +141,7 @@ public class PickUpPointController extends BaseController {
             try {
                 JsonNode json = request().body().asJson();
 
-                PickUpPoint pickuppoint = PickUpPointRepository.findByIdandMerchantId(id, ownMerchant.id);
+                PickUpPointMerchant pickuppoint = PickUpPointRepository.findByIdandMerchantId(id, ownMerchant.id);
                 Transaction trx = Ebean.beginTransaction();
                 if(pickuppoint != null){
                     try {
@@ -191,12 +181,12 @@ public class PickUpPointController extends BaseController {
     public static Result listPickupPoint(String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<PickUpPoint> query = PickUpPointRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", ownMerchant.id).order("t0.id");
+            Query<PickUpPointMerchant> query = PickUpPointRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", ownMerchant.id).order("t0.id");
             try {
                 List<PickUpPointResponse> responses = new ArrayList<>();
-                List<PickUpPoint> totalData = PickUpPointRepository.getTotalData(query);
-                List<PickUpPoint> responseIndex = PickUpPointRepository.getListPickUpPoint(query, sort, filter, offset, limit);
-                for (PickUpPoint data : responseIndex) {
+                List<PickUpPointMerchant> totalData = PickUpPointRepository.getTotalData(query);
+                List<PickUpPointMerchant> responseIndex = PickUpPointRepository.getListPickUpPoint(query, sort, filter, offset, limit);
+                for (PickUpPointMerchant data : responseIndex) {
                     PickUpPointResponse puPointResponse = new PickUpPointResponse();
                     puPointResponse.setId(data.id);
                     puPointResponse.setPupointName(data.getPupointName());
@@ -225,7 +215,7 @@ public class PickUpPointController extends BaseController {
                 JsonNode json = request().body().asJson();
 
                 Transaction trx = Ebean.beginTransaction();
-                PickUpPoint pickuppoint = PickUpPointRepository.findByIdandMerchantId(id, ownMerchant.id);
+                PickUpPointMerchant pickuppoint = PickUpPointRepository.findByIdandMerchantId(id, ownMerchant.id);
 
                 if(pickuppoint != null){
                     try {
