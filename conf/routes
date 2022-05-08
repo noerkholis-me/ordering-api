@@ -466,3 +466,10 @@ PUT     /merchant/setup/pickuppoint/:id/update            controllers.pickuppoin
 GET     /merchant/setup/pickuppoint/:id/detail            controllers.pickuppoint.PickUpPointSetupController.getPickupPointSetup(id: Long)
 DELETE  /merchant/setup/pickuppoint/:id/delete            controllers.pickuppoint.PickUpPointSetupController.deletePickUpPointSetup(id: Long)
 GET     /merchant/setup/pickuppoint/listdata              controllers.pickuppoint.PickUpPointSetupController.listPickupPointSetup(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+
+#FEESETTINGMERCHANT
+POST    /merchant/feesetting                       controllers.merchants.FeeSettingMerchantController.addFeeSetting()
+GET    /merchant/feesetting                         controllers.merchants.FeeSettingMerchantController.getAllFeeSetting(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+
+#FEESETTINGCONFIG
+GET     /master/feesettingconfig                   controllers.masters.FeeSettingConfigController.getFeeSettingConfig()
