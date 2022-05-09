@@ -466,10 +466,10 @@ public class BrandMerchantController extends BaseController {
                     brandDetailResponse.setMerchantId(brandMerchant.getMerchant().id);
                     for(SubsCategoryMerchant subsCategory : dataSubCategory){
                         BrandDetailResponse.SubsCategoryMerchant categoryResponses = new BrandDetailResponse.SubsCategoryMerchant();
-                        Query<ProductMerchant> queryProduct = ProductMerchantRepository.find.where().eq("t0.subs_category_merchant_id", subsCategory.id).eq("t0.brand_merchant_id", brandMerchant.id).eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.merchant_id", merchantId).order("t0.id");
+                        Query<ProductMerchant> queryProduct = ProductMerchantRepository.find.where().eq("t0.subs_category_merchant_id", subsCategory.id).eq("t0.brand_merchant_id", id).eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.merchant_id", merchantId).order("t0.id");
                         List<ProductMerchant> dataProduct = ProductMerchantRepository.getDataProductStore(queryProduct);
 
-                        String querySql = "t0.product_merchant_id in (select id from product_merchant where is_active = "+true+" and is_deleted = "+false+")";
+                        String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.subs_category_merchant_id = "+subsCategory.id+" and pm.brand_merchant_id = "+id+" and pm.is_active = "+true+" and pm.is_deleted = false)";
                         Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("random()");
                         List<ProductMerchantDetail> totalDataProductDetail = ProductMerchantDetailRepository.getTotalDataPage(query);
                         List<ProductMerchantDetail> productMerchantDetails = ProductMerchantDetailRepository.forProductRecommendation(query);
