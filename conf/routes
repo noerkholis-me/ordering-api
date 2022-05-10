@@ -459,6 +459,7 @@ PUT     /merchant/pickuppoint/:id/update            controllers.pickuppoint.Pick
 GET     /merchant/pickuppoint/:id/detail            controllers.pickuppoint.PickUpPointController.getPickupPoint(id: Long)
 DELETE  /merchant/pickuppoint/:id/delete            controllers.pickuppoint.PickUpPointController.deletePickUpPoint(id: Long)
 GET     /merchant/pickuppoint/listdata              controllers.pickuppoint.PickUpPointController.listPickupPoint(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+PUT     /merchant/pickuppoint/:id/status            controllers.pickuppoint.PickUpPointController.updateStatusPickUpPoint(id:Long)
 
 #PUPOINTSETUP
 POST    /merchant/setup/pickuppoint                       controllers.pickuppoint.PickUpPointSetupController.createPickUpPointSetup()
@@ -481,3 +482,8 @@ GET         /merchant/productassign/list                controllers.product.Prod
 PUT         /merchant/productassign/:id/update          controllers.product.ProductAddOnController.editAssignProductAddOn(id:Long)
 DELETE      /merchant/productassign/:id/delete          controllers.product.ProductAddOnController.deleteAssignProductAddOn(id:Long)
 GET         /merchant/productassign/:id/detail          controllers.product.ProductAddOnController.readAssignProductAddOn(id:Long)
+GET         /merchant/productassign/:id/data/detail     controllers.product.ProductAddOnController.detailProductAssign(id:Long)
+
+#PRODUCT TYPE
+GET         /merchant/product/type/list                 controllers.product.ProductAddOnTypeController.listProductTipe(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+POST        /merchant/product/type/create               controllers.product.ProductAddOnTypeController.createProductType()
