@@ -89,7 +89,7 @@ public class AppSettingsController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result updateAppSetting(Long id, Long merchantId) {
+    public static Result updateAppSetting(Long id) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
             try {
@@ -103,7 +103,7 @@ public class AppSettingsController extends BaseController {
                     try {
                         // System.out.print(id);
                         // System.out.print(merchantId);
-                        AppSettings appSetting = AppSettingRepository.findByIdandMerchantId(id, merchantId);
+                        AppSettings appSetting = AppSettingRepository.findByIdandMerchantId(id, ownMerchant.id);
                         if (appSetting == null) {
                             response.setBaseResponse(0, 0, 0, error + " pengaturan tidak tersedia.", null);
                             return badRequest(Json.toJson(response));

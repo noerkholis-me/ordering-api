@@ -450,7 +450,7 @@ DELETE    /merchant/tables/:id                     controllers.merchants.TableMe
 
 #APP SETTING
 POST    /merchant/appsetting                       controllers.settings.AppSettingsController.createAppSetting()
-PUT    /merchant/appsetting/:id/update                        controllers.settings.AppSettingsController.updateAppSetting(id: Long, merchant_id: Long ?= 0)
+PUT    /merchant/appsetting/:id/update                        controllers.settings.AppSettingsController.updateAppSetting(id: Long)
 GET     /merchant/setting/getsetting                       controllers.settings.AppSettingsController.getAppSetting(merchant_id: Long ?= 0)
 
 #PUPOINT
@@ -473,3 +473,11 @@ GET    /merchant/feesetting                         controllers.merchants.FeeSet
 
 #FEESETTINGCONFIG
 GET     /master/feesettingconfig                   controllers.masters.FeeSettingConfigController.getFeeSettingConfig()
+
+
+#PRODUCT ADDON ASSIGN
+POST        /merchant/productassign                     controllers.product.ProductAddOnController.assignProductAddOn()
+GET         /merchant/productassign/list                controllers.product.ProductAddOnController.listProductAssign(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+PUT         /merchant/productassign/:id/update          controllers.product.ProductAddOnController.editAssignProductAddOn(id:Long)
+DELETE      /merchant/productassign/:id/delete          controllers.product.ProductAddOnController.deleteAssignProductAddOn(id:Long)
+GET         /merchant/productassign/:id/detail          controllers.product.ProductAddOnController.readAssignProductAddOn(id:Long)
