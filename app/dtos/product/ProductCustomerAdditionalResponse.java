@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter @Setter
-public class ProductMerchantAssignResponse implements Serializable {
+public class ProductCustomerAdditionalResponse implements Serializable {
 
     private Long id;
 
@@ -44,6 +44,36 @@ public class ProductMerchantAssignResponse implements Serializable {
 
         @JsonProperty("product_type")
         private String productType;
+
+        @JsonProperty("product_price")
+        @JsonSerialize(using = BigDecimalSerialize.class)
+        private BigDecimal productPrice;
+
+        @JsonProperty("discount_type")
+        private String discountType;
+
+        @JsonProperty("discount")
+        private Double discount;
+
+        @JsonProperty("product_price_after_discount")
+        @JsonSerialize(using = BigDecimalSerialize.class)
+        private BigDecimal productPriceAfterDiscount;
+
+        @JsonProperty("product_image_main")
+        private String productImageMain;
+
+        @JsonProperty("product_image_1")
+        private String productImage1;
+        
+        @JsonProperty("product_image_2")
+        private String productImage2;
+
+        @JsonProperty("product_image_3")
+        private String productImage3;
+
+        @JsonProperty("product_image_4")
+        private String productImage4;
+
     }  
 
 }
