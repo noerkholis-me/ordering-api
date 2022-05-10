@@ -9,7 +9,7 @@ import com.hokeba.api.BaseResponse;
 import controllers.BaseController;
 import dtos.product.*;
 import models.*;
-import models.merchant.ProductMerchant;
+import models.merchant.*;
 import models.productaddon.*;
 import play.Logger;
 import play.libs.Json;
@@ -147,7 +147,7 @@ public class ProductAddOnController extends BaseController {
                     List<ProductAddOn> dataAddOn = ProductAddOnRepository.getDataForAddOn(queryProductAddOn);
                     List<ProductMerchantAssignResponse.ProductAddOn> responsesProductAddOn = new ArrayList<>();
                     responseData.setId(productAddOn.id);
-                    responseData.setProductMerchantId(productAddOn.getProductMerchant().id);
+                    responseData.setProductId(productAddOn.getProductMerchant().id);
                     ProductMerchant productMerchant = ProductMerchantRepository.findById(productAddOn.getProductMerchant().id, ownMerchant);
                     responseData.setProductName(productMerchant != null ? productMerchant.getProductName() : null);
                     responseData.setMerchantId(productAddOn.getMerchant().id);
@@ -227,21 +227,25 @@ public class ProductAddOnController extends BaseController {
     public static Result listProductAssign(String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<ProductAddOn> query = ProductAddOnRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", ownMerchant.id).order("t0.id");
+            String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+ownMerchant.id+" and pm.is_active = "+true+" and pm.is_deleted = "+false+")";
+            Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("random()");
             try {
                 List<ProductMerchantAssignResponse> responses = new ArrayList<>();
-                List<ProductAddOn> totalData = ProductAddOnRepository.getTotalDataPage(query);
-                List<ProductAddOn> responseIndex = ProductAddOnRepository.findProductWithPaging(query, sort, filter, offset, limit);
-                for (ProductAddOn data : responseIndex) {
+                List<ProductMerchantDetail> totalDataProductDetail = ProductMerchantDetailRepository.getTotalDataPage(query);
+                List<ProductMerchantDetail> productMerchantDetails = ProductMerchantDetailRepository.findDetailData(query, sort, filter, offset, limit);
+                for(ProductMerchantDetail productMerchantDetail : productMerchantDetails){
                     ProductMerchantAssignResponse responseData = new ProductMerchantAssignResponse();
-                    Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().eq("t0.product_id", data.getProductMerchant().id).eq("t0.is_deleted", false).eq("t0.merchant_id", ownMerchant.id).order("t0.id");
+                    ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(productMerchantDetail.getProductMerchant().id, ownMerchant.id);
+
+                    responseData.setId(productMerchant.id);
+                    responseData.setProductId(productMerchant.id);
+                    responseData.setProductName(productMerchant.getProductName());
+                    responseData.setMerchantId(productMerchant.getMerchant().id);
+                    
+                    Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().eq("t0.product_id", productMerchantDetail.getProductMerchant().id).eq("t0.is_deleted", false).eq("t0.merchant_id", ownMerchant.id).order("t0.id");
                     List<ProductAddOn> dataAddOn = ProductAddOnRepository.getDataForAddOn(queryProductAddOn);
                     List<ProductMerchantAssignResponse.ProductAddOn> responsesProductAddOn = new ArrayList<>();
-                    responseData.setId(data.id);
-                    responseData.setProductMerchantId(data.getProductMerchant().id);
-                    ProductMerchant productMerchant = ProductMerchantRepository.findById(data.getProductMerchant().id, ownMerchant);
-                    responseData.setProductName(productMerchant != null ? productMerchant.getProductName() : null);
-                    responseData.setMerchantId(data.getMerchant().id);
+                    
                     for(ProductAddOn dataProductAddOn : dataAddOn) {
                         ProductMerchantAssignResponse.ProductAddOn responseAddOn = new ProductMerchantAssignResponse.ProductAddOn();
                         responseAddOn.setProductAssignId(dataProductAddOn.getProductAssignId());
@@ -253,7 +257,49 @@ public class ProductAddOnController extends BaseController {
                     }
                     responses.add(responseData);
                 }
-                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size() , offset, limit, success + " menampilkan data", responses);
+                response.setBaseResponse(filter == null || filter.equals("") ? totalDataProductDetail.size() : productMerchantDetails.size() , offset, limit, success + " menampilkan data", responses);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                Logger.error("allDetail", e);
+            }
+        } else if (ownMerchant == null) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    public static Result detailProductAssign(Long idProduct) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+ownMerchant.id+" and pm.is_active = "+true+" and pm.is_deleted = "+false+")";
+            Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("random()");
+            try {
+                ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findDetailProduct(idProduct, ownMerchant.id);
+                    
+                ProductMerchantAssignResponse responseData = new ProductMerchantAssignResponse();
+                ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(productMerchantDetail.getProductMerchant().id, ownMerchant.id);
+
+                responseData.setId(productMerchant.id);
+                responseData.setProductId(productMerchant.id);
+                responseData.setProductName(productMerchant.getProductName());
+                responseData.setMerchantId(productMerchant.getMerchant().id);
+                    
+                Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().eq("t0.product_id", productMerchantDetail.getProductMerchant().id).eq("t0.is_deleted", false).eq("t0.merchant_id", ownMerchant.id).order("t0.id");
+                List<ProductAddOn> dataAddOn = ProductAddOnRepository.getDataForAddOn(queryProductAddOn);
+                List<ProductMerchantAssignResponse.ProductAddOn> responsesProductAddOn = new ArrayList<>();
+                    
+                for(ProductAddOn dataProductAddOn : dataAddOn) {
+                    ProductMerchantAssignResponse.ProductAddOn responseAddOn = new ProductMerchantAssignResponse.ProductAddOn();
+                    responseAddOn.setProductAssignId(dataProductAddOn.getProductAssignId());
+                    ProductMerchant productMerchantAssign = ProductMerchantRepository.findById(dataProductAddOn.getProductAssignId(), ownMerchant);
+                    responseAddOn.setProductName(productMerchantAssign.getProductName());
+                    responseAddOn.setProductType(dataProductAddOn.getProductType());
+                    responsesProductAddOn.add(responseAddOn);
+                    responseData.setProductAddOn(responseAddOn != null ? responsesProductAddOn : null);
+                }
+                response.setBaseResponse(1, 0, 1, "Berhasil menampilkan data", responseData);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 Logger.error("allDetail", e);

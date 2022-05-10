@@ -246,4 +246,44 @@ public class PickUpPointController extends BaseController {
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
     }
+
+    public static Result updateStatusPickUpPoint(Long id) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            try {
+                JsonNode json = request().body().asJson();
+
+                PickUpPointResponse request = objectMapper.readValue(json.toString(), PickUpPointResponse.class);
+                Transaction trx = Ebean.beginTransaction();
+                PickUpPointMerchant pickuppoint = PickUpPointRepository.findByIdandMerchantId(id, ownMerchant.id);
+
+                if(pickuppoint != null){
+                    try {
+                        pickuppoint.isActive = request.getIsActive();
+                        pickuppoint.update();
+                        
+                        trx.commit();
+                        response.setBaseResponse(1, 0, 1, success + " mengubah status pick up point", pickuppoint);
+                        return ok(Json.toJson(response));
+                    } catch (Exception e) {
+                        logger.error("Error saat mengubah status pick up point", e);
+                        e.printStackTrace();
+                        trx.rollback();
+                    } finally {
+                        trx.end();
+                    }
+                    response.setBaseResponse(0, 0, 0, error, null);
+                    return badRequest(Json.toJson(response));
+                } else {
+                    response.setBaseResponse(0, 0, 0, "Data tidak ditemukan", null);
+                    return badRequest(Json.toJson(response));
+                }
+            } catch (Exception e) {
+                logger.error("Error saat parsing json", e);
+                e.printStackTrace();
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
 }
