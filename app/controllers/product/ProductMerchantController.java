@@ -395,11 +395,12 @@ public class ProductMerchantController extends BaseController {
                 List<ProductMerchantDetail> productMerchantDetails = ProductMerchantDetailRepository.forProductRecommendation(query);
                 List<ProductResponse> productMerchantResponse = new ArrayList<>();
 
-                ProductResponse productResponse = new ProductResponse();
                 
                 for(ProductMerchantDetail productMerchantDetail : productMerchantDetails){
+                    ProductResponse productResponse = new ProductResponse();
                     ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(productMerchantDetail.getProductMerchant().id, merchantId);
-                    productResponse.setProductId(productMerchant.id);
+                    
+                    productResponse.setProductId(productMerchantDetail.getProductMerchant().id);
                     productResponse.setProductName(productMerchant.getProductName());
                     productResponse.setIsActive(productMerchant.getIsActive());
                     productResponse.setMerchantId(productMerchant.getMerchant().id);

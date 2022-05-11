@@ -259,7 +259,7 @@ public class PickUpPointController extends BaseController {
 
                 if(pickuppoint != null){
                     try {
-                        pickuppoint.isActive = request.getIsActive();
+                        pickuppoint.setIsActive(request.getIsActive());
                         pickuppoint.update();
                         
                         trx.commit();
