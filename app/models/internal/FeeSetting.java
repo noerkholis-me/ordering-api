@@ -29,7 +29,7 @@ public class FeeSetting extends BaseModel {
     public static Finder<Long, FeeSetting> find = new Finder<>(Long.class, FeeSetting.class);
 
     public static Optional<FeeSetting> findByLastUpdated() {
-        return Optional.ofNullable(find.orderBy("date desc").findUnique());
+        return Optional.ofNullable(find.orderBy("date desc").findList().get(0));
     }
 
 }
