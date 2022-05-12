@@ -90,7 +90,7 @@ public class PickUpPointController extends BaseController {
                             pickuppoint.setPupointName(request.getPupointName());
                             pickuppoint.setStore(store);
                             pickuppoint.setMerchant(ownMerchant);
-                            pickuppoint.isActive = request.getIsActive();
+                            pickuppoint.setIsActive(request.getIsActive());
                             pickuppoint.isDeleted = Boolean.FALSE;
                             pickuppoint.update();
                         
@@ -178,14 +178,14 @@ public class PickUpPointController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result listPickupPoint(String filter, String sort, int offset, int limit) {
+    public static Result listPickupPoint(String filter, String sort, int offset, int limit, Long storeId) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
             Query<PickUpPointMerchant> query = PickUpPointRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", ownMerchant.id).order("t0.id");
             try {
                 List<PickUpPointResponse> responses = new ArrayList<>();
                 List<PickUpPointMerchant> totalData = PickUpPointRepository.getTotalData(query);
-                List<PickUpPointMerchant> responseIndex = PickUpPointRepository.getListPickUpPoint(query, sort, filter, offset, limit);
+                List<PickUpPointMerchant> responseIndex = PickUpPointRepository.getListPickUpPoint(query, sort, filter, offset, limit, storeId);
                 for (PickUpPointMerchant data : responseIndex) {
                     PickUpPointResponse puPointResponse = new PickUpPointResponse();
                     puPointResponse.setId(data.id);
