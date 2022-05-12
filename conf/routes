@@ -458,7 +458,7 @@ POST    /merchant/pickuppoint                       controllers.pickuppoint.Pick
 PUT     /merchant/pickuppoint/:id/update            controllers.pickuppoint.PickUpPointController.updatePickUpPoint(id: Long)
 GET     /merchant/pickuppoint/:id/detail            controllers.pickuppoint.PickUpPointController.getPickupPoint(id: Long)
 DELETE  /merchant/pickuppoint/:id/delete            controllers.pickuppoint.PickUpPointController.deletePickUpPoint(id: Long)
-GET     /merchant/pickuppoint/listdata              controllers.pickuppoint.PickUpPointController.listPickupPoint(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET     /merchant/pickuppoint/listdata              controllers.pickuppoint.PickUpPointController.listPickupPoint(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0)
 PUT     /merchant/pickuppoint/:id/status            controllers.pickuppoint.PickUpPointController.updateStatusPickUpPoint(id:Long)
 
 #PUPOINTSETUP
@@ -466,7 +466,7 @@ POST    /merchant/setup/pickuppoint                       controllers.pickuppoin
 PUT     /merchant/setup/pickuppoint/:id/update            controllers.pickuppoint.PickUpPointSetupController.updatePickUpPointSetup(id: Long)
 GET     /merchant/setup/pickuppoint/:id/detail            controllers.pickuppoint.PickUpPointSetupController.getPickupPointSetup(id: Long)
 DELETE  /merchant/setup/pickuppoint/:id/delete            controllers.pickuppoint.PickUpPointSetupController.deletePickUpPointSetup(id: Long)
-GET     /merchant/setup/pickuppoint/listdata              controllers.pickuppoint.PickUpPointSetupController.listPickupPointSetup(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET     /merchant/setup/pickuppoint/listdata              controllers.pickuppoint.PickUpPointSetupController.listPickupPointSetup(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0)
 
 #FEESETTINGMERCHANT
 POST    /merchant/feesetting                       controllers.merchants.FeeSettingMerchantController.addFeeSetting()
@@ -482,7 +482,7 @@ GET         /merchant/productassign/list                controllers.product.Prod
 PUT         /merchant/productassign/:id/update          controllers.product.ProductAddOnController.editAssignProductAddOn(id:Long)
 DELETE      /merchant/productassign/:id/delete          controllers.product.ProductAddOnController.deleteAssignProductAddOn(id:Long)
 GET         /merchant/productassign/:id/detail          controllers.product.ProductAddOnController.readAssignProductAddOn(id:Long)
-GET         /merchant/productassign/:id/data/detail     controllers.product.ProductAddOnController.detailProductAssign(id:Long)
+GET         /merchant/productassign/:id/data/detail     controllers.product.ProductAddOnController.detailProductAssign(id: Long, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 
 #PRODUCT TYPE
 GET         /merchant/product/type/list                 controllers.product.ProductAddOnTypeController.listProductTipe(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)

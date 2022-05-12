@@ -50,6 +50,12 @@ public class PickUpPointSetupController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
+                        PickUpPointSetup puPointSetupData = PickUpPointSetupRepository.findByStoreIdandMerchantId(request.getStoreId(), ownMerchant.id);
+
+                        if(puPointSetupData != null) {
+                            response.setBaseResponse(0, 0, 0, "Pickup Point Setup untuk store " + store.getStoreName() + " sudah tersedia", null);
+                            return badRequest(Json.toJson(response));
+                        }
                         PickUpPointSetup puPointSetup = new PickUpPointSetup();
                         puPointSetup.setImagePupointSetup(request.getImagePupointSetup());
                         puPointSetup.setStore(store);
@@ -183,14 +189,14 @@ public class PickUpPointSetupController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result listPickupPointSetup(String filter, String sort, int offset, int limit) {
+    public static Result listPickupPointSetup(String filter, String sort, int offset, int limit, Long storeId) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
             Query<PickUpPointSetup> query = PickUpPointSetupRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", ownMerchant.id).order("t0.id");
             try {
                 List<PickUpPointSetupResponse> responses = new ArrayList<>();
                 List<PickUpPointSetup> totalData = PickUpPointSetupRepository.getTotalData(query);
-                List<PickUpPointSetup> responseIndex = PickUpPointSetupRepository.getListPickUpPointSetup(query, sort, filter, offset, limit);
+                List<PickUpPointSetup> responseIndex = PickUpPointSetupRepository.getListPickUpPointSetup(query, sort, filter, offset, limit, storeId);
                 for (PickUpPointSetup data : responseIndex) {
                     PickUpPointSetupResponse puPointSetupResponse = new PickUpPointSetupResponse();
                     puPointSetupResponse.setId(data.id);

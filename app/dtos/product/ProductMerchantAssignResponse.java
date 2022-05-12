@@ -16,7 +16,7 @@ import java.util.List;
 @Getter @Setter
 public class ProductMerchantAssignResponse implements Serializable {
 
-    private Long id;
+    // private Long id;
 
     @JsonProperty("product_id")
     private Long productId;
