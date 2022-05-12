@@ -53,7 +53,7 @@ public class PickUpPointSetupController extends BaseController {
                         PickUpPointSetup puPointSetupData = PickUpPointSetupRepository.findByStoreIdandMerchantId(request.getStoreId(), ownMerchant.id);
 
                         if(puPointSetupData != null) {
-                            response.setBaseResponse(0, 0, 0, "Pickup Point Setup untuk store " + store.getStoreName() + " sudah tersedia", null);
+                            response.setBaseResponse(0, 0, 0, "Pickup Point Setup untuk store " + store.storeName + " sudah tersedia", null);
                             return badRequest(Json.toJson(response));
                         }
                         PickUpPointSetup puPointSetup = new PickUpPointSetup();
