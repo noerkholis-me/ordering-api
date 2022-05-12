@@ -146,7 +146,7 @@ public class ProductAddOnController extends BaseController {
                     Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().eq("t0.product_id", productAddOn.getProductMerchant().id).eq("t0.is_deleted", false).eq("t0.merchant_id", ownMerchant.id).order("t0.id");
                     List<ProductAddOn> dataAddOn = ProductAddOnRepository.getDataForAddOn(queryProductAddOn);
                     List<ProductMerchantAssignResponse.ProductAddOn> responsesProductAddOn = new ArrayList<>();
-                    responseData.setId(productAddOn.id);
+                    // responseData.setId(productAddOn.id);
                     responseData.setProductId(productAddOn.getProductMerchant().id);
                     ProductMerchant productMerchant = ProductMerchantRepository.findById(productAddOn.getProductMerchant().id, ownMerchant);
                     responseData.setProductName(productMerchant != null ? productMerchant.getProductName() : null);
@@ -237,7 +237,7 @@ public class ProductAddOnController extends BaseController {
                     ProductMerchantAssignResponse responseData = new ProductMerchantAssignResponse();
                     ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(productMerchantDetail.getProductMerchant().id, ownMerchant.id);
 
-                    responseData.setId(productMerchant.id);
+                    // responseData.setId(productMerchant.id);
                     responseData.setProductId(productMerchant.id);
                     responseData.setProductName(productMerchant.getProductName());
                     responseData.setMerchantId(productMerchant.getMerchant().id);
@@ -270,36 +270,26 @@ public class ProductAddOnController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result detailProductAssign(Long idProduct) {
+    public static Result detailProductAssign(Long id, String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+ownMerchant.id+" and pm.is_active = "+true+" and pm.is_deleted = "+false+")";
-            Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("random()");
+            Query<ProductAddOn> query = ProductAddOnRepository.find.where().eq("product_id", id).eq("merchant_id", ownMerchant.id).eq("is_active", Boolean.TRUE).order("t0.id");
             try {
-                ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findDetailProduct(idProduct, ownMerchant.id);
                     
-                ProductMerchantAssignResponse responseData = new ProductMerchantAssignResponse();
-                ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(productMerchantDetail.getProductMerchant().id, ownMerchant.id);
-
-                responseData.setId(productMerchant.id);
-                responseData.setProductId(productMerchant.id);
-                responseData.setProductName(productMerchant.getProductName());
-                responseData.setMerchantId(productMerchant.getMerchant().id);
-                    
-                Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().eq("t0.product_id", productMerchantDetail.getProductMerchant().id).eq("t0.is_deleted", false).eq("t0.merchant_id", ownMerchant.id).order("t0.id");
-                List<ProductAddOn> dataAddOn = ProductAddOnRepository.getDataForAddOn(queryProductAddOn);
-                List<ProductMerchantAssignResponse.ProductAddOn> responsesProductAddOn = new ArrayList<>();
+                List<ProductAddOn> dataAddOn = ProductAddOnRepository.findProductWithPaging(query, sort, filter, offset, limit);
+                List<ProductAddOnAssignResponse> responsesProductAddOn = new ArrayList<>();
                     
                 for(ProductAddOn dataProductAddOn : dataAddOn) {
-                    ProductMerchantAssignResponse.ProductAddOn responseAddOn = new ProductMerchantAssignResponse.ProductAddOn();
-                    responseAddOn.setProductAssignId(dataProductAddOn.getProductAssignId());
-                    ProductMerchant productMerchantAssign = ProductMerchantRepository.findById(dataProductAddOn.getProductAssignId(), ownMerchant);
-                    responseAddOn.setProductName(productMerchantAssign.getProductName());
-                    responseAddOn.setProductType(dataProductAddOn.getProductType());
-                    responsesProductAddOn.add(responseAddOn);
-                    responseData.setProductAddOn(responseAddOn != null ? responsesProductAddOn : null);
+                    ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(dataProductAddOn.getProductMerchant().id, ownMerchant.id);
+                    ProductAddOnAssignResponse productAddOnResponse = new ProductAddOnAssignResponse();
+                    productAddOnResponse.setId(dataProductAddOn.id);
+                    productAddOnResponse.setProductAssignId(dataProductAddOn.getProductAssignId());
+                    productAddOnResponse.setProductName(productMerchant.getProductName());
+                    productAddOnResponse.setIsActive(dataProductAddOn.getIsActive());
+                    productAddOnResponse.setProductType(dataProductAddOn.getProductType());
+                    responsesProductAddOn.add(productAddOnResponse);
                 }
-                response.setBaseResponse(1, 0, 1, "Berhasil menampilkan data", responseData);
+                response.setBaseResponse(1, 0, 1, "Berhasil menampilkan data", responsesProductAddOn);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 Logger.error("allDetail", e);

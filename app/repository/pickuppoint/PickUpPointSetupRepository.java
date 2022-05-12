@@ -40,7 +40,7 @@ public class PickUpPointSetupRepository extends Model {
 			.findUnique();
 	}
 	
-	public static List<PickUpPointSetup> getListPickUpPointSetup(Query<PickUpPointSetup> reqQuery, String sort, String filter, int offset, int limit)
+	public static List<PickUpPointSetup> getListPickUpPointSetup(Query<PickUpPointSetup> reqQuery, String sort, String filter, int offset, int limit, Long storeId)
 			throws IOException {
 		Query<PickUpPointSetup> query = reqQuery;
 
@@ -54,6 +54,9 @@ public class PickUpPointSetupRepository extends Model {
 
 
 		// exp = exp.disjunction();
+		if(storeId != null && storeId != 0) {
+			exp.eq("t0.store_id", storeId);
+		}
 		// exp = exp.like("t0.store_id", "%" + filter + "%");
         // exp = exp.endjunction();
 

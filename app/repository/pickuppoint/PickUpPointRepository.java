@@ -36,7 +36,7 @@ public class PickUpPointRepository extends Model {
 			.findUnique();
 	}
 	
-	public static List<PickUpPointMerchant> getListPickUpPoint(Query<PickUpPointMerchant> reqQuery, String sort, String filter, int offset, int limit)
+	public static List<PickUpPointMerchant> getListPickUpPoint(Query<PickUpPointMerchant> reqQuery, String sort, String filter, int offset, int limit, Long idStore)
 			throws IOException {
 		Query<PickUpPointMerchant> query = reqQuery;
 
@@ -49,7 +49,10 @@ public class PickUpPointRepository extends Model {
 		ExpressionList<PickUpPointMerchant> exp = query.where();
 
 
-		exp = exp.disjunction();
+		// exp = exp.conjunction();
+		if(idStore != null && idStore != 0){
+			exp = exp.eq("t0.store_id", idStore);
+		}
 		exp = exp.ilike("t0.pupoint_name", "%" + filter + "%");
         // exp = exp.endjunction();
 
