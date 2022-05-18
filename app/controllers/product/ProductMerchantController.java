@@ -639,4 +639,33 @@ public class ProductMerchantController extends BaseController {
         response.setBaseResponse(0, 0, 0, "Merchant tidak ditemukan", null);
         return badRequest(Json.toJson(response));
     }
+
+    public static Result listAdditionalProductMerchant(){
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+ownMerchant.id+" and pm.is_active = "+true+" and pm.is_deleted = "+false+")";
+            Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "ADDITIONAL").order("t0.id");
+            try {
+                List<ProductMerchantDetail> productMerchantDetailList = ProductMerchantDetailRepository.findDataAdditionalForMerchant(query, ownMerchant.id);
+                List<ProductAdditionalMerchantResponse> responseDatas = new ArrayList<>();
+                for(ProductMerchantDetail detail: productMerchantDetailList) {
+                    ProductAdditionalMerchantResponse responseData = new ProductAdditionalMerchantResponse();
+                    ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(detail.getProductMerchant().id, ownMerchant.id);
+                    responseData.setId(productMerchant.id);
+                    responseData.setProductName(productMerchant.getProductName());
+                    responseData.setMerchantId(productMerchant.getMerchant().id);
+                    responseDatas.add(responseData);
+                } 
+                
+                response.setBaseResponse(1, 0, 1, "Berhasil menampilkan data", responseDatas);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                Logger.error("Error", e);
+            }
+            response.setBaseResponse(0, 0, 0, error, null);
+            return badRequest(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, "Akses ditolak", null);
+        return badRequest(Json.toJson(response));
+    }
 }
