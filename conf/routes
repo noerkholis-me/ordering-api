@@ -488,3 +488,6 @@ GET         /merchant/productassign/:id/data/detail     controllers.product.Prod
 #PRODUCT TYPE
 GET         /merchant/product/type/list                 controllers.product.ProductAddOnTypeController.listProductTipe(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 POST        /merchant/product/type/create               controllers.product.ProductAddOnTypeController.createProductType()
+
+#PAYMENT METHOD
+GET         /master/paymentmethod                       controllers.masters.PaymentMethodController.getPaymentMethod()
