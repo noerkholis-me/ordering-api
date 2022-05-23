@@ -22,7 +22,14 @@ public class PickUpPointSetupRepository extends Model {
 				.eq("merchant_id", merchantId)
 				.eq("is_deleted", Boolean.FALSE)
 				.findUnique();
-    }
+	}
+	
+	public static PickUpPointSetup findByStoreId (Long storeId) {
+		return find.where()
+			.eq("id", storeId)
+			.eq("is_deleted", Boolean.FALSE)
+			.findUnique();
+}
 
     public static PickUpPointSetup findByStoreIdandMerchantId(Long storeId, Long merchantId) {
 			return find.where()

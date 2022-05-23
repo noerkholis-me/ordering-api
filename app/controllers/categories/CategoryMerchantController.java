@@ -397,4 +397,61 @@ public class CategoryMerchantController extends BaseController {
             return unauthorized(Json.toJson(response));
         }
 
+    public static Result listCategoryFE(Long merchantId) {
+
+            Query<CategoryMerchant> query = CategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).order("t0.id");
+            try {
+                List<CategoryMerchantResponse> responses = new ArrayList<>();
+                List<CategoryMerchant> totalData = CategoryMerchantRepository.getTotalData(query);
+                List<CategoryMerchant> responseIndex = CategoryMerchantRepository.getDataCategory(query, "", "", 0, 0);
+                for (CategoryMerchant data : responseIndex) {
+                    CategoryMerchantResponse response = new CategoryMerchantResponse();
+                    Query<SubCategoryMerchant> querySub = SubCategoryMerchantRepository.find.where().eq("t0.category_id", data.id).eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).order("t0.id");
+                    List<SubCategoryMerchant> dataSub = SubCategoryMerchantRepository.getDataForCategory(querySub);
+                    List<CategoryMerchantResponse.SubCategoryMerchant> responsesSub = new ArrayList<>();
+                    response.setId(data.id);
+                    response.setCategoryName(data.getCategoryName());
+                    response.setImageWeb(data.getImageWeb());
+                    response.setImageMobile(data.getImageMobile());
+                    response.setIsDeleted(data.isDeleted);
+                    response.setIsActive(data.isActive());
+                    response.setMerchantId(data.getMerchant().id);
+                    for(SubCategoryMerchant dataSubs : dataSub) {
+                        CategoryMerchantResponse.SubCategoryMerchant responseSub = new CategoryMerchantResponse.SubCategoryMerchant();
+                        Query<SubsCategoryMerchant> querySubs = SubsCategoryMerchantRepository.find.where().eq("t0.subcategory_id", dataSubs.id).eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).order("t0.id");
+                        List<SubsCategoryMerchant> dataSubThree = SubsCategoryMerchantRepository.getDataForCategory(querySubs);
+                        List<CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant> responsesSubs = new ArrayList<>();
+                        responseSub.setId(dataSubs.id);
+                        responseSub.setSubcategoryName(dataSubs.getSubcategoryName());
+                        responseSub.setImageWeb(dataSubs.getImageWeb());
+                        responseSub.setImageMobile(dataSubs.getImageMobile());
+                        responseSub.setIsActive(dataSubs.isActive);
+                        responseSub.setIsDeleted(dataSubs.isDeleted);
+                        for(SubsCategoryMerchant dataSubsThree : dataSubThree) {
+                            CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant responseSubs = new CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant();
+                            responseSubs.setId(dataSubsThree.id);
+                            responseSubs.setSubscategoryName(dataSubsThree.getSubscategoryName());
+                            responseSubs.setImageWeb(dataSubsThree.getImageWeb());
+                            responseSubs.setImageMobile(dataSubsThree.getImageMobile());
+                            responseSubs.setIsActive(dataSubsThree.isActive);
+                            responseSubs.setIsDeleted(dataSubsThree.isDeleted);
+                            responseSubs.setSequence(dataSubsThree.getSequence());
+                            responsesSubs.add(responseSubs);
+                            responseSub.setSubsCategory(responseSubs != null ? responsesSubs : null);
+                        }
+                        
+                        responsesSub.add(responseSub);
+                        response.setSubCategory(responseSub != null ? responsesSub : null);
+                    }
+                    responses.add(response);
+                }
+                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size() , offset, limit, success + " menampilkan data", responses);
+                return ok(Json.toJson(response));
+            } catch (IOException e) {
+                Logger.error("allDetail", e);
+            }
+            response.setBaseResponse(0, 0, 0, "Merchant tidak ditemukan", null);
+            return badRequest(Json.toJson(response));
+    }
+
 }

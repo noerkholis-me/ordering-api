@@ -361,6 +361,9 @@ PUT     /merchant/category/:id/update                  controllers.categories.Ca
 GET     /merchant/category/:id/detail                  controllers.categories.CategoryMerchantController.viewCategory(id:Long)
 PUT     /merchant/category/:id/status                  controllers.categories.CategoryMerchantController.setStatus(id: Long)
 
+#CATEGORY KIOSK
+GET     /data/category/list                            controllers.categories.CategoryMerchantController.listCategoryFE(merchant_id:Long ?= 0)
+
 #SUB CATEGORY
 GET     /merchant/subcategory/list                        controllers.categories.SubCategoryMerchantController.listSubCategory(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 POST    /merchant/subcategory/:id                         controllers.categories.SubCategoryMerchantController.createSubCategory(id:Long)
@@ -407,6 +410,8 @@ GET     /merchant/product/list/additional           controllers.product.ProductM
 
 GET     /product/detail                             controllers.product.ProductMerchantController.productDetail(product_id: Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0)
 GET     /product/additional                         controllers.product.ProductMerchantController.productAdditional(product_id: Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0)
+
+GET     /product/kiosk/list                         controllers.product.ProductMerchantController.productListKiosk(brand_id:Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0)
 
 #PRODUCT RECOMMENDATION
 GET     /product/recommendation                     controllers.product.ProductMerchantController.listRecommendedProduct(merchant_id: Long ?= 0)
@@ -461,6 +466,7 @@ GET     /merchant/pickuppoint/:id/detail            controllers.pickuppoint.Pick
 DELETE  /merchant/pickuppoint/:id/delete            controllers.pickuppoint.PickUpPointController.deletePickUpPoint(id: Long)
 GET     /merchant/pickuppoint/listdata              controllers.pickuppoint.PickUpPointController.listPickupPoint(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0)
 PUT     /merchant/pickuppoint/:id/status            controllers.pickuppoint.PickUpPointController.updateStatusPickUpPoint(id:Long)
+GET     /pickup/point/get/data                      controllers.pickuppoint.PickUpPointController.getPickupPointForKiosK(store_id:Long)
 
 #PUPOINTSETUP
 POST    /merchant/setup/pickuppoint                       controllers.pickuppoint.PickUpPointSetupController.createPickUpPointSetup()
