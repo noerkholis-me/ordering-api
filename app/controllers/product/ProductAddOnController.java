@@ -248,12 +248,14 @@ public class ProductAddOnController extends BaseController {
                     
                     for(ProductAddOn dataProductAddOn : dataAddOn) {
                         ProductMerchantAssignResponse.ProductAddOn responseAddOn = new ProductMerchantAssignResponse.ProductAddOn();
-                        responseAddOn.setProductAssignId(dataProductAddOn.getProductAssignId());
                         ProductMerchant productMerchantAssign = ProductMerchantRepository.findById(dataProductAddOn.getProductAssignId(), ownMerchant);
-                        responseAddOn.setProductName(productMerchantAssign.getProductName());
-                        responseAddOn.setProductType(dataProductAddOn.getProductType());
-                        responsesProductAddOn.add(responseAddOn);
-                        responseData.setProductAddOn(responseAddOn != null ? responsesProductAddOn : null);
+                        if(productMerchantAssign != null){
+                            responseAddOn.setProductAssignId(dataProductAddOn.getProductAssignId());
+                            responseAddOn.setProductName(productMerchantAssign.getProductName());
+                            responseAddOn.setProductType(dataProductAddOn.getProductType());
+                            responsesProductAddOn.add(responseAddOn);
+                        }
+                        responseData.setProductAddOn(productMerchantAssign != null ? responsesProductAddOn : null);
                     }
                     responses.add(responseData);
                 }
@@ -277,6 +279,7 @@ public class ProductAddOnController extends BaseController {
             try {
                     
                 List<ProductAddOn> dataAddOn = ProductAddOnRepository.findProductWithPaging(query, sort, filter, offset, limit);
+                List<ProductAddOn> dataAddOnTotal = ProductAddOnRepository.getTotalDataPage(query);
                 List<ProductAddOnAssignResponse> responsesProductAddOn = new ArrayList<>();
                     
                 for(ProductAddOn dataProductAddOn : dataAddOn) {
@@ -289,7 +292,7 @@ public class ProductAddOnController extends BaseController {
                     productAddOnResponse.setProductType(dataProductAddOn.getProductType());
                     responsesProductAddOn.add(productAddOnResponse);
                 }
-                response.setBaseResponse(1, 0, 1, "Berhasil menampilkan data", responsesProductAddOn);
+                response.setBaseResponse(filter == null || filter.equals("") ? dataAddOnTotal.size() : dataAddOn.size(), offset, limit, "Berhasil menampilkan data", responsesProductAddOn);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 Logger.error("allDetail", e);
