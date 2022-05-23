@@ -286,4 +286,52 @@ public class PickUpPointController extends BaseController {
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
     }
+
+    public static Result getPickupPointForKiosK(Long storeId) {
+        if (storeId != null) {
+            try {
+                // JsonNode json = request().body().asJson();
+
+                // PickUpPointResponse request = objectMapper.readValue(json.toString(), PickUpPointResponse.class);
+                // Transaction trx = Ebean.beginTransaction();
+                
+                //For PUPSetup 
+                PickUpPointSetup puPointSetup = PickUpPointSetupRepository.findByStoreId(storeId);
+                PickupPointKiosKResponse responsePickupPoint = new PickupPointKiosKResponse();
+
+                if(puPointSetup != null) {
+
+                    //For PUPList
+                    List<PickupPointKiosKResponse.PickupPointMerchant> responseDatas = new ArrayList<>();
+                    
+                    Query<PickUpPointMerchant> queryPuPointList = PickUpPointRepository.find.where().eq("t0.is_deleted", false).eq("t0.store_id", storeId).order("t0.id");
+                    List<PickUpPointMerchant> pickuppointList = PickUpPointRepository.getListPickUpPoint(queryPuPointList, "", "", 0, 0, storeId);
+
+                    responsePickupPoint.setId(puPointSetup.id);
+                    responsePickupPoint.setImagePUPSetup(puPointSetup.getImagePupointSetup());
+                    responsePickupPoint.setStoreId(puPointSetup.getStore().id);
+                    responsePickupPoint.setMerchantId(puPointSetup.getMerchant().id);
+                    for(PickUpPointMerchant puPointMerchantData : pickuppointList) {
+                        PickupPointKiosKResponse.PickupPointMerchant responseData = new PickupPointKiosKResponse.PickupPointMerchant();
+                        responseData.setId(puPointMerchantData.id);
+                        responseData.setPuPointName(puPointMerchantData.getPupointName());
+                        responseDatas.add(responseData);
+                        responsePickupPoint.setPickUpList(responseDatas);
+                    }
+                    
+                    response.setBaseResponse(1, 0, 1, "Menampilkan data", responsePickupPoint);
+                    return ok(Json.toJson(response));
+                } else {
+                    response.setBaseResponse(0, 0, 0, "Data tidak ditemukan", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+            } catch (Exception e) {
+                logger.error("Error saat parsing json", e);
+                e.printStackTrace();
+            }
+        }
+        response.setBaseResponse(0, 0, 0, "Store code tidak boleh kosong", null);
+        return unauthorized(Json.toJson(response));
+    }
 }
