@@ -34,7 +34,26 @@ public class OrderPayment extends BaseModel {
     @Column(name = "payment_date")
     private Date paymentDate;
 
+    @Column(name = "tax_percentage")
+    private Double taxPercentage;
 
+    @Column(name = "service_percentage")
+    private Double servicePercentage;
+
+    @Column(name = "tax_price")
+    private BigDecimal taxPrice;
+
+    @Column(name = "service_price")
+    private BigDecimal servicePrice;
+
+    @Column(name = "payment_fee_type")
+    private String paymentFeeType;
+
+    @Column(name = "payment_fee_customer")
+    private BigDecimal paymentFeeCustomer;
+
+    @Column(name = "payment_fee_owner")
+    private BigDecimal paymentFeeOwner;
 
 
     // ============================================================ //

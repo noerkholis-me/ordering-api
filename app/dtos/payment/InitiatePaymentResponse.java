@@ -15,20 +15,16 @@ import java.util.Date;
 @Data
 public class InitiatePaymentResponse {
 
-    @JsonProperty("reference_id")
-    private String referenceId;
+    private String status;
     @JsonProperty("order_number")
     private String orderNumber;
-    @JsonProperty("merchant_name")
-    private String merchantName;
-    @JsonProperty("qr_string")
-    private String qrString;
     @JsonProperty("total_amount")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal totalAmount;
     @JsonProperty("creation_time")
     private Date creationTime;
-    @JsonProperty("status")
-    private String status;
+    @JsonProperty("expiration_date")
+    private Date expirationDate;
+    private MetaResponse metadata;
 
 }

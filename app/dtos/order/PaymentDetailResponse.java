@@ -13,18 +13,30 @@ import java.math.BigDecimal;
 @Data
 @Builder
 public class PaymentDetailResponse {
+
     @JsonProperty("payment_type")
     private String paymentType;
     @JsonProperty("payment_channel")
     private String paymentChannel;
-    @JsonProperty("platform_fee")
-    private BigDecimal platformFee;
-    @JsonProperty("payment_fee")
-    private BigDecimal paymentFee;
-    @JsonProperty("tax_fee")
-    private BigDecimal taxFee;
-    @JsonProperty("service_fee")
-    private BigDecimal serviceFee;
+    @JsonProperty("bank_code")
+    private String bankCode;
+    @JsonProperty("tax_percentage")
+    private Double taxPercentage;
+    @JsonProperty("service_percentage")
+    private Double servicePercentage;
+    @JsonProperty("tax_price")
+    private BigDecimal taxPrice;
+    @JsonProperty("service_price")
+    private BigDecimal servicePrice;
+    @JsonProperty("payment_fee_type")
+    private String paymentFeeType;
+    @JsonProperty("payment_fee_customer")
+    private BigDecimal paymentFeeCustomer;
+    @JsonProperty("payment_fee_owner")
+    private BigDecimal paymentFeeOwner;
     @JsonProperty("total_amount")
     private BigDecimal totalAmount;
+
+
+
 }
