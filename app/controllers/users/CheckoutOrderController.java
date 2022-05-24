@@ -8,14 +8,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.http.response.global.ServiceResponse;
 import controllers.BaseController;
-import dtos.order.OrderTransaction;
-import dtos.order.OrderTransactionResponse;
-import dtos.order.PaymentDetailResponse;
-import dtos.order.ProductOrderDetail;
+import dtos.order.*;
 import dtos.payment.InitiatePaymentRequest;
 import dtos.payment.InitiatePaymentResponse;
 import dtos.payment.PaymentRequest;
 import models.Member;
+import models.Merchant;
 import models.ProductStore;
 import models.transaction.*;
 import org.json.JSONObject;
@@ -25,6 +23,7 @@ import play.mvc.Result;
 import repository.OrderRepository;
 import repository.ProductStoreRepository;
 import service.PaymentService;
+import com.avaje.ebean.Query;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -41,8 +40,8 @@ public class CheckoutOrderController extends BaseController {
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     public static Result checkoutOrder() {
-        Member member = checkMemberAccessAuthorization();
-        if (member != null) {
+        // Member member = checkMemberAccessAuthorization();
+        // if (member != null) {
             JsonNode jsonNode = request().body().asJson();
             Transaction txn = Ebean.beginTransaction();
             try {
@@ -56,7 +55,7 @@ public class CheckoutOrderController extends BaseController {
                 order.setOrderNumber(orderNumber);
                 order.setOrderType(orderRequest.getOrderType());
                 order.setStatus(OrderStatus.NEW_ORDER.getStatus());
-                order.setMember(member);
+                // order.setMember(member);
 
                 order.save();
 
@@ -181,14 +180,14 @@ public class CheckoutOrderController extends BaseController {
             } finally {
                 txn.end();
             }
-        }
-        response.setBaseResponse(0, 0, 0, unauthorized, null);
-        return unauthorized(Json.toJson(response));
+        // }
+        response.setBaseResponse(0, 0, 0, "Error", null);
+        return badRequest(Json.toJson(response));
     }
 
     public static Result payment() {
-        Member member = checkMemberAccessAuthorization();
-        if (member != null) {
+        // Member member = checkMemberAccessAuthorization();
+        // if (member != null) {
             JsonNode jsonNode = request().body().asJson();
             Transaction txn = Ebean.beginTransaction();
             try {
@@ -219,11 +218,50 @@ public class CheckoutOrderController extends BaseController {
                 txn.end();
             }
 
+        // }
+        response.setBaseResponse(0, 0, 0, "Error", null);
+        return badRequest(Json.toJson(response));
+    }
 
+    public static Result listOrderMerchant(Long storeId, int offset, int limit) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        System.out.print(ownMerchant.id);
+        if(ownMerchant != null) {
+            Query<Order> queryData = OrderRepository.find.where().eq("t0.store_id", storeId).eq("t0.status", "NEW_ORDER").order("t0.created_at desc");
+            List<Order> dataOrder = OrderRepository.findByNewOrder(queryData, offset, limit);
+            List<OrderList> orderListResponses = new ArrayList<>();
+            for(Order orderData: dataOrder){
+                OrderList orderListResponse = new OrderList();
+
+                List<OrderDetail> orderDetailList = OrderRepository.findDataOrderDetail(orderData.id);
+
+                orderListResponse.setInvoiceNumber(orderData.getOrderPayment().getInvoiceNo());
+                orderListResponse.setOrderNumber(orderData.getOrderNumber());
+                orderListResponse.setMerchantName(orderData.getStore().getMerchant().fullName);
+                orderListResponse.setTotalAmount(orderData.getTotalPrice());
+                orderListResponse.setOrderType(orderData.getOrderType());
+                
+                for(OrderDetail oDetail : orderDetailList) {
+                    ProductOrderDetail responseOrderDetail = new ProductOrderDetail();
+                    responseOrderDetail.setProductId(oDetail.getProductStore().id);
+                    responseOrderDetail.setProductPrice(oDetail.getProductPrice());
+                    responseOrderDetail.setProductQty(oDetail.getQuantity());
+                    responseOrderDetail.setNotes(oDetail.getNotes());
+                }
+
+                OrderPayment oPayment = OrderRepository.findDataOrderPayment(orderData.id);
+                orderListResponse.setPaymentType(oPayment.getPaymentType());
+                orderListResponse.setPaymentChannel(oPayment.getPaymentChannel());
+                orderListResponse.setTotalAmountPayment(oPayment.getTotalAmount());
+                orderListResponse.setPaymentDate(oPayment.getPaymentDate());
+                orderListResponse.setStatus(oPayment.getStatus());
+                orderListResponses.add(orderListResponse);
+            }
+            response.setBaseResponse(dataOrder.size(), offset, limit, success, orderListResponses);
+            return ok(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
     }
-
 
 }
