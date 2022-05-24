@@ -1,13 +1,19 @@
 package repository;
 
-import models.transaction.Order;
+import com.avaje.ebean.Expr;
+import com.avaje.ebean.ExpressionList;
+import com.avaje.ebean.Query;
+import models.transaction.*;
 import play.db.ebean.Model;
 
+import java.util.List;
 import java.util.Optional;
 
 public class OrderRepository extends Model {
 
     public static Finder<Long, Order> find = new Finder<Long, Order>(Long.class, Order.class);
+    public static Finder<Long, OrderDetail> findDetail = new Finder<Long, OrderDetail>(Long.class, OrderDetail.class);
+    public static Finder<Long, OrderPayment> findOrderPayment = new Finder<Long, OrderPayment>(Long.class, OrderPayment.class);
 
     public static Optional<Order> findById(Long id) {
         return Optional.ofNullable(find.where().eq("id", id).findUnique());
@@ -15,6 +21,37 @@ public class OrderRepository extends Model {
 
     public static Optional<Order> findByOrderNumber(String orderNumber) {
         return Optional.ofNullable(find.where().eq("orderNumber", orderNumber).findUnique());
+    }
+
+    public static List<Order> findByNewOrder(Query<Order> reqQuery, int offset, int limit) {
+        Query<Order> query = reqQuery;
+        query = query.orderBy("t0.created_at desc");
+        
+        ExpressionList<Order> exp = query.where();
+        // exp = exp.disjunction();
+        // exp = exp.ilike("t0.updated_by", "%" + filter + "%");
+        query = exp.query();
+        if (limit != 0) {
+            query = query.setMaxRows(limit);
+        }
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static List<OrderDetail> findDataOrderDetail(Long orderId) {
+        Query<OrderDetail> query = findDetail.where().eq("t0.order_id", orderId).order("t0.created_at desc");
+        // query = query.orderBy("t0.created_at desc");
+        
+        ExpressionList<OrderDetail> exp = query.where();
+        query = exp.query();
+        return query.findPagingList(0).getPage(0).getList();
+    }
+
+    public static OrderPayment findDataOrderPayment(Long orderId) {
+        return findOrderPayment.where().eq("t0.order_id", orderId).findUnique();
+    }
+
+    public static Order checkStatusMerchant(String orderNumber) {
+        return find.where().eq("order_number", orderNumber).findUnique();
     }
 
 }

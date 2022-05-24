@@ -12,6 +12,8 @@ import play.libs.Json;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 
+import models.transaction.Order;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -93,6 +95,11 @@ public class Store extends BaseModel{
 
     @Column(name = "is_active")
     public Boolean isActive;
+
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    @Getter
+    @Setter
+    private List<Order> orders;
 
     public static Finder<Long, Store> find = new Finder<Long, Store>(Long.class, Store.class);
 
