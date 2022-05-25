@@ -46,4 +46,6 @@ public class PaymentDetail extends BaseModel {
     @JoinColumn(name = "order_payment_id", referencedColumnName = "id")
     private OrderPayment orderPayment;
 
+    public static Finder<Long, PaymentDetail> find = new Finder<>(Long.class, PaymentDetail.class);
+
 }
