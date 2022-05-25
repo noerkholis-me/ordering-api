@@ -37,10 +37,15 @@ public class PaymentDetail extends BaseModel {
     @Column(name = "qr_code", columnDefinition = "TEXT")
     private String qrCode;
 
+    @Column(name = "account_number")
+    private String accountNumber;
+
 
     // ============================================================= //
     @OneToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "order_payment_id", referencedColumnName = "id")
     private OrderPayment orderPayment;
+
+    public static Finder<Long, PaymentDetail> find = new Finder<>(Long.class, PaymentDetail.class);
 
 }

@@ -436,6 +436,8 @@ PUT   /merchant/productstore/:id/status                  controllers.product.Pro
 #ORDER
 POST /users/order/checkout                               controllers.users.CheckoutOrderController.checkoutOrder()
 POST /users/order/payment                                controllers.users.CheckoutOrderController.payment()
+##GET  /users/order/checkstatus                            controllers.users.
+GET     /merchant/orders/list                            controllers.users.CheckoutOrderController.listOrderMerchant(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 0)
 
 #PAYMENT
 GET  /users/order/:orderNumber/payment                   controllers.payment.PaymentController.checkStatusPayment(orderNumber: String)
@@ -497,3 +499,7 @@ POST        /merchant/product/type/create               controllers.product.Prod
 
 #PAYMENT METHOD
 GET         /master/paymentmethod                       controllers.masters.PaymentMethodController.getPaymentMethod()
+GET         /master/check-availble-bank                 controllers.payment.PaymentController.checkAvailableBank()
+
+# PAYMENT
+GET         /merchant/view-qr-code/:orderNumber         controllers.payment.PaymentController.viewQrCode(orderNumber : String)

@@ -2,6 +2,7 @@ package dtos.order;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import dtos.payment.MetaResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,10 +21,9 @@ public class OrderTransactionResponse {
     private String orderNumber;
     @JsonProperty("merchant_name")
     private String merchantName;
-    @JsonProperty("qr_string")
-    private String qrString;
     @JsonProperty("total_amount")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal totalAmount;
+    private MetaResponse metadata;
 
 }

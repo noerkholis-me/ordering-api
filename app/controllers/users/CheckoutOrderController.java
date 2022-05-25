@@ -8,15 +8,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.http.response.global.ServiceResponse;
 import controllers.BaseController;
-import dtos.order.OrderTransaction;
-import dtos.order.OrderTransactionResponse;
-import dtos.order.PaymentDetailResponse;
-import dtos.order.ProductOrderDetail;
-import dtos.payment.InitiatePaymentRequest;
-import dtos.payment.InitiatePaymentResponse;
-import dtos.payment.PaymentRequest;
-import models.Member;
-import models.ProductStore;
+import dtos.order.*;
+import dtos.payment.*;
+import models.*;
 import models.transaction.*;
 import org.json.JSONObject;
 import play.Logger;
@@ -25,8 +19,10 @@ import play.mvc.Result;
 import repository.OrderRepository;
 import repository.ProductStoreRepository;
 import service.PaymentService;
+import com.avaje.ebean.Query;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -41,13 +37,24 @@ public class CheckoutOrderController extends BaseController {
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     public static Result checkoutOrder() {
-        Member member = checkMemberAccessAuthorization();
-        if (member != null) {
+        int authority = checkAccessAuthorization("all");
+        if (authority == 200 || authority == 203) {
             JsonNode jsonNode = request().body().asJson();
             Transaction txn = Ebean.beginTransaction();
             try {
+                logger.info(">>> incoming order request..." + jsonNode.toString());
                 // request order
                 OrderTransaction orderRequest = objectMapper.readValue(jsonNode.toString(), OrderTransaction.class);
+                if (orderRequest.getCustomerEmail() == null || orderRequest.getCustomerPhoneNumber() == null) {
+                    response.setBaseResponse(0, 0, 0, "Email or Phone Number is not null", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                Store store = Store.findByStoreCode(orderRequest.getStoreCode());
+                if (store == null) {
+                    response.setBaseResponse(0, 0, 0, "Store code is not null", null);
+                    return badRequest(Json.toJson(response));
+                }
 
                 // new oders
                 Order order = new Order();
@@ -56,7 +63,8 @@ public class CheckoutOrderController extends BaseController {
                 order.setOrderNumber(orderNumber);
                 order.setOrderType(orderRequest.getOrderType());
                 order.setStatus(OrderStatus.NEW_ORDER.getStatus());
-                order.setMember(member);
+                order.setStore(store);
+                // order.setMember(member);
 
                 order.save();
 
@@ -73,6 +81,7 @@ public class CheckoutOrderController extends BaseController {
                     orderDetail.setProductName(productStore.get().getProductMerchant().getProductName());
                     orderDetail.setProductPrice(productStore.get().getFinalPrice());
                     orderDetail.setQuantity(productOrderDetail.getProductQty());
+                    orderDetail.setNotes(productOrderDetail.getNotes());
                     orderDetail.setOrder(order);
                     orderDetails.add(orderDetail);
                 }
@@ -100,29 +109,32 @@ public class CheckoutOrderController extends BaseController {
                 orderPayment.setPaymentType(orderRequest.getPaymentDetailResponse().getPaymentType());
                 orderPayment.setPaymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel());
                 orderPayment.setPaymentDate(new Date());
-
-                BigDecimal totalAmount = new BigDecimal(0);
-                BigDecimal fee = orderRequest.getPaymentDetailResponse().getPaymentFee()
-                        .add(orderRequest.getPaymentDetailResponse().getPlatformFee()
-                        .add(orderRequest.getPaymentDetailResponse().getServiceFee())
-                        .add(orderRequest.getPaymentDetailResponse().getTaxFee()));
-                totalAmount = totalAmount.add(totalPrice.add(fee));
-                orderPayment.setTotalAmount(totalAmount);
+                orderPayment.setTaxPercentage(orderRequest.getPaymentDetailResponse().getTaxPercentage());
+                orderPayment.setServicePercentage(orderRequest.getPaymentDetailResponse().getServicePercentage());
+                orderPayment.setTaxPrice(orderRequest.getPaymentDetailResponse().getTaxPrice());
+                orderPayment.setServicePrice(orderRequest.getPaymentDetailResponse().getServicePrice());
+                orderPayment.setPaymentFeeType(orderRequest.getPaymentDetailResponse().getPaymentFeeType());
+                orderPayment.setPaymentFeeCustomer(orderRequest.getPaymentDetailResponse().getPaymentFeeCustomer());
+                orderPayment.setPaymentFeeOwner(orderRequest.getPaymentDetailResponse().getPaymentFeeOwner());
+                orderPayment.setTotalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount());
                 orderPayment.save();
 
                 // do initiate payment
                 InitiatePaymentRequest request = new InitiatePaymentRequest();
                 request.setOrderNumber(orderNumber);
                 request.setDeviceType(orderRequest.getDeviceType());
-                PaymentDetailResponse paymentDetailResponse = PaymentDetailResponse.builder()
-                        .paymentType(orderRequest.getPaymentDetailResponse().getPaymentType())
+                request.setCustomerName(orderRequest.getCustomerName());
+                request.setCustomerEmail(orderRequest.getCustomerEmail());
+                request.setCustomerPhoneNumber(orderRequest.getCustomerPhoneNumber());
+
+                // please
+                PaymentServiceRequest paymentServiceRequest = PaymentServiceRequest.builder()
                         .paymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel())
-                        .platformFee(orderRequest.getPaymentDetailResponse().getPlatformFee())
-                        .paymentFee(orderRequest.getPaymentDetailResponse().getPaymentFee())
-                        .taxFee(orderRequest.getPaymentDetailResponse().getTaxFee())
-                        .totalAmount(totalAmount)
+                        .paymentType(orderRequest.getPaymentDetailResponse().getPaymentType())
+                        .bankCode(orderRequest.getPaymentDetailResponse().getBankCode())
+                        .totalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount())
                         .build();
-                request.setPaymentDetailResponse(paymentDetailResponse);
+                request.setPaymentServiceRequest(paymentServiceRequest);
                 request.setProductOrderDetails(productOrderDetails);
                 request.setMerchantName(orderRequest.getMerchantName());
 
@@ -140,7 +152,8 @@ public class CheckoutOrderController extends BaseController {
                     return badRequest(Json.toJson(response));
                 } else {
                     // update payment status
-                    order.setStatus(OrderStatus.PROCESS.getStatus());
+                    order.setStatus(OrderStatus.NEW_ORDER.getStatus());
+                    order.setOrderQueue(createQueue());
                     order.update();
 
                     orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
@@ -151,14 +164,17 @@ public class CheckoutOrderController extends BaseController {
                     String initiate = jsonObject.getJSONObject("data").toString();
                     InitiatePaymentResponse initiatePaymentResponse = objectMapper.readValue(initiate, InitiatePaymentResponse.class);
 
-
                     PaymentDetail payDetail = new PaymentDetail();
                     payDetail.setOrderNumber(order.getOrderNumber());
                     payDetail.setPaymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel());
                     payDetail.setCreationTime(initiatePaymentResponse.getCreationTime());
                     payDetail.setStatus(initiatePaymentResponse.getStatus());
-                    payDetail.setQrCode(initiatePaymentResponse.getQrString());
-                    payDetail.setReferenceId(initiatePaymentResponse.getReferenceId());
+                    if (orderRequest.getPaymentDetailResponse().getPaymentChannel().equalsIgnoreCase("qr_code")) {
+                        payDetail.setQrCode(initiatePaymentResponse.getMetadata().getQrCode());
+                    } else if (orderRequest.getPaymentDetailResponse().getPaymentChannel().equalsIgnoreCase("virtual_account")){
+                        payDetail.setAccountNumber(initiatePaymentResponse.getMetadata().getAccountNumber());
+                    }
+                    payDetail.setReferenceId(initiatePaymentResponse.getMetadata().getReferenceId());
                     payDetail.setTotalAmount(initiatePaymentResponse.getTotalAmount());
                     payDetail.setOrderPayment(orderPayment);
                     payDetail.save();
@@ -168,9 +184,9 @@ public class CheckoutOrderController extends BaseController {
                     OrderTransactionResponse orderTransactionResponse = new OrderTransactionResponse();
                     orderTransactionResponse.setOrderNumber(order.getOrderNumber());
                     orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
-                    orderTransactionResponse.setQrString(initiatePaymentResponse.getQrString());
                     orderTransactionResponse.setTotalAmount(initiatePaymentResponse.getTotalAmount());
-                    orderTransactionResponse.setMerchantName(initiatePaymentResponse.getMerchantName());
+                    orderTransactionResponse.setMerchantName(orderRequest.getMerchantName());
+                    orderTransactionResponse.setMetadata(initiatePaymentResponse.getMetadata());
 
                     response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
                     return ok(Json.toJson(response));
@@ -181,14 +197,20 @@ public class CheckoutOrderController extends BaseController {
             } finally {
                 txn.end();
             }
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
         }
-        response.setBaseResponse(0, 0, 0, unauthorized, null);
-        return unauthorized(Json.toJson(response));
+        response.setBaseResponse(0, 0, 0, error, null);
+        return ok(Json.toJson(response));
     }
 
     public static Result payment() {
-        Member member = checkMemberAccessAuthorization();
-        if (member != null) {
+        // Member member = checkMemberAccessAuthorization();
+        // if (member != null) {
             JsonNode jsonNode = request().body().asJson();
             Transaction txn = Ebean.beginTransaction();
             try {
@@ -219,11 +241,57 @@ public class CheckoutOrderController extends BaseController {
                 txn.end();
             }
 
+        // }
+        response.setBaseResponse(0, 0, 0, "Error", null);
+        return badRequest(Json.toJson(response));
+    }
 
+    public static Result listOrderMerchant(Long storeId, int offset, int limit) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if(ownMerchant != null) {
+            Query<Order> queryData = OrderRepository.find.where().eq("t0.store_id", storeId).eq("t0.status", "NEW_ORDER").order("t0.created_at desc");
+            List<Order> dataOrder = OrderRepository.findByNewOrder(queryData, offset, limit);
+            List<OrderList> orderListResponses = new ArrayList<>();
+            for(Order orderData: dataOrder){
+                OrderList orderListResponse = new OrderList();
+
+                List<OrderDetail> orderDetailList = OrderRepository.findDataOrderDetail(orderData.id);
+
+                orderListResponse.setInvoiceNumber(orderData.getOrderPayment().getInvoiceNo());
+                orderListResponse.setOrderNumber(orderData.getOrderNumber());
+                orderListResponse.setMerchantName(orderData.getStore().getMerchant().fullName);
+                orderListResponse.setTotalAmount(orderData.getTotalPrice());
+                orderListResponse.setOrderType(orderData.getOrderType());
+                
+                for(OrderDetail oDetail : orderDetailList) {
+                    ProductOrderDetail responseOrderDetail = new ProductOrderDetail();
+                    responseOrderDetail.setProductId(oDetail.getProductStore().id);
+                    responseOrderDetail.setProductPrice(oDetail.getProductPrice());
+                    responseOrderDetail.setProductQty(oDetail.getQuantity());
+                    responseOrderDetail.setNotes(oDetail.getNotes());
+                }
+
+                OrderPayment oPayment = OrderRepository.findDataOrderPayment(orderData.id);
+                orderListResponse.setPaymentType(oPayment.getPaymentType());
+                orderListResponse.setPaymentChannel(oPayment.getPaymentChannel());
+                orderListResponse.setTotalAmountPayment(oPayment.getTotalAmount());
+                orderListResponse.setPaymentDate(oPayment.getPaymentDate());
+                orderListResponse.setStatus(oPayment.getStatus());
+                orderListResponses.add(orderListResponse);
+            }
+            response.setBaseResponse(dataOrder.size(), offset, limit, success, orderListResponses);
+            return ok(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
     }
 
+    public static Integer createQueue() {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Order order = Order.find.where("t0.created_at > '" + simpleDateFormat.format(new Date()) + " 00:00:00' and order_queue IS NOT NULL ")
+                .order("order_queue desc, id desc").setMaxRows(1).findUnique();
+
+        return order == null ? 1 : order.getOrderQueue() + 1;
+    }
 
 }

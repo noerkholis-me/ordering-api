@@ -52,6 +52,9 @@ public class Order extends BaseModel {
     @Column(name = "approved_date")
     public Date approvedDate;
 
+    @Column(name = "order_queue")
+    private Integer orderQueue;
+
     // ================================================================ //
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
@@ -59,6 +62,10 @@ public class Order extends BaseModel {
 
     @OneToOne(mappedBy = "order")
     private OrderPayment orderPayment;
+
+    @ManyToOne(cascade = { CascadeType.ALL })
+    @JoinColumn(name = "store_id", referencedColumnName = "id")
+    private Store store;
 
     // ================================================================ //
 

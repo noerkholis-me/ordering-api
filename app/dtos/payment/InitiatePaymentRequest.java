@@ -19,12 +19,18 @@ public class InitiatePaymentRequest {
     @JsonProperty("order_number")
     private String orderNumber;
     @JsonProperty("payment_detail")
-    private PaymentDetailResponse paymentDetailResponse;
+    private PaymentServiceRequest paymentServiceRequest;
     @JsonProperty("product_detail")
     private List<ProductOrderDetail> productOrderDetails;
     @JsonProperty("merchant_name")
     private String merchantName;
     @JsonProperty("device_type")
     private String deviceType;
+    @JsonProperty("customer_email")
+    private String customerEmail;
+    @JsonProperty("customer_name")
+    private String customerName;
+    @JsonProperty("customer_phone_number")
+    private String customerPhoneNumber;
 
 }
