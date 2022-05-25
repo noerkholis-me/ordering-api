@@ -499,3 +499,7 @@ POST        /merchant/product/type/create               controllers.product.Prod
 
 #PAYMENT METHOD
 GET         /master/paymentmethod                       controllers.masters.PaymentMethodController.getPaymentMethod()
+GET         /master/check-availble-bank                 controllers.payment.PaymentController.checkAvailableBank()
+
+# PAYMENT
+GET         /merchant/view-qr-code/:orderNumber         controllers.payment.PaymentController.viewQrCode(orderNumber : String)

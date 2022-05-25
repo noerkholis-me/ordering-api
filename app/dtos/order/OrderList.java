@@ -1,5 +1,6 @@
 package dtos.order;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
@@ -39,8 +40,10 @@ public class OrderList {
     @JsonProperty("payment_channel")
     private String paymentChannel;
     @JsonProperty("total_amount_payment")
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal totalAmountPayment;
     @JsonProperty("payment_date")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Jakarta")
     private Date paymentDate;
 
 }
