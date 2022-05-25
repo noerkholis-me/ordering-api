@@ -26,7 +26,7 @@ public class PickUpPointSetupRepository extends Model {
 	
 	public static PickUpPointSetup findByStoreId (Long storeId) {
 		return find.where()
-			.eq("id", storeId)
+			.eq("store_id", storeId)
 			.eq("is_deleted", Boolean.FALSE)
 			.findUnique();
 }

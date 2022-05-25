@@ -23,6 +23,17 @@ public class OrderRepository extends Model {
         return Optional.ofNullable(find.where().eq("orderNumber", orderNumber).findUnique());
     }
 
+    public static List<Order> findOrderDataByUser(Long userId) {
+        Query<Order> query = find.where().eq("user_id", userId).order("t0.created_at desc");
+        query = query.orderBy("t0.created_at desc");
+        
+        ExpressionList<Order> exp = query.where();
+        // exp = exp.disjunction();
+        // exp = exp.ilike("t0.updated_by", "%" + filter + "%");
+        query = exp.query();
+        return query.findPagingList(0).getPage(0).getList();
+    }
+
     public static List<Order> findByNewOrder(Query<Order> reqQuery, int offset, int limit) {
         Query<Order> query = reqQuery;
         query = query.orderBy("t0.created_at desc");
