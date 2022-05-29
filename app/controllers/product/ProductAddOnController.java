@@ -283,7 +283,7 @@ public class ProductAddOnController extends BaseController {
                 List<ProductAddOnAssignResponse> responsesProductAddOn = new ArrayList<>();
                     
                 for(ProductAddOn dataProductAddOn : dataAddOn) {
-                    ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(dataProductAddOn.getProductMerchant().id, ownMerchant.id);
+                    ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(dataProductAddOn.getProductAssignId(), ownMerchant.id);
                     ProductAddOnAssignResponse productAddOnResponse = new ProductAddOnAssignResponse();
                     productAddOnResponse.setId(dataProductAddOn.id);
                     productAddOnResponse.setProductAssignId(dataProductAddOn.getProductAssignId());

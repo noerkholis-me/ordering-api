@@ -184,6 +184,10 @@ public class Member extends BaseModel {
 
     public static Finder<Long, Member> find = new Finder<Long, Member>(Long.class, Member.class);
 
+    public static Member findDataCustomer(String email, String phoneNumber){
+        return find.where().raw("t0.email = '" + email + "' or t0.phone = '" + phoneNumber + "'").eq("t0.is_deleted", false).findUnique();
+    }
+
     public Member() {
 
     }
