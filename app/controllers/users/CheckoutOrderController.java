@@ -45,15 +45,15 @@ public class CheckoutOrderController extends BaseController {
                 logger.info(">>> incoming order request..." + jsonNode.toString());
                 // request order
                 OrderTransaction orderRequest = objectMapper.readValue(jsonNode.toString(), OrderTransaction.class);
-                if (orderRequest.getCustomerEmail() == null || orderRequest.getCustomerPhoneNumber() == null) {
-                    response.setBaseResponse(0, 0, 0, "Email or Phone Number is not null", null);
-                    return badRequest(Json.toJson(response));
-                }
-
                 Store store = Store.findByStoreCode(orderRequest.getStoreCode());
                 if (store == null) {
                     response.setBaseResponse(0, 0, 0, "Store code is not null", null);
                     return badRequest(Json.toJson(response));
+                }
+
+                Member member = null;
+                if (orderRequest.getCustomerEmail() != null) {
+                    member = Member.findByEmail(orderRequest.getCustomerEmail());
                 }
 
                 // new oders
@@ -64,7 +64,7 @@ public class CheckoutOrderController extends BaseController {
                 order.setOrderType(orderRequest.getOrderType());
                 order.setStatus(OrderStatus.NEW_ORDER.getStatus());
                 order.setStore(store);
-                // order.setMember(member);
+                order.setMember(member);
 
                 order.save();
 
@@ -123,9 +123,12 @@ public class CheckoutOrderController extends BaseController {
                 InitiatePaymentRequest request = new InitiatePaymentRequest();
                 request.setOrderNumber(orderNumber);
                 request.setDeviceType(orderRequest.getDeviceType());
-                request.setCustomerName(orderRequest.getCustomerName());
-                request.setCustomerEmail(orderRequest.getCustomerEmail());
-                request.setCustomerPhoneNumber(orderRequest.getCustomerPhoneNumber());
+                if (member == null) {
+                    request.setCustomerName(store.storeName);
+                }
+                request.setCustomerName(member.fullName);
+                request.setCustomerEmail(member.email);
+                request.setCustomerPhoneNumber(member.phone);
 
                 // please
                 PaymentServiceRequest paymentServiceRequest = PaymentServiceRequest.builder()
@@ -136,7 +139,7 @@ public class CheckoutOrderController extends BaseController {
                         .build();
                 request.setPaymentServiceRequest(paymentServiceRequest);
                 request.setProductOrderDetails(productOrderDetails);
-                request.setMerchantName(orderRequest.getMerchantName());
+                request.setStoreCode(store.storeCode);
 
                 ServiceResponse serviceResponse = PaymentService.getInstance().initiatePayment(request);
 
@@ -246,10 +249,10 @@ public class CheckoutOrderController extends BaseController {
         return badRequest(Json.toJson(response));
     }
 
-    public static Result listOrderMerchant(Long storeId, int offset, int limit) {
+    public static Result listOrderMerchant(Long storeId, int offset, int limit, String statusOrder) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if(ownMerchant != null) {
-            Query<Order> queryData = OrderRepository.find.where().eq("t0.store_id", storeId).eq("t0.status", "NEW_ORDER").order("t0.created_at desc");
+            Query<Order> queryData = OrderRepository.find.where().eq("t0.store_id", storeId).eq("t0.status", statusOrder).order("t0.created_at desc");
             List<Order> dataOrder = OrderRepository.findByNewOrder(queryData, offset, limit);
             List<OrderList> orderListResponses = new ArrayList<>();
             for(Order orderData: dataOrder){
@@ -262,14 +265,20 @@ public class CheckoutOrderController extends BaseController {
                 orderListResponse.setMerchantName(orderData.getStore().getMerchant().fullName);
                 orderListResponse.setTotalAmount(orderData.getTotalPrice());
                 orderListResponse.setOrderType(orderData.getOrderType());
+                orderListResponse.setStatusOrder(orderData.getStatus());
+                orderListResponse.setOrderQueue(orderData.getOrderQueue());
                 
+                List<ProductOrderDetail> responsesOrderDetail = new ArrayList<>();
                 for(OrderDetail oDetail : orderDetailList) {
                     ProductOrderDetail responseOrderDetail = new ProductOrderDetail();
                     responseOrderDetail.setProductId(oDetail.getProductStore().id);
                     responseOrderDetail.setProductPrice(oDetail.getProductPrice());
                     responseOrderDetail.setProductQty(oDetail.getQuantity());
                     responseOrderDetail.setNotes(oDetail.getNotes());
+                    responsesOrderDetail.add(responseOrderDetail);
                 }
+
+                orderListResponse.setProductOrderDetail(responsesOrderDetail);
 
                 OrderPayment oPayment = OrderRepository.findDataOrderPayment(orderData.id);
                 orderListResponse.setPaymentType(oPayment.getPaymentType());
@@ -292,6 +301,94 @@ public class CheckoutOrderController extends BaseController {
                 .order("order_queue desc, id desc").setMaxRows(1).findUnique();
 
         return order == null ? 1 : order.getOrderQueue() + 1;
+    }
+
+    public static Result changeStatusFromMerchant() {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if(ownMerchant != null) {
+            try{
+                JsonNode json = request().body().asJson();
+                OrderStatusChanges statusRequest = objectMapper.readValue(json.toString(), OrderStatusChanges.class);
+                Transaction trx = Ebean.beginTransaction();
+                try{
+                    Optional<Order> orderData = OrderRepository.findByOrderNumber(statusRequest.getOrderNumber());
+                    if(orderData.isPresent()){
+                        orderData.get().setStatus(statusRequest.getStatusOrder());
+                        orderData.get().update();
+
+                        trx.commit();
+                        response.setBaseResponse(1, 0, 0, "Berhasil mengubah status Nomor Order " + orderData.get().getOrderNumber(), orderData.get());
+                        return ok(Json.toJson(response));
+                    }
+                    response.setBaseResponse(0, 0, 0, "Nomor order tidak ditemukan", null);
+                    return badRequest(Json.toJson(response));
+                } catch (Exception e) {
+                    logger.error("Error saat mengubah status", e);
+                    e.printStackTrace();
+                    trx.rollback();
+                } finally {
+                    trx.end();
+                }
+                response.setBaseResponse(0, 0, 0, error, null);
+                return badRequest(Json.toJson(response));
+            } catch (Exception e) {
+                logger.error("Error saat parsing json", e);
+                e.printStackTrace();
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    public static Result checkStatusOrderNumber(String email, String phoneNumber) {
+        if(email != null && email != "" || phoneNumber != null && phoneNumber != "") {
+            Member memberUser = Member.findDataCustomer(email, phoneNumber);
+
+            if(memberUser != null){
+                List<Order> dataOrder = OrderRepository.findOrderDataByUser(memberUser.id);
+                List<OrderList> orderListResponses = new ArrayList<>();
+                for(Order orderData: dataOrder){
+                    OrderList orderListResponse = new OrderList();
+
+                    List<OrderDetail> orderDetailList = OrderRepository.findDataOrderDetail(orderData.id);
+
+                    orderListResponse.setInvoiceNumber(orderData.getOrderPayment().getInvoiceNo());
+                    orderListResponse.setOrderNumber(orderData.getOrderNumber());
+                    orderListResponse.setMerchantName(orderData.getStore().getMerchant().fullName);
+                    orderListResponse.setTotalAmount(orderData.getTotalPrice());
+                    orderListResponse.setOrderType(orderData.getOrderType());
+                    orderListResponse.setStatusOrder(orderData.getStatus());
+                    orderListResponse.setOrderQueue(orderData.getOrderQueue());
+                    
+                    List<ProductOrderDetail> responsesOrderDetail = new ArrayList<>();
+                    for(OrderDetail oDetail : orderDetailList) {
+                        ProductOrderDetail responseOrderDetail = new ProductOrderDetail();
+                        responseOrderDetail.setProductId(oDetail.getProductStore().id);
+                        responseOrderDetail.setProductPrice(oDetail.getProductPrice());
+                        responseOrderDetail.setProductQty(oDetail.getQuantity());
+                        responseOrderDetail.setNotes(oDetail.getNotes());
+                        responsesOrderDetail.add(responseOrderDetail);
+                    }
+
+                    orderListResponse.setProductOrderDetail(responsesOrderDetail);
+
+                    OrderPayment oPayment = OrderRepository.findDataOrderPayment(orderData.id);
+                    orderListResponse.setPaymentType(oPayment.getPaymentType());
+                    orderListResponse.setPaymentChannel(oPayment.getPaymentChannel());
+                    orderListResponse.setTotalAmountPayment(oPayment.getTotalAmount());
+                    orderListResponse.setPaymentDate(oPayment.getPaymentDate());
+                    orderListResponse.setStatus(oPayment.getStatus());
+                    orderListResponses.add(orderListResponse);
+                }
+                response.setBaseResponse(dataOrder.size(), 0, 0, "Berhasil menampilkan data", orderListResponses);
+                return ok(Json.toJson(response));
+            }
+
+            response.setBaseResponse(0, 0, 0, "Email atau Nomor Telepon tidak ditemukan", null);
+            return badRequest(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, "Email atau Nomor Telepon dibutuhkan", null);
+        return badRequest(Json.toJson(response));
     }
 
 }

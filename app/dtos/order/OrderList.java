@@ -29,6 +29,10 @@ public class OrderList {
     private BigDecimal totalAmount;
     @JsonProperty("order_type")
     private String orderType;
+    @JsonProperty("status_order")
+    private String statusOrder;
+    @JsonProperty("order_queue")
+    private Integer orderQueue;
     // @JsonProperty("order_transaction")
     // private OrderTransactionResponse orderTransaction;
     @JsonProperty("order_detail")
