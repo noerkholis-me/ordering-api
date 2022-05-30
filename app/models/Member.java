@@ -699,6 +699,10 @@ public class Member extends BaseModel {
         return SalesOrder.find.where().eq("is_deleted", false).eq("member.id", memberId).findRowCount();
     }
 
+    public static Member findByEmail(String email) {
+        return find.where().eq("email", email).findUnique();
+    }
+
     public Boolean getNewsLetter() {
         return newsLetter == null ? true : newsLetter;
     }

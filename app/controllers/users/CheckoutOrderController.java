@@ -45,15 +45,15 @@ public class CheckoutOrderController extends BaseController {
                 logger.info(">>> incoming order request..." + jsonNode.toString());
                 // request order
                 OrderTransaction orderRequest = objectMapper.readValue(jsonNode.toString(), OrderTransaction.class);
-                if (orderRequest.getCustomerEmail() == null || orderRequest.getCustomerPhoneNumber() == null) {
-                    response.setBaseResponse(0, 0, 0, "Email or Phone Number is not null", null);
-                    return badRequest(Json.toJson(response));
-                }
-
                 Store store = Store.findByStoreCode(orderRequest.getStoreCode());
                 if (store == null) {
                     response.setBaseResponse(0, 0, 0, "Store code is not null", null);
                     return badRequest(Json.toJson(response));
+                }
+
+                Member member = null;
+                if (orderRequest.getCustomerEmail() != null) {
+                    member = Member.findByEmail(orderRequest.getCustomerEmail());
                 }
 
                 // new oders
@@ -64,7 +64,7 @@ public class CheckoutOrderController extends BaseController {
                 order.setOrderType(orderRequest.getOrderType());
                 order.setStatus(OrderStatus.NEW_ORDER.getStatus());
                 order.setStore(store);
-                // order.setMember(member);
+                order.setMember(member);
 
                 order.save();
 
@@ -123,9 +123,12 @@ public class CheckoutOrderController extends BaseController {
                 InitiatePaymentRequest request = new InitiatePaymentRequest();
                 request.setOrderNumber(orderNumber);
                 request.setDeviceType(orderRequest.getDeviceType());
-                request.setCustomerName(orderRequest.getCustomerName());
-                request.setCustomerEmail(orderRequest.getCustomerEmail());
-                request.setCustomerPhoneNumber(orderRequest.getCustomerPhoneNumber());
+                if (member == null) {
+                    request.setCustomerName(store.storeName);
+                }
+                request.setCustomerName(member.fullName);
+                request.setCustomerEmail(member.email);
+                request.setCustomerPhoneNumber(member.phone);
 
                 // please
                 PaymentServiceRequest paymentServiceRequest = PaymentServiceRequest.builder()
@@ -136,7 +139,7 @@ public class CheckoutOrderController extends BaseController {
                         .build();
                 request.setPaymentServiceRequest(paymentServiceRequest);
                 request.setProductOrderDetails(productOrderDetails);
-                request.setMerchantName(orderRequest.getMerchantName());
+                request.setStoreCode(store.storeCode);
 
                 ServiceResponse serviceResponse = PaymentService.getInstance().initiatePayment(request);
 
@@ -308,13 +311,13 @@ public class CheckoutOrderController extends BaseController {
                 OrderStatusChanges statusRequest = objectMapper.readValue(json.toString(), OrderStatusChanges.class);
                 Transaction trx = Ebean.beginTransaction();
                 try{
-                    Order orderData = OrderRepository.checkStatusMerchant(statusRequest.getOrderNumber());
-                    if(orderData != null){
-                        orderData.setStatus(statusRequest.getStatusOrder());
-                        orderData.update();
+                    Optional<Order> orderData = OrderRepository.findByOrderNumber(statusRequest.getOrderNumber());
+                    if(orderData.isPresent()){
+                        orderData.get().setStatus(statusRequest.getStatusOrder());
+                        orderData.get().update();
 
                         trx.commit();
-                        response.setBaseResponse(1, 0, 0, "Berhasil mengubah status Nomor Order " + orderData.getOrderNumber(), orderData);
+                        response.setBaseResponse(1, 0, 0, "Berhasil mengubah status Nomor Order " + orderData.get().getOrderNumber(), orderData.get());
                         return ok(Json.toJson(response));
                     }
                     response.setBaseResponse(0, 0, 0, "Nomor order tidak ditemukan", null);

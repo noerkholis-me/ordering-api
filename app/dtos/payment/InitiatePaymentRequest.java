@@ -22,8 +22,8 @@ public class InitiatePaymentRequest {
     private PaymentServiceRequest paymentServiceRequest;
     @JsonProperty("product_detail")
     private List<ProductOrderDetail> productOrderDetails;
-    @JsonProperty("merchant_name")
-    private String merchantName;
+    @JsonProperty("store_code")
+    private String storeCode;
     @JsonProperty("device_type")
     private String deviceType;
     @JsonProperty("customer_email")
