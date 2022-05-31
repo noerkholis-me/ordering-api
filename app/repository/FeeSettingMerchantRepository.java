@@ -21,6 +21,15 @@ public class FeeSettingMerchantRepository extends Model {
                     .findUnique());
     }
 
+    public static Optional<FeeSettingMerchant> findByLatestFeeSetting() {
+        return Optional.of(
+                find.where()
+                        .eq("isDeleted", false)
+                        .orderBy("date desc")
+                        .findList().get(0)
+        );
+    }
+
     public static Query<FeeSettingMerchant> findAllByMerchantQuery(Merchant merchant) {
         return find.where().eq("isDeleted", false).eq("merchant", merchant).orderBy("date desc");
     }

@@ -318,7 +318,7 @@ public class CheckoutOrderController extends BaseController {
                         orderData.get().update();
 
                         trx.commit();
-                        response.setBaseResponse(1, 0, 0, "Berhasil mengubah status Nomor Order " + orderData.get().getOrderNumber(), orderData.get());
+                        response.setBaseResponse(1, 0, 0, "Berhasil mengubah status Nomor Order " + orderData.get().getOrderNumber(), orderData.get().getOrderNumber());
                         return ok(Json.toJson(response));
                     }
                     response.setBaseResponse(0, 0, 0, "Nomor order tidak ditemukan", null);
