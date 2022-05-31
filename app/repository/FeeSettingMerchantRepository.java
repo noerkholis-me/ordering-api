@@ -26,7 +26,7 @@ public class FeeSettingMerchantRepository extends Model {
                 find.where()
                         .eq("isDeleted", false)
                         .orderBy("date desc")
-                        .findUnique()
+                        .findList().get(0)
         );
     }
 
