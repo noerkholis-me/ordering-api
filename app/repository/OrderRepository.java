@@ -34,7 +34,7 @@ public class OrderRepository extends Model {
         return query.findPagingList(0).getPage(0).getList();
     }
 
-    public static List<Order> findByNewOrder(Query<Order> reqQuery, int offset, int limit) {
+    public static List<Order> findOrderByStatus(Query<Order> reqQuery, int offset, int limit) {
         Query<Order> query = reqQuery;
         query = query.orderBy("t0.created_at desc");
         

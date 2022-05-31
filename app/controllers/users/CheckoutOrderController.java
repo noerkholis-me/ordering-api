@@ -253,16 +253,27 @@ public class CheckoutOrderController extends BaseController {
     public static Result listOrderMerchant(Long storeId, int offset, int limit, String statusOrder) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if(ownMerchant != null) {
-            Query<Order> queryData = OrderRepository.find.where().eq("t0.store_id", storeId).eq("t0.status", statusOrder).order("t0.created_at desc");
-            List<Order> dataOrder = OrderRepository.findByNewOrder(queryData, offset, limit);
+            String querySqlStore = "";
+            if(storeId != null && storeId != 0){
+                querySqlStore = "t0.store_id in (select st.id from STORE st where st.merchant_id = "+ownMerchant.id+" and st.id = " +storeId+ " and st.is_active = true and st.is_deleted = false)";
+            } else {
+                querySqlStore = "t0.store_id in (select st.id from STORE st where st.merchant_id = "+ownMerchant.id+" and st.is_active = true and st.is_deleted = false)";
+            }
+            String querySqlOrderPayment = "t0.id in (select op.id from order_payment op where op.status = 'PAID' AND  op.is_deleted = " +false+ ")";
+            Query<Order> queryData = OrderRepository.find.where().raw(querySqlStore).raw(querySqlOrderPayment).eq("t0.status", statusOrder).order("t0.created_at desc");
+            List<Order> dataOrder = OrderRepository.findOrderByStatus(queryData, offset, limit);
             List<OrderList> orderListResponses = new ArrayList<>();
             for(Order orderData: dataOrder){
                 OrderList orderListResponse = new OrderList();
 
                 List<OrderDetail> orderDetailList = OrderRepository.findDataOrderDetail(orderData.id);
 
+                Member member = null;
+                member = Member.findByIdMember(orderData.getMember().id);
+
                 orderListResponse.setInvoiceNumber(orderData.getOrderPayment().getInvoiceNo());
                 orderListResponse.setOrderNumber(orderData.getOrderNumber());
+                orderListResponse.setCustomerName(member != null ? member.fullName : null);                
                 orderListResponse.setMerchantName(orderData.getStore().getMerchant().fullName);
                 orderListResponse.setTotalAmount(orderData.getTotalPrice());
                 orderListResponse.setOrderType(orderData.getOrderType());
@@ -318,7 +329,7 @@ public class CheckoutOrderController extends BaseController {
                         orderData.get().update();
 
                         trx.commit();
-                        response.setBaseResponse(1, 0, 0, "Berhasil mengubah status Nomor Order " + orderData.get().getOrderNumber(), orderData.get());
+                        response.setBaseResponse(1, 0, 0, "Berhasil mengubah status Nomor Order " + orderData.get().getOrderNumber(), orderData.get().getOrderNumber());
                         return ok(Json.toJson(response));
                     }
                     response.setBaseResponse(0, 0, 0, "Nomor order tidak ditemukan", null);
