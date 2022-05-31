@@ -19,6 +19,7 @@ import repository.FeeSettingMerchantRepository;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public class FeeSettingMerchantController extends BaseController {
 
@@ -94,6 +95,43 @@ public class FeeSettingMerchantController extends BaseController {
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
+    }
+
+    public static Result getFeeSetting() {
+        int authority = checkAccessAuthorization("all");
+        if (authority == 200 || authority == 203) {
+            try {
+
+                Optional<FeeSettingMerchant> feeSettingMerchant = FeeSettingMerchantRepository.findByLatestFeeSetting();
+                if (!feeSettingMerchant.isPresent()) {
+                    response.setBaseResponse(0, 0, 0, notFound, null);
+                    return notFound(Json.toJson(response));
+                }
+
+                FeeSettingResponse feeSettingResponse = new FeeSettingResponse();
+                feeSettingResponse.setId(feeSettingMerchant.get().id);
+                feeSettingResponse.setDate(feeSettingMerchant.get().getDate());
+                feeSettingResponse.setTax(feeSettingMerchant.get().getTax());
+                feeSettingResponse.setService(feeSettingMerchant.get().getService());
+                feeSettingResponse.setPlatformFeeType(feeSettingMerchant.get().getPlatformFeeType());
+                feeSettingResponse.setPaymentFeeType(feeSettingMerchant.get().getPaymentFeeType());
+                feeSettingResponse.setUpdatedBy(feeSettingMerchant.get().getUpdatedBy());
+
+                response.setBaseResponse(1, 0, 0, success + " Showing data fee setting", feeSettingResponse);
+                return ok(Json.toJson(response));
+            } catch (Exception ex) {
+                logger.error("Error while getting fee setting", ex);
+                ex.printStackTrace();
+            }
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, error, null);
+        return ok(Json.toJson(response));
     }
 
 
