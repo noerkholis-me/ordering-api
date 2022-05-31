@@ -52,7 +52,7 @@ public class CheckoutOrderController extends BaseController {
                 }
 
                 Member member = null;
-                if (orderRequest.getCustomerEmail() != null) {
+                if (orderRequest.getCustomerEmail() != null || !orderRequest.getCustomerEmail().equalsIgnoreCase("")) {
                     member = Member.findByEmail(orderRequest.getCustomerEmail());
                 }
 
@@ -125,10 +125,11 @@ public class CheckoutOrderController extends BaseController {
                 request.setDeviceType(orderRequest.getDeviceType());
                 if (member == null) {
                     request.setCustomerName(store.storeName);
+                } else {
+                    request.setCustomerName(member.fullName);
+                    request.setCustomerEmail(member.email);
+                    request.setCustomerPhoneNumber(member.phone);
                 }
-                request.setCustomerName(member.fullName);
-                request.setCustomerEmail(member.email);
-                request.setCustomerPhoneNumber(member.phone);
 
                 // please
                 PaymentServiceRequest paymentServiceRequest = PaymentServiceRequest.builder()
