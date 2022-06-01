@@ -13,16 +13,14 @@ import dtos.payment.*;
 import models.*;
 import models.merchant.ProductMerchant;
 import models.merchant.TableMerchant;
+import models.productaddon.ProductAddOn;
 import models.pupoint.PickUpPointMerchant;
 import models.transaction.*;
 import org.json.JSONObject;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
-import repository.OrderRepository;
-import repository.ProductMerchantRepository;
-import repository.ProductStoreRepository;
-import repository.TableMerchantRepository;
+import repository.*;
 import repository.pickuppoint.PickUpPointRepository;
 import service.PaymentService;
 import com.avaje.ebean.Query;
@@ -101,23 +99,36 @@ public class CheckoutOrderController extends BaseController {
                         message.append("product id ").append(productOrderDetail.getProductId()).append(" not found");
                     }
 
-                    if (productOrderDetail.getProductQty() > 1) {
-                        OrderDetail orderDetail = new OrderDetail();
-                        orderDetail.setProductMerchant(productMerchant);
-                        orderDetail.setProductName(productMerchant.getProductName());
-                        // =============================================================== //
-                        orderDetail.setProductPrice(productOrderDetail.getProductPrice());
-                        orderDetail.setQuantity(productOrderDetail.getProductQty());
-                        orderDetail.setNotes(productOrderDetail.getNotes());
-                        orderDetail.setOrder(order);
-                        orderDetail.save();
-
+                    OrderDetail orderDetail = new OrderDetail();
+                    orderDetail.setProductMerchant(productMerchant);
+                    orderDetail.setProductName(productMerchant.getProductName());
+                    // =============================================================== //
+                    orderDetail.setProductPrice(productOrderDetail.getProductPrice());
+                    orderDetail.setQuantity(productOrderDetail.getProductQty());
+                    orderDetail.setNotes(productOrderDetail.getNotes());
+                    orderDetail.setOrder(order);
+                    orderDetail.save();
+                    if (productOrderDetail.getProductOrderAddOns().size() != 0) {
+                        for (ProductOrderAddOn productOrderAddOn : productOrderDetail.getProductOrderAddOns()) {
+                            // create product add on
+                            ProductAddOn productAddOn = ProductAddOnRepository.findByProductId(productOrderAddOn.getProductId());
+                            if (productAddOn == null) {
+                                message.append("product add on id ").append(productOrderAddOn.getProductId()).append(" not found");
+                            }
+                            OrderDetailAddOn orderDetailAddOn = new OrderDetailAddOn();
+                            orderDetailAddOn.setOrderDetail(orderDetail);
+                            orderDetailAddOn.setProductAddOn(productAddOn);
+                            orderDetailAddOn.setQuantity(productOrderAddOn.getProductQty());
+                            orderDetailAddOn.setNotes(productOrderAddOn.getNotes());
+                            orderDetailAddOn.setProductPrice(productOrderAddOn.getProductPrice());
+                            orderDetailAddOn.setProductName(productAddOn.getProductMerchant().getProductName());
+                            orderDetailAddOn.save();
+                        }
                     }
-
-
                 }
                 // validate product
                 if (!message.toString().isEmpty()) {
+                    txn.rollback();
                     response.setBaseResponse(0, 0, 0, message.toString(), null);
                     return badRequest(Json.toJson(response));
                 }
@@ -136,7 +147,7 @@ public class CheckoutOrderController extends BaseController {
                 OrderPayment orderPayment = new OrderPayment();
                 orderPayment.setOrder(order);
                 orderPayment.setInvoiceNo(OrderPayment.generateInvoiceCode());
-                orderPayment.setStatus(PaymentStatus.UNPAID.getStatus());
+                orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
                 orderPayment.setPaymentType(orderRequest.getPaymentDetailResponse().getPaymentType());
                 orderPayment.setPaymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel());
                 orderPayment.setPaymentDate(new Date());

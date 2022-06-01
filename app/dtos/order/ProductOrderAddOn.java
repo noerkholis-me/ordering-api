@@ -9,13 +9,12 @@ import lombok.NoArgsConstructor;
 import utils.BigDecimalSerialize;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
-public class ProductOrderDetail {
+public class ProductOrderAddOn {
 
     @JsonProperty("product_id")
     private Long productId;
@@ -26,7 +25,5 @@ public class ProductOrderDetail {
     private Integer productQty;
     @JsonProperty("notes")
     private String notes;
-    @JsonProperty("product_add_on")
-    private List<ProductOrderAddOn> productOrderAddOns;
 
 }
