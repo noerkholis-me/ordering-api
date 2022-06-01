@@ -97,12 +97,12 @@ public class FeeSettingMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result getFeeSetting() {
+    public static Result getFeeSetting(Long merchantId) {
         int authority = checkAccessAuthorization("all");
         if (authority == 200 || authority == 203) {
             try {
 
-                Optional<FeeSettingMerchant> feeSettingMerchant = FeeSettingMerchantRepository.findByLatestFeeSetting();
+                Optional<FeeSettingMerchant> feeSettingMerchant = FeeSettingMerchantRepository.findByLatestFeeSetting(merchantId);
                 if (!feeSettingMerchant.isPresent()) {
                     response.setBaseResponse(0, 0, 0, notFound, null);
                     return notFound(Json.toJson(response));
