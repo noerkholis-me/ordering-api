@@ -266,7 +266,7 @@ public class CheckoutOrderController extends BaseController {
             for(Order orderData: dataOrder){
                 OrderList orderListResponse = new OrderList();
 
-                List<OrderDetail> orderDetailList = OrderRepository.findDataOrderDetail(orderData.id);
+                List<OrderDetail> orderDetailList = OrderRepository.findDataOrderDetail(orderData.id, "MAIN");
 
                 Member member = null;
                 member = Member.findByIdMember(orderData.getMember().id);
@@ -280,14 +280,35 @@ public class CheckoutOrderController extends BaseController {
                 orderListResponse.setStatusOrder(orderData.getStatus());
                 orderListResponse.setOrderQueue(orderData.getOrderQueue());
                 
-                List<ProductOrderDetail> responsesOrderDetail = new ArrayList<>();
+                List<OrderList.ProductOrderDetail> responsesOrderDetail = new ArrayList<>();
                 for(OrderDetail oDetail : orderDetailList) {
-                    ProductOrderDetail responseOrderDetail = new ProductOrderDetail();
+                    OrderList.ProductOrderDetail responseOrderDetail = new OrderList.ProductOrderDetail();
+                    List<OrderList.ProductOrderDetail.ProductAdditionalList> responsesProductAdditional = new ArrayList<>();
+
+                    List<OrderDetail> orderProductAdditionalList = OrderRepository.findDataOrderProductAdditional(orderData.id, oDetail.getProductStore().id, "ADDITIONAL");
+
                     responseOrderDetail.setProductId(oDetail.getProductStore().id);
+                    responseOrderDetail.setProductName(oDetail.getProductName());
                     responseOrderDetail.setProductPrice(oDetail.getProductPrice());
                     responseOrderDetail.setProductQty(oDetail.getQuantity());
                     responseOrderDetail.setNotes(oDetail.getNotes());
+                    if(orderProductAdditionalList != null){
+                        System.out.println(orderProductAdditionalList.size());
+                    }
+                    for(OrderDetail oDetails : orderProductAdditionalList) {
+                        
+                        OrderList.ProductOrderDetail.ProductAdditionalList responseProductAdditional = new OrderList.ProductOrderDetail.ProductAdditionalList();
+        
+                        responseProductAdditional.setProductId(oDetails.getProductStore().id);
+                        responseProductAdditional.setProductName(oDetails.getProductName());
+                        responseProductAdditional.setProductPrice(oDetails.getProductPrice());
+                        responseProductAdditional.setProductQty(oDetails.getQuantity());
+                        responseProductAdditional.setNotes(oDetails.getNotes());
+                        responsesProductAdditional.add(responseProductAdditional);
+                    }
+                    responseOrderDetail.setProductAddOn(responsesProductAdditional);
                     responsesOrderDetail.add(responseOrderDetail);
+                    
                 }
 
                 orderListResponse.setProductOrderDetail(responsesOrderDetail);
@@ -362,7 +383,7 @@ public class CheckoutOrderController extends BaseController {
                 for(Order orderData: dataOrder){
                     OrderList orderListResponse = new OrderList();
 
-                    List<OrderDetail> orderDetailList = OrderRepository.findDataOrderDetail(orderData.id);
+                    List<OrderDetail> orderDetailList = OrderRepository.findDataOrderDetail(orderData.id, "MAIN");
 
                     orderListResponse.setInvoiceNumber(orderData.getOrderPayment().getInvoiceNo());
                     orderListResponse.setOrderNumber(orderData.getOrderNumber());
@@ -372,9 +393,9 @@ public class CheckoutOrderController extends BaseController {
                     orderListResponse.setStatusOrder(orderData.getStatus());
                     orderListResponse.setOrderQueue(orderData.getOrderQueue());
                     
-                    List<ProductOrderDetail> responsesOrderDetail = new ArrayList<>();
+                    List<OrderList.ProductOrderDetail> responsesOrderDetail = new ArrayList<>();
                     for(OrderDetail oDetail : orderDetailList) {
-                        ProductOrderDetail responseOrderDetail = new ProductOrderDetail();
+                        OrderList.ProductOrderDetail responseOrderDetail = new OrderList.ProductOrderDetail();
                         responseOrderDetail.setProductId(oDetail.getProductStore().id);
                         responseOrderDetail.setProductPrice(oDetail.getProductPrice());
                         responseOrderDetail.setProductQty(oDetail.getQuantity());
