@@ -481,6 +481,7 @@ GET     /merchant/setup/pickuppoint/listdata              controllers.pickuppoin
 #FEESETTINGMERCHANT
 POST    /merchant/feesetting                       controllers.merchants.FeeSettingMerchantController.addFeeSetting()
 GET    /merchant/feesetting                         controllers.merchants.FeeSettingMerchantController.getAllFeeSetting(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET     /users/feesetting                           controllers.merchants.FeeSettingMerchantController.getFeeSetting()
 
 #FEESETTINGCONFIG
 GET     /master/feesettingconfig                   controllers.masters.FeeSettingConfigController.getFeeSettingConfig()
