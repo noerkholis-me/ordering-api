@@ -13,6 +13,13 @@ public class PickUpPointRepository extends Model {
 
     public static Finder<Long, PickUpPointMerchant> find = new Finder<>(Long.class, PickUpPointMerchant.class);
 
+	public static PickUpPointMerchant findById (Long id) {
+		return find.where()
+				.eq("id", id)
+				.eq("is_deleted", Boolean.FALSE)
+				.findUnique();
+	}
+
     public static PickUpPointMerchant findByMerchantId (Long merchantId) {
 			return find.where()
 				.eq("merchant_id", merchantId)

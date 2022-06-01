@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @AllArgsConstructor
@@ -28,9 +29,17 @@ public class OrderTransaction {
     private String customerName;
     @JsonProperty("customer_phone_number")
     private String customerPhoneNumber;
+    @JsonProperty("sub_total")
+    private BigDecimal subTotal;
+    @JsonProperty("total_price")
+    private BigDecimal totalPrice;
     @JsonProperty("product_order_detail")
     private List<ProductOrderDetail> productOrderDetail;
     @JsonProperty("payment_detail")
     private PaymentDetailResponse paymentDetailResponse;
+    @JsonProperty("pickup_point_id")
+    private Long pickupPointId;
+    @JsonProperty("table_id")
+    private Long tableId;
 
 }
