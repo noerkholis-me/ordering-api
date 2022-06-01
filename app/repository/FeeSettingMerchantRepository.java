@@ -21,11 +21,12 @@ public class FeeSettingMerchantRepository extends Model {
                     .findUnique());
     }
 
-    public static Optional<FeeSettingMerchant> findByLatestFeeSetting() {
+    public static Optional<FeeSettingMerchant> findByLatestFeeSetting(Long merchantId) {
         return Optional.of(
                 find.where()
-                        .eq("isDeleted", false)
-                        .orderBy("date desc")
+                        .eq("t0.merchant_id", merchantId)
+                        .eq("t0.is_deleted", false)
+                        .orderBy("t0.date desc")
                         .findList().get(0)
         );
     }
