@@ -583,6 +583,7 @@ public class ProductMerchantController extends BaseController {
     public static Result productAdditional(Long productId, Long merchantId, Long storeId){
         if (merchantId != null) {
             String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.id = "+productId+" pm.merchant_id = "+merchantId+" and pm.is_active = "+true+" and pm.is_deleted = "+false+")";
+            String groupBy = "GROUP BY t0.id, t0.product_type";
             Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("random()");
             try {
                 ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findDetailProduct(productId, merchantId);
@@ -595,7 +596,7 @@ public class ProductMerchantController extends BaseController {
                 responseData.setProductName(productMerchant.getProductName());
                 responseData.setMerchantId(productMerchant.getMerchant().id);
                     
-                Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().eq("t0.product_id", productMerchantDetail.getProductMerchant().id).eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).order("t0.id");
+                Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().raw("t0.product_id = " + productMerchantDetail.getProductMerchant().id + " AND t0.is_deleted = " + false + " AND t0.merchant_id = " + merchantId + " " + groupBy).order("t0.product_type asc");
                 List<ProductAddOn> dataAddOn = ProductAddOnRepository.getDataForAddOn(queryProductAddOn);
                 List<ProductCustomerAdditionalResponse.ProductAddOn> responsesProductAddOn = new ArrayList<>();
                     

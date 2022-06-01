@@ -58,6 +58,7 @@ public class BannersMerchantController extends BaseController {
                         newBanners.setBannerName(request.getBannerName());
                         newBanners.setBannerImageWeb(request.getBannerImageWeb());
                         newBanners.setBannerImageMobile(request.getBannerImageMobile());
+                        newBanners.setBannerImageKiosk(request.getBannerImageKiosk());
                         newBanners.setMerchant(ownMerchant);
                         newBanners.setActive(request.isActive());
                         newBanners.setDateFrom(request.getDateFrom());
@@ -98,6 +99,8 @@ public class BannersMerchantController extends BaseController {
             return "Gambar banner web tidak boleh kosong";
         if (request.getBannerImageMobile() == null)
             return "Gambar banner mobile tidak boleh kosong";
+        if (request.getBannerImageKiosk() == null)
+            return "Gambar banner kiosk tidak boleh kosong";
         if (request.getDateFrom() == null)
             return "Tanggal Mulai tidak boleh kosong";
         if (request.getDateFrom().after(request.getDateTo()))
@@ -126,6 +129,7 @@ public class BannersMerchantController extends BaseController {
                     response.setBannerName(data.getBannerName());
                     response.setBannerImageWeb(data.getBannerImageWeb());
                     response.setBannerImageMobile(data.getBannerImageMobile());
+                    response.setBannerImageKiosk(data.getBannerImageKiosk());
                     response.setActive(data.isActive());
                     response.setDeleted(data.isDeleted());
                     response.setDateFrom(data.getDateFrom());
@@ -171,6 +175,9 @@ public class BannersMerchantController extends BaseController {
                         }
                         if(request.getBannerImageMobile() != null){
                             banners.setBannerImageMobile(request.getBannerImageMobile());
+                        }
+                        if(request.getBannerImageKiosk() != null){
+                            banners.setBannerImageKiosk(request.getBannerImageKiosk());
                         }
                         banners.setActive(request.isActive());
                         banners.setDateFrom(request.getDateFrom());
@@ -260,6 +267,7 @@ public class BannersMerchantController extends BaseController {
                     bannersResponse.setBannerName(banners.getBannerName());
                     bannersResponse.setBannerImageWeb(banners.getBannerImageWeb());
                     bannersResponse.setBannerImageMobile(banners.getBannerImageMobile());
+                    bannersResponse.setBannerImageKiosk(banners.getBannerImageKiosk());
                     bannersResponse.setMerchantId(banners.getMerchant().id);
                     bannersResponse.setActive(banners.isActive());
                     bannersResponse.setDateFrom(banners.getDateFrom());
@@ -346,6 +354,7 @@ public class BannersMerchantController extends BaseController {
                     response.setBannerName(data.getBannerName());
                     response.setBannerImageWeb(data.getBannerImageWeb());
                     response.setBannerImageMobile(data.getBannerImageMobile());
+                    response.setBannerImageKiosk(data.getBannerImageKiosk());
                     response.setActive(data.isActive());
                     response.setDeleted(data.isDeleted());
                     response.setDateFrom(data.getDateFrom());

@@ -22,6 +22,10 @@ public class OrderList {
     private String invoiceNumber;
     @JsonProperty("order_number")
     private String orderNumber;
+
+    @JsonProperty("customer_name")
+    private String customerName;
+
     @JsonProperty("merchant_name")
     private String merchantName;
     @JsonProperty("total_amount")
@@ -37,6 +41,7 @@ public class OrderList {
     // private OrderTransactionResponse orderTransaction;
     @JsonProperty("order_detail")
     private List<ProductOrderDetail> productOrderDetail;
+    
     @JsonProperty("status")
     private String status;
     @JsonProperty("payment_type")
