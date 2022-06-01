@@ -31,6 +31,10 @@ public class Banners extends BaseModel {
     @JsonProperty("banner_image_mobile")
     public String bannerImageMobile;
 
+    @Getter @Setter
+    @JsonProperty("banner_image_kiosk")
+    public String bannerImageKiosk;
+
     @Setter @Getter
     @JsonProperty("is_active")
     @Column(name = "is_active")

@@ -16,6 +16,9 @@ public class PickUpPointSetupResponse  {
     @JsonProperty("image_pupoint_setup")
     public String imagePupointSetup;
 
+    @JsonProperty("image_pup_landscape")
+    public String imagePupLandscape;
+
     @JsonProperty("store_id")
     public Long storeId;
 

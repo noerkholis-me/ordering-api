@@ -23,6 +23,10 @@ public class PickUpPointSetup extends BaseModel {
     @JsonProperty("image_pupoint_setup")
     public String imagePupointSetup;
 
+    @Getter @Setter
+    @JsonProperty("image_pup_landscape")
+    public String imagePupLandscape;
+
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="merchant_id", referencedColumnName = "id")

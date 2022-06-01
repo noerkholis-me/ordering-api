@@ -58,6 +58,7 @@ public class PickUpPointSetupController extends BaseController {
                         }
                         PickUpPointSetup puPointSetup = new PickUpPointSetup();
                         puPointSetup.setImagePupointSetup(request.getImagePupointSetup());
+                        puPointSetup.setImagePupLandscape(request.getImagePupLandscape());
                         puPointSetup.setStore(store);
                         puPointSetup.setMerchant(ownMerchant);
                         puPointSetup.isDeleted = Boolean.FALSE;
@@ -103,6 +104,7 @@ public class PickUpPointSetupController extends BaseController {
                     if(pickuppointsetup != null){
                         try {
                             pickuppointsetup.setImagePupointSetup(request.getImagePupointSetup());
+                            pickuppointsetup.setImagePupLandscape(request.getImagePupLandscape());
                             pickuppointsetup.setStore(store);
                             pickuppointsetup.setMerchant(ownMerchant);
                             pickuppointsetup.isDeleted = Boolean.FALSE;
@@ -160,6 +162,7 @@ public class PickUpPointSetupController extends BaseController {
                         PickUpPointSetupResponse puPointSetupResponse = new PickUpPointSetupResponse();
                         puPointSetupResponse.setId(pickuppointsetup.id);
                         puPointSetupResponse.setImagePupointSetup(pickuppointsetup.getImagePupointSetup());
+                        puPointSetupResponse.setImagePupLandscape(pickuppointsetup.getImagePupLandscape());
                         puPointSetupResponse.setStoreId(pickuppointsetup.getStore().id);
                         puPointSetupResponse.setMerchantId(pickuppointsetup.getMerchant().id);
                         puPointSetupResponse.setIsDeleted(pickuppointsetup.isDeleted);
@@ -201,6 +204,7 @@ public class PickUpPointSetupController extends BaseController {
                     PickUpPointSetupResponse puPointSetupResponse = new PickUpPointSetupResponse();
                     puPointSetupResponse.setId(data.id);
                     puPointSetupResponse.setImagePupointSetup(data.getImagePupointSetup());
+                    puPointSetupResponse.setImagePupLandscape(data.getImagePupLandscape());
                     puPointSetupResponse.setStoreId(data.getStore().id);
                     puPointSetupResponse.setMerchantId(data.getMerchant().id);
                     puPointSetupResponse.setIsDeleted(data.isDeleted);
