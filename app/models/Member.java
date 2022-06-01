@@ -42,6 +42,8 @@ public class Member extends BaseModel {
     @JsonIgnore
     public String password;
 
+    public Long id;
+
     @JsonProperty("first_name")
     public String firstName;
     @JsonProperty("last_name")
@@ -186,6 +188,10 @@ public class Member extends BaseModel {
 
     public static Member findDataCustomer(String email, String phoneNumber){
         return find.where().raw("t0.email = '" + email + "' or t0.phone = '" + phoneNumber + "'").eq("t0.is_deleted", false).findUnique();
+    }
+
+    public static Member findByIdMember(Long idUser){
+        return find.where().raw("t0.id = " + idUser).eq("t0.is_deleted", false).findUnique();
     }
 
     public Member() {

@@ -25,6 +25,9 @@ public class BannersResponse {
     @JsonProperty("banner_image_mobile")
     public String bannerImageMobile;
 
+    @JsonProperty("banner_image_kiosk")
+    public String bannerImageKiosk;
+
     @JsonProperty("is_active")
     public boolean isActive;
 
