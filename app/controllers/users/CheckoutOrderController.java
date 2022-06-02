@@ -11,13 +11,17 @@ import controllers.BaseController;
 import dtos.order.*;
 import dtos.payment.*;
 import models.*;
+import models.merchant.ProductMerchant;
+import models.merchant.TableMerchant;
+import models.productaddon.ProductAddOn;
+import models.pupoint.PickUpPointMerchant;
 import models.transaction.*;
 import org.json.JSONObject;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
-import repository.OrderRepository;
-import repository.ProductStoreRepository;
+import repository.*;
+import repository.pickuppoint.PickUpPointRepository;
 import service.PaymentService;
 import com.avaje.ebean.Query;
 
@@ -65,47 +69,86 @@ public class CheckoutOrderController extends BaseController {
                 order.setStatus(OrderStatus.NEW_ORDER.getStatus());
                 order.setStore(store);
                 order.setMember(member);
+                // pickup point and table
+                if (orderRequest.getOrderType().equalsIgnoreCase("TAKEAWAY") && orderRequest.getDeviceType().equalsIgnoreCase("KIOSK")) {
+                    // check pickup point
+                    PickUpPointMerchant pickUpPointMerchant = PickUpPointRepository.findById(orderRequest.getPickupPointId());
+                    if (pickUpPointMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, "Pickup Point not found", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    order.setPickUpPointMerchant(pickUpPointMerchant);
+                    order.setPickupPointName(pickUpPointMerchant.getPupointName());
+                } else if (orderRequest.getOrderType().equalsIgnoreCase("DINEIN")) {
+                    Optional<TableMerchant> tableMerchant = TableMerchantRepository.findById(orderRequest.getTableId());
+                    if (!tableMerchant.isPresent()) {
+                        response.setBaseResponse(0, 0, 0, "Pickup Point not found", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    order.setTableMerchant(tableMerchant.get());
+                    order.setTableName(tableMerchant.get().getName());
+                }
 
                 order.save();
 
                 List<ProductOrderDetail> productOrderDetails = orderRequest.getProductOrderDetail();
                 StringBuilder message = new StringBuilder();
-                List<OrderDetail> orderDetails = new ArrayList<>();
                 for (ProductOrderDetail productOrderDetail : productOrderDetails) {
-                    Optional<ProductStore> productStore = ProductStoreRepository.findById(productOrderDetail.getProductId());
-                    if (!productStore.isPresent()) {
-                        message.append("product id ").append(productOrderDetail.getProductId()).append(" not found");
+                    ProductMerchant productMerchant = ProductMerchantRepository.findById(productOrderDetail.getProductId());
+                    if (productMerchant != null) {
+                        OrderDetail orderDetail = new OrderDetail();
+                        orderDetail.setProductMerchant(productMerchant);
+                        orderDetail.setProductName(productMerchant.getProductName());
+                        // =============================================================== //
+                        orderDetail.setProductPrice(productOrderDetail.getProductPrice());
+                        orderDetail.setQuantity(productOrderDetail.getProductQty());
+                        orderDetail.setNotes(productOrderDetail.getNotes());
+                        orderDetail.setSubTotal(productOrderDetail.getSubTotal());
+                        orderDetail.setIsCustomizable(productOrderDetail.getIsCustomizable());
+                        orderDetail.setOrder(order);
+                        orderDetail.save();
+                        if (productOrderDetail.getProductOrderAddOns().size() != 0 || !productOrderDetail.getProductOrderAddOns().isEmpty()) {
+                            for (ProductOrderAddOn productOrderAddOn : productOrderDetail.getProductOrderAddOns()) {
+                                // create product add on
+                                ProductAddOn productAddOn = ProductAddOnRepository.findByProductAssignId(productOrderAddOn.getProductId());
+                                if (productAddOn != null) {
+                                    OrderDetailAddOn orderDetailAddOn = new OrderDetailAddOn();
+                                    orderDetailAddOn.setOrderDetail(orderDetail);
+                                    orderDetailAddOn.setProductAddOn(productAddOn);
+                                    orderDetailAddOn.setQuantity(productOrderAddOn.getProductQty());
+                                    orderDetailAddOn.setNotes(productOrderAddOn.getNotes());
+                                    orderDetailAddOn.setProductPrice(productOrderAddOn.getProductPrice());
+                                    orderDetailAddOn.setProductName(productAddOn.getProductMerchant().getProductName());
+                                    orderDetailAddOn.setProductAssignId(productAddOn.getProductAssignId());
+                                    orderDetailAddOn.setSubTotal(productOrderAddOn.getSubTotal());
+                                    orderDetailAddOn.save();
+                                }
+                            }
+                        }
                     }
-                    OrderDetail orderDetail = new OrderDetail();
-                    orderDetail.setProductStore(productStore.get());
-                    orderDetail.setProductName(productStore.get().getProductMerchant().getProductName());
-                    orderDetail.setProductPrice(productStore.get().getFinalPrice());
-                    orderDetail.setQuantity(productOrderDetail.getProductQty());
-                    orderDetail.setNotes(productOrderDetail.getNotes());
-                    orderDetail.setOrder(order);
-                    orderDetails.add(orderDetail);
                 }
                 // validate product
-                if (!message.toString().isEmpty()) {
-                    response.setBaseResponse(0, 0, 0, message.toString(), null);
-                    return badRequest(Json.toJson(response));
-                }
-                BigDecimal subTotal = new BigDecimal(0);
-                BigDecimal totalPrice = new BigDecimal(0);
-                for (OrderDetail orderDetail : orderDetails) {
-                    subTotal = subTotal.add(orderDetail.getProductPrice().multiply(new BigDecimal(orderDetail.getQuantity())));
-                    totalPrice = subTotal;
-                    orderDetail.save();
-                }
+//                if (!message.toString().isEmpty()) {
+//                    txn.rollback();
+//                    response.setBaseResponse(0, 0, 0, message.toString(), null);
+//                    return badRequest(Json.toJson(response));
+//                }
+//                BigDecimal subTotal = new BigDecimal(0);
+//                BigDecimal totalPrice = new BigDecimal(0);
+//                for (OrderDetail orderDetail : orderDetails) {
+//                    subTotal = subTotal.add(orderDetail.getProductPrice().multiply(new BigDecimal(orderDetail.getQuantity())));
+//                    totalPrice = subTotal;
+//                    orderDetail.save();
+//                }
 
-                order.setSubTotal(subTotal);
-                order.setTotalPrice(totalPrice);
+                order.setSubTotal(orderRequest.getSubTotal());
+                order.setTotalPrice(orderRequest.getTotalPrice());
                 order.update();
 
                 OrderPayment orderPayment = new OrderPayment();
                 orderPayment.setOrder(order);
                 orderPayment.setInvoiceNo(OrderPayment.generateInvoiceCode());
-                orderPayment.setStatus(PaymentStatus.UNPAID.getStatus());
+                orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
                 orderPayment.setPaymentType(orderRequest.getPaymentDetailResponse().getPaymentType());
                 orderPayment.setPaymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel());
                 orderPayment.setPaymentDate(new Date());
@@ -157,7 +200,7 @@ public class CheckoutOrderController extends BaseController {
                 } else {
                     // update payment status
                     order.setStatus(OrderStatus.NEW_ORDER.getStatus());
-                    order.setOrderQueue(createQueue());
+                    order.setOrderQueue(createQueue(store.id));
                     order.update();
 
                     orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
@@ -189,7 +232,7 @@ public class CheckoutOrderController extends BaseController {
                     orderTransactionResponse.setOrderNumber(order.getOrderNumber());
                     orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
                     orderTransactionResponse.setTotalAmount(initiatePaymentResponse.getTotalAmount());
-                    orderTransactionResponse.setMerchantName(orderRequest.getMerchantName());
+                    orderTransactionResponse.setQueueNumber(order.getOrderQueue());
                     orderTransactionResponse.setMetadata(initiatePaymentResponse.getMetadata());
 
                     response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
@@ -285,9 +328,9 @@ public class CheckoutOrderController extends BaseController {
                     OrderList.ProductOrderDetail responseOrderDetail = new OrderList.ProductOrderDetail();
                     List<OrderList.ProductOrderDetail.ProductAdditionalList> responsesProductAdditional = new ArrayList<>();
 
-                    List<OrderDetail> orderProductAdditionalList = OrderRepository.findDataOrderProductAdditional(orderData.id, oDetail.getProductStore().id, "ADDITIONAL");
+                    List<OrderDetail> orderProductAdditionalList = OrderRepository.findDataOrderProductAdditional(orderData.id, oDetail.getProductMerchant().id, "ADDITIONAL");
 
-                    responseOrderDetail.setProductId(oDetail.getProductStore().id);
+                    responseOrderDetail.setProductId(oDetail.getProductMerchant().id);
                     responseOrderDetail.setProductName(oDetail.getProductName());
                     responseOrderDetail.setProductPrice(oDetail.getProductPrice());
                     responseOrderDetail.setProductQty(oDetail.getQuantity());
@@ -299,7 +342,7 @@ public class CheckoutOrderController extends BaseController {
                         
                         OrderList.ProductOrderDetail.ProductAdditionalList responseProductAdditional = new OrderList.ProductOrderDetail.ProductAdditionalList();
         
-                        responseProductAdditional.setProductId(oDetails.getProductStore().id);
+                        responseProductAdditional.setProductId(oDetails.getProductMerchant().id);
                         responseProductAdditional.setProductName(oDetails.getProductName());
                         responseProductAdditional.setProductPrice(oDetails.getProductPrice());
                         responseProductAdditional.setProductQty(oDetails.getQuantity());
@@ -328,9 +371,9 @@ public class CheckoutOrderController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Integer createQueue() {
+    public static Integer createQueue(Long storeCode) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Order order = Order.find.where("t0.created_at > '" + simpleDateFormat.format(new Date()) + " 00:00:00' and order_queue IS NOT NULL ")
+        Order order = Order.find.where("t0.created_at > '" + simpleDateFormat.format(new Date()) + " 00:00:00' and order_queue IS NOT NULL and t0.store_id = '" + storeCode +  "'")
                 .order("order_queue desc, id desc").setMaxRows(1).findUnique();
 
         return order == null ? 1 : order.getOrderQueue() + 1;
@@ -396,7 +439,7 @@ public class CheckoutOrderController extends BaseController {
                     List<OrderList.ProductOrderDetail> responsesOrderDetail = new ArrayList<>();
                     for(OrderDetail oDetail : orderDetailList) {
                         OrderList.ProductOrderDetail responseOrderDetail = new OrderList.ProductOrderDetail();
-                        responseOrderDetail.setProductId(oDetail.getProductStore().id);
+                        responseOrderDetail.setProductId(oDetail.getProductMerchant().id);
                         responseOrderDetail.setProductPrice(oDetail.getProductPrice());
                         responseOrderDetail.setProductQty(oDetail.getQuantity());
                         responseOrderDetail.setNotes(oDetail.getNotes());

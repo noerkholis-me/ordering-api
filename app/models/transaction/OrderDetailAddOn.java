@@ -3,21 +3,24 @@ package models.transaction;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import models.BaseModel;
-import models.ProductStore;
 import models.merchant.ProductMerchant;
+import models.productaddon.ProductAddOn;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "order_detail")
+@Table(name = "order_detail_add_on")
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class OrderDetail extends BaseModel {
+public class OrderDetailAddOn extends BaseModel {
 
     @ManyToOne(cascade = { CascadeType.ALL })
-    @JoinColumn(name = "product_id", referencedColumnName = "id")
-    private ProductMerchant productMerchant;
+    @JoinColumn(name = "product_add_on_id", referencedColumnName = "id")
+    private ProductAddOn productAddOn;
+
+    @Column(name = "product_assign_id")
+    private Long productAssignId;
 
     @Column(name = "product_name")
     private String productName;
@@ -35,14 +38,8 @@ public class OrderDetail extends BaseModel {
     @Column(name = "sub_total")
     private BigDecimal subTotal;
 
-    @Column(name = "is_customizable")
-    private Boolean isCustomizable;
-
     @ManyToOne(cascade = { CascadeType.ALL })
-    @JoinColumn(name = "order_id", referencedColumnName = "id")
-    private Order order;
-
-
-
+    @JoinColumn(name = "order_detail_id", referencedColumnName = "id")
+    private OrderDetail orderDetail;
 
 }

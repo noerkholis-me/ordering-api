@@ -2,8 +2,8 @@ package dtos.order;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import dtos.payment.MetaResponse;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import utils.BigDecimalSerialize;
@@ -13,17 +13,19 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class OrderTransactionResponse {
+@Builder
+public class ProductOrderAddOn {
 
-    @JsonProperty("invoice_number")
-    private String invoiceNumber;
-    @JsonProperty("order_number")
-    private String orderNumber;
-    @JsonProperty("queue_number")
-    private Integer queueNumber;
-    @JsonProperty("total_amount")
+    @JsonProperty("product_id")
+    private Long productId;
+    @JsonProperty("product_price")
     @JsonSerialize(using = BigDecimalSerialize.class)
-    private BigDecimal totalAmount;
-    private MetaResponse metadata;
+    private BigDecimal productPrice;
+    @JsonProperty("product_qty")
+    private Integer productQty;
+    @JsonProperty("sub_total")
+    private BigDecimal subTotal;
+    @JsonProperty("notes")
+    private String notes;
 
 }

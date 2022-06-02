@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import utils.BigDecimalSerialize;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,7 +24,13 @@ public class ProductOrderDetail {
     private BigDecimal productPrice;
     @JsonProperty("product_qty")
     private Integer productQty;
+    @JsonProperty("sub_total")
+    private BigDecimal subTotal;
     @JsonProperty("notes")
     private String notes;
+    @JsonProperty("is_customizable")
+    private Boolean isCustomizable;
+    @JsonProperty("product_add_on")
+    private List<ProductOrderAddOn> productOrderAddOns;
 
 }

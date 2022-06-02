@@ -7,6 +7,8 @@ import models.BaseModel;
 import models.Member;
 import models.Merchant;
 import models.Store;
+import models.merchant.TableMerchant;
+import models.pupoint.PickUpPointMerchant;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -66,6 +68,20 @@ public class Order extends BaseModel {
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "store_id", referencedColumnName = "id")
     private Store store;
+
+    @ManyToOne(cascade = { CascadeType.ALL })
+    @JoinColumn(name = "pickup_point_id", referencedColumnName = "id")
+    private PickUpPointMerchant pickUpPointMerchant;
+
+    @Column(name = "pickup_point_name")
+    private String pickupPointName;
+
+    @ManyToOne(cascade = { CascadeType.ALL })
+    @JoinColumn(name = "table_id", referencedColumnName = "id")
+    private TableMerchant tableMerchant;
+
+    @Column(name = "table_name")
+    private String tableName;
 
     // ================================================================ //
 
