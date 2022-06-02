@@ -95,43 +95,44 @@ public class CheckoutOrderController extends BaseController {
                 StringBuilder message = new StringBuilder();
                 for (ProductOrderDetail productOrderDetail : productOrderDetails) {
                     ProductMerchant productMerchant = ProductMerchantRepository.findById(productOrderDetail.getProductId());
-                    if (productMerchant == null) {
-                        message.append("product id ").append(productOrderDetail.getProductId()).append(" not found");
-                    }
-
-                    OrderDetail orderDetail = new OrderDetail();
-                    orderDetail.setProductMerchant(productMerchant);
-                    orderDetail.setProductName(productMerchant.getProductName());
-                    // =============================================================== //
-                    orderDetail.setProductPrice(productOrderDetail.getProductPrice());
-                    orderDetail.setQuantity(productOrderDetail.getProductQty());
-                    orderDetail.setNotes(productOrderDetail.getNotes());
-                    orderDetail.setOrder(order);
-                    orderDetail.save();
-                    if (productOrderDetail.getProductOrderAddOns().size() != 0 || !productOrderDetail.getProductOrderAddOns().isEmpty()) {
-                        for (ProductOrderAddOn productOrderAddOn : productOrderDetail.getProductOrderAddOns()) {
-                            // create product add on
-                            ProductAddOn productAddOn = ProductAddOnRepository.findByProductId(productOrderAddOn.getProductId());
-                            if (productAddOn == null) {
-                                message.append("product add on id ").append(productOrderAddOn.getProductId()).append(" not found");
+                    if (productMerchant != null) {
+                        OrderDetail orderDetail = new OrderDetail();
+                        orderDetail.setProductMerchant(productMerchant);
+                        orderDetail.setProductName(productMerchant.getProductName());
+                        // =============================================================== //
+                        orderDetail.setProductPrice(productOrderDetail.getProductPrice());
+                        orderDetail.setQuantity(productOrderDetail.getProductQty());
+                        orderDetail.setNotes(productOrderDetail.getNotes());
+                        orderDetail.setSubTotal(productOrderDetail.getSubTotal());
+                        orderDetail.setIsCustomizable(productOrderDetail.getIsCustomizable());
+                        orderDetail.setOrder(order);
+                        orderDetail.save();
+                        if (productOrderDetail.getProductOrderAddOns().size() != 0 || !productOrderDetail.getProductOrderAddOns().isEmpty()) {
+                            for (ProductOrderAddOn productOrderAddOn : productOrderDetail.getProductOrderAddOns()) {
+                                // create product add on
+                                ProductAddOn productAddOn = ProductAddOnRepository.findByProductAssignId(productOrderAddOn.getProductId());
+                                if (productAddOn != null) {
+                                    OrderDetailAddOn orderDetailAddOn = new OrderDetailAddOn();
+                                    orderDetailAddOn.setOrderDetail(orderDetail);
+                                    orderDetailAddOn.setProductAddOn(productAddOn);
+                                    orderDetailAddOn.setQuantity(productOrderAddOn.getProductQty());
+                                    orderDetailAddOn.setNotes(productOrderAddOn.getNotes());
+                                    orderDetailAddOn.setProductPrice(productOrderAddOn.getProductPrice());
+                                    orderDetailAddOn.setProductName(productAddOn.getProductMerchant().getProductName());
+                                    orderDetailAddOn.setProductAssignId(productAddOn.getProductAssignId());
+                                    orderDetailAddOn.setSubTotal(productOrderAddOn.getSubTotal());
+                                    orderDetailAddOn.save();
+                                }
                             }
-                            OrderDetailAddOn orderDetailAddOn = new OrderDetailAddOn();
-                            orderDetailAddOn.setOrderDetail(orderDetail);
-                            orderDetailAddOn.setProductAddOn(productAddOn);
-                            orderDetailAddOn.setQuantity(productOrderAddOn.getProductQty());
-                            orderDetailAddOn.setNotes(productOrderAddOn.getNotes());
-                            orderDetailAddOn.setProductPrice(productOrderAddOn.getProductPrice());
-                            orderDetailAddOn.setProductName(productAddOn.getProductMerchant().getProductName());
-                            orderDetailAddOn.save();
                         }
                     }
                 }
                 // validate product
-                if (!message.toString().isEmpty()) {
-                    txn.rollback();
-                    response.setBaseResponse(0, 0, 0, message.toString(), null);
-                    return badRequest(Json.toJson(response));
-                }
+//                if (!message.toString().isEmpty()) {
+//                    txn.rollback();
+//                    response.setBaseResponse(0, 0, 0, message.toString(), null);
+//                    return badRequest(Json.toJson(response));
+//                }
 //                BigDecimal subTotal = new BigDecimal(0);
 //                BigDecimal totalPrice = new BigDecimal(0);
 //                for (OrderDetail orderDetail : orderDetails) {
@@ -199,7 +200,7 @@ public class CheckoutOrderController extends BaseController {
                 } else {
                     // update payment status
                     order.setStatus(OrderStatus.NEW_ORDER.getStatus());
-                    order.setOrderQueue(createQueue());
+                    order.setOrderQueue(createQueue(store.id));
                     order.update();
 
                     orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
@@ -231,7 +232,7 @@ public class CheckoutOrderController extends BaseController {
                     orderTransactionResponse.setOrderNumber(order.getOrderNumber());
                     orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
                     orderTransactionResponse.setTotalAmount(initiatePaymentResponse.getTotalAmount());
-                    orderTransactionResponse.setMerchantName(orderRequest.getMerchantName());
+                    orderTransactionResponse.setQueueNumber(order.getOrderQueue());
                     orderTransactionResponse.setMetadata(initiatePaymentResponse.getMetadata());
 
                     response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
@@ -349,9 +350,9 @@ public class CheckoutOrderController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Integer createQueue() {
+    public static Integer createQueue(Long storeCode) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Order order = Order.find.where("t0.created_at > '" + simpleDateFormat.format(new Date()) + " 00:00:00' and order_queue IS NOT NULL ")
+        Order order = Order.find.where("t0.created_at > '" + simpleDateFormat.format(new Date()) + " 00:00:00' and order_queue IS NOT NULL and t0.store_id = '" + storeCode +  "'")
                 .order("order_queue desc, id desc").setMaxRows(1).findUnique();
 
         return order == null ? 1 : order.getOrderQueue() + 1;

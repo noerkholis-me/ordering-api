@@ -19,6 +19,9 @@ public class OrderDetailAddOn extends BaseModel {
     @JoinColumn(name = "product_add_on_id", referencedColumnName = "id")
     private ProductAddOn productAddOn;
 
+    @Column(name = "product_assign_id")
+    private Long productAssignId;
+
     @Column(name = "product_name")
     private String productName;
 
@@ -31,6 +34,9 @@ public class OrderDetailAddOn extends BaseModel {
 
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
+
+    @Column(name = "sub_total")
+    private BigDecimal subTotal;
 
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "order_detail_id", referencedColumnName = "id")

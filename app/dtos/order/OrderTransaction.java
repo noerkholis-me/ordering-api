@@ -21,8 +21,6 @@ public class OrderTransaction {
     private String orderType;
     @JsonProperty("device_type")
     private String deviceType;
-    @JsonProperty("merchant_name")
-    private String merchantName;
     @JsonProperty("customer_email")
     private String customerEmail;
     @JsonProperty("customer_name")

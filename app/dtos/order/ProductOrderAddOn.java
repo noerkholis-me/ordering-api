@@ -23,6 +23,8 @@ public class ProductOrderAddOn {
     private BigDecimal productPrice;
     @JsonProperty("product_qty")
     private Integer productQty;
+    @JsonProperty("sub_total")
+    private BigDecimal subTotal;
     @JsonProperty("notes")
     private String notes;
 
