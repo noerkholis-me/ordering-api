@@ -17,8 +17,8 @@ public class ProductAddOnRepository extends Model {
         return find.where().eq("id", id).eq("merchant_id", merchantId).eq("is_active", Boolean.TRUE).findUnique();
     }
 
-    public static ProductAddOn findByProductId(Long productId) {
-        return find.where().eq("t0.product_id", productId).findUnique();
+    public static ProductAddOn findByProductAssignId(Long productAssignId) {
+        return find.where().eq("t0.product_assign_id", productAssignId).findUnique();
     }
 
     public static List<ProductAddOn> getTotalDataPage (Query<ProductAddOn> reqQuery) {

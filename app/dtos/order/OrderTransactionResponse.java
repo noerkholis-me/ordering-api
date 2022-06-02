@@ -19,8 +19,8 @@ public class OrderTransactionResponse {
     private String invoiceNumber;
     @JsonProperty("order_number")
     private String orderNumber;
-    @JsonProperty("merchant_name")
-    private String merchantName;
+    @JsonProperty("queue_number")
+    private Integer queueNumber;
     @JsonProperty("total_amount")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal totalAmount;
