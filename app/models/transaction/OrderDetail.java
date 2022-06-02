@@ -32,6 +32,12 @@ public class OrderDetail extends BaseModel {
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
 
+    @Column(name = "sub_total")
+    private BigDecimal subTotal;
+
+    @Column(name = "is_customizable")
+    private Boolean isCustomizable;
+
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     private Order order;
