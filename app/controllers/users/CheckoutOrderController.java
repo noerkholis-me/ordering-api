@@ -110,7 +110,7 @@ public class CheckoutOrderController extends BaseController {
                         if (productOrderDetail.getProductOrderAddOns().size() != 0 || !productOrderDetail.getProductOrderAddOns().isEmpty()) {
                             for (ProductOrderAddOn productOrderAddOn : productOrderDetail.getProductOrderAddOns()) {
                                 // create product add on
-                                ProductAddOn productAddOn = ProductAddOnRepository.findByProductAssignId(productOrderAddOn.getProductId());
+                                ProductAddOn productAddOn = ProductAddOnRepository.findByProductAssignIdAndProductId(productOrderAddOn.getProductAssignId(), productOrderAddOn.getProductId());
                                 if (productAddOn != null) {
                                     OrderDetailAddOn orderDetailAddOn = new OrderDetailAddOn();
                                     orderDetailAddOn.setOrderDetail(orderDetail);
