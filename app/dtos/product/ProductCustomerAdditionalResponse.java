@@ -36,6 +36,9 @@ public class ProductCustomerAdditionalResponse implements Serializable {
     @Builder
     public static class ProductAddOn {
 
+        @JsonProperty("product_id")
+        private Long productId;
+
         @JsonProperty("product_assign_id")
         private Long productAssignId;
 
