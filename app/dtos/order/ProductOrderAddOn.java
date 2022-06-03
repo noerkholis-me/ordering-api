@@ -18,6 +18,8 @@ public class ProductOrderAddOn {
 
     @JsonProperty("product_id")
     private Long productId;
+    @JsonProperty("product_assign_id")
+    private Long productAssignId;
     @JsonProperty("product_price")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal productPrice;

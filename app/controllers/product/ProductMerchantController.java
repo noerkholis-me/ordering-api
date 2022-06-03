@@ -607,6 +607,7 @@ public class ProductMerchantController extends BaseController {
                     ProductMerchant productMerchantAssign = ProductMerchantRepository.findByIdProductRecommend(dataProductAddOn.getProductAssignId(), merchantId);
                     
                     ProductCustomerAdditionalResponse.ProductAddOn responseAddOn = new ProductCustomerAdditionalResponse.ProductAddOn();
+                    responseAddOn.setProductId(dataProductAddOn.getProductMerchant().id);
                     responseAddOn.setProductAssignId(dataProductAddOn.getProductAssignId());
                     responseAddOn.setProductName(productMerchantAssign.getProductName());
                     responseAddOn.setProductType(dataProductAddOn.getProductType());
