@@ -312,11 +312,13 @@ public class CheckoutOrderController extends BaseController {
                 List<OrderDetail> orderDetailList = OrderRepository.findDataOrderDetail(orderData.id, "MAIN");
 
                 Member member = null;
-                member = Member.findByIdMember(orderData.getMember().id);
+                if(orderData.getMember() != null){
+                    member = Member.findByIdMember(orderData.getMember().id);
+                }
 
                 orderListResponse.setInvoiceNumber(orderData.getOrderPayment().getInvoiceNo());
                 orderListResponse.setOrderNumber(orderData.getOrderNumber());
-                orderListResponse.setCustomerName(member != null ? member.fullName : null);                
+                orderListResponse.setCustomerName(member != null ? member.fullName : "General Customer (" + orderData.getStore().storeName + ")");                
                 orderListResponse.setMerchantName(orderData.getStore().getMerchant().fullName);
                 orderListResponse.setTotalAmount(orderData.getTotalPrice());
                 orderListResponse.setOrderType(orderData.getOrderType());
