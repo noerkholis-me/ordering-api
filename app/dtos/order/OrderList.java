@@ -3,12 +3,11 @@ package dtos.order;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 import utils.BigDecimalSerialize;
 import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
+import models.*;
 
 import java.util.*;
 
@@ -41,7 +40,49 @@ public class OrderList {
     // private OrderTransactionResponse orderTransaction;
     @JsonProperty("order_detail")
     private List<ProductOrderDetail> productOrderDetail;
-    
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    @Builder
+    public static class ProductOrderDetail {
+
+        @JsonProperty("product_id")
+        private Long productId;
+        @JsonProperty("product_name")
+        private String productName;
+        @JsonProperty("product_price")
+        @JsonSerialize(using = BigDecimalSerialize.class)
+        private BigDecimal productPrice;
+        @JsonProperty("product_qty")
+        private Integer productQty;
+        @JsonProperty("notes")
+        private String notes;
+
+        private List<ProductAdditionalList> productAddOn;
+
+        @AllArgsConstructor
+        @NoArgsConstructor
+        @Getter
+        @Setter
+        @Builder
+        public static class ProductAdditionalList {
+
+            @JsonProperty("product_id")
+            private Long productId;
+            @JsonProperty("product_name")
+            private String productName;
+            @JsonProperty("product_price")
+            @JsonSerialize(using = BigDecimalSerialize.class)
+            private BigDecimal productPrice;
+            @JsonProperty("product_qty")
+            private Integer productQty;
+            @JsonProperty("notes")
+            private String notes;
+
+        }
+
+    }
     @JsonProperty("status")
     private String status;
     @JsonProperty("payment_type")
