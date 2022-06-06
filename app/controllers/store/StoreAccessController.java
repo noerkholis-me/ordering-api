@@ -135,10 +135,10 @@ public class StoreAccessController extends BaseController {
                     responseStoreAccess.setIsActive(data.getIsActive());
                     for(StoreAccessDetail storeDetail : dataDetail) {
                         StoreAccessResponse.StoreAccessDetail responseDetail = new StoreAccessResponse.StoreAccessDetail();
-                        Store store = Store.findById(storeDetail.getStore().id);
-                        responseDetail.setId(store.id);
-                        responseDetail.setStoreName(store.getStoreName());
-                        responseDetail.setIsActive(store.isActive);
+                        Store storeDataFetch = Store.findById(storeDetail.getStore().id);
+                        responseDetail.setId(storeDataFetch.id);
+                        responseDetail.setStoreName(storeDataFetch.storeName);
+                        responseDetail.setIsActive(storeDataFetch.isActive);
                         responsesDetail.add(responseDetail);
                         responseStoreAccess.setStoreData(responseDetail != null ? responsesDetail : null);
                     }
@@ -179,10 +179,10 @@ public class StoreAccessController extends BaseController {
                         responseStoreAccess.setIsActive(dataAccess.getIsActive());
                         for(StoreAccessDetail storeDetail : dataDetail) {
                             StoreAccessResponse.StoreAccessDetail responseDetail = new StoreAccessResponse.StoreAccessDetail();
-                            Store store = Store.findById(storeDetail.getStore().id);
-                            responseDetail.setId(store.id);
-                            responseDetail.setStoreName(store.getStoreName());
-                            responseDetail.setIsActive(store.isActive);
+                            Store storeDataFetch = Store.findById(storeDetail.getStore().id);
+                            responseDetail.setId(storeDataFetch.id);
+                            responseDetail.setStoreName(storeDataFetch.storeName);
+                            responseDetail.setIsActive(storeDataFetch.isActive);
                             responsesDetail.add(responseDetail);
                             responseStoreAccess.setStoreData(responseDetail != null ? responsesDetail : null);
                         }
