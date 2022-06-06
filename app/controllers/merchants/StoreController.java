@@ -198,9 +198,7 @@ public class StoreController extends BaseController {
         int authority = checkAccessAuthorization("all");
         if (authority == 200 || authority == 203) {
             try {
-                byte[] byteStoreCode = Base64.getDecoder().decode(storeCode);
-                String storeCodeDecode = new String(byteStoreCode);
-                Store store = Store.findByStoreCode(storeCodeDecode);
+                Store store = Store.findByStoreCode(storeCode);
                 if (store == null) {
                     response.setBaseResponse(0, 0, 0, " Store is not found.", null);
                     return badRequest(Json.toJson(response));
@@ -260,7 +258,7 @@ public class StoreController extends BaseController {
         store.storeLongitude = Double.parseDouble(finalLotLang[1]);
         if (isEdit == Boolean.FALSE) {
             store.storeCode = CommonFunction.generateRandomString(8);
-            store.storeQrCode = Constant.getInstance().getFrontEndUrl().concat(Base64.getEncoder().encodeToString(store.storeCode.getBytes()));
+            store.storeQrCode = Constant.getInstance().getFrontEndUrl().concat(store.storeCode);
         }
     }
 

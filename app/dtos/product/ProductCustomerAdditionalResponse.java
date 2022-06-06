@@ -27,70 +27,56 @@ public class ProductCustomerAdditionalResponse implements Serializable {
     @JsonProperty("merchant_id")
     private Long merchantId;
 
-    private List<ProductAddOnType> productAddOnType;
+    private List<ProductAddOn> productAddOn;
 
     @AllArgsConstructor
     @NoArgsConstructor
     @Getter
     @Setter
     @Builder
-    public static class ProductAddOnType {
+    public static class ProductAddOn {
+
+        @JsonProperty("product_id")
+        private Long productId;
+
+        @JsonProperty("product_assign_id")
+        private Long productAssignId;
+
+        @JsonProperty("product_name")
+        private String productName;
 
         @JsonProperty("product_type")
         private String productType;
 
-        @JsonProperty("is_active")
-        private Boolean isActive;
+        @JsonProperty("product_price")
+        @JsonSerialize(using = BigDecimalSerialize.class)
+        private BigDecimal productPrice;
 
-        private List<ProductAddOn> productAddOn;
+        @JsonProperty("discount_type")
+        private String discountType;
 
-        @AllArgsConstructor
-        @NoArgsConstructor
-        @Getter
-        @Setter
-        @Builder
-        public static class ProductAddOn {
+        @JsonProperty("discount")
+        private Double discount;
 
-            @JsonProperty("product_assign_id")
-            private Long productAssignId;
+        @JsonProperty("product_price_after_discount")
+        @JsonSerialize(using = BigDecimalSerialize.class)
+        private BigDecimal productPriceAfterDiscount;
 
-            @JsonProperty("product_name")
-            private String productName;
+        @JsonProperty("product_image_main")
+        private String productImageMain;
 
-            @JsonProperty("product_type")
-            private String productType;
+        @JsonProperty("product_image_1")
+        private String productImage1;
+        
+        @JsonProperty("product_image_2")
+        private String productImage2;
 
-            @JsonProperty("product_price")
-            @JsonSerialize(using = BigDecimalSerialize.class)
-            private BigDecimal productPrice;
+        @JsonProperty("product_image_3")
+        private String productImage3;
 
-            @JsonProperty("discount_type")
-            private String discountType;
+        @JsonProperty("product_image_4")
+        private String productImage4;
 
-            @JsonProperty("discount")
-            private Double discount;
-
-            @JsonProperty("product_price_after_discount")
-            @JsonSerialize(using = BigDecimalSerialize.class)
-            private BigDecimal productPriceAfterDiscount;
-
-            @JsonProperty("product_image_main")
-            private String productImageMain;
-
-            @JsonProperty("product_image_1")
-            private String productImage1;
-            
-            @JsonProperty("product_image_2")
-            private String productImage2;
-
-            @JsonProperty("product_image_3")
-            private String productImage3;
-
-            @JsonProperty("product_image_4")
-            private String productImage4;
-
-        }
-
-    }
+    }  
 
 }

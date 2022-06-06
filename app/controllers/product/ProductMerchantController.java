@@ -596,54 +596,40 @@ public class ProductMerchantController extends BaseController {
                 responseData.setProductName(productMerchant.getProductName());
                 responseData.setMerchantId(productMerchant.getMerchant().id);
                     
-                Query<ProductAddOnType> queryProductAddOnType = ProductAddOnTypeRepository.find.where().eq("t0.is_active", true).eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).order("t0.id asc");
-                List<ProductAddOnType> dataAddOnType = ProductAddOnTypeRepository.getDataForAddOn(queryProductAddOnType);
-                List<ProductCustomerAdditionalResponse.ProductAddOnType> responsesProductAddOnType = new ArrayList<>();
-                for(ProductAddOnType productAddOnType : dataAddOnType) {
-                    Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().eq("t0.product_type", productAddOnType.getProductType()).eq("t0.product_id", productMerchantDetail.getProductMerchant().id).eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).order("t0.id asc");
-                    List<ProductAddOn> dataAddOn = ProductAddOnRepository.getDataForAddOn(queryProductAddOn);
+                Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().raw("t0.product_id = " + productMerchantDetail.getProductMerchant().id + " AND t0.is_deleted = " + false + " AND t0.merchant_id = " + merchantId + " " + groupBy).order("t0.product_type asc");
+                List<ProductAddOn> dataAddOn = ProductAddOnRepository.getDataForAddOn(queryProductAddOn);
+                List<ProductCustomerAdditionalResponse.ProductAddOn> responsesProductAddOn = new ArrayList<>();
                     
-                    ProductCustomerAdditionalResponse.ProductAddOnType responseAddOnType = new ProductCustomerAdditionalResponse.ProductAddOnType();
-                    List<ProductCustomerAdditionalResponse.ProductAddOnType.ProductAddOn> responsesProductAddOn = new ArrayList<>();
+                for(ProductAddOn dataProductAddOn : dataAddOn) {
 
-                    responseAddOnType.setProductType(productAddOnType.getProductType());
-                    responseAddOnType.setIsActive(productAddOnType.getIsActive());
-
-                    for(ProductAddOn dataProductAddOn : dataAddOn) {
-
-                        ProductStore productStore = ProductStoreRepository.findForCust(dataProductAddOn.getProductAssignId(), storeId, merchantId);
-                        ProductMerchantDetail forDetail = ProductMerchantDetailRepository.findDetailAdditionalProduct(dataProductAddOn.getProductAssignId(), merchantId);
-                        ProductMerchant productMerchantAssign = ProductMerchantRepository.findByIdProductRecommend(dataProductAddOn.getProductAssignId(), merchantId);
-                        
-                        ProductCustomerAdditionalResponse.ProductAddOnType.ProductAddOn responseAddOn = new ProductCustomerAdditionalResponse.ProductAddOnType.ProductAddOn();
-                        responseAddOn.setProductAssignId(dataProductAddOn.getProductAssignId());
-                        responseAddOn.setProductName(productMerchantAssign.getProductName());
-                        responseAddOn.setProductType(dataProductAddOn.getProductType());
-                        if (productStore != null) {
-                            responseAddOn.setProductPrice(productStore.getStorePrice());
-                            responseAddOn.setDiscountType(productStore.getDiscountType());
-                            responseAddOn.setDiscount(productStore.getDiscount());
-                            responseAddOn.setProductPriceAfterDiscount(productStore.getFinalPrice());
-                        } else {
-                            responseAddOn.setProductPrice(forDetail.getProductPrice());
-                            responseAddOn.setDiscountType(forDetail.getDiscountType());
-                            responseAddOn.setDiscount(forDetail.getDiscount());
-                            responseAddOn.setProductPriceAfterDiscount(forDetail.getProductPriceAfterDiscount());
-                        }
-                        responseAddOn.setProductImageMain(forDetail.getProductImageMain());
-                        responseAddOn.setProductImage1(forDetail.getProductImage1());
-                        responseAddOn.setProductImage2(forDetail.getProductImage2());
-                        responseAddOn.setProductImage3(forDetail.getProductImage3());
-                        responseAddOn.setProductImage4(forDetail.getProductImage4());
-                        responsesProductAddOn.add(responseAddOn);
-                        responseAddOnType.setProductAddOn(responseAddOn != null ? responsesProductAddOn : null);
+                    ProductStore productStore = ProductStoreRepository.findForCust(dataProductAddOn.getProductAssignId(), storeId, merchantId);
+                    ProductMerchantDetail forDetail = ProductMerchantDetailRepository.findDetailAdditionalProduct(dataProductAddOn.getProductAssignId(), merchantId);
+                    ProductMerchant productMerchantAssign = ProductMerchantRepository.findByIdProductRecommend(dataProductAddOn.getProductAssignId(), merchantId);
+                    
+                    ProductCustomerAdditionalResponse.ProductAddOn responseAddOn = new ProductCustomerAdditionalResponse.ProductAddOn();
+                    responseAddOn.setProductId(dataProductAddOn.getProductMerchant().id);
+                    responseAddOn.setProductAssignId(dataProductAddOn.getProductAssignId());
+                    responseAddOn.setProductName(productMerchantAssign.getProductName());
+                    responseAddOn.setProductType(dataProductAddOn.getProductType());
+                    if (productStore != null) {
+                        responseAddOn.setProductPrice(productStore.getStorePrice());
+                        responseAddOn.setDiscountType(productStore.getDiscountType());
+                        responseAddOn.setDiscount(productStore.getDiscount());
+                        responseAddOn.setProductPriceAfterDiscount(productStore.getFinalPrice());
+                    } else {
+                        responseAddOn.setProductPrice(forDetail.getProductPrice());
+                        responseAddOn.setDiscountType(forDetail.getDiscountType());
+                        responseAddOn.setDiscount(forDetail.getDiscount());
+                        responseAddOn.setProductPriceAfterDiscount(forDetail.getProductPriceAfterDiscount());
                     }
-
-                    responsesProductAddOnType.add(responseAddOnType);
-                    responseData.setProductAddOnType(responsesProductAddOnType);
+                    responseAddOn.setProductImageMain(forDetail.getProductImageMain());
+                    responseAddOn.setProductImage1(forDetail.getProductImage1());
+                    responseAddOn.setProductImage2(forDetail.getProductImage2());
+                    responseAddOn.setProductImage3(forDetail.getProductImage3());
+                    responseAddOn.setProductImage4(forDetail.getProductImage4());
+                    responsesProductAddOn.add(responseAddOn);
+                    responseData.setProductAddOn(responseAddOn != null ? responsesProductAddOn : null);
                 }
-                    
-                
                 response.setBaseResponse(1, 0, 1, "Berhasil menampilkan data", responseData);
                 return ok(Json.toJson(response));
             } catch (Exception e) {

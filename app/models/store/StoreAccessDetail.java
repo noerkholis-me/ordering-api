@@ -9,7 +9,7 @@ import models.*;
 import javax.persistence.*;
 
 @Entity
-public class StoreAccess extends BaseModel {
+public class StoreAccessDetail extends BaseModel {
     private static final long serialVersionUID = 1L;
 
     @Getter
@@ -17,18 +17,14 @@ public class StoreAccess extends BaseModel {
     public Long id;
 
     @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name="user_merchant_id", referencedColumnName = "id")
+    @ManyToOne(cascade = { CascadeType.ALL })
+    @JoinColumn(name="store_access_id", referencedColumnName = "id")
     @Getter @Setter
-    public UserMerchant userMerchant;
-
-    @Getter @Setter
-    @JsonProperty("is_active")
-    public Boolean isActive;
+    public StoreAccess storeAccess;
 
     @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name="merchant_id", referencedColumnName = "id")
+    @ManyToOne(cascade = { CascadeType.ALL })
+    @JoinColumn(name="store_id", referencedColumnName = "id")
     @Getter @Setter
-    public Merchant merchant;
+    public Store store;
 }
