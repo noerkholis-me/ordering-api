@@ -4,12 +4,12 @@ services:
    sandboxapi:
         image: _IMAGE:VERSION_
         volumes:
-       - media:/app/sandbox-media/
-       - elasticsearch:/app/sandbox-elasticsearch/
-       - export:/app/sandbox-export/
+           - media:/app/sandbox-media/
+           - elasticsearch:/app/sandbox-elasticsearch/
+           - export:/app/sandbox-export/
         restart: always
         ports:
-            - "9001:9001"
+           - "9001:9001"
 volumes:
    media:
    elasticsearch:
