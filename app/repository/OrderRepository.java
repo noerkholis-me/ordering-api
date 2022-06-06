@@ -48,8 +48,20 @@ public class OrderRepository extends Model {
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
-    public static List<OrderDetail> findDataOrderDetail(Long orderId) {
-        Query<OrderDetail> query = findDetail.where().eq("t0.order_id", orderId).order("t0.created_at desc");
+    public static List<OrderDetail> findDataOrderDetail(Long orderId, String productType) {
+        String queryRaw = "t0.product_store_id in (select product_merchant_id from product_merchant_detail where product_type = '"+productType+"')";
+        Query<OrderDetail> query = findDetail.where().raw(queryRaw).eq("t0.order_id", orderId).order("t0.created_at desc");
+        // query = query.orderBy("t0.created_at desc");
+        
+        ExpressionList<OrderDetail> exp = query.where();
+        query = exp.query();
+        return query.findPagingList(0).getPage(0).getList();
+    }
+
+    public static List<OrderDetail> findDataOrderProductAdditional(Long orderId, Long productId, String productType) {
+        
+        String queryRaw = "t0.product_store_id in (select pmd.product_merchant_id from product_merchant_detail pmd where pmd.product_type = '"+productType+"' AND pmd.product_merchant_id in (select pao.product_assign_id from product_add_on_merchant pao where pao.product_id = "+productId+" ORDER BY pao.id asc))";
+        Query<OrderDetail> query = findDetail.where().raw(queryRaw).eq("t0.order_id", orderId).order("t0.created_at desc");
         // query = query.orderBy("t0.created_at desc");
         
         ExpressionList<OrderDetail> exp = query.where();

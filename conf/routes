@@ -505,3 +505,11 @@ GET         /master/check-availble-bank                 controllers.payment.Paym
 
 # PAYMENT
 GET         /merchant/view-qr-code/:orderNumber         controllers.payment.PaymentController.viewQrCode(orderNumber : String)
+
+#STORE ACCESS
+
+POST        /merchant/assign/store/access               controllers.store.StoreAccessController.assignStoreAccess()
+PUT         /merchant/assign/store/access/:id_assign/update        controllers.store.StoreAccessController.updateStoreAccess(id_assign: Long)
+DELETE      /merchant/assign/store/access/:id_assign/delete        controllers.store.StoreAccessController.deleteStoreAssign(id_assign: Long)
+GET         /merchant/assign/store/list                 controllers.store.StoreAccessController.listUserAssign(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET         /merchant/assign/store/:user_merchant_id/detail      controllers.store.StoreAccessController.detailUserAssign(user_merchant_id: Long)
