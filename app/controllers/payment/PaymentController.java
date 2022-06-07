@@ -105,7 +105,7 @@ public class PaymentController extends BaseController {
                 response.setBaseResponse(1, offset, 1, inputParameter, serviceResponse.getData());
                 return badRequest(Json.toJson(response));
             } else {
-                return badRequest(Json.toJson(serviceResponse.getData()));
+                return ok(Json.toJson(serviceResponse.getData()));
             }
         } else if (authority == 403) {
             response.setBaseResponse(0, 0, 0, forbidden, null);

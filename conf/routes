@@ -516,3 +516,4 @@ GET         /merchant/assign/store/:user_merchant_id/detail      controllers.sto
 
 #LOYALTY POINTI
 POST         /merchant/loyalty/point/setting             controllers.loyalty.LoyaltyPointController.createLoyaltyPoint(subs_category_id: Long ?= 0)
+GET          /merchant/loyalty/point/list                controllers.loyalty.LoyaltyPointController.listPickupPoint(offset:Int ?= 0, limit:Int ?= 10)

@@ -84,55 +84,62 @@ public class LoyaltyPointController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    // public static Result updatePickUpPoint(Long id) {
-    //     Merchant ownMerchant = checkMerchantAccessAuthorization();
-    //     if (ownMerchant != null) {
-    //         try {
-    //             JsonNode json = request().body().asJson();
+    public static Result updateLoyaltyPoint(Long id, Long subsCategoryId) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            try {
+                JsonNode json = request().body().asJson();
 
-    //             PickUpPointResponse request = objectMapper.readValue(json.toString(), PickUpPointResponse.class);
-    //             Store store = Store.findById(request.getStoreId());
-    //             String validate = validateData(request);
-    //             if (validate == null) {
-    //                 Transaction trx = Ebean.beginTransaction();
-    //                 PickUpPointMerchant pickuppoint = PickUpPointRepository.findByIdandMerchantId(id, ownMerchant.id);
-
-    //                 if(pickuppoint != null){
-    //                     try {
-    //                         pickuppoint.setPupointName(request.getPupointName());
-    //                         pickuppoint.setStore(store);
-    //                         pickuppoint.setMerchant(ownMerchant);
-    //                         pickuppoint.setIsActive(request.getIsActive());
-    //                         pickuppoint.isDeleted = Boolean.FALSE;
-    //                         pickuppoint.update();
+                LoyaltyPointMerchantRequest request = objectMapper.readValue(json.toString(), LoyaltyPointMerchantRequest.class);
+                SubsCategoryMerchant subsCategory = SubsCategoryMerchantRepository.findById(subsCategoryId);
+                if(subsCategory == null){
+                    response.setBaseResponse(0, 0, 0, "Subs category tidak ditemukan", null);
+                    return notFound(Json.toJson(response));
+                }
+                LoyaltyPointMerchant loyaltyPoint = LoyaltyPointMerchantRepository.findByIdandSubsCategoryId(id, subsCategoryId, ownMerchant.id);
+                if(loyaltyPoint != null){
+                    String validate = validateData(request);
+                    if (validate == null) {
+                        Transaction trx = Ebean.beginTransaction();
+                        try {
+                            loyaltyPoint.setUsageType(request.getUsageType());
+                            loyaltyPoint.setLoyaltyUsageValue(request.getLoyaltyUsageValue());
+                            loyaltyPoint.setMaxLoyaltyUsageValue(request.getMaxLoyaltyUsageValue());
+                            loyaltyPoint.setCashbackType(request.getCashbackType());
+                            loyaltyPoint.setCashbackValue(request.getCashbackValue());
+                            loyaltyPoint.setMaxCashbackValue(request.getMaxCashbackValue());
+                            loyaltyPoint.setSubsCategoryMerchant(subsCategory);
+                            loyaltyPoint.setMerchant(ownMerchant);
+                            loyaltyPoint.isDeleted = Boolean.FALSE;
+                            loyaltyPoint.update();
                         
-    //                         trx.commit();
-    //                         response.setBaseResponse(1, 0, 1, success + " mengubah data pick up point", pickuppoint);
-    //                         return ok(Json.toJson(response));
-    //                     } catch (Exception e) {
-    //                         logger.error("Error saat mengubah data pick up point", e);
-    //                         e.printStackTrace();
-    //                         trx.rollback();
-    //                     } finally {
-    //                         trx.end();
-    //                     }
-    //                     response.setBaseResponse(0, 0, 0, error, null);
-    //                     return badRequest(Json.toJson(response));
-    //                 } else {
-    //                     response.setBaseResponse(0, 0, 0, "Data tidak ditemukan", null);
-    //                     return badRequest(Json.toJson(response));
-    //                 }
-    //             }
-    //             response.setBaseResponse(0, 0, 0, validate, null);
-    //             return badRequest(Json.toJson(response));
-    //         } catch (Exception e) {
-    //             logger.error("Error saat parsing json", e);
-    //             e.printStackTrace();
-    //         }
-    //     }
-    //     response.setBaseResponse(0, 0, 0, unauthorized, null);
-    //     return unauthorized(Json.toJson(response));
-    // }
+                            trx.commit();
+                            response.setBaseResponse(1, 0, 1, "Berhasil menyimpan data Loyalty", loyaltyPoint.id);
+                            return ok(Json.toJson(response));
+                        } catch (Exception e) {
+                            logger.error("Error saat menyimpan data Loyalty", e);
+                            e.printStackTrace();
+                            trx.rollback();
+                        } finally {
+                            trx.end();
+                        }
+                        response.setBaseResponse(0, 0, 0, error, null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    response.setBaseResponse(0, 0, 0, validate, null);
+                    return badRequest(Json.toJson(response));
+                } else {
+                    response.setBaseResponse(0, 0, 0, "Loyalty setting tidak tersedia", null);
+                    return notFound(Json.toJson(response));
+                }
+            } catch (Exception e) {
+                logger.error("Error saat parsing json", e);
+                e.printStackTrace();
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
 
     public static String validateData(LoyaltyPointMerchantRequest request) {
         if (request == null)
@@ -153,48 +160,44 @@ public class LoyaltyPointController extends BaseController {
         return null;
     }
 
-    // public static Result getPickupPoint(Long id) {
-    //     Merchant ownMerchant = checkMerchantAccessAuthorization();
-    //     if (ownMerchant != null) {
-    //         try {
-    //             JsonNode json = request().body().asJson();
-
-    //             PickUpPointMerchant pickuppoint = PickUpPointRepository.findByIdandMerchantId(id, ownMerchant.id);
-    //             Transaction trx = Ebean.beginTransaction();
-    //             if(pickuppoint != null){
-    //                 try {
-    //                     PickUpPointResponse puPointResponse = new PickUpPointResponse();
-    //                     puPointResponse.setId(pickuppoint.id);
-    //                     puPointResponse.setPupointName(pickuppoint.getPupointName());
-    //                     puPointResponse.setStoreId(pickuppoint.getStore().id);
-    //                     puPointResponse.setMerchantId(pickuppoint.getMerchant().id);
-    //                     puPointResponse.setIsActive(pickuppoint.getIsActive());
-    //                     puPointResponse.setIsDeleted(pickuppoint.isDeleted);
-                    
-    //                     trx.commit();
-    //                     response.setBaseResponse(1, 0, 1, success + " menampilkan data pick up point", puPointResponse);
-    //                     return ok(Json.toJson(response));
-    //                 } catch (Exception e) {
-    //                     logger.error("Error saat menampilkan data pick up point", e);
-    //                     e.printStackTrace();
-    //                     trx.rollback();
-    //                 } finally {
-    //                     trx.end();
-    //                 }
-    //                 response.setBaseResponse(0, 0, 0, error, null);
-    //                 return badRequest(Json.toJson(response));
-    //             } else {
-    //                 response.setBaseResponse(0, 0, 0, "Data pickup point tidak ditemukan", null);
-    //                     return ok(Json.toJson(response));
-    //             }
-    //         } catch (Exception e) {
-    //             logger.error("Error saat parsing json", e);
-    //             e.printStackTrace();
-    //         }
-    //     }
-    //     response.setBaseResponse(0, 0, 0, unauthorized, null);
-    //     return unauthorized(Json.toJson(response));
-    // }
+    public static Result listPickupPoint(int offset, int limit) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            try {
+                Query<LoyaltyPointMerchant> query = LoyaltyPointMerchantRepository.find.where().eq("t0.merchant_id", ownMerchant.id).eq("t0.is_deleted", false).order("t0.id asc");
+                List<LoyaltyPointMerchant> listDataLoyalty = LoyaltyPointMerchantRepository.getListLoyaltyPoint(query, offset, limit);
+                List<LoyaltyPointMerchant> totalData = LoyaltyPointMerchantRepository.getTotalData(query);
+                List<LoyaltyPointMerchantResponse> responsesLoyalty = new ArrayList<>();
+                for(LoyaltyPointMerchant loyaltyData : listDataLoyalty){
+                    LoyaltyPointMerchantResponse responseLoyalty = new LoyaltyPointMerchantResponse();
+                    SubsCategoryMerchant subsCategory = SubsCategoryMerchantRepository.findById(loyaltyData.getSubsCategoryMerchant().id);
+                    if(subsCategory == null){
+                        response.setBaseResponse(0, 0, 0, "Subs category tidak ditemukan", null);
+                        return notFound(Json.toJson(response));
+                    }
+                    responseLoyalty.setId(loyaltyData.getId());
+                    responseLoyalty.setUsageType(loyaltyData.getUsageType());
+                    responseLoyalty.setLoyaltyUsageValue(loyaltyData.getLoyaltyUsageValue());
+                    responseLoyalty.setMaxLoyaltyUsageValue(loyaltyData.getMaxLoyaltyUsageValue());
+                    responseLoyalty.setCashbackType(loyaltyData.getCashbackType());
+                    responseLoyalty.setCashbackValue(loyaltyData.getCashbackValue());
+                    responseLoyalty.setMaxCashbackValue(loyaltyData.getMaxCashbackValue());
+                    responseLoyalty.setSubsCategoryId(loyaltyData.getSubsCategoryMerchant().id);
+                    responseLoyalty.setSubsCategoryName(subsCategory.getSubscategoryName());
+                    responseLoyalty.setMerchantId(loyaltyData.getMerchant().id);
+                    responseLoyalty.setIsDeleted(loyaltyData.isDeleted);
+                    responsesLoyalty.add(responseLoyalty);
+                }
+                response.setBaseResponse(totalData.size(), offset, limit, "Berhasil menyimpan data Loyalty", responsesLoyalty);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                logger.error("Error saat memanggil data", e);
+                e.printStackTrace();
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
 
     // public static Result listPickupPoint(String filter, String sort, int offset, int limit, Long storeId) {
     //     Merchant ownMerchant = checkMerchantAccessAuthorization();
