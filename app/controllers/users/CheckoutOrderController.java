@@ -328,30 +328,29 @@ public class CheckoutOrderController extends BaseController {
                 List<OrderList.ProductOrderDetail> responsesOrderDetail = new ArrayList<>();
                 for(OrderDetail oDetail : orderDetailList) {
                     OrderList.ProductOrderDetail responseOrderDetail = new OrderList.ProductOrderDetail();
-                    List<OrderList.ProductOrderDetail.ProductAdditionalList> responsesProductAdditional = new ArrayList<>();
-
-                    List<OrderDetail> orderProductAdditionalList = OrderRepository.findDataOrderProductAdditional(orderData.id, oDetail.getProductMerchant().id, "ADDITIONAL");
-
+                    
                     responseOrderDetail.setProductId(oDetail.getProductMerchant().id);
                     responseOrderDetail.setProductName(oDetail.getProductName());
                     responseOrderDetail.setProductPrice(oDetail.getProductPrice());
                     responseOrderDetail.setProductQty(oDetail.getQuantity());
                     responseOrderDetail.setNotes(oDetail.getNotes());
+                    
+                    List<OrderList.ProductOrderDetail.ProductAdditionalList> responsesProductAdditional = new ArrayList<>();
+                    List<OrderDetail> orderProductAdditionalList = OrderRepository.findDataOrderProductAdditional(orderData.id, oDetail.getProductMerchant().id, "ADDITIONAL");
                     if(orderProductAdditionalList != null){
-                        System.out.println(orderProductAdditionalList.size());
+                        for(OrderDetail oDetails : orderProductAdditionalList) {
+                            
+                            OrderList.ProductOrderDetail.ProductAdditionalList responseProductAdditional = new OrderList.ProductOrderDetail.ProductAdditionalList();
+            
+                            responseProductAdditional.setProductId(oDetails.getProductMerchant().id);
+                            responseProductAdditional.setProductName(oDetails.getProductName());
+                            responseProductAdditional.setProductPrice(oDetails.getProductPrice());
+                            responseProductAdditional.setProductQty(oDetails.getQuantity());
+                            responseProductAdditional.setNotes(oDetails.getNotes());
+                            responsesProductAdditional.add(responseProductAdditional);
+                        }
                     }
-                    for(OrderDetail oDetails : orderProductAdditionalList) {
-                        
-                        OrderList.ProductOrderDetail.ProductAdditionalList responseProductAdditional = new OrderList.ProductOrderDetail.ProductAdditionalList();
-        
-                        responseProductAdditional.setProductId(oDetails.getProductMerchant().id);
-                        responseProductAdditional.setProductName(oDetails.getProductName());
-                        responseProductAdditional.setProductPrice(oDetails.getProductPrice());
-                        responseProductAdditional.setProductQty(oDetails.getQuantity());
-                        responseProductAdditional.setNotes(oDetails.getNotes());
-                        responsesProductAdditional.add(responseProductAdditional);
-                    }
-                    responseOrderDetail.setProductAddOn(responsesProductAdditional);
+                    responseOrderDetail.setProductAddOn(orderProductAdditionalList != null ? responsesProductAdditional : null);
                     responsesOrderDetail.add(responseOrderDetail);
                     
                 }
