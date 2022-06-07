@@ -513,3 +513,6 @@ PUT         /merchant/assign/store/access/:id_assign/update        controllers.s
 DELETE      /merchant/assign/store/access/:id_assign/delete        controllers.store.StoreAccessController.deleteStoreAssign(id_assign: Long)
 GET         /merchant/assign/store/list                 controllers.store.StoreAccessController.listUserAssign(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET         /merchant/assign/store/:user_merchant_id/detail      controllers.store.StoreAccessController.detailUserAssign(user_merchant_id: Long)
+
+#LOYALTY POINTI
+POST         /merchant/loyalty/point/setting             controllers.loyalty.LoyaltyPointController.createLoyaltyPoint(subs_category_id: Long ?= 0)

@@ -20,7 +20,7 @@ public class SubsCategoryMerchantRepository extends Model {
 
 
 	public static SubsCategoryMerchant findById(Long id) {
-		return find.where().eq("id", id).findUnique();
+		return find.where().eq("id", id).eq("is_active", true).eq("is_deleted", false).findUnique();
 	}
 
     public static SubsCategoryMerchant findByIdAndMerchantId(Long id, Long merchantId) {
