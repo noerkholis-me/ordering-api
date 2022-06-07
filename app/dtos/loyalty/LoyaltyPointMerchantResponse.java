@@ -47,6 +47,9 @@ public class LoyaltyPointMerchantResponse  {
     @JsonProperty("subs_category_id")
     private Long subsCategoryId;
 
+    @JsonProperty("subs_category_name")
+    private String subsCategoryName;
+
     @JsonProperty("merchant_id")
     private Long merchantId;
 

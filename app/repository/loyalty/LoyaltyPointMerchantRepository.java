@@ -20,9 +20,10 @@ public class LoyaltyPointMerchantRepository extends Model {
 				.findUnique();
 	}
 
-	public static LoyaltyPointMerchant findByIdandMerchantId(Long id, Long merchantId) {
+	public static LoyaltyPointMerchant findByIdandSubsCategoryId(Long id, Long subsCategoryId, Long merchantId) {
 		return find.where()
 			.eq("id", id)
+            .eq("subs_category_id", subsCategoryId)
 			.eq("merchant_id", merchantId)
 			.eq("is_deleted", Boolean.FALSE)
 			.findUnique();
@@ -36,15 +37,12 @@ public class LoyaltyPointMerchantRepository extends Model {
 			.findUnique();
 	}
 	
-	public static List<LoyaltyPointMerchant> getListLoyaltyPoint(Query<LoyaltyPointMerchant> reqQuery, String sort, String filter, int offset, int limit)
+	public static List<LoyaltyPointMerchant> getListLoyaltyPoint(Query<LoyaltyPointMerchant> reqQuery, int offset, int limit)
 			throws IOException {
 		Query<LoyaltyPointMerchant> query = reqQuery;
 
-		if (!"".equals(sort)) {
-            query = query.orderBy(sort);
-		} else {
-			query = query.orderBy("t0.updated_at desc");
-		}
+		
+		query = query.orderBy("t0.updated_at desc");
 
 		ExpressionList<LoyaltyPointMerchant> exp = query.where();
 
