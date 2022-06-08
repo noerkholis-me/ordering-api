@@ -275,7 +275,7 @@ public class ProductAddOnController extends BaseController {
     public static Result detailProductAssign(Long id, String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<ProductAddOn> query = ProductAddOnRepository.find.where().eq("product_id", id).eq("merchant_id", ownMerchant.id).eq("is_active", Boolean.TRUE).order("t0.id");
+            Query<ProductAddOn> query = ProductAddOnRepository.find.where().eq("product_id", id).eq("merchant_id", ownMerchant.id).eq("is_deleted", false).order("t0.id");
             try {
                     
                 List<ProductAddOn> dataAddOn = ProductAddOnRepository.findProductWithPaging(query, sort, filter, offset, limit);
