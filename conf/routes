@@ -514,7 +514,7 @@ DELETE      /merchant/assign/store/access/:id_assign/delete        controllers.s
 GET         /merchant/assign/store/list                 controllers.store.StoreAccessController.listUserAssign(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET         /merchant/assign/store/:user_merchant_id/detail      controllers.store.StoreAccessController.detailUserAssign(user_merchant_id: Long)
 
-#LOYALTY POINTI
+#LOYALTY POINT
 POST         /merchant/loyalty/point/setting             controllers.loyalty.LoyaltyPointController.createLoyaltyPoint(subs_category_id: Long ?= 0)
 GET          /merchant/loyalty/point/list                controllers.loyalty.LoyaltyPointController.listPickupPoint(offset:Int ?= 0, limit:Int ?= 10)
 
@@ -525,3 +525,6 @@ PUT          /merchant/bankaccount/change-primary-account       controllers.merc
 PUT          /merchant/bankaccount/:id                          controllers.merchants.BankAccountMerchantController.editBankAccount(id: Long)
 DELETE       /merchant/bankaccount/:id                          controllers.merchants.BankAccountMerchantController.deleteBankAccount(id: Long)
 GET          /merchant/bankaccount/:id                          controllers.merchants.BankAccountMerchantController.getBankAccountById(id: Long)
+
+#ORDER REPORT MERCHANTS
+GET         /merchant/order/reports/data                controllers.users.CheckoutOrderController.orderReportMerchant(start_date:String ?= "", end_date:String ?= "", offset:Int ?= 0, limit:Int ?= 10, status_order:String ?= "")
