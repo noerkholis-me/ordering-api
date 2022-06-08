@@ -38,14 +38,12 @@ public class BankAccountMerchantController extends BaseController {
                     return notFound(Json.toJson(response));
                 }
                 List<BankAccountMerchant> bankAccountMerchants = BankAccountMerchantRepository.findAll(merchant);
-                if (bankAccountMerchants.isEmpty()) {
-                    response.setBaseResponse(0, 0, 0, notFound, null);
-                    return notFound(Json.toJson(response));
-                }
-                for (int i = 0; i < bankAccountMerchants.size(); i++) {
-                    if (bankAccountMerchants.get(i).getIsPrimary() == Boolean.TRUE && request.getIsPrimary() == Boolean.TRUE) {
-                        response.setBaseResponse(0, 0, 0, inputParameter + " Primary account has been set", null);
-                        return badRequest(Json.toJson(response));
+                if (!bankAccountMerchants.isEmpty()) {
+                    for (int i = 0; i < bankAccountMerchants.size(); i++) {
+                        if (bankAccountMerchants.get(i).getIsPrimary() == Boolean.TRUE && request.getIsPrimary() == Boolean.TRUE) {
+                            response.setBaseResponse(0, 0, 0, inputParameter + " Primary account has been set", null);
+                            return badRequest(Json.toJson(response));
+                        }
                     }
                 }
                 Transaction trx = Ebean.beginTransaction();
@@ -91,14 +89,12 @@ public class BankAccountMerchantController extends BaseController {
                     return notFound(Json.toJson(response));
                 }
                 List<BankAccountMerchant> bankAccountMerchants = BankAccountMerchantRepository.findAll(merchant);
-                if (bankAccountMerchants.isEmpty()) {
-                    response.setBaseResponse(0, 0, 0, notFound, null);
-                    return notFound(Json.toJson(response));
-                }
-                for (int i = 0; i < bankAccountMerchants.size(); i++) {
-                    if (bankAccountMerchants.get(i).getIsPrimary() == Boolean.TRUE && request.getIsPrimary() == Boolean.TRUE) {
-                        response.setBaseResponse(0, 0, 0, inputParameter + " Primary account has been set", null);
-                        return badRequest(Json.toJson(response));
+                if (!bankAccountMerchants.isEmpty()) {
+                    for (int i = 0; i < bankAccountMerchants.size(); i++) {
+                        if (bankAccountMerchants.get(i).getIsPrimary() == Boolean.TRUE && request.getIsPrimary() == Boolean.TRUE) {
+                            response.setBaseResponse(0, 0, 0, inputParameter + " Primary account has been set", null);
+                            return badRequest(Json.toJson(response));
+                        }
                     }
                 }
                 Optional<BankAccountMerchant> bankAccountMerchant = BankAccountMerchantRepository.findById(id);
