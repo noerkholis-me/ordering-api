@@ -175,7 +175,7 @@ public class LoyaltyPointController extends BaseController {
                         response.setBaseResponse(0, 0, 0, "Subs category tidak ditemukan", null);
                         return notFound(Json.toJson(response));
                     }
-                    responseLoyalty.setId(loyaltyData.getId());
+                    responseLoyalty.setId(loyaltyData.id);
                     responseLoyalty.setUsageType(loyaltyData.getUsageType());
                     responseLoyalty.setLoyaltyUsageValue(loyaltyData.getLoyaltyUsageValue());
                     responseLoyalty.setMaxLoyaltyUsageValue(loyaltyData.getMaxLoyaltyUsageValue());
