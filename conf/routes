@@ -517,3 +517,11 @@ GET         /merchant/assign/store/:user_merchant_id/detail      controllers.sto
 #LOYALTY POINTI
 POST         /merchant/loyalty/point/setting             controllers.loyalty.LoyaltyPointController.createLoyaltyPoint(subs_category_id: Long ?= 0)
 GET          /merchant/loyalty/point/list                controllers.loyalty.LoyaltyPointController.listPickupPoint(offset:Int ?= 0, limit:Int ?= 10)
+
+#BANK ACCOUNT
+POST         /merchant/bankaccount                              controllers.merchants.BankAccountMerchantController.addBankAccount()
+GET          /merchant/bankaccount                              controllers.merchants.BankAccountMerchantController.getAllBankAccount(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+PUT          /merchant/bankaccount/change-primary-account       controllers.merchants.BankAccountMerchantController.changePrimaryBankAccount()
+PUT          /merchant/bankaccount/:id                          controllers.merchants.BankAccountMerchantController.editBankAccount(id: Long)
+DELETE       /merchant/bankaccount/:id                          controllers.merchants.BankAccountMerchantController.deleteBankAccount(id: Long)
+GET          /merchant/bankaccount/:id                          controllers.merchants.BankAccountMerchantController.getBankAccountById(id: Long)
