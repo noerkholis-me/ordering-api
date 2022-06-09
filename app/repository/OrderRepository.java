@@ -49,7 +49,7 @@ public class OrderRepository extends Model {
     }
 
     public static List<OrderDetail> findDataOrderDetail(Long orderId, String productType) {
-        String queryRaw = "t0.product_store_id in (select product_merchant_id from product_merchant_detail where product_type = '"+productType+"')";
+        String queryRaw = "t0.product_id in (select product_merchant_id from product_merchant_detail where product_type = '"+productType+"')";
         Query<OrderDetail> query = findDetail.where().raw(queryRaw).eq("t0.order_id", orderId).order("t0.created_at desc");
         // query = query.orderBy("t0.created_at desc");
         
