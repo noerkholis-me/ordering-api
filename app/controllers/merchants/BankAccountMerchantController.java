@@ -215,6 +215,7 @@ public class BankAccountMerchantController extends BaseController {
                 List<BankAccountMerchantModel> bankAccountMerchantModels = new ArrayList<>();
                 for (BankAccountMerchant bankAccountMerchant : bankAccounts) {
                     BankAccountMerchantModel model = new BankAccountMerchantModel();
+                    model.setId(bankAccountMerchant.id);
                     model.setBankName(bankAccountMerchant.getBankName());
                     model.setAccountNumber(bankAccountMerchant.getAccountNumber());
                     model.setAccountName(bankAccountMerchant.getAccountName());
