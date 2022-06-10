@@ -79,6 +79,8 @@ public class CheckoutOrderController extends BaseController {
                     }
                     order.setPickUpPointMerchant(pickUpPointMerchant);
                     order.setPickupPointName(pickUpPointMerchant.getPupointName());
+                    order.setTableMerchant(null);
+                    order.setTableName(null);
                 } else if (orderRequest.getOrderType().equalsIgnoreCase("DINEIN")) {
                     Optional<TableMerchant> tableMerchant = TableMerchantRepository.findById(orderRequest.getTableId());
                     if (!tableMerchant.isPresent()) {
@@ -87,6 +89,8 @@ public class CheckoutOrderController extends BaseController {
                     }
                     order.setTableMerchant(tableMerchant.get());
                     order.setTableName(tableMerchant.get().getName());
+                    order.setPickUpPointMerchant(null);
+                    order.setPickupPointName(null);
                 }
 
                 order.save();
