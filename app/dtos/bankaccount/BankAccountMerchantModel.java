@@ -12,6 +12,8 @@ import lombok.Setter;
 @Setter
 public class BankAccountMerchantModel {
 
+    @JsonProperty("id")
+    private Long id;
     @JsonProperty("bank_name")
     private String bankName;
     @JsonProperty("account_number")
