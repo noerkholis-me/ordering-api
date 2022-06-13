@@ -188,7 +188,7 @@ public class LoyaltyPointController extends BaseController {
                     responseLoyalty.setIsDeleted(loyaltyData.isDeleted);
                     responsesLoyalty.add(responseLoyalty);
                 }
-                response.setBaseResponse(totalData.size(), offset, limit, "Berhasil menyimpan data Loyalty", responsesLoyalty);
+                response.setBaseResponse(totalData.size(), offset, limit, "Berhasil menampilkan data Loyalty", responsesLoyalty);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 logger.error("Error saat memanggil data", e);
