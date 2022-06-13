@@ -14,7 +14,7 @@ public class ProductAddOnRepository extends Model {
     public static Finder<Long, ProductAddOn> find = new Finder<>(Long.class, ProductAddOn.class);
 
     public static ProductAddOn findByIdAndMerchant(Long id, Long merchantId) {
-        return find.where().eq("id", id).eq("merchant_id", merchantId).eq("is_active", Boolean.TRUE).findUnique();
+        return find.where().eq("id", id).eq("merchant_id", merchantId).findUnique();
     }
 
     public static ProductAddOn findByProductAssignIdAndProductId(Long productAssignId, Long productId) {

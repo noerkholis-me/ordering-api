@@ -51,7 +51,7 @@ public class SubsCategoryMerchantRepository extends Model {
 
 
 		exp = exp.disjunction();
-		exp = exp.ilike("t0.subcategory_name", "%" + filter + "%");
+		exp = exp.ilike("t0.subscategory_name", "%" + filter + "%");
         // exp = exp.endjunction();
 
 		query = exp.query();

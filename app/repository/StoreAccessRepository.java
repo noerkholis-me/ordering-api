@@ -22,8 +22,8 @@ public class StoreAccessRepository extends Model {
 		return find.where().eq("user_merchant_id", id).eq("is_deleted", false).eq("is_active", true).findUnique();
     }
     
-    public static StoreAccessDetail findByIdStore(Long id) {
-		return findDetail.where().eq("store_id", id).findUnique();
+    public static StoreAccessDetail findByIdStore(Long store_id, Long store_access_id) {
+		return findDetail.where().eq("store_access_id", store_access_id).eq("store_id", store_id).findUnique();
     }
 
     public static StoreAccess findByIdAndMerchantId(Long id, Long merchantId) {
