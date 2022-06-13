@@ -37,12 +37,7 @@ public class StoreAccessController extends BaseController {
     private static BaseResponse response = new BaseResponse();
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-
-//    @ApiOperation(value = "Create Category", notes = "Create Category.\n" + swaggerInfo
-//            + "", response = BaseResponse.class, httpMethod = "POST")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "category form", dataType = "temp.swaggermap.CategoryForm", required = true, paramType = "body", value = "category form") })
-//    @BodyParser.Of(value = BodyParser.Json.class, maxLength = 50 * 1024 * 1024)
+    
     public static Result assignStoreAccess() {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
@@ -235,7 +230,7 @@ public class StoreAccessController extends BaseController {
                             for(Store stores : store) {
                                 Store dataStore = Store.findById(stores.id);
                                 if(dataStore != null){
-                                    StoreAccessDetail storeDetailData = StoreAccessRepository.findByIdStore(stores.id);
+                                    StoreAccessDetail storeDetailData = StoreAccessRepository.findByIdStore(stores.id, newStoreAccess.id);
                                     if(storeDetailData != null){
                                         storeDetailData.setStoreAccess(newStoreAccess);
                                         storeDetailData.setStore(dataStore);

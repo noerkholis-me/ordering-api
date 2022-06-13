@@ -43,11 +43,6 @@ public class SubCategoryMerchantController extends BaseController {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-//    @ApiOperation(value = "Create Category", notes = "Create Category.\n" + swaggerInfo
-//            + "", response = BaseResponse.class, httpMethod = "POST")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "category form", dataType = "temp.swaggermap.CategoryForm", required = true, paramType = "body", value = "category form") })
-//    @BodyParser.Of(value = BodyParser.Json.class, maxLength = 50 * 1024 * 1024)
     public static Result createSubCategory(Long id) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
@@ -144,10 +139,6 @@ public class SubCategoryMerchantController extends BaseController {
         return null;
     }
 
-    // @ApiOperation(value = "Edit Category", notes = "Edit Category.\n" + swaggerInfo
-    //         + "", response = BaseResponse.class, httpMethod = "PUT")
-    // @ApiImplicitParams({
-    //         @ApiImplicitParam(name = "category form", dataType = "temp.swaggermap.CategoryForm", required = true, paramType = "body", value = "category form") })
     public static Result editSubCategory(Long id) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
@@ -228,10 +219,6 @@ public class SubCategoryMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    @ApiOperation(value = "Delete Sub Category", notes = "Delete Sub Category.\n" + swaggerInfo
-            + "", response = BaseResponse.class, httpMethod = "DELETE")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "sub category form", dataType = "temp.swaggermap.SubCategoryForm", required = true, paramType = "body", value = "sub category form") })
     public static Result deleteSubCategory(Long id) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
@@ -267,10 +254,6 @@ public class SubCategoryMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    @ApiOperation(value = "Read Sub Category", notes = "Read Sub Category.\n" + swaggerInfo
-            + "", response = BaseResponse.class, httpMethod = "GET")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "sub kategori form", dataType = "temp.swaggermap.SubCategoryForm", required = true, paramType = "body", value = "sub kategori form") })
     public static Result viewSubCategory(Long id) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
@@ -311,8 +294,6 @@ public class SubCategoryMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    @ApiOperation(value = "Get all sub category list.", notes = "Returns list of sub category.\n" + swaggerInfo
-            + "", response = SubCategoryMerchant.class, responseContainer = "List", httpMethod = "GET")
     public static Result listSubCategory(String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
@@ -347,8 +328,6 @@ public class SubCategoryMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    @ApiOperation(value = "Get sequence list.", notes = "Returns list of sequence.\n" + swaggerInfo
-            + "", response = SubCategoryMerchant.class, responseContainer = "List", httpMethod = "GET")
     public static Result listSequence() {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
@@ -383,10 +362,6 @@ public class SubCategoryMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    @ApiOperation(value = "Update Sequence", notes = "Update Sequence.\n" + swaggerInfo
-            + "", response = BaseResponse.class, httpMethod = "PUT")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "sequence form", dataType = "temp.swaggermap.SequenceForm", required = true, paramType = "body", value = "sequence form") })
     public static Result updateSequence() {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
@@ -606,10 +581,6 @@ public class SubCategoryMerchantController extends BaseController {
             return unauthorized(Json.toJson(response));
         }
     
-        @ApiOperation(value = "Delete Subs Category", notes = "Delete Subs Category.\n" + swaggerInfo
-                + "", response = BaseResponse.class, httpMethod = "DELETE")
-        @ApiImplicitParams({
-                @ApiImplicitParam(name = "subs category form", dataType = "temp.swaggermap.SubsCategoryForm", required = true, paramType = "body", value = "subs category form") })
         public static Result deleteSubsCategory(Long id) {
             Merchant ownMerchant = checkMerchantAccessAuthorization();
             if (ownMerchant != null) {
@@ -645,10 +616,6 @@ public class SubCategoryMerchantController extends BaseController {
             return unauthorized(Json.toJson(response));
         }
     
-        @ApiOperation(value = "Read Subs Category", notes = "Read Subs Category.\n" + swaggerInfo
-                + "", response = BaseResponse.class, httpMethod = "GET")
-        @ApiImplicitParams({
-                @ApiImplicitParam(name = "subs kategori form", dataType = "temp.swaggermap.SubsCategoryForm", required = true, paramType = "body", value = "subs kategori form") })
         public static Result viewSubsCategory(Long id) {
             Merchant ownMerchant = checkMerchantAccessAuthorization();
             if (ownMerchant != null) {
@@ -667,6 +634,7 @@ public class SubCategoryMerchantController extends BaseController {
                         subsCategoryMerchantResponse.setImageMobile(subsCategoryMerchant.getImageMobile());
                         subsCategoryMerchantResponse.setIsDeleted(subsCategoryMerchant.isDeleted);
                         subsCategoryMerchantResponse.setIsActive(subsCategoryMerchant.isActive);
+                        subsCategoryMerchantResponse.setSequence(subsCategoryMerchant.getSequence());
                         subsCategoryMerchantResponse.setCategoryId(subsCategoryMerchant.getCategoryMerchant().id);
                         subsCategoryMerchantResponse.setSubCategoryId(subsCategoryMerchant.getSubCategoryMerchant().id);
                         subsCategoryMerchantResponse.setMerchantId(subsCategoryMerchant.getMerchant().id);
@@ -684,6 +652,46 @@ public class SubCategoryMerchantController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
                 response.setBaseResponse(0, 0, 0, "Tidak dapat menemukan sub kategori id", null);
+                return badRequest(Json.toJson(response));
+            }
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+
+        public static Result listSubsCategory(String sort, String filter, int offset, int limit) {
+            Merchant ownMerchant = checkMerchantAccessAuthorization();
+            if (ownMerchant != null) {
+                Transaction trx = Ebean.beginTransaction();
+                try {
+                    Query<SubsCategoryMerchant> query  = SubsCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.merchant_id", ownMerchant.id).order("t0.id asc");
+                    List<SubsCategoryMerchant> subsCategoryMerchant = SubsCategoryMerchantRepository.getDataSubsCategory(query, sort, filter, offset, limit);
+                    List<SubsCategoryMerchantResponse> subsCategoryMerchantList = new ArrayList<>();
+
+                    for(SubsCategoryMerchant data : subsCategoryMerchant){
+                        SubsCategoryMerchantResponse subsCategoryMerchantResponse = new SubsCategoryMerchantResponse();
+                        subsCategoryMerchantResponse.setId(data.id);
+                        subsCategoryMerchantResponse.setSubscategoryName(data.getSubscategoryName());
+                        subsCategoryMerchantResponse.setImageWeb(data.getImageWeb());
+                        subsCategoryMerchantResponse.setImageMobile(data.getImageMobile());
+                        subsCategoryMerchantResponse.setIsDeleted(data.isDeleted);
+                        subsCategoryMerchantResponse.setIsActive(data.isActive);
+                        subsCategoryMerchantResponse.setSequence(data.getSequence());
+                        subsCategoryMerchantResponse.setCategoryId(data.getCategoryMerchant().id);
+                        subsCategoryMerchantResponse.setSubCategoryId(data.getSubCategoryMerchant().id);
+                        subsCategoryMerchantResponse.setMerchantId(data.getMerchant().id);
+                        subsCategoryMerchantList.add(subsCategoryMerchantResponse);
+                    }
+    
+                    response.setBaseResponse(1,offset, 1, success + " menampilkan subs kategori", subsCategoryMerchantList);
+                    return ok(Json.toJson(response));
+                } catch (Exception e) {
+                    logger.error("Error saat menampilkan data subs kategori", e);
+                    e.printStackTrace();
+                    trx.rollback(); 
+                } finally {
+                    trx.end();
+                }
+                response.setBaseResponse(0, 0, 0, error, null);
                 return badRequest(Json.toJson(response));
             }
             response.setBaseResponse(0, 0, 0, unauthorized, null);
