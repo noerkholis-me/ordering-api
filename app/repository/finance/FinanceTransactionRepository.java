@@ -2,12 +2,16 @@ package repository.finance;
 
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
+import controllers.finance.FinanceTransactionController;
 import models.BaseModel;
 import models.finance.FinanceTransaction;
+import play.Logger;
 
 import java.util.List;
 
 public class FinanceTransactionRepository extends BaseModel {
+
+    private final static Logger.ALogger LOGGER = Logger.of(FinanceTransactionRepository.class);
 
     private static final Finder<Long, FinanceTransaction> find = new Finder<>(Long.class, FinanceTransaction.class);
 
@@ -28,9 +32,23 @@ public class FinanceTransactionRepository extends BaseModel {
                                                                         String sort, int offset, int limit, String status) {
         Query<FinanceTransaction> query = null;
         if (storeId != 0) {
-            query = find.where().eq("isDeleted", false).eq("t0.store_id", storeId).eq("status", status).query();
-        } else {
-            query = find.where().eq("isDeleted", false).eq("status", status).query();
+            System.out.println("store id != 0");
+            query = find.where().eq("isDeleted", false).eq("t0.store_id", storeId).query();
+        }
+
+        if (storeId != 0 && !status.equals("")) {
+            System.out.println("store id != 0 and status != empty");
+            query = find.where().eq("isDeleted", false).eq("t0.store_id", storeId).eq("t0.status", status).query();
+        }
+
+        if (!status.equals("")) {
+            System.out.println("status != empty");
+            query = find.where().eq("isDeleted", false).eq("t0.status", status).query();
+        }
+
+        if (storeId == 0 || status.equals("")) {
+            System.out.println("all");
+            query = find.where().eq("isDeleted", false).query();
         }
 
         if(!sort.equals("")) {

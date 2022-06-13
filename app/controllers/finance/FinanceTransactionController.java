@@ -28,7 +28,7 @@ public class FinanceTransactionController extends BaseController {
         if (ownMerchant != null) {
             try {
                 List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findAllTransaction(startDate, endDate, storeId, sort, offset, limit, status);
-//                Integer totalData = FinanceTransactionRepository.getTotalPage(storeId).size();
+                Integer totalData = FinanceTransactionRepository.getTotalPage(storeId).size();
                 FinanceTransactionResponse financeTransactionResponse = new FinanceTransactionResponse();
                 List<FinanceTransactionResponse.TransactionResponse> transactionResponses = new ArrayList<>();
                 BigDecimal activeBalance = BigDecimal.ZERO;
@@ -44,7 +44,7 @@ public class FinanceTransactionController extends BaseController {
                 }
                 financeTransactionResponse.setActiveBalance(activeBalance);
                 financeTransactionResponse.setTransactionResponses(transactionResponses);
-                response.setBaseResponse(transactionResponses.size(), offset, limit, success + " Showing data transaction", financeTransactionResponse);
+                response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", financeTransactionResponse);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 LOGGER.error("Error when getting transaction data");
