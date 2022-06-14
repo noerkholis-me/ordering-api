@@ -2,8 +2,10 @@ package controllers.finance;
 
 import com.hokeba.api.BaseResponse;
 import controllers.BaseController;
+import dtos.finance.ActiveBalanceResponse;
 import dtos.finance.FinanceTransactionResponse;
 import models.Merchant;
+import models.Store;
 import models.finance.FinanceTransaction;
 import play.Logger;
 import play.libs.Json;
@@ -14,7 +16,9 @@ import service.DownloadTransactionService;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FinanceTransactionController extends BaseController {
 
@@ -29,22 +33,17 @@ public class FinanceTransactionController extends BaseController {
             try {
                 List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findAllTransaction(startDate, endDate, storeId, sort, offset, limit, status);
                 Integer totalData = FinanceTransactionRepository.getTotalPage(storeId).size();
-                FinanceTransactionResponse financeTransactionResponse = new FinanceTransactionResponse();
-                List<FinanceTransactionResponse.TransactionResponse> transactionResponses = new ArrayList<>();
-                BigDecimal activeBalance = BigDecimal.ZERO;
+                List<FinanceTransactionResponse> financeTransactionResponses = new ArrayList<>();
                 for (FinanceTransaction transaction : financeTransactions) {
-                    FinanceTransactionResponse.TransactionResponse trxRes = new FinanceTransactionResponse.TransactionResponse();
+                    FinanceTransactionResponse trxRes = new FinanceTransactionResponse();
                     trxRes.setReferenceNumber(transaction.getReferenceNumber());
                     trxRes.setDate(transaction.getDate());
                     trxRes.setTransactionType(transaction.getTransactionType());
                     trxRes.setStatus(transaction.getStatus());
                     trxRes.setAmount(transaction.getAmount());
-                    transactionResponses.add(trxRes);
-                    activeBalance = activeBalance.add(transaction.getAmount());
+                    financeTransactionResponses.add(trxRes);
                 }
-                financeTransactionResponse.setActiveBalance(activeBalance);
-                financeTransactionResponse.setTransactionResponses(transactionResponses);
-                response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", financeTransactionResponse);
+                response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", financeTransactionResponses);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 LOGGER.error("Error when getting transaction data");
@@ -62,13 +61,42 @@ public class FinanceTransactionController extends BaseController {
         if (merchant != null) {
             try {
                 List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findAllTransaction(startDate, endDate, storeId, sort, offset, limit, status);
-                File file = DownloadTransactionService.downloadTransaction(financeTransactions);
+                File file = DownloadTransactionService.downloadTransaction(financeTransactions, FinanceTransaction.TRANSACTION, new ArrayList<>());
                 response().setContentType("application/vnd.ms-excel");
                 response().setHeader("Content-disposition", "attachment; filename=transaction.xlsx");
                 return ok(file);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 LOGGER.error("Error while download transaction ", ex);
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    public static Result getActiveBalance(Long storeId) {
+        Merchant merchant = checkMerchantAccessAuthorization();
+        if (merchant != null) {
+            try {
+                BigDecimal totalActiveBalance = BigDecimal.ZERO;
+                Store store = Store.findById(storeId);
+                BigDecimal activeBalanceStore = store.getActiveBalance();
+
+                List<Store> stores = Store.findAllStoreIsActiveByMerchant(merchant);
+                System.out.println("store >>> " + stores.size());
+                for (Store storeActive : stores) {
+                    System.out.println(storeActive.getActiveBalance());
+                    totalActiveBalance = totalActiveBalance.add(storeActive.getActiveBalance());
+                }
+
+                ActiveBalanceResponse activeBalanceResponse = new ActiveBalanceResponse();
+                activeBalanceResponse.setActiveBalance(activeBalanceStore);
+                activeBalanceResponse.setTotalActiveBalance(totalActiveBalance);
+                response.setBaseResponse(1, 0, 0, success + " Showing data active balance", activeBalanceResponse);
+                return ok(Json.toJson(response));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                LOGGER.error("error while get active balance ", ex);
             }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);

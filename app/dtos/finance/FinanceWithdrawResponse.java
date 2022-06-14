@@ -14,17 +14,14 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class FinanceTransactionResponse {
+public class FinanceWithdrawResponse {
 
-    @JsonProperty("reference_number")
-    private String referenceNumber;
+    @JsonProperty("request_number")
+    private String requestNumber;
 
     @JsonProperty("date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Jakarta")
     private Date date;
-
-    @JsonProperty("transaction_type")
-    private String transactionType;
 
     @JsonProperty("status")
     private String status;
@@ -32,5 +29,6 @@ public class FinanceTransactionResponse {
     @JsonProperty("amount")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal amount;
+
 
 }
