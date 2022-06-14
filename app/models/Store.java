@@ -14,6 +14,7 @@ import javax.validation.constraints.Size;
 
 import models.transaction.Order;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -95,6 +96,10 @@ public class Store extends BaseModel{
 
     @Column(name = "is_active")
     public Boolean isActive;
+
+    @Column(name = "active_balance")
+    @Getter @Setter
+    public BigDecimal activeBalance;
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
     @Getter
@@ -187,6 +192,10 @@ public class Store extends BaseModel{
 
     public static Query<Store> findStoreIsActiveAndMerchant(Merchant merchant) {
         return find.where().eq("isDeleted", false).eq("merchant", merchant).order("id");
+    }
+
+    public static List<Store> findAllStoreIsActiveByMerchant(Merchant merchant) {
+        return find.where().eq("isDeleted", false).eq("merchant", merchant).eq("isActive", true).findList();
     }
 
     public static List<Store> getTotalDataPage (Query<Store> reqQuery) {

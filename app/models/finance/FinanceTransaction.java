@@ -15,6 +15,11 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = false)
 public class FinanceTransaction extends BaseModel {
 
+    public static final String IN = "IN";
+    public static final String OUT = "OUT";
+    public static final String TRANSACTION = "TRANSACTION";
+    public static final String WITHDRAW = "WITHDRAW";
+
     @Column(name = "event_id")
     private String eventId;
 
