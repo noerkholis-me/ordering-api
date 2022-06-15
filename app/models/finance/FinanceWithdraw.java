@@ -37,6 +37,9 @@ public class FinanceWithdraw extends BaseModel {
     @Column(name = "account_number")
     private String accountNumber;
 
+    @Column(name = "request_by")
+    private String requestBy;
+
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "store_id", referencedColumnName = "id")
     private Store store;

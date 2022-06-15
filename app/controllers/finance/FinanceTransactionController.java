@@ -1,5 +1,6 @@
 package controllers.finance;
 
+import com.avaje.ebean.Query;
 import com.hokeba.api.BaseResponse;
 import controllers.BaseController;
 import dtos.finance.ActiveBalanceResponse;
@@ -31,8 +32,19 @@ public class FinanceTransactionController extends BaseController {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
             try {
-                List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findAllTransaction(startDate, endDate, storeId, sort, offset, limit, status);
-                Integer totalData = FinanceTransactionRepository.getTotalPage(storeId).size();
+                Query<FinanceTransaction> query = null;
+                // default query find by merchant id
+                query = FinanceTransactionRepository.findAllTransactionByMerchantId(ownMerchant.id);
+                if (storeId != null && storeId != 0L) {
+                    Store store = Store.findById(storeId);
+                    if (store == null) {
+                        response.setBaseResponse(0, 0, 0, "store id does not exists", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    query = FinanceTransactionRepository.findAllTransactionByStoreId(storeId);
+                }
+                List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findAllTransaction(query, startDate, endDate, sort, offset, limit, status);
+                Integer totalData = FinanceTransactionRepository.getTotalPage(query);
                 List<FinanceTransactionResponse> financeTransactionResponses = new ArrayList<>();
                 for (FinanceTransaction transaction : financeTransactions) {
                     FinanceTransactionResponse trxRes = new FinanceTransactionResponse();
@@ -57,10 +69,21 @@ public class FinanceTransactionController extends BaseController {
 
     public static Result downloadTransaction(Long storeId, String startDate, String endDate, String sort,
                                              int offset, int limit, String status) {
-        Merchant merchant = checkMerchantAccessAuthorization();
-        if (merchant != null) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
             try {
-                List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findAllTransaction(startDate, endDate, storeId, sort, offset, limit, status);
+                Query<FinanceTransaction> query = null;
+                // default query find by merchant id
+                query = FinanceTransactionRepository.findAllTransactionByMerchantId(ownMerchant.id);
+                if (storeId != null && storeId != 0L) {
+                    Store store = Store.findById(storeId);
+                    if (store == null) {
+                        response.setBaseResponse(0, 0, 0, "store id does not exists", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    query = FinanceTransactionRepository.findAllTransactionByStoreId(storeId);
+                }
+                List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findAllTransaction(query, startDate, endDate, sort, offset, limit, status);
                 File file = DownloadTransactionService.downloadTransaction(financeTransactions, FinanceTransaction.TRANSACTION, new ArrayList<>());
                 response().setContentType("application/vnd.ms-excel");
                 response().setHeader("Content-disposition", "attachment; filename=transaction.xlsx");
@@ -79,15 +102,14 @@ public class FinanceTransactionController extends BaseController {
         if (merchant != null) {
             try {
                 BigDecimal totalActiveBalance = BigDecimal.ZERO;
+                BigDecimal activeBalanceStore = BigDecimal.ZERO;
                 Store store = Store.findById(storeId);
-                BigDecimal activeBalanceStore = store.getActiveBalance();
-
-                List<Store> stores = Store.findAllStoreIsActiveByMerchant(merchant);
-                System.out.println("store >>> " + stores.size());
-                for (Store storeActive : stores) {
-                    System.out.println(storeActive.getActiveBalance());
-                    totalActiveBalance = totalActiveBalance.add(storeActive.getActiveBalance());
+                if (store == null) {
+                    activeBalanceStore = BigDecimal.ZERO;
+                } else {
+                    activeBalanceStore = store.getActiveBalance();
                 }
+                totalActiveBalance = merchant.totalActiveBalance;
 
                 ActiveBalanceResponse activeBalanceResponse = new ActiveBalanceResponse();
                 activeBalanceResponse.setActiveBalance(activeBalanceStore);
