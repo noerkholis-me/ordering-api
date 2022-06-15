@@ -72,23 +72,29 @@ public class CheckoutOrderController extends BaseController {
                 // pickup point and table
                 if (orderRequest.getOrderType().equalsIgnoreCase("TAKEAWAY") && orderRequest.getDeviceType().equalsIgnoreCase("KIOSK")) {
                     // check pickup point
-                    PickUpPointMerchant pickUpPointMerchant = PickUpPointRepository.findById(orderRequest.getPickupPointId());
-                    if (pickUpPointMerchant == null) {
-                        response.setBaseResponse(0, 0, 0, "Pickup Point not found", null);
-                        return badRequest(Json.toJson(response));
+                    PickUpPointMerchant pickUpPointMerchant = null;
+                    if(orderRequest.getPickupPointId() != null && orderRequest.getPickupPointId() != 0){
+                        pickUpPointMerchant = PickUpPointRepository.findById(orderRequest.getPickupPointId());
+                        if (pickUpPointMerchant == null) {
+                            response.setBaseResponse(0, 0, 0, "Pickup Point not found", null);
+                            return badRequest(Json.toJson(response));
+                        }
                     }
-                    order.setPickUpPointMerchant(pickUpPointMerchant);
-                    order.setPickupPointName(pickUpPointMerchant.getPupointName());
+                    order.setPickUpPointMerchant(pickUpPointMerchant != null ? pickUpPointMerchant : null);
+                    order.setPickupPointName(pickUpPointMerchant != null ? pickUpPointMerchant.getPupointName() : null);
                     order.setTableMerchant(null);
                     order.setTableName(null);
                 } else if (orderRequest.getOrderType().equalsIgnoreCase("DINEIN")) {
-                    Optional<TableMerchant> tableMerchant = TableMerchantRepository.findById(orderRequest.getTableId());
-                    if (!tableMerchant.isPresent()) {
-                        response.setBaseResponse(0, 0, 0, "Pickup Point not found", null);
-                        return badRequest(Json.toJson(response));
+                    Optional<TableMerchant> tableMerchant = null;
+                    if(orderRequest.getTableId() != null && orderRequest.getTableId() != 0){
+                        tableMerchant = TableMerchantRepository.findById(orderRequest.getTableId());
+                        if (!tableMerchant.isPresent()) {
+                            response.setBaseResponse(0, 0, 0, "Table not found", null);
+                            return badRequest(Json.toJson(response));
+                        }
                     }
-                    order.setTableMerchant(tableMerchant.get());
-                    order.setTableName(tableMerchant.get().getName());
+                    order.setTableMerchant(tableMerchant != null ? tableMerchant.get() : null);
+                    order.setTableName(tableMerchant != null ? tableMerchant.get().getName() : null);
                     order.setPickUpPointMerchant(null);
                     order.setPickupPointName(null);
                 }
