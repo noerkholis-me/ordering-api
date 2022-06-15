@@ -224,24 +224,36 @@ public class StoreAccessController extends BaseController {
                         if(newStoreAccess != null){
                             newStoreAccess.setUserMerchant(um);
                             newStoreAccess.setMerchant(ownMerchant);
-                            newStoreAccess.setIsActive(request.getIsActive());
+                            // newStoreAccess.setIsActive(request.getIsActive());  
                             // newStoreAccess.isDeleted = request.getIsDeleted();
                             newStoreAccess.update();
+
+                            // SOFT DELETE ALL DATA WITH RELATED ID
+                            List<StoreAccessDetail> storeDetailDataList = StoreAccessRepository.findByIdStoreAccess(newStoreAccess.id);
+                            for(StoreAccessDetail storeAccessDetail : storeDetailDataList){
+                                storeAccessDetail.isDeleted = Boolean.TRUE;
+                                storeAccessDetail.update();
+                            }
+
+                            // SEARCH DATA THAT RELATED TO STORE ID REQUEST
                             for(Store stores : store) {
                                 Store dataStore = Store.findById(stores.id);
                                 if(dataStore != null){
-                                    StoreAccessDetail storeDetailData = StoreAccessRepository.findByIdStore(stores.id, newStoreAccess.id);
+                                    StoreAccessDetail storeDetailData = StoreAccessRepository.findByIdStore(dataStore.id, newStoreAccess.id);
+                                    // UPDATE DATA THAT RELATED TO STORE ID REQUEST
                                     if(storeDetailData != null){
                                         storeDetailData.setStoreAccess(newStoreAccess);
                                         storeDetailData.setStore(dataStore);
+                                        storeDetailData.isDeleted = Boolean.FALSE;
                                         storeDetailData.update();
-                                    } else {
-                                        StoreAccessDetail storeAccessDetail = new StoreAccessDetail();
-                                        storeAccessDetail.setStoreAccess(newStoreAccess);
-                                        storeAccessDetail.isDeleted = Boolean.FALSE;
-                                        storeAccessDetail.setStore(dataStore);
-                                        storeAccessDetail.save();
                                     }
+                                } else {
+                                    // ADD DATA IF NOT EXIST
+                                    StoreAccessDetail storeAccessDetail = new StoreAccessDetail();
+                                    storeAccessDetail.setStoreAccess(newStoreAccess);
+                                    storeAccessDetail.isDeleted = Boolean.FALSE;
+                                    storeAccessDetail.setStore(dataStore);
+                                    storeAccessDetail.save();
                                 }
                             }
                             trx.commit();

@@ -25,6 +25,10 @@ public class StoreAccessRepository extends Model {
     public static StoreAccessDetail findByIdStore(Long store_id, Long store_access_id) {
 		return findDetail.where().eq("store_access_id", store_access_id).eq("store_id", store_id).findUnique();
     }
+    
+    public static List<StoreAccessDetail> findByIdStoreAccess(Long store_access_id) {
+		return findDetail.where().eq("store_access_id", store_access_id).findList();
+    }
 
     public static StoreAccess findByIdAndMerchantId(Long id, Long merchantId) {
         try {
