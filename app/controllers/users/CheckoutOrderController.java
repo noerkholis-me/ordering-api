@@ -553,7 +553,7 @@ public class CheckoutOrderController extends BaseController {
 
                     // GET ORDER PAYMENT DETAIL
                     OrderPayment orderPayment = OrderPaymentRepository.find.where().eq("t0.id", data.id).findUnique();
-                    if(orderPayment.getStatus().equals("PAID")){
+                    if(orderPayment.getStatus().toLowerCase().contains("paid")){
                         responseOrder.setInvoiceNumber(orderPayment != null ? orderPayment.getInvoiceNo() : null);
                         responseOrder.setOrderNumber(data.getOrderNumber());
 
