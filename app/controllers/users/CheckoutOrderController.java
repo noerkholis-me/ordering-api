@@ -313,12 +313,15 @@ public class CheckoutOrderController extends BaseController {
             Query<Order> orderData = OrderRepository.find.where().eq("t0.status", statusOrder).order("t0.created_at desc");
             List<Order> orderList = OrderRepository.findOrderByStatus(orderData, offset, limit);
             List<OrderList> orderListResponse = new ArrayList<>();
+            System.out.println("Awal");
             for(Order data: orderList){
                 OrderList responseOrder = new OrderList();
 
+                System.out.println("Looping Order");
                 // GET ORDER PAYMENT DETAIL
                 OrderPayment orderPayment = OrderPaymentRepository.find.where().eq("t0.id", data.id).findUnique();
                 if(orderPayment.getStatus().equals("PAID")){
+                    System.out.println("Cek Status Paid");
                     responseOrder.setInvoiceNumber(orderPayment != null ? orderPayment.getInvoiceNo() : null);
                     responseOrder.setOrderNumber(data.getOrderNumber());
 
@@ -347,6 +350,7 @@ public class CheckoutOrderController extends BaseController {
                     List<OrderList.ProductOrderDetail> responsesOrderDetail = new ArrayList<>();
                     List<OrderDetail> orderDetail = OrderRepository.findDataOrderDetail(data.id, "MAIN");
                     for(OrderDetail oDetail : orderDetail) {
+                        System.out.println("Looping Product Main");
                         OrderList.ProductOrderDetail orderDetailResponse = new OrderList.ProductOrderDetail();
                         orderDetailResponse.setProductId(oDetail.getProductMerchant().id);
                         orderDetailResponse.setProductName(oDetail.getProductName());
@@ -358,6 +362,7 @@ public class CheckoutOrderController extends BaseController {
                         List<OrderList.ProductOrderDetail.ProductOrderDetailAddOn> responsesOrderDetailAddOn = new ArrayList<>();
                         List<OrderDetailAddOn> orderDetailAddOnList = OrderRepository.findOrderDataProductAddOn(oDetail.id);
                         for(OrderDetailAddOn orderDetailAddOn: orderDetailAddOnList) {
+                            System.out.println("Looping Additional");
                             OrderList.ProductOrderDetail.ProductOrderDetailAddOn responseAddOn = new OrderList.ProductOrderDetail.ProductOrderDetailAddOn();
                             // ProductAddOn addOnData = ProductAddOnRepository.findByProductAssignIdAndProductId(orderDetailAddOn.getProductAssignId(), oDetail.getProductMerchant().id);
                             responseAddOn.setProductId(orderDetailAddOn.getProductAssignId());
