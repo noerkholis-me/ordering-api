@@ -52,6 +52,10 @@ public class MerchantLog extends BaseModel {
     @JsonBackReference
     public Merchant merchant;
 
+    @ManyToOne
+    @JsonBackReference
+    public UserMerchant userMerchant;
+
     @Transient
     public Long getMerchantId() {
         if (merchant != null)
@@ -65,7 +69,7 @@ public class MerchantLog extends BaseModel {
         return Encryption.SHA1(new Date().toString() + "MERCHANTHOKEBATOKEN" + username + password);
     }
 
-    public static MerchantLog loginMerchant(String deviceModel, String deviceType, String deviceId, Merchant member) {
+    public static MerchantLog loginMerchant(String deviceModel, String deviceType, String deviceId, Merchant member, UserMerchant userMerchant, Boolean userType) {
         MerchantLog log = new MerchantLog();
         try {
             if (deviceType.equalsIgnoreCase(DEV_TYPE_ANDROID) || deviceType.equalsIgnoreCase(DEV_TYPE_IOS)) {
@@ -77,18 +81,29 @@ public class MerchantLog extends BaseModel {
             }
             String userCode = "";
             String passCode = "";
-            if(member.email!=null){
-                userCode = member.email;
-                passCode = member.password;
+            if (userType == Boolean.TRUE) {
+                if(member.email!=null){
+                    userCode = member.email;
+                    passCode = member.password;
+                }
+                log.memberType = "merchant";
+                log.token = generateToken(userCode, passCode);
+            } else {
+                if(userMerchant.email != null){
+                    userCode = userMerchant.email;
+                    passCode = userMerchant.password;
+                }
+                log.memberType = "user_merchant";
+                log.token = generateToken(userCode, passCode);
             }
-            log.token = generateToken(userCode, passCode);
+
             log.deviceModel = deviceModel;
             log.deviceType = deviceType;
             log.deviceId = deviceId;
 
             log.isActive = true;
-            log.memberType = "merchant";
             log.merchant = member;
+            log.userMerchant = userMerchant;
             log.save();
         } catch (Exception e) {
             // TODO: handle exception
