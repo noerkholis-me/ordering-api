@@ -30,5 +30,14 @@ public class FinanceWithdrawResponse {
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal amount;
 
+    @JsonProperty("store_id")
+    private Long storeId;
+
+    @JsonProperty("store_name")
+    private String storeName;
+
+    @JsonProperty("request_by")
+    private String requestBy;
+
 
 }
