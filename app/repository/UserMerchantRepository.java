@@ -1,5 +1,6 @@
 package repository;
 
+import com.hokeba.util.Encryption;
 import models.Merchant;
 import models.UserMerchant;
 import play.db.ebean.Model;
@@ -96,5 +97,12 @@ public class UserMerchantRepository extends Model {
         UserMerchant data = find.where().eq("t0.activation_code", activationCode).findUnique();
         return data;
     }
+
+	public static UserMerchant login(String email, String password) {
+		String encPassword = Encryption.EncryptAESCBCPCKS5Padding(password);
+		UserMerchant member = find.where().and(Expr.eq("email", email), Expr.eq("password", encPassword))
+				.eq("isDeleted", false).setMaxRows(1).findUnique();
+		return member;
+	}
 
 }
