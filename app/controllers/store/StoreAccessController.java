@@ -48,13 +48,18 @@ public class StoreAccessController extends BaseController {
                 UserMerchant um = UserMerchantRepository.findById(request.getUserMerchantId(), ownMerchant);
                 if(um == null) {
                     response.setBaseResponse(0, 0, 0, "User tidak ditemukan", null);
-                    return badRequest(Json.toJson(response));
+                    return notFound(Json.toJson(response));
                 }
                 List<Store> store = request.getStoreId();
                 String validate = validateAssignStore(request);
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
+                        StoreAccess dataStoreAccess = StoreAccessRepository.findById(um.id);
+                        if(dataStoreAccess != null) {
+                            response.setBaseResponse(0, 0, 0, "User sudah terdaftar", null);
+                            return badRequest(Json.toJson(response));
+                        }
                         StoreAccess newStoreAccess = new StoreAccess();
                         newStoreAccess.setUserMerchant(um);
                         newStoreAccess.setMerchant(ownMerchant);
@@ -246,14 +251,17 @@ public class StoreAccessController extends BaseController {
                                         storeDetailData.setStore(dataStore);
                                         storeDetailData.isDeleted = Boolean.FALSE;
                                         storeDetailData.update();
+                                    } else {
+                                        // ADD DATA IF NOT EXIST
+                                        StoreAccessDetail storeAccessDetail = new StoreAccessDetail();
+                                        storeAccessDetail.setStoreAccess(newStoreAccess);
+                                        storeAccessDetail.isDeleted = Boolean.FALSE;
+                                        storeAccessDetail.setStore(dataStore);
+                                        storeAccessDetail.save();
                                     }
                                 } else {
-                                    // ADD DATA IF NOT EXIST
-                                    StoreAccessDetail storeAccessDetail = new StoreAccessDetail();
-                                    storeAccessDetail.setStoreAccess(newStoreAccess);
-                                    storeAccessDetail.isDeleted = Boolean.FALSE;
-                                    storeAccessDetail.setStore(dataStore);
-                                    storeAccessDetail.save();
+                                    response.setBaseResponse(0, 0, 0, "Data Store tidak ditemukan", null);
+                                    return notFound(Json.toJson(response));
                                 }
                             }
                             trx.commit();

@@ -13,6 +13,7 @@ public class OrderRepository extends Model {
 
     public static Finder<Long, Order> find = new Finder<Long, Order>(Long.class, Order.class);
     public static Finder<Long, OrderDetail> findDetail = new Finder<Long, OrderDetail>(Long.class, OrderDetail.class);
+    public static Finder<Long, OrderDetailAddOn> findDetailAddOn = new Finder<Long, OrderDetailAddOn>(Long.class, OrderDetailAddOn.class);
     public static Finder<Long, OrderPayment> findOrderPayment = new Finder<Long, OrderPayment>(Long.class, OrderPayment.class);
 
     public static Optional<Order> findById(Long id) {
@@ -49,7 +50,7 @@ public class OrderRepository extends Model {
     }
 
     public static List<OrderDetail> findDataOrderDetail(Long orderId, String productType) {
-        String queryRaw = "t0.product_id in (select product_merchant_id from product_merchant_detail where product_type = '"+productType+"')";
+        String queryRaw = "t0.product_id in (select pmid.product_merchant_id from product_merchant_detail pmid where pmid.product_type = '"+productType+"')";
         Query<OrderDetail> query = findDetail.where().raw(queryRaw).eq("t0.order_id", orderId).order("t0.created_at desc");
         // query = query.orderBy("t0.created_at desc");
         
@@ -65,6 +66,15 @@ public class OrderRepository extends Model {
         // query = query.orderBy("t0.created_at desc");
         
         ExpressionList<OrderDetail> exp = query.where();
+        query = exp.query();
+        return query.findPagingList(0).getPage(0).getList();
+    }
+
+    public static List<OrderDetailAddOn> findOrderDataProductAddOn(Long orderDetailId) {
+        Query<OrderDetailAddOn> query = findDetailAddOn.where().eq("t0.order_detail_id", orderDetailId).order("t0.created_at desc");
+        // query = query.orderBy("t0.created_at desc");
+        
+        ExpressionList<OrderDetailAddOn> exp = query.where();
         query = exp.query();
         return query.findPagingList(0).getPage(0).getList();
     }
