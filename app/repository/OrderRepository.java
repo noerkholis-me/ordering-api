@@ -1,5 +1,6 @@
 package repository;
 
+import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Expr;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
@@ -86,5 +87,67 @@ public class OrderRepository extends Model {
     public static Order checkStatusMerchant(String orderNumber) {
         return find.where().eq("order_number", orderNumber).findUnique();
     }
+
+
+    // ============================================================================================================================== //
+
+    public static Query<Order> findAllOrderByStoreId(Long storeId) {
+        return Ebean.find(Order.class)
+                .fetch("store")
+                .where()
+                .eq("store.id", storeId)
+                .query();
+    }
+
+    public static Integer getTotalData (Query<Order> reqQuery) {
+        Query<Order> query = reqQuery;
+        ExpressionList<Order> exp = query.where();
+        query = exp.query();
+        return query.findPagingList(0).getPage(0).getList().size();
+    }
+
+    public static List<Order> findAllOrderWithFilter(Query<Order> reqQuery, int offset, int limit, String status) {
+        Query<Order> query = reqQuery;
+        query.orderBy("t0.order_date desc");
+
+        ExpressionList<Order> exp = query.where();
+
+        if (!status.equalsIgnoreCase("")) {
+            exp = exp.eq("t0.status", status);
+        }
+
+        query = exp.query();
+        if (limit != 0) {
+            query = query.setMaxRows(limit);
+        }
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static List<OrderDetail> findOrderDetailByOrderId(Long orderId) {
+        return findDetail.where().eq("order.id", orderId).findList();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
