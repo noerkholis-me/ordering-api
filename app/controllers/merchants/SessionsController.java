@@ -54,64 +54,59 @@ public class SessionsController extends BaseController {
             @ApiImplicitParam(name = "login form", dataType = "temp.swaggermap.LoginForm", required = true, paramType = "body", value = "login form") })
     public static Result signIn() {
         JsonNode json = request().body().asJson();
-        System.out.println(">>>>> Incoming login : " + json.toString());
-        try {
-            if (checkAccessAuthorization("guest") == 200 && json.has("email") && json.has("password")
-                    && json.has("device_model") && json.has("device_id") && json.has("device_type")) {
 
-                String email = json.findPath("email").asText();
-                String password = json.findPath("password").asText();
-                String deviceModel = json.findPath("device_model").asText();
-                String deviceType = json.findPath("device_type").asText();
-                String deviceId = json.findPath("device_id").asText();
-                Merchant member = null;
-                if (email.matches(CommonFunction.emailRegex)) {
-                    member = Merchant.login(email, password);
-                }
-                if (member != null) {
-                    if (!Merchant.STATUS_APPROVED.equals(member.status)) {
-                        response.setBaseResponse(0, 0, 0, "Your account hasn't been approved, please contact our support", null);
-                        return badRequest(Json.toJson(response));
-                    }
-                    if (member.isActive){
-                        try {
-                            MerchantLog log = MerchantLog.loginMerchant(deviceModel, deviceType, deviceId, member);
-                            if (log == null) {
-                                response.setBaseResponse(0, 0, 0, inputParameter, null);
-                                return badRequest(Json.toJson(response));
-                            }
-                            // modify session response for merchant can be reusable for property
-                            MerchantSessionResponse profileData = toMerchantSessionResponse(member);
-                            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                            ObjectMapper om = new ObjectMapper();
-                            om.addMixIn(Merchant.class, JsonMask.class);
-//                        HashMap<String, Boolean> features = member.checkPrivilegeList();
-                            List<FeatureAndPermissionSession> featureAndPermissionSessions = member.checkFeatureAndPermissions();
-                            UserSession session = new UserSession(log.token, df.format(log.expiredDate), log.memberType, Json.parse(om.writeValueAsString(profileData)), featureAndPermissionSessions);
-//                        session.setProfile_data(Json.parse(om.writeValueAsString(profileData)));
-                            response.setBaseResponse(1, 0, 1, success, session);
-                            return ok(Json.toJson(response));
-                        } catch (Exception e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-                        response.setBaseResponse(0, 0, 0, error, null);
-                        return badRequest(Json.toJson(response));
-                    }else{
-                        response.setBaseResponse(0, 0, 0, "Your account hasn't actived, please check and verify from your email", null);
-                        return badRequest(Json.toJson(response));
-                    }
-                }
-                response.setBaseResponse(0, 0, 0, "Wrong username or password", null);
-                return badRequest(Json.toJson(response));
+        if (checkAccessAuthorization("guest") == 200 && json.has("email") && json.has("password")
+                && json.has("device_model") && json.has("device_id") && json.has("device_type")) {
+
+            String email = json.findPath("email").asText();
+            String password = json.findPath("password").asText();
+            String deviceModel = json.findPath("device_model").asText();
+            String deviceType = json.findPath("device_type").asText();
+            String deviceId = json.findPath("device_id").asText();
+            Merchant member = null;
+            if (email.matches(CommonFunction.emailRegex)) {
+                member = Merchant.login(email, password);
             }
-            response.setBaseResponse(0, 0, 0, unauthorized, null);
-            return unauthorized(Json.toJson(response));
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            response.setBaseResponse(0, 0, 0, unauthorized, null);
-            return unauthorized(Json.toJson(response));
+            if (member != null) {
+                if (!Merchant.STATUS_APPROVED.equals(member.status)) {
+                    response.setBaseResponse(0, 0, 0, "Your account hasn't been approved, please contact our support", null);
+                    return badRequest(Json.toJson(response));
+                }
+                if (member.isActive){
+                    try {
+                        MerchantLog log = MerchantLog.loginMerchant(deviceModel, deviceType, deviceId, member);
+                        if (log == null) {
+                            response.setBaseResponse(0, 0, 0, inputParameter, null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        // modify session response for merchant can be reusable for property
+                        MerchantSessionResponse profileData = toMerchantSessionResponse(member);
+                        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                        ObjectMapper om = new ObjectMapper();
+                        om.addMixIn(Merchant.class, JsonMask.class);
+//                        HashMap<String, Boolean> features = member.checkPrivilegeList();
+                        List<FeatureAndPermissionSession> featureAndPermissionSessions = member.checkFeatureAndPermissions();
+                        UserSession session = new UserSession(log.token, df.format(log.expiredDate), log.memberType, Json.parse(om.writeValueAsString(profileData)), featureAndPermissionSessions);
+//                        session.setProfile_data(Json.parse(om.writeValueAsString(profileData)));
+                        response.setBaseResponse(1, 0, 1, success, session);
+                        return ok(Json.toJson(response));
+                    } catch (Exception e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                    response.setBaseResponse(0, 0, 0, error, null);
+                    return badRequest(Json.toJson(response));
+                }else{
+                    response.setBaseResponse(0, 0, 0, "Your account hasn't actived, please check and verify from your email", null);
+                    return badRequest(Json.toJson(response));
+                }
+            }
+            response.setBaseResponse(0, 0, 0, "Wrong username or password", null);
+            return badRequest(Json.toJson(response));
         }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+
     }
 
     private static MerchantSessionResponse toMerchantSessionResponse(Merchant member) {
