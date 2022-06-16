@@ -59,14 +59,14 @@ public class OrderList {
         @JsonProperty("notes")
         private String notes;
 
-        private List<ProductAdditionalList> productAddOn;
+        private List<ProductOrderDetailAddOn> productAddOn;
 
         @AllArgsConstructor
         @NoArgsConstructor
         @Getter
         @Setter
         @Builder
-        public static class ProductAdditionalList {
+        public static class ProductOrderDetailAddOn {
 
             @JsonProperty("product_id")
             private Long productId;
