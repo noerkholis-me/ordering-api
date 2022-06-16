@@ -8,6 +8,7 @@ import models.merchant.ProductMerchant;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "order_detail")
@@ -41,6 +42,9 @@ public class OrderDetail extends BaseModel {
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     private Order order;
+
+    @OneToMany(mappedBy = "orderDetail")
+    private List<OrderDetailAddOn> orderDetailAddOns;
 
 
 
