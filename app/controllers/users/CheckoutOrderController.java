@@ -31,6 +31,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.io.File;
+import java.io.FileOutputStream;
+
+import service.DownloadOrderReport;
 
 public class CheckoutOrderController extends BaseController {
 
@@ -611,6 +615,47 @@ public class CheckoutOrderController extends BaseController {
             } catch (Exception e) {
                 logger.error("Error", e);
                 e.printStackTrace();
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    public static Result downloadTransaction(String startDate, String endDate, int offset, int limit, String statusOrder) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            try {
+                String querySqlStore = "t0.store_id in (select st.id from STORE st where st.merchant_id = "+ownMerchant.id+" and st.is_active = true and st.is_deleted = false)";
+                String querySqlOrderPayment = "t0.id in (select op.id from order_payment op where op.status = 'PAID' AND op.is_deleted = " +false+ ")";
+                Query<Order> queryData = null;
+                if(statusOrder != null && statusOrder != "" && startDate != null && startDate != ""){
+                    if(endDate == null || endDate == ""){
+                        response.setBaseResponse(0, 0, 0, "Tanggal akhir tidak boleh null atau kosong", null);
+                        return badRequest(Json.toJson(response));
+                    }
+
+                    queryData = OrderRepository.find.where().raw(querySqlStore).raw(querySqlOrderPayment).eq("t0.status", statusOrder).raw("t0.order_date between '"+startDate+"' and '"+endDate+"'").order("t0.created_at desc");
+                } else if(statusOrder != null && statusOrder != ""){
+                    queryData = OrderRepository.find.where().raw(querySqlStore).raw(querySqlOrderPayment).eq("t0.status", statusOrder).order("t0.created_at desc");
+                } else if(startDate != null && startDate != ""){
+                    if(endDate == null || endDate == ""){
+                        response.setBaseResponse(0, 0, 0, "Tanggal akhir tidak boleh null atau kosong", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    queryData = OrderRepository.find.where().raw(querySqlStore).raw(querySqlOrderPayment).raw("t0.order_date between '"+startDate+"' and '"+endDate+"'").order("t0.created_at desc");
+                } else {
+                    queryData = OrderRepository.find.where().raw(querySqlStore).raw(querySqlOrderPayment).order("t0.created_at desc");
+                }
+                List<Order> orderList = OrderRepository.findOrderByStatus(queryData, offset, limit);
+                File file = DownloadOrderReport.downloadOrderReport(orderList, ownMerchant.id);
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddhhmmss");
+                String filenameOrderReport = "OrderReport-" +simpleDateFormat.format(new Date()).toString()+".xlsx";
+                response().setContentType("application/vnd.ms-excel");
+                response().setHeader("Content-disposition", "attachment; filename="+filenameOrderReport);
+                return ok(file);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                logger.error("Error while download order report ", ex);
             }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
