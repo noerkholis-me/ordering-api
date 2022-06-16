@@ -99,6 +99,15 @@ public class OrderRepository extends Model {
                 .query();
     }
 
+    public static Query<Order> findAllOrderByMerchantId(Long merchantId) {
+        return Ebean.find(Order.class)
+                .fetch("store")
+                .fetch("store.merchant")
+                .where()
+                .eq("store.merchant.id", merchantId)
+                .query();
+    }
+
     public static Integer getTotalData (Query<Order> reqQuery) {
         Query<Order> query = reqQuery;
         ExpressionList<Order> exp = query.where();
