@@ -32,17 +32,25 @@ public class OrderMerchantController extends BaseController {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
+
+                Query<Order> query = null;
+                // default query find by merchant id
+                query = OrderRepository.findAllOrderByMerchantId(merchant.id);
+
                 // check store id --> mandatory
-                if (storeId == null || storeId == 0L) {
-                    response.setBaseResponse(0, 0, 0, "store id does not exists", null);
-                    return badRequest(Json.toJson(response));
+                if (storeId != null && storeId != 0L) {
+                    Store store = Store.findById(storeId);
+                    if (store == null) {
+                        response.setBaseResponse(0, 0, 0, "store id does not exists", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    query = OrderRepository.findAllOrderByStoreId(storeId);
                 }
 
-                Query<Order> reqQuery = OrderRepository.findAllOrderByStoreId(storeId);
-                Integer totalData = OrderRepository.getTotalData(reqQuery);
+                Integer totalData = OrderRepository.getTotalData(query);
 
                 List<OrderList> orderLists = new ArrayList<>();
-                List<Order> orders = OrderRepository.findAllOrderWithFilter(reqQuery, offset, limit, statusOrder);
+                List<Order> orders = OrderRepository.findAllOrderWithFilter(query, offset, limit, statusOrder);
                 if (orders.isEmpty() || orders.size() == 0) {
                     response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", orderLists);
                     return ok(Json.toJson(response));
