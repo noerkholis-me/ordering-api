@@ -74,33 +74,34 @@ public class DownloadOrderReport {
             int row = 1;
             int number = 1;
             for (Order data : orderData) {
-                Row rowSheet = sheet.createRow(row++);
                 // GET ORDER PAYMENT DETAIL
+                Row rowSheet = sheet.createRow(row++);
                 OrderPayment orderPayment = OrderPaymentRepository.find.where().eq("t0.id", data.id).findUnique();
-
+                
                 // GET DATA OF STORE
                 Store storeData = Store.findById(data.getStore().id);
-
+                
                 // GET NAME OF CUSTOMER
                 Member member = null;
                 if(data.getMember() != null) {
                     member = Member.findByIdMember(data.getMember().id);
                 }
-
+                
                 // GET NAME OF MERCHANT
                 Merchant merchant = null;
                 if(data.getStore().getMerchant() != null) {
                     merchant = Merchant.merchantGetId(data.getStore().getMerchant().id);
                 }
-
+                
                 // GET PRODUCT DETAIL ORDER ON MAIN PRODUCT
                 List<OrderDetail> orderDetail = OrderRepository.findDataOrderDetail(data.id, "MAIN");
                 for(OrderDetail oDetail : orderDetail) {
+                    // rowSheet = sheet.createRow(row++);
                     rowSheet.createCell(0).setCellValue(number++);
                     rowSheet.getCell(0).setCellStyle(cellStyle);
                     
                     // Tanggal Order
-                    rowSheet.createCell(1).setCellValue(data.getOrderDate());
+                    rowSheet.createCell(1).setCellValue("'"+data.getOrderDate());
                     rowSheet.getCell(1).setCellStyle(cellStyle);
                     
                     // No Order
@@ -175,80 +176,83 @@ public class DownloadOrderReport {
                     // GET PRODUCT ADD ON FROM PRODUCT MAIN
                     List<OrderDetailAddOn> orderDetailAddOnList = OrderRepository.findOrderDataProductAddOn(oDetail.id);
                     for(OrderDetailAddOn orderDetailAddOn: orderDetailAddOnList) {
-                        // rowSheet.createCell(0).setCellValue(number++);
-                        // rowSheet.getCell(0).setCellStyle(cellStyle);
+                        rowSheet = sheet.createRow(row++);
+
+                        rowSheet.createCell(0).setCellValue(number++);
+                        rowSheet.getCell(0).setCellStyle(cellStyle);
                         
-                        // // Tanggal Order
-                        // rowSheet.createCell(1).setCellValue(data.getOrderDate());
-                        // rowSheet.getCell(1).setCellStyle(cellStyle);
+                        // Tanggal Order
+                        rowSheet.createCell(1).setCellValue("'"+data.getOrderDate());
+                        rowSheet.getCell(1).setCellStyle(cellStyle);
                         
-                        // // No Order
-                        // rowSheet.createCell(2).setCellValue(data.getOrderNumber());
-                        // rowSheet.getCell(2).setCellStyle(dateStyle);
+                        // No Order
+                        rowSheet.createCell(2).setCellValue(data.getOrderNumber());
+                        rowSheet.getCell(2).setCellStyle(dateStyle);
 
-                        // // Tipe Order
-                        // rowSheet.createCell(3).setCellValue(data.getOrderType());
-                        // rowSheet.getCell(3).setCellStyle(cellStyle);
+                        // Tipe Order
+                        rowSheet.createCell(3).setCellValue(data.getOrderType());
+                        rowSheet.getCell(3).setCellStyle(cellStyle);
 
-                        // // Nama Customer
-                        // rowSheet.createCell(4).setCellValue(member != null ? member.fullName : "General Customer ("+ storeData.storeName +")");
-                        // rowSheet.getCell(4).setCellStyle(cellStyle);
+                        // Nama Customer
+                        rowSheet.createCell(4).setCellValue(member != null ? member.fullName : "General Customer ("+ storeData.storeName +")");
+                        rowSheet.getCell(4).setCellStyle(cellStyle);
 
-                        // // Nama Toko
-                        // rowSheet.createCell(5).setCellValue(data.getStore().storeName);
-                        // rowSheet.getCell(5).setCellStyle(cellStyle);
+                        // Nama Toko
+                        rowSheet.createCell(5).setCellValue(data.getStore().storeName);
+                        rowSheet.getCell(5).setCellStyle(cellStyle);
 
-                        // // Antrian
-                        // rowSheet.createCell(6).setCellValue(data.getOrderQueue());
-                        // rowSheet.getCell(6).setCellStyle(cellStyle);
+                        // Antrian
+                        rowSheet.createCell(6).setCellValue(data.getOrderQueue());
+                        rowSheet.getCell(6).setCellStyle(cellStyle);
 
-                        // // Nama Produk
-                        // rowSheet.createCell(7).setCellValue(oDetail.getProductName());
-                        // rowSheet.getCell(7).setCellStyle(cellStyle);
+                        // Nama Produk
+                        rowSheet.createCell(7).setCellValue(orderDetailAddOn.getProductName());
+                        rowSheet.getCell(7).setCellStyle(cellStyle);
 
-                        // // Tipe Produk
-                        // rowSheet.createCell(8).setCellValue(data.getAmount().doubleValue());
-                        // rowSheet.getCell(8).setCellStyle(cellStyle);
+                        // Tipe Produk
+                        ProductMerchantDetail pmdetailAddOn = ProductMerchantDetailRepository.findDetailAdditionalProduct(orderDetailAddOn.getProductAssignId(), merchantId);
+                        rowSheet.createCell(8).setCellValue(pmdetailAddOn.getProductType());
+                        rowSheet.getCell(8).setCellStyle(cellStyle);
 
-                        // // Harga Produk
-                        // rowSheet.createCell(9).setCellValue(oDetail.getProductPrice());
-                        // rowSheet.getCell(9).setCellStyle(cellStyle);
+                        // Harga Produk
+                        rowSheet.createCell(9).setCellValue(orderDetailAddOn.getProductPrice().doubleValue());
+                        rowSheet.getCell(9).setCellStyle(cellStyle);
 
-                        // // Quantity
-                        // rowSheet.createCell(10).setCellValue(oDetail.getQuantity());
-                        // rowSheet.getCell(10).setCellStyle(cellStyle);
+                        // Quantity
+                        rowSheet.createCell(10).setCellValue(orderDetailAddOn.getQuantity());
+                        rowSheet.getCell(10).setCellStyle(cellStyle);
 
-                        // // Total Harga Produk
-                        // rowSheet.createCell(11).setCellValue(oDetail.getSubTotal());
-                        // rowSheet.getCell(11).setCellStyle(cellStyle);
+                        // Total Harga Produk
+                        rowSheet.createCell(11).setCellValue(orderDetailAddOn.getSubTotal().doubleValue());
+                        rowSheet.getCell(11).setCellStyle(cellStyle);
 
-                        // // Tax
-                        // rowSheet.createCell(12).setCellValue(orderPayment.getTaxPrice());
-                        // rowSheet.getCell(12).setCellStyle(cellStyle);
+                        // Tax
+                        rowSheet.createCell(12).setCellValue(orderPayment.getTaxPrice().doubleValue());
+                        rowSheet.getCell(12).setCellStyle(cellStyle);
 
-                        // // Service
-                        // rowSheet.createCell(13).setCellValue(orderPayment.getServicePrice());
-                        // rowSheet.getCell(13).setCellStyle(cellStyle);
+                        // Service
+                        rowSheet.createCell(13).setCellValue(orderPayment.getServicePrice().doubleValue());
+                        rowSheet.getCell(13).setCellStyle(cellStyle);
 
-                        // // Payment Fee Owner
-                        // rowSheet.createCell(14).setCellValue(orderPayment.getPaymentFeeOwner() != null ? orderPayment.getPaymentFeeOwner() : 0);
-                        // rowSheet.getCell(14).setCellStyle(cellStyle);
+                        // Payment Fee Owner
+                        rowSheet.createCell(14).setCellValue(orderPayment.getPaymentFeeOwner() != null ? orderPayment.getPaymentFeeOwner().doubleValue() : 0);
+                        rowSheet.getCell(14).setCellStyle(cellStyle);
 
-                        // // Payment Fee Customer
-                        // rowSheet.createCell(15).setCellValue(orderPayment.getPaymentFeeCustomer() != null ? orderPayment.getPaymentFeeCustomer() : 0);
-                        // rowSheet.getCell(15).setCellStyle(cellStyle);
+                        // Payment Fee Customer
+                        rowSheet.createCell(15).setCellValue(orderPayment.getPaymentFeeCustomer() != null ? orderPayment.getPaymentFeeCustomer().doubleValue() : 0);
+                        rowSheet.getCell(15).setCellStyle(cellStyle);
 
-                        // // Total Harga
-                        // rowSheet.createCell(16).setCellValue(oDetail.getTotalAmount());
-                        // rowSheet.getCell(16).setCellStyle(cellStyle);
+                        // Total Harga
+                        rowSheet.createCell(16).setCellValue(data.getTotalPrice().doubleValue());
+                        rowSheet.getCell(16).setCellStyle(cellStyle);
 
-                        // // Payment Fee Type
-                        // rowSheet.createCell(17).setCellValue(orderPayment.getPaymentFeeType());
-                        // rowSheet.getCell(17).setCellStyle(cellStyle);
+                        // Payment Fee Type
+                        rowSheet.createCell(17).setCellValue(orderPayment.getPaymentFeeType());
+                        rowSheet.getCell(17).setCellStyle(cellStyle);
 
-                        // // Status
-                        // rowSheet.createCell(18).setCellValue(data.getStatus() +" - ("+ orderPayment.getStatus() + ")");
-                        // rowSheet.getCell(18).setCellStyle(cellStyle);
+                        // Status
+                        rowSheet.createCell(18).setCellValue(data.getStatus() +" - ("+ orderPayment.getStatus() + ")");
+                        rowSheet.getCell(18).setCellStyle(cellStyle);
                     }
                 }
             }

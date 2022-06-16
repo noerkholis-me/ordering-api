@@ -170,6 +170,7 @@ public class UserMerchantController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
                 userMerchant.isDeleted = true;
+                userMerchant.isActive = false;
                 userMerchant.update();
                 trx.commit();
 
