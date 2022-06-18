@@ -41,6 +41,13 @@ public class UserMerchantRepository extends Model {
             .eq("role.merchant", merchant)
             .eq("isActive", Boolean.TRUE)
             .findUnique();
+	}
+	
+    public static UserMerchant findAccountById(Long id) {
+        return find.where()
+            .eq("id", id)
+            .eq("isActive", Boolean.TRUE)
+            .findUnique();
     }
 
     public static List<UserMerchant> getDataUser(Query<UserMerchant> reqQuery, String sort, String filter, int offset, int limit)
