@@ -330,6 +330,7 @@ GET         /merchant/users/list                        controllers.merchants.Us
 GET         /merchant/users/:id/view                    controllers.merchants.UserMerchantController.viewUser(id:Long)
 DELETE      /merchant/users/:id/delete                  controllers.merchants.UserMerchantController.deleteUsers(id:Long)
 PUT         /merchant/users/:id/edit                    controllers.merchants.UserMerchantController.editUser(id:Long)
+PUT         /merchant/users/:id/edit/status             controllers.merchants.UserMerchantController.setStatus(id:Long)
 
 #ROLE
 GET     /merchant/role/list                        controllers.merchants.RoleMerchantController.listRole(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
@@ -542,3 +543,8 @@ GET         /merchant/finance/transaction/active-balance                 control
 # ORDER LIST
 GET         /merchant/orders/list                 controllers.order.OrderMerchantController.getOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="")
 
+# UPDATE PROFILE
+PUT         /merchant/update/profile              controllers.users.UpdateProfileController.updateMerchantData()
+PUT         /merchant/update/password              controllers.users.UpdateProfileController.updatePasswordMerchantData()
+PUT         /users/merchant/update/:id_user/profile        controllers.users.UpdateProfileController.updateUserMerchantData(id_user: Long)
+PUT         /users/merchant/update/:id_user/password        controllers.users.UpdateProfileController.updatePasswordUserMerchantData(id_user: Long)
