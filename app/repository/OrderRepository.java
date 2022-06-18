@@ -108,6 +108,25 @@ public class OrderRepository extends Model {
                 .query();
     }
 
+    public static Query<Order> findAllOrderReportWithFilter(Long merchantId, String startDate, String endDate) {
+        if(startDate != null && startDate != ""){
+            return Ebean.find(Order.class)
+                .fetch("store")
+                .fetch("store.merchant")
+                .where()
+                .raw("t0.order_date between '"+startDate+"' and '"+endDate+"'")
+                .eq("store.merchant.id", merchantId)
+                .query();
+        } else {
+            return Ebean.find(Order.class)
+                .fetch("store")
+                .fetch("store.merchant")
+                .where()
+                .eq("store.merchant.id", merchantId)
+                .query();
+        }
+    }
+
     public static Integer getTotalData (Query<Order> reqQuery) {
         Query<Order> query = reqQuery;
         ExpressionList<Order> exp = query.where();

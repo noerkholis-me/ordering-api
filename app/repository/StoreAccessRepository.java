@@ -56,6 +56,7 @@ public class StoreAccessRepository extends Model {
 		ExpressionList<StoreAccess> exp = query.where();
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
+		exp = exp.ilike("userMerchant.fullName", "%" + filter + "%");
 		query = exp.query();
 
 		int total = query.findList().size();
