@@ -126,7 +126,8 @@ public class MerchantLog extends BaseModel {
 
     public static MerchantLog isMerchantAuthorized(String token, String apiKey) {
         // validate token
-        MerchantLog log = MerchantLog.find.where().eq("token", token).eq("is_active", true).eq("member_type", "merchant")
+        MerchantLog log = MerchantLog.find.where().eq("token", token)
+                .eq("is_active", true)
                 .setMaxRows(1).findUnique();
 
         // validate api key

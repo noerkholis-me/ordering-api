@@ -116,7 +116,7 @@ public class StoreAccessController extends BaseController {
     public static Result listUserAssign(String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<StoreAccess> query = StoreAccessRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.merchant_id", ownMerchant.id).order("t0.id desc");
+            Query<StoreAccess> query = StoreAccessRepository.find.fetch("userMerchant").where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.merchant_id", ownMerchant.id).order("t0.id desc");
             try {
                 List<StoreAccessResponse> responsesStoreAccess = new ArrayList<>();
                 List<StoreAccess> totalData = StoreAccessRepository.getTotalData(query);
