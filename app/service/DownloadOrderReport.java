@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public class DownloadOrderReport {
 
@@ -76,10 +77,8 @@ public class DownloadOrderReport {
             for (Order data : orderData) {
                 // GET ORDER PAYMENT DETAIL
                 Row rowSheet = sheet.createRow(row++);
-                OrderPayment orderPayment = OrderPaymentRepository.find.where().eq("t0.id", data.id).findUnique();
-                
-                // GET DATA OF STORE
-                Store storeData = Store.findById(data.getStore().id);
+                Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderId(data.id);
+                OrderPayment getOrderPayment = orderPayment.get();
                 
                 // GET NAME OF CUSTOMER
                 Member member = null;
@@ -87,15 +86,9 @@ public class DownloadOrderReport {
                     member = Member.findByIdMember(data.getMember().id);
                 }
                 
-                // GET NAME OF MERCHANT
-                Merchant merchant = null;
-                if(data.getStore().getMerchant() != null) {
-                    merchant = Merchant.merchantGetId(data.getStore().getMerchant().id);
-                }
-                
                 // GET PRODUCT DETAIL ORDER ON MAIN PRODUCT
-                List<OrderDetail> orderDetail = OrderRepository.findDataOrderDetail(data.id, "MAIN");
-                for(OrderDetail oDetail : orderDetail) {
+                List<OrderDetail> orderDetails = OrderRepository.findOrderDetailByOrderId(data.id);
+                for(OrderDetail oDetail : orderDetails) {
                     // rowSheet = sheet.createRow(row++);
                     rowSheet.createCell(0).setCellValue(number++);
                     rowSheet.getCell(0).setCellStyle(cellStyle);
@@ -113,7 +106,7 @@ public class DownloadOrderReport {
                     rowSheet.getCell(3).setCellStyle(cellStyle);
 
                     // Nama Customer
-                    rowSheet.createCell(4).setCellValue(member != null ? member.fullName : "General Customer ("+ storeData.storeName +")");
+                    rowSheet.createCell(4).setCellValue(member != null ? member.fullName : "General Customer ("+ data.getStore().storeName +")");
                     rowSheet.getCell(4).setCellStyle(cellStyle);
 
                     // Nama Toko
@@ -146,19 +139,19 @@ public class DownloadOrderReport {
                     rowSheet.getCell(11).setCellStyle(cellStyle);
 
                     // Tax
-                    rowSheet.createCell(12).setCellValue(orderPayment.getTaxPrice().doubleValue());
+                    rowSheet.createCell(12).setCellValue(getOrderPayment.getTaxPrice().doubleValue());
                     rowSheet.getCell(12).setCellStyle(cellStyle);
 
                     // Service
-                    rowSheet.createCell(13).setCellValue(orderPayment.getServicePrice().doubleValue());
+                    rowSheet.createCell(13).setCellValue(getOrderPayment.getServicePrice().doubleValue());
                     rowSheet.getCell(13).setCellStyle(cellStyle);
 
                     // Payment Fee Owner
-                    rowSheet.createCell(14).setCellValue(orderPayment.getPaymentFeeOwner() != null ? orderPayment.getPaymentFeeOwner().doubleValue() : 0);
+                    rowSheet.createCell(14).setCellValue(getOrderPayment.getPaymentFeeOwner() != null ? getOrderPayment.getPaymentFeeOwner().doubleValue() : 0);
                     rowSheet.getCell(14).setCellStyle(cellStyle);
 
                     // Payment Fee Customer
-                    rowSheet.createCell(15).setCellValue(orderPayment.getPaymentFeeCustomer() != null ? orderPayment.getPaymentFeeCustomer().doubleValue() : 0);
+                    rowSheet.createCell(15).setCellValue(getOrderPayment.getPaymentFeeCustomer() != null ? getOrderPayment.getPaymentFeeCustomer().doubleValue() : 0);
                     rowSheet.getCell(15).setCellStyle(cellStyle);
 
                     // Total Harga
@@ -166,16 +159,15 @@ public class DownloadOrderReport {
                     rowSheet.getCell(16).setCellStyle(cellStyle);
 
                     // Payment Fee Type
-                    rowSheet.createCell(17).setCellValue(orderPayment.getPaymentFeeType());
+                    rowSheet.createCell(17).setCellValue(getOrderPayment.getPaymentFeeType());
                     rowSheet.getCell(17).setCellStyle(cellStyle);
 
                     // Status
-                    rowSheet.createCell(18).setCellValue(data.getStatus() +" - ("+ orderPayment.getStatus() + ")");
+                    rowSheet.createCell(18).setCellValue(data.getStatus() +" - ("+ getOrderPayment.getStatus() + ")");
                     rowSheet.getCell(18).setCellStyle(cellStyle);
 
                     // GET PRODUCT ADD ON FROM PRODUCT MAIN
-                    List<OrderDetailAddOn> orderDetailAddOnList = OrderRepository.findOrderDataProductAddOn(oDetail.id);
-                    for(OrderDetailAddOn orderDetailAddOn: orderDetailAddOnList) {
+                    for(OrderDetailAddOn orderDetailAddOn: oDetail.getOrderDetailAddOns()) {
                         rowSheet = sheet.createRow(row++);
 
                         rowSheet.createCell(0).setCellValue(number++);
@@ -194,7 +186,7 @@ public class DownloadOrderReport {
                         rowSheet.getCell(3).setCellStyle(cellStyle);
 
                         // Nama Customer
-                        rowSheet.createCell(4).setCellValue(member != null ? member.fullName : "General Customer ("+ storeData.storeName +")");
+                        rowSheet.createCell(4).setCellValue(member != null ? member.fullName : "General Customer ("+ data.getStore().storeName +")");
                         rowSheet.getCell(4).setCellStyle(cellStyle);
 
                         // Nama Toko
@@ -227,19 +219,19 @@ public class DownloadOrderReport {
                         rowSheet.getCell(11).setCellStyle(cellStyle);
 
                         // Tax
-                        rowSheet.createCell(12).setCellValue(orderPayment.getTaxPrice().doubleValue());
+                        rowSheet.createCell(12).setCellValue(getOrderPayment.getTaxPrice().doubleValue());
                         rowSheet.getCell(12).setCellStyle(cellStyle);
 
                         // Service
-                        rowSheet.createCell(13).setCellValue(orderPayment.getServicePrice().doubleValue());
+                        rowSheet.createCell(13).setCellValue(getOrderPayment.getServicePrice().doubleValue());
                         rowSheet.getCell(13).setCellStyle(cellStyle);
 
                         // Payment Fee Owner
-                        rowSheet.createCell(14).setCellValue(orderPayment.getPaymentFeeOwner() != null ? orderPayment.getPaymentFeeOwner().doubleValue() : 0);
+                        rowSheet.createCell(14).setCellValue(getOrderPayment.getPaymentFeeOwner() != null ? getOrderPayment.getPaymentFeeOwner().doubleValue() : 0);
                         rowSheet.getCell(14).setCellStyle(cellStyle);
 
                         // Payment Fee Customer
-                        rowSheet.createCell(15).setCellValue(orderPayment.getPaymentFeeCustomer() != null ? orderPayment.getPaymentFeeCustomer().doubleValue() : 0);
+                        rowSheet.createCell(15).setCellValue(getOrderPayment.getPaymentFeeCustomer() != null ? getOrderPayment.getPaymentFeeCustomer().doubleValue() : 0);
                         rowSheet.getCell(15).setCellStyle(cellStyle);
 
                         // Total Harga
@@ -247,11 +239,11 @@ public class DownloadOrderReport {
                         rowSheet.getCell(16).setCellStyle(cellStyle);
 
                         // Payment Fee Type
-                        rowSheet.createCell(17).setCellValue(orderPayment.getPaymentFeeType());
+                        rowSheet.createCell(17).setCellValue(getOrderPayment.getPaymentFeeType());
                         rowSheet.getCell(17).setCellStyle(cellStyle);
 
                         // Status
-                        rowSheet.createCell(18).setCellValue(data.getStatus() +" - ("+ orderPayment.getStatus() + ")");
+                        rowSheet.createCell(18).setCellValue(data.getStatus() +" - ("+ getOrderPayment.getStatus() + ")");
                         rowSheet.getCell(18).setCellStyle(cellStyle);
                     }
                 }
