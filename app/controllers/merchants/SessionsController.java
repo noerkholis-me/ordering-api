@@ -131,10 +131,17 @@ public class SessionsController extends BaseController {
                                 return badRequest(Json.toJson(response));
                             }
 
+                            if (userMerchant.checkFeatureAndPermissions() == null) {
+                                response.setBaseResponse(0, 0, 0, "User belum mempunyai hak akses", null);
+                                return badRequest(Json.toJson(response));
+                            }
+
+                            List<FeatureAndPermissionSession> featureAndPermissionSessions = userMerchant.checkFeatureAndPermissions();
+
                             DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                             ObjectMapper om = new ObjectMapper();
                             om.addMixIn(Merchant.class, JsonMask.class);
-                            List<FeatureAndPermissionSession> featureAndPermissionSessions = userMerchant.checkFeatureAndPermissions();
+
                             UserSession session = new UserSession(log.token, df.format(log.expiredDate), log.memberType, Json.parse(om.writeValueAsString(profileData)), featureAndPermissionSessions);
                             response.setBaseResponse(1, 0, 1, success, session);
                             return ok(Json.toJson(response));
