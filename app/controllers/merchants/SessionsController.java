@@ -436,7 +436,7 @@ public class SessionsController extends BaseController {
                 }
                 Thread thread = new Thread(() -> {
                     try {
-                        MailConfig.sendmail(member.email, MailConfig.subjectForgotPassword, MailConfig.renderMailForgotPasswordMerchantTemplate(member, redirect));
+                        MailConfig.sendmail(member.email, MailConfig.subjectForgotPassword, MailConfig.renderMailForgotPasswordMerchantTemplate(member.resetToken, member.fullName, redirect));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -452,15 +452,15 @@ public class SessionsController extends BaseController {
                     String forgotPasswordCode = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
                     String redirect = Constant.getInstance().getMerchantUrl() + "/reset-password" + "/" + forgotPasswordCode;
                     try {
-//                        userMerchant.resetToken = Encryption.EncryptAESCBCPCKS5Padding(member.email+now);
-                        member.resetTime = now;
+                        userMerchant.setResetToken(Encryption.EncryptAESCBCPCKS5Padding(member.email+now));
+                        userMerchant.setResetTime(now);
                         member.update();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
                     Thread thread = new Thread(() -> {
                         try {
-                            MailConfig.sendmail(member.email, MailConfig.subjectForgotPassword, MailConfig.renderMailForgotPasswordMerchantTemplate(member, redirect));
+                            MailConfig.sendmail(userMerchant.getEmail(), MailConfig.subjectForgotPassword, MailConfig.renderMailForgotPasswordMerchantTemplate(userMerchant.getResetToken(), userMerchant.getFullName(), redirect));
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -473,8 +473,6 @@ public class SessionsController extends BaseController {
                     return notFound(Json.toJson(response));
                 }
             }
-            response.setBaseResponse(0, 0, 0, notFound, null);
-            return notFound(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));

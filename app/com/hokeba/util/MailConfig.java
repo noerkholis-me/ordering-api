@@ -87,9 +87,9 @@ public class MailConfig {
 
     }
 
-    public static String renderMailForgotPasswordMerchantTemplate(Merchant member, String url) {
+    public static String renderMailForgotPasswordMerchantTemplate(String resetToken, String name, String url) {
         return views.html.ForgotPasswordEmail
-                .render(member.name, url + "/" + member.resetToken, Constant.getInstance().getImageUrl().concat("mail"))
+                .render(name, url + "/" + resetToken, Constant.getInstance().getImageUrl().concat("mail"))
                 .toString();
 
     }

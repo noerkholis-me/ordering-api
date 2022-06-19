@@ -2,6 +2,8 @@ package models.finance;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import models.BaseModel;
 import models.Store;
 
@@ -39,6 +41,12 @@ public class FinanceWithdraw extends BaseModel {
 
     @Column(name = "request_by")
     private String requestBy;
+
+    @Column(name = "approval_date")
+    private Date approvalDate;
+
+    @Column(name = "approval_by")
+    private String approvedBy;
 
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "store_id", referencedColumnName = "id")
