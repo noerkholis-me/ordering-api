@@ -128,4 +128,18 @@ public class MailConfig {
 		return "";
 	}
 
+	public static String renderMailSendCreatePasswordBackendTemplate(String activationCode, String fullName) {
+		Merchant dt = new Merchant();
+		Form<Merchant> formData = Form.form(Merchant.class).fill(dt);
+		String url = Helper.BACKEND_URL + "/account-activation/" + activationCode;
+
+		try {
+			String html = views.html.verificationEmail.render(fullName, url).toString();
+			return html;
+		} catch (Exception ignored) {
+
+		}
+		return "";
+	}
+
 }
