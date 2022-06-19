@@ -125,10 +125,23 @@ public class SessionsController extends BaseController {
                             }
                             // modify session response for merchant can be reusable for property
                             UserMerchantSessionResponse profileData = toUserMerchantSessionResponse(userMerchant);
+
+                            if (profileData.getStoreAccess() == null) {
+                                response.setBaseResponse(0, 0, 0, "User belum mempunyai akses toko. Silahkan hubungi administrator.", null);
+                                return badRequest(Json.toJson(response));
+                            }
+
+                            if (userMerchant.checkFeatureAndPermissions() == null) {
+                                response.setBaseResponse(0, 0, 0, "User belum mempunyai hak akses", null);
+                                return badRequest(Json.toJson(response));
+                            }
+
+                            List<FeatureAndPermissionSession> featureAndPermissionSessions = userMerchant.checkFeatureAndPermissions();
+
                             DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                             ObjectMapper om = new ObjectMapper();
                             om.addMixIn(Merchant.class, JsonMask.class);
-                            List<FeatureAndPermissionSession> featureAndPermissionSessions = userMerchant.checkFeatureAndPermissions();
+
                             UserSession session = new UserSession(log.token, df.format(log.expiredDate), log.memberType, Json.parse(om.writeValueAsString(profileData)), featureAndPermissionSessions);
                             response.setBaseResponse(1, 0, 1, success, session);
                             return ok(Json.toJson(response));
@@ -202,26 +215,29 @@ public class SessionsController extends BaseController {
         userMerchantResponse.setIsActive(userMerchant.getIsActive());
 
         StoreAccess dataAccess = StoreAccessRepository.findById(userMerchant.id);
-        Query<StoreAccessDetail> queryDetail = StoreAccessRepository.findDetail.where().eq("t0.store_access_id", dataAccess.id).eq("t0.is_deleted", false).order("t0.id");
-        List<StoreAccessDetail> dataDetail = StoreAccessRepository.getDetailData(queryDetail);
-        List<StoreAccessResponse.StoreAccessDetail> responsesDetail = new ArrayList<>();
-
-        StoreAccessResponse responseStoreAccess = new StoreAccessResponse();
-        responseStoreAccess.setId(dataAccess.id);
-        responseStoreAccess.setUserMerchantId(dataAccess.getUserMerchant().id);
-        responseStoreAccess.setUserName(userMerchant.fullName);
-        responseStoreAccess.setMerchantId(dataAccess.getMerchant().id);
-        responseStoreAccess.setIsActive(dataAccess.getIsActive());
-        for(StoreAccessDetail storeDetail : dataDetail) {
-            StoreAccessResponse.StoreAccessDetail responseDetail = new StoreAccessResponse.StoreAccessDetail();
-            Store storeDataFetch = Store.findById(storeDetail.getStore().id);
-            responseDetail.setId(storeDataFetch.id);
-            responseDetail.setStoreName(storeDataFetch.storeName);
-            responseDetail.setIsActive(storeDataFetch.isActive);
-            responsesDetail.add(responseDetail);
-            responseStoreAccess.setStoreData(responseDetail != null ? responsesDetail : null);
+        if (dataAccess != null) {
+            List<StoreAccessResponse.StoreAccessDetail> responsesDetail = new ArrayList<>();
+            Query<StoreAccessDetail> queryDetail = StoreAccessRepository.findDetail.where().eq("t0.store_access_id", dataAccess.id).eq("t0.is_deleted", false).order("t0.id");
+            List<StoreAccessDetail> dataDetail = StoreAccessRepository.getDetailData(queryDetail);
+            StoreAccessResponse responseStoreAccess = new StoreAccessResponse();
+            responseStoreAccess.setId(dataAccess.id);
+            responseStoreAccess.setUserMerchantId(dataAccess.getUserMerchant().id);
+            responseStoreAccess.setUserName(userMerchant.fullName);
+            responseStoreAccess.setMerchantId(dataAccess.getMerchant().id);
+            responseStoreAccess.setIsActive(dataAccess.getIsActive());
+            for(StoreAccessDetail storeDetail : dataDetail) {
+                StoreAccessResponse.StoreAccessDetail responseDetail = new StoreAccessResponse.StoreAccessDetail();
+                Store storeDataFetch = Store.findById(storeDetail.getStore().id);
+                responseDetail.setId(storeDataFetch.id);
+                responseDetail.setStoreName(storeDataFetch.storeName);
+                responseDetail.setIsActive(storeDataFetch.isActive);
+                responsesDetail.add(responseDetail);
+                responseStoreAccess.setStoreData(responseDetail != null ? responsesDetail : null);
+            }
+            userMerchantResponse.setStoreAccess(responseStoreAccess);
+        } else {
+            userMerchantResponse.setStoreAccess(null);
         }
-        userMerchantResponse.setStoreAccess(responseStoreAccess);
 
         return userMerchantResponse;
     }
@@ -427,7 +443,7 @@ public class SessionsController extends BaseController {
                 }
                 Thread thread = new Thread(() -> {
                     try {
-                        MailConfig.sendmail(member.email, MailConfig.subjectForgotPassword, MailConfig.renderMailForgotPasswordMerchantTemplate(member, redirect));
+                        MailConfig.sendmail(member.email, MailConfig.subjectForgotPassword, MailConfig.renderMailForgotPasswordMerchantTemplate(member.resetToken, member.fullName, redirect));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -435,9 +451,35 @@ public class SessionsController extends BaseController {
                 thread.start();
                 response.setBaseResponse(1, 0, 1, success, null);
                 return ok(Json.toJson(response));
+            } else {
+                UserMerchant userMerchant = UserMerchantRepository.findByEmail(email);
+                if (userMerchant != null) {
+                    Long now = System.currentTimeMillis();
+                    String merchantEmail = userMerchant.getEmail();
+                    String forgotPasswordCode = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
+                    String redirect = Constant.getInstance().getMerchantUrl() + "/reset-password" + "/" + forgotPasswordCode;
+                    try {
+                        userMerchant.setResetToken(Encryption.EncryptAESCBCPCKS5Padding(member.email+now));
+                        userMerchant.setResetTime(now);
+                        member.update();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    Thread thread = new Thread(() -> {
+                        try {
+                            MailConfig.sendmail(userMerchant.getEmail(), MailConfig.subjectForgotPassword, MailConfig.renderMailForgotPasswordMerchantTemplate(userMerchant.getResetToken(), userMerchant.getFullName(), redirect));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                    thread.start();
+                    response.setBaseResponse(1, 0, 1, success, null);
+                    return ok(Json.toJson(response));
+                } else {
+                    response.setBaseResponse(0, 0, 0, notFound, null);
+                    return notFound(Json.toJson(response));
+                }
             }
-            response.setBaseResponse(0, 0, 0, notFound, null);
-            return notFound(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
