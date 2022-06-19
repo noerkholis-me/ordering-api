@@ -81,6 +81,15 @@ public class UserMerchant extends BaseModel {
     @Getter @Setter
     public RoleMerchant role;
 
+    @Getter @Setter
+    @Column(name = "reset_token")
+    public String resetToken;
+
+    @Column(name = "reset_time")
+    @Getter @Setter
+    private Long resetTime;
+
+
 //    @OneToOne
 //    @JsonProperty("merchant")
 //    @JoinColumn(name="merchant_id", referencedColumnName = "id")
@@ -119,6 +128,10 @@ public class UserMerchant extends BaseModel {
     }
 
     public List<FeatureAndPermissionSession> checkFeatureAndPermissions() {
+        List<RoleMerchantFeature> roleMerchantFeatures = RoleMerchantFeature.findByRoleMerchantId(this.role.id);
+        if (roleMerchantFeatures == null || roleMerchantFeatures.isEmpty()) {
+            return null;
+        }
         List<RoleMerchantFeature> myFeature = this.role.getFeatureList();
         List<FeatureAndPermissionSession> featureAndPermissionSessionList = new ArrayList<>();
         for (RoleMerchantFeature feature : myFeature) {
