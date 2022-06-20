@@ -372,7 +372,7 @@ public class OrderMerchantController extends BaseController {
                     orderLists.add(orderRes);
                 }
 
-                response.setBaseResponse(totalData, offset, limit, success + " Berhasil menampilkan data order report", orderLists);
+                response.setBaseResponse(totalData, offset, limit, " Berhasil menampilkan data order report", orderLists);
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
                 LOGGER.error("Error when getting list data orders");

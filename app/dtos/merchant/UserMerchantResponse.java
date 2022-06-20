@@ -20,6 +20,8 @@ public class UserMerchantResponse  {
     private String email;
     @JsonProperty("role_id")
     private Long roleId;
+    @JsonProperty("role_name")
+    private String roleName;
     @JsonProperty("is_active")
     private Boolean isActive;
     // private String password;
