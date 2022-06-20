@@ -149,20 +149,21 @@ public class RoleMerchantController extends BaseController {
     private static List<FeatureAssignRequest> toFeaturesResponse(List<RoleMerchantFeature> roleMerchantFeatures) {
         if (roleMerchantFeatures == null || roleMerchantFeatures.isEmpty()) {
             return new ArrayList<>();
+        } else {
+            List<FeatureAssignRequest> featureAssignRequests = new ArrayList<>();
+            for (RoleMerchantFeature roleMerchantFeature : roleMerchantFeatures) {
+                FeatureAssignRequest featureAssignRequest = new FeatureAssignRequest();
+                featureAssignRequest.setFeatureId(roleMerchantFeature.getFeature().id);
+                featureAssignRequest.setFeatureName(roleMerchantFeature.getFeature().name);
+                featureAssignRequest.setKey(roleMerchantFeature.getFeature().key);
+                featureAssignRequest.setIsView(roleMerchantFeature.getIsView());
+                featureAssignRequest.setIsAdd(roleMerchantFeature.getIsAdd());
+                featureAssignRequest.setIsEdit(roleMerchantFeature.getIsEdit());
+                featureAssignRequest.setIsDelete(roleMerchantFeature.getIsDelete());
+                featureAssignRequests.add(featureAssignRequest);
+            }
+            return featureAssignRequests;
         }
-        List<FeatureAssignRequest> featureAssignRequests = new ArrayList<>();
-        for (RoleMerchantFeature roleMerchantFeature : roleMerchantFeatures) {
-            FeatureAssignRequest featureAssignRequest = new FeatureAssignRequest();
-            featureAssignRequest.setFeatureId(roleMerchantFeature.getFeature().id);
-            featureAssignRequest.setFeatureName(roleMerchantFeature.getFeature().name);
-            featureAssignRequest.setKey(roleMerchantFeature.getFeature().key);
-            featureAssignRequest.setIsView(roleMerchantFeature.getIsView());
-            featureAssignRequest.setIsAdd(roleMerchantFeature.getIsAdd());
-            featureAssignRequest.setIsEdit(roleMerchantFeature.getIsEdit());
-            featureAssignRequest.setIsDelete(roleMerchantFeature.getIsDelete());
-            featureAssignRequests.add(featureAssignRequest);
-        }
-        return featureAssignRequests;
     }
 
     @ApiOperation(value = "Edit Role", notes = "Edit Role.\n" + swaggerInfo
