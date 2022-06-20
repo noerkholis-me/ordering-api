@@ -376,6 +376,7 @@ PUT     /merchant/subcategory/:id/status                  controllers.categories
 #LEVEL 3
 POST    /merchant/subscategory/:catid/:subid               controllers.categories.SubCategoryMerchantController.createSubsCategory(catid:Long, subid:Long)
 PUT     /merchant/subscategory/:id/update                  controllers.categories.SubCategoryMerchantController.editSubsCategory(id:Long)
+PUT     /merchant/subscategory/:id/status                  controllers.categories.SubCategoryMerchantController.setStatusSubsCategory(id:Long)
 DELETE  /merchant/subscategory/:id/delete                  controllers.categories.SubCategoryMerchantController.deleteSubsCategory(id:Long)
 GET     /merchant/subscategory/data/list                   controllers.categories.SubCategoryMerchantController.listSubsCategory(sort:String ?= "", filter:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET     /merchant/subscategory/:id/detail                  controllers.categories.SubCategoryMerchantController.viewSubsCategory(id:Long)
