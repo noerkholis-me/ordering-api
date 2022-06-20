@@ -59,16 +59,29 @@ public class ImagesController extends BaseController {
                 }
                 int loop = 1;
                 Map<String, String> mapImage = new HashMap<>();
+                String extension = null;
+                String fileName = null;
                 try {
                     while (loop <= countImage) {
                         String imageKey = "image-" + loop;
                         Images images = Images.find.where().eq("module", key).eq("image_key", imageKey).findUnique();
                         if (images == null) {
                             Http.MultipartFormData.FilePart imageFile = body.getFile(imageKey);
-                            File image = ImageUtil.uploadImage(imageFile, key, imageKey, ImageUtil.fullImageSize, "jpg");
+
+                            // GET FILE EXTENSION
+                            fileName = imageFile.getFilename();
+
+                            int index = fileName.lastIndexOf('.');
+                            if(index > 0) {
+                                extension = fileName.substring(index + 1);
+                                System.out.println(extension);
+                            }
+                            // ===========================================
+
+                            File image = ImageUtil.uploadImage(imageFile, key, imageKey, ImageUtil.fullImageSize, extension);
                             String url = ImageUtil.createImageUrl(key, image.getName());
                             mapImage.put(imageKey, url);
-
+                            
                             Images img = new Images();
                             img.setModule(key);
                             img.setImages(url);
@@ -77,7 +90,18 @@ public class ImagesController extends BaseController {
 
                         } else {
                             Http.MultipartFormData.FilePart imageFile = body.getFile(imageKey);
-                            File image = ImageUtil.uploadImage(imageFile, key, imageKey, ImageUtil.fullImageSize, "jpg");
+                            
+                            // GET FILE EXTENSION
+                            fileName = imageFile.getFilename();
+
+                            int index = fileName.lastIndexOf('.');
+                            if(index > 0) {
+                                extension = fileName.substring(index + 1);
+                                System.out.println(extension);
+                            }
+                            // ===========================================
+
+                            File image = ImageUtil.uploadImage(imageFile, key, imageKey, ImageUtil.fullImageSize, extension);
                             String url = ImageUtil.createImageUrl(key, image.getName());
                             mapImage.put(imageKey, url);
 

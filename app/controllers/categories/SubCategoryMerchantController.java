@@ -580,6 +580,59 @@ public class SubCategoryMerchantController extends BaseController {
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         }
+
+        public static Result setStatusSubsCategory(Long id) {
+            Merchant ownMerchant = checkMerchantAccessAuthorization();
+            if (ownMerchant != null) {
+                try {
+                    JsonNode json = request().body().asJson();
+                    
+                    SubsCategoryMerchantResponse request = objectMapper.readValue(json.toString(), SubsCategoryMerchantResponse.class);
+                    String validate = validateCreateSubsCategory(request);
+                    if (validate == null) {
+                        Transaction trx = Ebean.beginTransaction();
+                        try {
+                            SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                            if (subsCategoryMerchant == null) {
+                                response.setBaseResponse(0, 0, 0, error + " subs kategori tidak tersedia.", null);
+                                return badRequest(Json.toJson(response));
+                            }
+                            CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(subsCategoryMerchant.getCategoryMerchant().id, ownMerchant.id);
+                            if(categoryMerchant == null) {
+                                response.setBaseResponse(0, 0, 0, error + " kategori tidak ditemukan.", null);
+                                return badRequest(Json.toJson(response));
+                            }
+                            SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(subsCategoryMerchant.getSubCategoryMerchant().id, ownMerchant.id);
+                            if (subCategoryMerchant == null) {
+                                response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
+                                return badRequest(Json.toJson(response));
+                            }
+                            subsCategoryMerchant.setActive(request.getIsActive());
+                            subsCategoryMerchant.update();
+    
+                            trx.commit();
+                            response.setBaseResponse(1, offset, 1, success + " mengubah sub kategori", subsCategoryMerchant);
+                            return ok(Json.toJson(response));
+                        } catch (Exception e) {
+                            logger.error("Error saat mengubah sub kategori", e);
+                            e.printStackTrace();
+                            trx.rollback();
+                        } finally {
+                            trx.end();
+                        }
+                        response.setBaseResponse(0, 0, 0, error, null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    response.setBaseResponse(0, 0, 0, validate, null);
+                    return badRequest(Json.toJson(response));
+                } catch (Exception e) {
+                    logger.error("Error saat parsing json", e);
+                    e.printStackTrace();
+                }
+            }
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
     
         public static Result deleteSubsCategory(Long id) {
             Merchant ownMerchant = checkMerchantAccessAuthorization();
