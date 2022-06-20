@@ -45,7 +45,7 @@ public class FinanceWithdraw extends BaseModel {
     @Column(name = "approval_date")
     private Date approvalDate;
 
-    @Column(name = "approval_by")
+    @Column(name = "approved_by")
     private String approvedBy;
 
     @ManyToOne(cascade = { CascadeType.ALL })
