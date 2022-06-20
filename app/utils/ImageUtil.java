@@ -61,35 +61,35 @@ public class ImageUtil {
         //original image size
         int width   = imageR.getWidth();
         int height  = imageR.getHeight();
-        if(resolution==null){
-            resolution = getScaledResolution(width, height);
-        }
-        //result image frame size
-        int widthF  = width;
-        int heightF = height;
-        int[]size = getAppliedResolution(width, height, widthF, heightF);
-        // resize image size
-        int widthR = width;
-        int heightR = height;
-        // start coordinate to drawing at result image frame
-        int widthS = width / 4;
-        int heightS = height / 4;
+        // if(resolution==null){
+        //     resolution = getScaledResolution(width, height);
+        // }
+        // //result image frame size
+        // int widthF  = width;
+        // int heightF = height;
+        // int[]size = getAppliedResolution(width, height, widthF, heightF);
+        // // resize image size
+        // int widthR = width;
+        // int heightR = height;
+        // // start coordinate to drawing at result image frame
+        // int widthS = width / 4;
+        // int heightS = height / 4;
 
-        Image imageR1 = imageR.getScaledInstance(widthR, heightR, Image.SCALE_SMOOTH);
+        Image imageR1 = imageR.getScaledInstance(width, height, Image.SCALE_SMOOTH);
         BufferedImage b1;
         Graphics2D bg;
         if(resFormat.equalsIgnoreCase("png")||resFormat.equalsIgnoreCase("gif")){
-            b1 = new BufferedImage(widthF, heightF, BufferedImage.TYPE_INT_ARGB);
+            b1 = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
             bg = b1.createGraphics();
             bg.setComposite(AlphaComposite.Clear);
-            bg.fillRect(0, 0, widthF, heightF);
+            bg.fillRect(0, 0, 0, 0);
             bg.setComposite(AlphaComposite.Src);
             bg.drawImage(imageR1, 0, 0, null);
         } else {
-            b1 = new BufferedImage(widthF, heightF, BufferedImage.TYPE_INT_RGB);
+            b1 = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
             bg = b1.createGraphics();
             bg.setColor(Color.WHITE);
-            bg.fillRect(0, 0, widthF, heightF);
+            bg.fillRect(0, 0, 0, 0);
             bg.setComposite(AlphaComposite.Src);
             bg.drawImage(imageR1, 0, 0, Color.WHITE, null);
         }
