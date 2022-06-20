@@ -68,6 +68,8 @@ public class FinanceWithdrawController extends BaseController {
             } catch (Exception ex) {
                 LOGGER.error("Error when getting transaction withdraw data");
                 ex.printStackTrace();
+                response.setBaseResponse(0, offset, limit, error + " Showing data transaction", null);
+                return internalServerError(Json.toJson(response));
             }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);

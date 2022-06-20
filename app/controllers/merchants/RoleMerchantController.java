@@ -147,6 +147,9 @@ public class RoleMerchantController extends BaseController {
     }
 
     private static List<FeatureAssignRequest> toFeaturesResponse(List<RoleMerchantFeature> roleMerchantFeatures) {
+        if (roleMerchantFeatures == null || roleMerchantFeatures.isEmpty()) {
+            return new ArrayList<>();
+        }
         List<FeatureAssignRequest> featureAssignRequests = new ArrayList<>();
         for (RoleMerchantFeature roleMerchantFeature : roleMerchantFeatures) {
             FeatureAssignRequest featureAssignRequest = new FeatureAssignRequest();
