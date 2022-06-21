@@ -199,9 +199,9 @@ public class SeedDefaultConfiguration {
 		features.add(
 				new Feature("Pickup Point", "pickuppointmerchant", "Stores", "Can view, create and edit pickup point data.", true, true));
 		features.add(
-				new Feature("Table Type", "tabletypemerchant", "Stores", "Can view, create and edit table type data.", true, true));
+				new Feature("Product Add On", "productmerchant", "Products", "Can view, create and edit table type data.", true, true));
 		features.add(
-				new Feature("Table", "tablemerchant", "Stores", "Can view, create and edit table type data.", true, true));
+				new Feature("Report Order", "ordermerchant", "Orders", "Can view, create and edit table type data.", true, true));
 		features.add(
 				new Feature("Order", "ordermerchant", "Orders", "Can view, create and edit transaction data.", true, true));
 		features.add(
