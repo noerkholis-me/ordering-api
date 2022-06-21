@@ -129,8 +129,8 @@ public class OrderMerchantController extends BaseController {
                             productOrderDetails.add(productDetail);
                         }
                         orderRes.setProductOrderDetail(productOrderDetails);
+                        orderLists.add(orderRes);
                     }
-                    orderLists.add(orderRes);
                 }
 
 
