@@ -125,7 +125,7 @@ public class UpdateProfileController extends BaseController {
                     Thread thread = new Thread(() -> {
                         try {
                             MailConfig.sendmail(request.getEmail(), MailConfig.subjectActivation,
-                                    MailConfig.renderMailSendCreatePasswordBackendTemplate(forActivation, getMerchantData.fullName));
+                                    MailConfig.renderVerificationAccount(forActivation, getMerchantData.fullName));
         
                         } catch (Exception e) {
                             e.printStackTrace();
