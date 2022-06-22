@@ -13,6 +13,7 @@ import controllers.BaseController;
 import com.hokeba.util.CommonFunction;
 import com.hokeba.util.Encryption;
 import com.hokeba.util.MailConfig;
+import com.hokeba.util.Helper;
 import dtos.profile.*;
 import models.*;
 import models.Photo;
@@ -252,7 +253,7 @@ public class UpdateProfileController extends BaseController {
                     Thread thread = new Thread(() -> {
                         try {
                             MailConfig.sendmail(request.getEmail(), MailConfig.subjectActivation,
-                                    MailConfig.renderMailSendCreatePasswordCMSTemplate(forActivation, getUserMerchantData.fullName));
+                                    MailConfig.renderVerificationAccount(forActivation, getUserMerchantData.fullName));
         
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -277,6 +278,43 @@ public class UpdateProfileController extends BaseController {
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
+    }
+
+    public static Result verifyUserMerchantEmail(String activationCode) {
+        Transaction trx = Ebean.beginTransaction();
+        try {
+
+            // VALIDATION
+            // =======================================================================
+            if(activationCode == null || activationCode == ""){
+                response.setBaseResponse(0, 0, 0, "Activation code tidak boleh kosong", null);
+                return badRequest(Json.toJson(response));
+            }
+            // =======================================================================
+            
+            UserMerchant getUserMerchantData = UserMerchantRepository.findByActivationCode(activationCode);
+            Merchant getMerchantData = Merchant.findByActivationCode(activationCode);
+            if(getUserMerchantData != null) {
+                getUserMerchantData.isActive = Boolean.TRUE;
+                getUserMerchantData.setActivationCode("");
+                getUserMerchantData.update();
+                trx.commit();
+                return redirect(Helper.MERCHANT_URL+"/activation?success=1");
+            } else if(getMerchantData != null) {
+                getMerchantData.isActive = Boolean.TRUE;
+                getMerchantData.activationCode = "";
+                getMerchantData.update();
+                trx.commit();
+                return redirect(Helper.MERCHANT_URL+"/activation?success=1");
+            }
+            response.setBaseResponse(0, 0, 0, "Profile tidak ditemukan", null);
+            return notFound(Json.toJson(response));
+            
+        } catch (Exception e) {
+            logger.error("Error saat parsing json", e);
+            e.printStackTrace();
+        }
+        return redirect(Helper.MERCHANT_URL);
     }
 
     public static Result updatePasswordUserMerchantData(Long userMerchantId) {

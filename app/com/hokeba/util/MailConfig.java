@@ -142,4 +142,20 @@ public class MailConfig {
 		return "";
 	}
 
+
+
+	public static String renderVerificationAccount(String activationCode, String fullName) {
+		Merchant dt = new Merchant();
+		Form<Merchant> formData = Form.form(Merchant.class).fill(dt);
+		String url = Helper.API_URL + "/re/account-activation?token=" + activationCode;
+
+		try {
+			String html = views.html.verificationEmailChange.render(fullName, url).toString();
+			return html;
+		} catch (Exception ignored) {
+
+		}
+		return "";
+	}
+
 }

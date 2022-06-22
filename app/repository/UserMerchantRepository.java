@@ -56,6 +56,12 @@ public class UserMerchantRepository extends Model {
             .eq("isActive", Boolean.TRUE)
             .findUnique();
     }
+	
+    public static UserMerchant findByActivationCode(String activationCode) {
+        return find.where()
+            .eq("activation_code", activationCode)
+            .findUnique();
+    }
 
     public static List<UserMerchant> getDataUser(Query<UserMerchant> reqQuery, String sort, String filter, int offset, int limit)
 			throws IOException {
