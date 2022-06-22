@@ -88,6 +88,15 @@ public class FinanceWithdrawController extends BaseController {
                     response.setBaseResponse(0, 0, 0, inputParameter + " store not found.", null);
                     return badRequest(Json.toJson(response));
                 }
+
+                BigDecimal currentBalance = store.getActiveBalance();
+                BigDecimal requestAmount = request.getAmount();
+
+                if (requestAmount.compareTo(currentBalance) == 1) {
+                    response.setBaseResponse(0, 0, 0, inputParameter + " amount should be less than active balance", null);
+                    return badRequest(Json.toJson(response));
+                }
+
                 Transaction trx = Ebean.beginTransaction();
                 try {
                     FinanceWithdraw financeWithdraw = new FinanceWithdraw();

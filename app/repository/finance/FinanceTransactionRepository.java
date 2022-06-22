@@ -47,6 +47,19 @@ public class FinanceTransactionRepository extends BaseModel {
                 .query();
     }
 
+    public static List<FinanceTransaction> findAllTransactionByDate(String startDate, String endDate) throws Exception {
+        Query<FinanceTransaction> query = find.query();
+        ExpressionList<FinanceTransaction> exp = query.where();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        Date start = simpleDateFormat.parse(startDate.concat(" 00:00:00.0"));
+        Date end = simpleDateFormat.parse(endDate.concat(" 23:59:00.0"));
+
+        Timestamp startTimestamp = new Timestamp(start.getTime());
+        Timestamp endTimestamp = new Timestamp(end.getTime());
+        exp.between("t0.date", startTimestamp, endTimestamp);
+        return query.findList();
+    }
+
     public static List<FinanceTransaction> findAllTransaction(Query<FinanceTransaction> reqQuery, String startDate, String endDate,
                                                                         String sort, int offset, int limit, String status) throws ParseException {
         Query<FinanceTransaction> query = reqQuery;
