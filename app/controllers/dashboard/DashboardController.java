@@ -9,8 +9,12 @@ import models.finance.FinanceTransaction;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import repository.ProductMerchantRepository;
 import repository.finance.FinanceTransactionRepository;
+import repository.finance.FinanceWithdrawRepository;
+import scala.Int;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -24,28 +28,104 @@ public class DashboardController extends BaseController {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
-                String start = null;
-                String end = null;
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                List<Member> members = new ArrayList<>();
-                List<FinanceTransaction> financeTransactions = new ArrayList<>();
-                Map<List<Member>, List<FinanceTransaction>> mapData = new HashMap<>();
-                if (startDate.equalsIgnoreCase("") && endDate.equalsIgnoreCase("")) {
-                    // do find seven days ago
-                    long DAY_IN_MS = 1000 * 60 * 60 * 24;
-                    start = new Date(System.currentTimeMillis() - (7 * DAY_IN_MS)).toString();
-                    end = new Date().toString();
-                    members = Member.findAllMemberByCreatedAt(start, end);
-                    financeTransactions = FinanceTransactionRepository.findAllTransactionByDate(start, end);
-
-                    mapData.put()
-
-                } else {
-
-                }
+                return ok();
 
             } catch (Exception ex) {
                  ex.printStackTrace();
+                response.setBaseResponse(0, 0, 0, error, null);
+                return unauthorized(Json.toJson(response));
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    public static Result getTotalCustomer(String startDate, String endDate) {
+        Merchant merchant = checkMerchantAccessAuthorization();
+        if (merchant != null) {
+            try {
+                Map<String, Integer> data = new HashMap<>();
+                data.put("total_customer", 0);
+                response.setBaseResponse(1, offset, limit, success + " Showing total member ", data);
+                return ok(Json.toJson(response));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                response.setBaseResponse(0, 0, 0, error, null);
+                return unauthorized(Json.toJson(response));
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    public static Result getTotalProduct(String startDate, String endDate) {
+        Merchant merchant = checkMerchantAccessAuthorization();
+        if (merchant != null) {
+            try {
+                Integer totalProduct = ProductMerchantRepository.getTotalProduct(merchant, startDate, endDate);
+                Map<String, Integer> data = new HashMap<>();
+                data.put("total_product", totalProduct);
+                response.setBaseResponse(1, offset, limit, success + " Showing total product ", data);
+                return ok(Json.toJson(response));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                response.setBaseResponse(0, 0, 0, error, null);
+                return unauthorized(Json.toJson(response));
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    public static Result getTotalTransactionAmount() {
+        Merchant merchant = checkMerchantAccessAuthorization();
+        if (merchant != null) {
+            try {
+                BigDecimal totalActiveBalance = merchant.totalActiveBalance;
+                Map<String, Integer> data = new HashMap<>();
+                data.put("total_transaction_amount", totalActiveBalance.intValue());
+                response.setBaseResponse(1, offset, limit, success + " Showing total transaction amount", data);
+                return ok(Json.toJson(response));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                response.setBaseResponse(0, 0, 0, error, null);
+                return unauthorized(Json.toJson(response));
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    public static Result getTotalTransaction(String startDate, String endDate) {
+        Merchant merchant = checkMerchantAccessAuthorization();
+        if (merchant != null) {
+            try {
+                Integer totalTransaction = FinanceTransactionRepository.getTotalTransaction(merchant.id, startDate, endDate);
+                Map<String, Integer> data = new HashMap<>();
+                data.put("total_transaction", totalTransaction);
+                response.setBaseResponse(1, offset, limit, success + " Showing total transaction", data);
+                return ok(Json.toJson(response));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                response.setBaseResponse(0, 0, 0, error, null);
+                return unauthorized(Json.toJson(response));
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    public static Result getTotalWithdraw(String startDate, String endDate) {
+        Merchant merchant = checkMerchantAccessAuthorization();
+        if (merchant != null) {
+            try {
+                Integer totalTransaction = FinanceWithdrawRepository.getTotalWithdraw(merchant.id, startDate, endDate);
+                Map<String, Integer> data = new HashMap<>();
+                data.put("total_withdraw", totalTransaction);
+                response.setBaseResponse(1, offset, limit, success + " Showing total transaction", data);
+                return ok(Json.toJson(response));
+            } catch (Exception ex) {
+                ex.printStackTrace();
                 response.setBaseResponse(0, 0, 0, error, null);
                 return unauthorized(Json.toJson(response));
             }

@@ -40,6 +40,12 @@ public class FinanceWithdraw extends BaseModel {
     @Column(name = "account_number")
     private String accountNumber;
 
+    @Column(name = "account_name")
+    private String accountName;
+
+    @Column(name = "bank_name")
+    private String bankName;
+
     @Column(name = "request_by")
     private String requestBy;
 

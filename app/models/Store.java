@@ -102,7 +102,7 @@ public class Store extends BaseModel{
     @Getter @Setter
     public BigDecimal activeBalance;
 
-    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "store")
     @Getter
     @Setter
     private List<Order> orders;
