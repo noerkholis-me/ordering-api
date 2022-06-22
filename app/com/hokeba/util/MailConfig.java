@@ -38,13 +38,25 @@ public class MailConfig {
 	// Using Mail Gun Mail Server
 	public static boolean sendmail(String recipients, String subject, String contentTemplate) {
 		Properties props = new Properties();
-		props.put("mail.smtp.auth", "true");
+		props.setProperty("mail.smtp.host", smtp);
+		props.setProperty("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+		props.setProperty("mail.smtp.socketFactory.fallback", "false");
+		props.setProperty("mail.smtp.port", "465");
+		props.setProperty("mail.smtp.socketFactory.port", "465");
 		props.put("mail.smtp.starttls.enable", "true");
-		props.put("mail.smtp.host", smtp);
-		props.put("mail.smtp.port", "587");
+		props.put("mail.smtp.auth", "true");
 		props.put("mail.debug", "true");
-		props.put("mail.smtp.sendpartial", "true");
-		props.put("mail.smtp.ssl.enable", "false");
+		props.put("mail.store.protocol", "pop3");
+		props.put("mail.transport.protocol", "smtp");
+		props.put("mail.debug.auth", "true");
+		props.setProperty( "mail.pop3.socketFactory.fallback", "false");
+//		props.put("mail.smtp.auth", "true");
+//		props.put("mail.smtp.starttls.enable", "true");
+//		props.put("mail.smtp.host", smtp);
+//		props.put("mail.smtp.port", "465");
+//		props.put("mail.debug", "true");
+//		props.put("mail.smtp.sendpartial", "true");
+		props.put("mail.smtp.ssl.enable", "true");
 		props.put("mail.smtp.ssl.trust", "*");
 		props.put("mail.smtp.ssl.protocols", "TLSv1.2");
 
