@@ -418,7 +418,7 @@ public class OrderMerchantController extends BaseController {
                     return ok(Json.toJson(response));
                 }
                 
-                File file = DownloadOrderReport.downloadOrderReport(orders, merchant.id);
+                File file = DownloadOrderReport.downloadOrderReport(orders);
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddhhmmss");
                 String filenameOrderReport = "OrderReport-" +simpleDateFormat.format(new Date()).toString()+".xlsx";
                 response().setContentType("application/vnd.ms-excel");

@@ -24,7 +24,7 @@ public class DownloadOrderReport {
     private static final String FILE_NAME = "Order";
     private static final String FILE_TYPE = ".xlsx";
 
-    public static File downloadOrderReport(List<Order> orderData, Long merchantId) throws Exception{
+    public static File downloadOrderReport(List<Order> orderData) throws Exception{
         File file = null;
         try {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddhhmmss");
@@ -121,11 +121,19 @@ public class DownloadOrderReport {
                         // Nama Produk
                         rowSheet.createCell(7).setCellValue(oDetail.getProductName());
                         rowSheet.getCell(7).setCellStyle(cellStyle);
+                        System.out.print("Product id: ");
+                        System.out.println(oDetail.getProductMerchant().id);
 
                         // Tipe Produk
-                        ProductMerchantDetail pmdetail = ProductMerchantDetailRepository.findDetailProduct(oDetail.getProductMerchant().id, merchantId);
-                        rowSheet.createCell(8).setCellValue(pmdetail.getProductType());
-                        rowSheet.getCell(8).setCellStyle(cellStyle);
+                        ProductMerchantDetail pmdetail = ProductMerchantDetailRepository.getTypeData(oDetail.getProductMerchant().id);
+                        
+                        if (pmdetail != null) {
+                            rowSheet.createCell(8).setCellValue(pmdetail.getProductType());
+                            rowSheet.getCell(8).setCellStyle(cellStyle);
+                        }
+                        
+                        System.out.print("Product: ");
+                        System.out.println(oDetail.getProductMerchant());
 
                         // Harga Produk
                         rowSheet.createCell(9).setCellValue(oDetail.getProductPrice().doubleValue());
@@ -202,10 +210,17 @@ public class DownloadOrderReport {
                             rowSheet.createCell(7).setCellValue(orderDetailAddOn.getProductName());
                             rowSheet.getCell(7).setCellStyle(cellStyle);
 
+                            System.out.print("Product add on id: ");
+                            System.out.println(orderDetailAddOn.getProductAssignId());
+
                             // Tipe Produk
-                            ProductMerchantDetail pmdetailAddOn = ProductMerchantDetailRepository.findDetailAdditionalProduct(orderDetailAddOn.getProductAssignId(), merchantId);
-                            rowSheet.createCell(8).setCellValue(pmdetailAddOn.getProductType());
-                            rowSheet.getCell(8).setCellStyle(cellStyle);
+                            ProductMerchantDetail pmdetailAddOn = ProductMerchantDetailRepository.getTypeData(orderDetailAddOn.getProductAssignId());
+                            if (pmdetailAddOn != null) {
+                                rowSheet.createCell(8).setCellValue(pmdetail.getProductType());
+                                rowSheet.getCell(8).setCellStyle(cellStyle);
+                            }
+
+                            System.out.print("End of Product Add On ID");
 
                             // Harga Produk
                             rowSheet.createCell(9).setCellValue(orderDetailAddOn.getProductPrice().doubleValue());
