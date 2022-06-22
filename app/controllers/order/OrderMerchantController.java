@@ -58,7 +58,7 @@ public class OrderMerchantController extends BaseController {
                 List<OrderList> orderLists = new ArrayList<>();
                 List<Order> orders = OrderRepository.findAllOrderWithFilter(query, offset, limit, statusOrder);
                 if (orders.isEmpty() || orders.size() == 0) {
-                    response.setBaseResponse(0, 0, 0, "Data kosong", null);
+                    response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", orderLists);
                     return ok(Json.toJson(response));
                 }
 
@@ -180,7 +180,7 @@ public class OrderMerchantController extends BaseController {
                     List<OrderList> orderLists = new ArrayList<>();
                     List<Order> orders = OrderRepository.findAllOrderWithFilter(query, offset, limit, statusOrder);
                     if (orders.isEmpty() || orders.size() == 0) {
-                        response.setBaseResponse(0, 0, 0, "Data kosong", null);
+                        response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", orderLists);
                         return ok(Json.toJson(response));
                     }
 
@@ -300,7 +300,7 @@ public class OrderMerchantController extends BaseController {
                 List<OrderList> orderLists = new ArrayList<>();
                 List<Order> orders = OrderRepository.findAllOrderWithFilter(query, offset, limit, statusOrder);
                 if (orders.isEmpty() || orders.size() == 0) {
-                    response.setBaseResponse(0, 0, 0, "Data kosong", null);
+                    response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", orderLists);
                     return ok(Json.toJson(response));
                 }
 
@@ -414,7 +414,7 @@ public class OrderMerchantController extends BaseController {
                 List<OrderList> orderLists = new ArrayList<>();
                 List<Order> orders = OrderRepository.findAllOrderWithFilter(query, offset, limit, statusOrder);
                 if (orders.isEmpty() || orders.size() == 0) {
-                    response.setBaseResponse(0, 0, 0, "Data kosong", null);
+                    response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", orderLists);
                     return ok(Json.toJson(response));
                 }
                 
