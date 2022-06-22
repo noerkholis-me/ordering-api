@@ -42,6 +42,12 @@ public class UserMerchantRepository extends Model {
 				.findUnique();
 	}
 
+	public static UserMerchant forResendEmail(String email) {
+		return find.where()
+				.eq("email", email)
+				.findUnique();
+	}
+
     public static UserMerchant findById(Long id, Merchant merchant) {
         return find.where()
             .eq("id", id)
