@@ -550,6 +550,9 @@ PUT         /merchant/update/password              controllers.users.UpdateProfi
 PUT         /users/merchant/update/:id_user/profile        controllers.users.UpdateProfileController.updateUserMerchantData(id_user: Long)
 PUT         /users/merchant/update/:id_user/password        controllers.users.UpdateProfileController.updatePasswordUserMerchantData(id_user: Long)
 
+# REDIRECT
+GET         /re/account-activation                  controllers.users.UpdateProfileController.verifyUserMerchantEmail(token: String ?= "")
+
 # DASHBOARD
 GET         /merchant/dashboard/total-customer      controllers.dashboard.DashboardController.getTotalCustomer(start_date: String?= "", end_date: String?= "")
 GET         /merchant/dashboard/total-product      controllers.dashboard.DashboardController.getTotalProduct(start_date: String?= "", end_date: String?= "")

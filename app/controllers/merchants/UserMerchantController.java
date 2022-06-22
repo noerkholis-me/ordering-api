@@ -58,7 +58,7 @@ public class UserMerchantController extends BaseController {
                         }
 
                         UserMerchant newUserMerchant = new UserMerchant();
-                        constructRequestModel(newUserMerchant, request, role, ownMerchant, Boolean.TRUE);
+                        constructRequestModel(newUserMerchant, request, role, ownMerchant, Boolean.FALSE);
                         newUserMerchant.save();
 
                         String forActivation = Encryption.EncryptAESCBCPCKS5Padding(String.valueOf(newUserMerchant.id) + String.valueOf(System.currentTimeMillis()));
@@ -128,7 +128,7 @@ public class UserMerchantController extends BaseController {
                             response.setBaseResponse(0, 0, 0, error + " Role id not found.", null);
                             return badRequest(Json.toJson(response));
                         }
-                        constructRequestModel(userMerchant, request, role, ownMerchant, Boolean.TRUE);
+                        constructRequestModel(userMerchant, request, role, ownMerchant, request.getIsActive());
                         userMerchant.update();
                         trx.commit();
 
@@ -319,6 +319,7 @@ public class UserMerchantController extends BaseController {
                     response.setGender(data.getGender());
                     response.setMerchantId(data.getRole().getMerchant().id);
                     response.setRoleId(data.getRole().id);
+                    response.setRoleName(data.getRole().getName());
                     responses.add(response);
                 }
                 response.setBaseResponse(filter == null || filter == "" ? totalData.size() : responseIndex.size() , offset, limit, success + " showing data", responses);
