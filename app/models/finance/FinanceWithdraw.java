@@ -18,8 +18,9 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = false)
 public class FinanceWithdraw extends BaseModel {
 
-    public static final String WAITING_CONFIRMATION = "Waiting Confirmation";
-    public static final String APPROVED = "Approved";
+    public static final String WAITING_CONFIRMATION = "WAITING_CONFIRMATION";
+    public static final String APPROVED = "APPROVED";
+    public static final String REJECTED = "REJECTED";
 
     @Column(name = "event_id")
     private String eventId;
@@ -38,6 +39,12 @@ public class FinanceWithdraw extends BaseModel {
 
     @Column(name = "account_number")
     private String accountNumber;
+
+    @Column(name = "account_name")
+    private String accountName;
+
+    @Column(name = "bank_name")
+    private String bankName;
 
     @Column(name = "request_by")
     private String requestBy;

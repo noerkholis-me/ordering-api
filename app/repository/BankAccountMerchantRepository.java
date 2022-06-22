@@ -18,6 +18,10 @@ public class BankAccountMerchantRepository extends BaseModel {
         return Optional.ofNullable(find.where().eq("id", id).findUnique());
     }
 
+    public static Optional<BankAccountMerchant> findByAccountNumber(String accountNumber) {
+        return Optional.ofNullable(find.where().eq("accountNumber", accountNumber).eq("isPrimary", true).findUnique());
+    }
+
     public static List<BankAccountMerchant> findAll(Merchant merchant) {
         return find.where()
                 .eq("merchant", merchant)

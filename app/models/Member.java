@@ -1,12 +1,14 @@
 package models;
 
 import com.avaje.ebean.*;
+import com.avaje.ebean.Query;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hokeba.util.CommonFunction;
 import com.hokeba.util.Constant;
 import com.hokeba.util.Encryption;
+import models.finance.FinanceTransaction;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -16,6 +18,7 @@ import javax.validation.constraints.Size;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -703,6 +706,24 @@ public class Member extends BaseModel {
     }
     public static Integer findRowCountOrderHistory(Long memberId) {
         return SalesOrder.find.where().eq("is_deleted", false).eq("member.id", memberId).findRowCount();
+    }
+
+    public static List<Member> findAllMemberByCreatedAt(String startDate, String endDate) throws Exception {
+
+        Query<Member> query = Member.find.where().eq("t0.is_active", true).query();
+
+        ExpressionList<Member> exp = query.where();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        Date start = simpleDateFormat.parse(startDate.concat(" 00:00:00.0"));
+        Date end = simpleDateFormat.parse(endDate.concat(" 23:59:00.0"));
+
+        Timestamp startTimestamp = new Timestamp(start.getTime());
+        Timestamp endTimestamp = new Timestamp(end.getTime());
+        exp.between("t0.created_at", startTimestamp, endTimestamp);
+
+        query = exp.query();
+
+        return query.findList();
     }
 
     public static Member findByEmail(String email) {
