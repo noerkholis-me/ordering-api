@@ -129,6 +129,9 @@ public class UpdateProfileController extends BaseController {
         
                         } catch (Exception e) {
                             e.printStackTrace();
+                            trx.rollback();
+                        } finally {
+                            trx.end();
                         }
                     });
                     thread.start();
@@ -154,6 +157,9 @@ public class UpdateProfileController extends BaseController {
             } catch (Exception e) {
                 logger.error("Error saat parsing json", e);
                 e.printStackTrace();
+                trx.rollback();
+            } finally {
+                trx.end();
             }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
@@ -204,6 +210,9 @@ public class UpdateProfileController extends BaseController {
             } catch (Exception e) {
                 logger.error("Error saat parsing json", e);
                 e.printStackTrace();
+                trx.rollback();
+            } finally {
+                trx.end();
             }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
@@ -257,6 +266,9 @@ public class UpdateProfileController extends BaseController {
         
                         } catch (Exception e) {
                             e.printStackTrace();
+                            trx.rollback();
+                        } finally {
+                            trx.end();
                         }
                     });
                     thread.start();
@@ -274,6 +286,9 @@ public class UpdateProfileController extends BaseController {
             } catch (Exception e) {
                 logger.error("Error saat parsing json", e);
                 e.printStackTrace();
+                trx.rollback();
+            } finally {
+                trx.end();
             }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
@@ -313,6 +328,9 @@ public class UpdateProfileController extends BaseController {
         } catch (Exception e) {
             logger.error("Error saat parsing json", e);
             e.printStackTrace();
+            trx.rollback();
+        } finally {
+            trx.end();
         }
         return redirect(Helper.MERCHANT_URL);
     }
@@ -361,6 +379,9 @@ public class UpdateProfileController extends BaseController {
             } catch (Exception e) {
                 logger.error("Error saat parsing json", e);
                 e.printStackTrace();
+                trx.rollback();
+            } finally {
+                trx.end();
             }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);

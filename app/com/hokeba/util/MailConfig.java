@@ -142,8 +142,6 @@ public class MailConfig {
 		return "";
 	}
 
-
-
 	public static String renderVerificationAccount(String activationCode, String fullName) {
 		Merchant dt = new Merchant();
 		Form<Merchant> formData = Form.form(Merchant.class).fill(dt);
