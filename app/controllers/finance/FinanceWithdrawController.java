@@ -13,19 +13,18 @@ import models.Merchant;
 import models.Store;
 import models.finance.FinanceTransaction;
 import models.finance.FinanceWithdraw;
+import models.merchant.BankAccountMerchant;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import repository.BankAccountMerchantRepository;
 import repository.finance.FinanceTransactionRepository;
 import repository.finance.FinanceWithdrawRepository;
 import service.DownloadTransactionService;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class FinanceWithdrawController extends BaseController {
 
@@ -88,6 +87,21 @@ public class FinanceWithdrawController extends BaseController {
                     response.setBaseResponse(0, 0, 0, inputParameter + " store not found.", null);
                     return badRequest(Json.toJson(response));
                 }
+
+                BigDecimal currentBalance = store.getActiveBalance();
+                BigDecimal requestAmount = request.getAmount();
+
+                if (requestAmount.compareTo(currentBalance) == 1) {
+                    response.setBaseResponse(0, 0, 0, inputParameter + " amount should be less than active balance", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                Optional<BankAccountMerchant> bankAccountMerchant = BankAccountMerchantRepository.findByAccountNumber(request.getAccountNumber());
+                if (!bankAccountMerchant.isPresent()) {
+                    response.setBaseResponse(0, 0, 0, inputParameter + " account number not found", null);
+                    return badRequest(Json.toJson(response));
+                }
+
                 Transaction trx = Ebean.beginTransaction();
                 try {
                     FinanceWithdraw financeWithdraw = new FinanceWithdraw();
@@ -96,7 +110,9 @@ public class FinanceWithdrawController extends BaseController {
                     financeWithdraw.setDate(new Date());
                     financeWithdraw.setStatus(FinanceWithdraw.WAITING_CONFIRMATION);
                     financeWithdraw.setAmount(request.getAmount());
-                    financeWithdraw.setAccountNumber(request.getAccountNumber());
+                    financeWithdraw.setAccountNumber(bankAccountMerchant.get().getAccountNumber());
+                    financeWithdraw.setAccountName(bankAccountMerchant.get().getAccountName());
+                    financeWithdraw.setBankName(bankAccountMerchant.get().getBankName());
                     financeWithdraw.setRequestBy(request.getRequestBy());
                     financeWithdraw.setStore(store);
                     financeWithdraw.save();
