@@ -3,6 +3,9 @@ package controllers.order;
 import com.avaje.ebean.Query;
 import com.hokeba.api.BaseResponse;
 import controllers.BaseController;
+import dtos.order.InvoicePrintResponse;
+import dtos.order.OrderDetailAddOnResponse;
+import dtos.order.OrderDetailResponse;
 import dtos.order.OrderList;
 import models.Member;
 import models.Merchant;
@@ -427,6 +430,74 @@ public class OrderMerchantController extends BaseController {
             } catch (Exception ex) {
                 ex.printStackTrace();
                 LOGGER.error("Error while download order report ", ex);
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    public static Result printInvoice(String orderNumber) {
+        Merchant merchant = checkMerchantAccessAuthorization();
+        if (merchant != null) {
+            try {
+                if (orderNumber.equalsIgnoreCase("") || orderNumber == null) {
+                    response.setBaseResponse(0, 0, 0, "order number cannot be null or empty.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                Optional<Order> order = OrderRepository.findByOrderNumber(orderNumber);
+                if (!order.isPresent()) {
+                    response.setBaseResponse(0, 0, 0, "order number does not exists.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                Order getOrder = order.get();
+
+                Store store = getOrder.getStore();
+
+                InvoicePrintResponse invoicePrintResponse = new InvoicePrintResponse();
+
+                invoicePrintResponse.setImageStoreUrl("");
+                invoicePrintResponse.setStoreName(store.storeName);
+                invoicePrintResponse.setStoreAddress(store.storeAddress);
+                invoicePrintResponse.setStorePhoneNumber(store.storePhone);
+
+                OrderPayment orderPayment = getOrder.getOrderPayment();
+                invoicePrintResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
+                invoicePrintResponse.setOrderNumber(getOrder.getOrderNumber());
+                invoicePrintResponse.setOrderType(getOrder.getOrderType());
+                invoicePrintResponse.setOrderDate(getOrder.getOrderDate());
+                invoicePrintResponse.setOrderTime(getOrder.getOrderDate());
+
+                List<OrderDetail> orderDetails = getOrder.getOrderDetails();
+                List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
+                for (OrderDetail orderDetail : orderDetails) {
+                    OrderDetailResponse orderDetailResponse = new OrderDetailResponse();
+                    orderDetailResponse.setProductName(orderDetail.getProductName());
+                    orderDetailResponse.setQty(orderDetail.getQuantity());
+                    orderDetailResponse.setTotal(orderDetail.getSubTotal());
+                    List<OrderDetailAddOnResponse> orderDetailAddOns = new ArrayList<>();
+                    List<OrderDetailAddOn> orderDetailAddOnList = orderDetail.getOrderDetailAddOns();
+                    for (OrderDetailAddOn orderDetailAddOn : orderDetailAddOnList) {
+                        OrderDetailAddOnResponse orderDetailAddOnResponse = new OrderDetailAddOnResponse();
+                        orderDetailAddOnResponse.setProductName(orderDetailAddOn.getProductName());
+                        orderDetailAddOns.add(orderDetailAddOnResponse);
+                    }
+                    orderDetailResponse.setOrderDetailAddOns(orderDetailAddOns);
+                    orderDetailResponses.add(orderDetailResponse);
+                }
+                invoicePrintResponse.setOrderDetails(orderDetailResponses);
+                invoicePrintResponse.setSubTotal(getOrder.getSubTotal());
+                invoicePrintResponse.setTaxPrice(orderPayment.getTaxPrice());
+                invoicePrintResponse.setPaymentFeeOwner(orderPayment.getPaymentFeeOwner());
+                invoicePrintResponse.setPaymentFeeCustomer(orderPayment.getPaymentFeeCustomer());
+                invoicePrintResponse.setTotal(getOrder.getTotalPrice());
+                invoicePrintResponse.setOrderQueue(getOrder.getOrderQueue());
+
+                response.setBaseResponse(1, offset, limit, success + " success showing data invoice.", invoicePrintResponse);
+                return ok(Json.toJson(response));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                response.setBaseResponse(0, 0, 0, error, null);
+                return unauthorized(Json.toJson(response));
             }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
