@@ -198,6 +198,10 @@ public class UpdateProfileController extends BaseController {
                     response.setBaseResponse(0, 0, 0, "Password tidak boleh sama dengan sebelumnya", null);
                     return badRequest(Json.toJson(response));
                 }
+                if(!Encryption.EncryptAESCBCPCKS5Padding(request.getOldPassword()).equals(getMerchantData.password)){
+                    response.setBaseResponse(0, 0, 0, "Password lama yang anda masukkan salah", null);
+                    return badRequest(Json.toJson(response));
+                }
                 // =======================================================================
 
                 getMerchantData.password = Encryption.EncryptAESCBCPCKS5Padding(request.getPassword());
@@ -365,6 +369,10 @@ public class UpdateProfileController extends BaseController {
                 }
                 if(Encryption.EncryptAESCBCPCKS5Padding(request.getPassword()).equals(getUserMerchantData.getPassword())){
                     response.setBaseResponse(0, 0, 0, "Password tidak boleh sama dengan sebelumnya", null);
+                    return badRequest(Json.toJson(response));
+                }
+                if(!Encryption.EncryptAESCBCPCKS5Padding(request.getOldPassword()).equals(getUserMerchantData.getPassword())){
+                    response.setBaseResponse(0, 0, 0, "Password lama yang anda masukkan salah", null);
                     return badRequest(Json.toJson(response));
                 }
                 // =======================================================================                
