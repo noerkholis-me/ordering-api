@@ -202,6 +202,10 @@ public class UserMerchantController extends BaseController {
                     response.setBaseResponse(0, 0, 0, "User merchant tidak ditemukan", null);
                     return badRequest(Json.toJson(response));
                 }
+                if (userMerchant.getPassword() == null && userMerchant.isActive == false && request.getIsActive() == true) {
+                    response.setBaseResponse(0, 0, 0, "Tidak bisa mengaktifkan! Silahkan kirim email verifikasi kepada user!", null);
+                    return badRequest(Json.toJson(response));
+                }
                 userMerchant.isActive = request.getIsActive();
                 userMerchant.update();
                 trx.commit();
