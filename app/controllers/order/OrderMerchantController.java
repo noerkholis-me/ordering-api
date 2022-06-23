@@ -437,8 +437,8 @@ public class OrderMerchantController extends BaseController {
     }
 
     public static Result printInvoice(String orderNumber) {
-        Merchant merchant = checkMerchantAccessAuthorization();
-        if (merchant != null) {
+        int authority = checkAccessAuthorization("all");
+        if (authority == 200 || authority == 203) {
             try {
                 if (orderNumber.equalsIgnoreCase("") || orderNumber == null) {
                     response.setBaseResponse(0, 0, 0, "order number cannot be null or empty.", null);
@@ -499,9 +499,13 @@ public class OrderMerchantController extends BaseController {
                 response.setBaseResponse(0, 0, 0, error, null);
                 return unauthorized(Json.toJson(response));
             }
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
         }
-        response.setBaseResponse(0, 0, 0, unauthorized, null);
-        return unauthorized(Json.toJson(response));
     }
 
 
