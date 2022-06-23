@@ -73,9 +73,9 @@ public class MerchantLog extends BaseModel {
         MerchantLog log = new MerchantLog();
         try {
             if (deviceType.equalsIgnoreCase(DEV_TYPE_ANDROID) || deviceType.equalsIgnoreCase(DEV_TYPE_IOS)) {
-                log.expiredDate = new DateTime(new Date()).plusDays(30).toDate();
+                log.expiredDate = new DateTime(new Date()).plusHours(1).toDate();
             } else if (deviceType.equalsIgnoreCase(DEV_TYPE_WEB)) {
-                log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
+                log.expiredDate = new DateTime(new Date()).plusHours(1).toDate();
             } else {
                 return null;
             }

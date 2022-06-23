@@ -560,3 +560,5 @@ GET         /merchant/dashboard/total-product      controllers.dashboard.Dashboa
 GET         /merchant/dashboard/total-transaction-amount      controllers.dashboard.DashboardController.getTotalTransactionAmount()
 GET         /merchant/dashboard/total-transaction      controllers.dashboard.DashboardController.getTotalTransaction(start_date: String?= "", end_date: String?= "")
 GET         /merchant/dashboard/total-withdraw      controllers.dashboard.DashboardController.getTotalWithdraw(start_date: String?= "", end_date: String?= "")
+
+GET         /merchant/order/print-invoice/:orderNumber      controllers.order.OrderMerchantController.printInvoice(orderNumber: String)
