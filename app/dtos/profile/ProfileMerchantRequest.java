@@ -43,6 +43,9 @@ public class ProfileMerchantRequest {
     @JsonProperty("postal_code")
     public String postalCode;
 
+    @JsonProperty("old_password")
+    public String oldPassword;
+
     @JsonProperty("password")
     public String password;
 
