@@ -246,8 +246,6 @@ public class UpdateProfileController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
                 // =======================================================================
-
-                System.out.println(ownMerchant.id);
                 
                 UserMerchant getUserMerchantData = UserMerchantRepository.findAccountById(userMerchantId);
                 if(getUserMerchantData == null) {
