@@ -113,7 +113,7 @@ public class UpdateProfileController extends BaseController {
                     return notFound(Json.toJson(response));
                 }
 
-                if(request.getEmail() != null && request.getEmail() != "" && !request.getEmail().equals(getMerchantData.email)){
+                if(request.getEmail() != null && request.getEmail() != "" && !request.getEmail().equalsIgnoreCase(getMerchantData.email)){
                     getMerchantData.email = request.getEmail();
                     getMerchantData.isActive = Boolean.FALSE;
                     getMerchantData.status = "PENDING APPROVAL";
@@ -194,11 +194,11 @@ public class UpdateProfileController extends BaseController {
                     response.setBaseResponse(0, 0, 0, "Confirmation Password tidak sama", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(Encryption.EncryptAESCBCPCKS5Padding(request.getPassword()).equals(getMerchantData.password)){
+                if(Encryption.EncryptAESCBCPCKS5Padding(request.getPassword()).equalsIgnoreCase(getMerchantData.password)){
                     response.setBaseResponse(0, 0, 0, "Password tidak boleh sama dengan sebelumnya", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(!Encryption.EncryptAESCBCPCKS5Padding(request.getOldPassword()).equals(getMerchantData.password)){
+                if(!Encryption.EncryptAESCBCPCKS5Padding(request.getOldPassword()).equalsIgnoreCase(getMerchantData.password)){
                     response.setBaseResponse(0, 0, 0, "Password lama yang anda masukkan salah", null);
                     return badRequest(Json.toJson(response));
                 }
@@ -255,7 +255,7 @@ public class UpdateProfileController extends BaseController {
                     return notFound(Json.toJson(response));
                 }
 
-                if(request.getEmail() != null && request.getEmail() != "" && !request.getEmail().equals(getUserMerchantData.email)){
+                if(request.getEmail() != null && request.getEmail() != "" && !request.getEmail().equalsIgnoreCase(getUserMerchantData.getEmail())){
                     getUserMerchantData.setEmail(request.getEmail());
                     getUserMerchantData.isActive = Boolean.FALSE;
                     String forActivation = Encryption.EncryptAESCBCPCKS5Padding(String.valueOf(getUserMerchantData.id) + String.valueOf(System.currentTimeMillis()));
@@ -367,11 +367,11 @@ public class UpdateProfileController extends BaseController {
                     response.setBaseResponse(0, 0, 0, "Confirmation Password tidak sama", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(Encryption.EncryptAESCBCPCKS5Padding(request.getPassword()).equals(getUserMerchantData.getPassword())){
+                if(Encryption.EncryptAESCBCPCKS5Padding(request.getPassword()).equalsIgnoreCase(getUserMerchantData.getPassword())){
                     response.setBaseResponse(0, 0, 0, "Password tidak boleh sama dengan sebelumnya", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(!Encryption.EncryptAESCBCPCKS5Padding(request.getOldPassword()).equals(getUserMerchantData.getPassword())){
+                if(!Encryption.EncryptAESCBCPCKS5Padding(request.getOldPassword()).equalsIgnoreCase(getUserMerchantData.getPassword())){
                     response.setBaseResponse(0, 0, 0, "Password lama yang anda masukkan salah", null);
                     return badRequest(Json.toJson(response));
                 }
