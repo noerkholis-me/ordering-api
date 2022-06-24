@@ -127,7 +127,7 @@ public class OrderMerchantController extends BaseController {
                             for (OrderDetailAddOn orderDetailAddOn : orderDetail.getOrderDetailAddOns()) {
                                 // System.out.println(">>>>> order detail add on in : " + orderDetailAddOn.id);
                                 OrderList.ProductOrderDetail.ProductOrderDetailAddOn productAddOn = new OrderList.ProductOrderDetail.ProductOrderDetailAddOn();
-                                productAddOn.setProductId(orderDetailAddOn.getProductAddOn().getProductMerchant().id);
+                                productAddOn.setProductId(orderDetailAddOn.getProductAddOn().getProductAssignId());
                                 productAddOn.setProductName(orderDetailAddOn.getProductName());
                                 productAddOn.setProductPrice(orderDetailAddOn.getProductPrice());
                                 productAddOn.setProductQty(orderDetailAddOn.getQuantity());
@@ -248,7 +248,7 @@ public class OrderMerchantController extends BaseController {
                             for (OrderDetailAddOn orderDetailAddOn : orderDetail.getOrderDetailAddOns()) {
                                 // System.out.println(">>>>> order detail add on in : " + orderDetailAddOn.id);
                                 OrderList.ProductOrderDetail.ProductOrderDetailAddOn productAddOn = new OrderList.ProductOrderDetail.ProductOrderDetailAddOn();
-                                productAddOn.setProductId(orderDetailAddOn.getProductAddOn().getProductMerchant().id);
+                                productAddOn.setProductId(orderDetailAddOn.getProductAddOn().getProductAssignId());
                                 productAddOn.setProductName(orderDetailAddOn.getProductName());
                                 productAddOn.setProductPrice(orderDetailAddOn.getProductPrice());
                                 productAddOn.setProductQty(orderDetailAddOn.getQuantity());
@@ -267,7 +267,7 @@ public class OrderMerchantController extends BaseController {
                     // System.out.println(">>>>> Total Data Orders : " + orders.size());
                     // System.out.println(">>>>> order list : " + orderLists.size());
 
-                    response.setBaseResponse(totalData, offset, limit, success + " Berhasil menampilkan data order", orderLists);
+                    response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data order", orderLists);
                     return ok(Json.toJson(response));
                 } catch (Exception ex) {
                     LOGGER.error("Error when getting list data orders");
@@ -369,7 +369,7 @@ public class OrderMerchantController extends BaseController {
                             for (OrderDetailAddOn orderDetailAddOn : orderDetail.getOrderDetailAddOns()) {
                                 // System.out.println(">>>>> order detail add on in : " + orderDetailAddOn.id);
                                 OrderList.ProductOrderDetail.ProductOrderDetailAddOn productAddOn = new OrderList.ProductOrderDetail.ProductOrderDetailAddOn();
-                                productAddOn.setProductId(orderDetailAddOn.getProductAddOn().getProductMerchant().id);
+                                productAddOn.setProductId(orderDetailAddOn.getProductAddOn().getProductAssignId());
                                 productAddOn.setProductName(orderDetailAddOn.getProductName());
                                 productAddOn.setProductPrice(orderDetailAddOn.getProductPrice());
                                 productAddOn.setProductQty(orderDetailAddOn.getQuantity());

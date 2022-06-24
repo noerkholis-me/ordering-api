@@ -101,7 +101,7 @@ public class MailConfig {
 
     public static String renderMailForgotPasswordMerchantTemplate(String resetToken, String name, String url) {
         return views.html.ForgotPasswordEmail
-                .render(name, url + "/" + resetToken, Constant.getInstance().getImageUrl().concat("mail"))
+                .render(name, url + "/" + resetToken, Constant.getInstance().getImageUrl())
                 .toString();
 
     }
@@ -132,7 +132,7 @@ public class MailConfig {
 		String url = Helper.MERCHANT_URL + "/account-activation/" + activationCode;
 
 		try {
-			String html = views.html.verificationEmail.render(fullName, url).toString();
+			String html = views.html.verificationEmail.render(fullName, url, Constant.getInstance().getImageUrl()).toString();
 			return html;
 		} catch (Exception ignored) {
 
@@ -146,7 +146,7 @@ public class MailConfig {
 		String url = Helper.BACKEND_URL + "/account-activation/" + activationCode;
 
 		try {
-			String html = views.html.verificationEmail.render(fullName, url).toString();
+			String html = views.html.verificationEmail.render(fullName, url, Constant.getInstance().getImageUrl()).toString();
 			return html;
 		} catch (Exception ignored) {
 
@@ -160,7 +160,7 @@ public class MailConfig {
 		String url = Helper.API_URL + "/re/account-activation?token=" + activationCode;
 
 		try {
-			String html = views.html.verificationEmailChange.render(fullName, url).toString();
+			String html = views.html.verificationEmailChange.render(fullName, url, Constant.getInstance().getImageUrl()).toString();
 			return html;
 		} catch (Exception ignored) {
 
