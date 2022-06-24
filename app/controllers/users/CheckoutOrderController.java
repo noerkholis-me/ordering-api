@@ -126,16 +126,19 @@ public class CheckoutOrderController extends BaseController {
                                 // create product add on
                                 ProductAddOn productAddOn = ProductAddOnRepository.findByProductAssignIdAndProductId(productOrderAddOn.getProductAssignId(), productOrderAddOn.getProductId());
                                 if (productAddOn != null) {
-                                    OrderDetailAddOn orderDetailAddOn = new OrderDetailAddOn();
-                                    orderDetailAddOn.setOrderDetail(orderDetail);
-                                    orderDetailAddOn.setProductAddOn(productAddOn);
-                                    orderDetailAddOn.setQuantity(productOrderAddOn.getProductQty());
-                                    orderDetailAddOn.setNotes(productOrderAddOn.getNotes());
-                                    orderDetailAddOn.setProductPrice(productOrderAddOn.getProductPrice());
-                                    orderDetailAddOn.setProductName(productAddOn.getProductMerchant().getProductName());
-                                    orderDetailAddOn.setProductAssignId(productAddOn.getProductAssignId());
-                                    orderDetailAddOn.setSubTotal(productOrderAddOn.getSubTotal());
-                                    orderDetailAddOn.save();
+                                    ProductMerchant addOn = ProductMerchantRepository.findById(productAddOn.getProductAssignId());
+                                    if (addOn != null) {
+                                        OrderDetailAddOn orderDetailAddOn = new OrderDetailAddOn();
+                                        orderDetailAddOn.setOrderDetail(orderDetail);
+                                        orderDetailAddOn.setProductAddOn(productAddOn);
+                                        orderDetailAddOn.setQuantity(productOrderAddOn.getProductQty());
+                                        orderDetailAddOn.setNotes(productOrderAddOn.getNotes());
+                                        orderDetailAddOn.setProductPrice(productOrderAddOn.getProductPrice());
+                                        orderDetailAddOn.setProductName(addOn.getProductName());
+                                        orderDetailAddOn.setProductAssignId(productAddOn.getProductAssignId());
+                                        orderDetailAddOn.setSubTotal(productOrderAddOn.getSubTotal());
+                                        orderDetailAddOn.save();
+                                    }
                                 }
                             }
                         }
@@ -350,6 +353,46 @@ public class CheckoutOrderController extends BaseController {
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
+    }
+
+    public static Result cancelOrder() {
+        int authority = checkAccessAuthorization("all");
+        if (authority == 200 || authority == 203) {
+
+            JsonNode jsonNode = request().body().asJson();
+            String orderNumber = jsonNode.get("order_number").asText();
+            Transaction trx = Ebean.beginTransaction();
+            try {
+                Optional<Order> order = OrderRepository.findByOrderNumber(orderNumber);
+                if (!order.isPresent()) {
+                    response.setBaseResponse(0, 0, 0, "Nomor order tidak ditemukan", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                order.get().setStatus(Order.CANCELLED);
+
+                order.get().update();
+
+                trx.commit();
+
+                response.setBaseResponse(1, 0, 0, "Berhasil membatalkan pesanan. Dengan nomor order " + orderNumber, orderNumber);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                logger.error("Error saat mengubah status", e);
+                e.printStackTrace();
+                trx.rollback();
+            } finally {
+                trx.end();
+            }
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, error, null);
+        return ok(Json.toJson(response));
     }
 
 }

@@ -442,6 +442,7 @@ POST /users/order/checkout                               controllers.users.Check
 POST /users/order/payment                                controllers.users.CheckoutOrderController.payment()
 GET  /users/order/checkstatus                            controllers.order.OrderMerchantController.checkStatusOrderNumber(offset:Int ?= 0, limit:Int ?= 10, statusOrder:String ?= "", email:String ?= "", phone_number:String ?= "", store_code: String)
 PUT  /merchant/order/changestatus                        controllers.users.CheckoutOrderController.changeStatusFromMerchant()
+PUT  /users/order/cancel                              controllers.users.CheckoutOrderController.cancelOrder()
 
 #PAYMENT
 GET  /users/order/:orderNumber/payment                   controllers.payment.PaymentController.checkStatusPayment(orderNumber: String)

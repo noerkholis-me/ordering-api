@@ -47,9 +47,13 @@ public class InvoicePrintResponse {
     @JsonProperty("tax")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal taxPrice;
+    @JsonProperty("tax_percentage")
+    private Double taxPercentage;
     @JsonProperty("service")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal paymentFeeOwner;
+    @JsonProperty("service_percentage")
+    private Double servicePercentage;
     @JsonProperty("service_fee")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal paymentFeeCustomer;
