@@ -1,6 +1,8 @@
 package controllers.finance;
 
+import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Query;
+import com.avaje.ebean.Transaction;
 import com.hokeba.api.BaseResponse;
 import controllers.BaseController;
 import dtos.finance.ActiveBalanceResponse;
@@ -101,21 +103,33 @@ public class FinanceTransactionController extends BaseController {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
-                BigDecimal totalActiveBalance = BigDecimal.ZERO;
-                BigDecimal activeBalanceStore = BigDecimal.ZERO;
-                Store store = Store.findById(storeId);
-                if (store == null) {
-                    activeBalanceStore = BigDecimal.ZERO;
-                } else {
-                    activeBalanceStore = store.getActiveBalance();
-                }
-                totalActiveBalance = merchant.totalActiveBalance;
+                Transaction trx = Ebean.beginTransaction();
+                try {
+                    BigDecimal totalActiveBalance = BigDecimal.ZERO;
+                    BigDecimal activeBalanceStore = BigDecimal.ZERO;
+                    Store store = Store.findById(storeId);
+                    if (store == null) {
+                        activeBalanceStore = BigDecimal.ZERO;
+                    } else {
+                        activeBalanceStore = store.getActiveBalance();
+                    }
+                    totalActiveBalance = merchant.totalActiveBalance;
 
-                ActiveBalanceResponse activeBalanceResponse = new ActiveBalanceResponse();
-                activeBalanceResponse.setActiveBalance(activeBalanceStore);
-                activeBalanceResponse.setTotalActiveBalance(totalActiveBalance);
-                response.setBaseResponse(1, 0, 0, success + " Showing data active balance", activeBalanceResponse);
-                return ok(Json.toJson(response));
+                    ActiveBalanceResponse activeBalanceResponse = new ActiveBalanceResponse();
+                    activeBalanceResponse.setActiveBalance(activeBalanceStore);
+                    activeBalanceResponse.setTotalActiveBalance(totalActiveBalance);
+
+                    trx.commit();
+
+                    response.setBaseResponse(1, 0, 0, success + " Showing data active balance", activeBalanceResponse);
+                    return ok(Json.toJson(response));
+                } catch (Exception e) {
+                    LOGGER.error("Error pada saat assign produk", e);
+                    e.printStackTrace();
+                    trx.rollback();
+                } finally {
+                    trx.end();
+                }
             } catch (Exception ex) {
                 ex.printStackTrace();
                 LOGGER.error("error while get active balance ", ex);

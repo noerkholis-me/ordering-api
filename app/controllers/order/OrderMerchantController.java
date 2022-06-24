@@ -2,6 +2,7 @@ package controllers.order;
 
 import com.avaje.ebean.Query;
 import com.hokeba.api.BaseResponse;
+import com.hokeba.util.Constant;
 import controllers.BaseController;
 import dtos.order.InvoicePrintResponse;
 import dtos.order.OrderDetailAddOnResponse;
@@ -10,6 +11,9 @@ import dtos.order.OrderList;
 import models.Member;
 import models.Merchant;
 import models.Store;
+import models.appsettings.AppSettings;
+import models.internal.FeeSetting;
+import models.merchant.FeeSettingMerchant;
 import models.transaction.Order;
 import models.transaction.OrderDetail;
 import models.transaction.OrderDetailAddOn;
@@ -17,6 +21,8 @@ import models.transaction.OrderPayment;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import repository.AppSettingRepository;
+import repository.FeeSettingMerchantRepository;
 import repository.OrderPaymentRepository;
 import repository.OrderRepository;
 
@@ -455,7 +461,14 @@ public class OrderMerchantController extends BaseController {
 
                 InvoicePrintResponse invoicePrintResponse = new InvoicePrintResponse();
 
-                invoicePrintResponse.setImageStoreUrl("");
+                AppSettings appSettings = AppSettingRepository.findByMerchantId(store.getMerchant().id);
+                if (appSettings == null) {
+                    String sandboxImage = Constant.getInstance().getImageUrl().concat("/assets/images/logo-sandbox.png");
+                    invoicePrintResponse.setImageStoreUrl(sandboxImage);
+                }
+
+                invoicePrintResponse.setImageStoreUrl(appSettings.getAppLogo());
+
                 invoicePrintResponse.setStoreName(store.storeName);
                 invoicePrintResponse.setStoreAddress(store.storeAddress);
                 invoicePrintResponse.setStorePhoneNumber(store.storePhone);
@@ -487,6 +500,15 @@ public class OrderMerchantController extends BaseController {
                 invoicePrintResponse.setOrderDetails(orderDetailResponses);
                 invoicePrintResponse.setSubTotal(getOrder.getSubTotal());
                 invoicePrintResponse.setTaxPrice(orderPayment.getTaxPrice());
+
+                Optional<FeeSettingMerchant> feeSetting = FeeSettingMerchantRepository.findByLatestFeeSetting(store.getMerchant().id);
+                if (!feeSetting.isPresent()) {
+                    invoicePrintResponse.setTaxPercentage(feeSetting.get().getTax());
+                    invoicePrintResponse.setServicePercentage(feeSetting.get().getService());
+                }
+                invoicePrintResponse.setTaxPercentage(11D);
+                invoicePrintResponse.setServicePercentage(0D);
+
                 invoicePrintResponse.setPaymentFeeOwner(orderPayment.getPaymentFeeOwner());
                 invoicePrintResponse.setPaymentFeeCustomer(orderPayment.getPaymentFeeCustomer());
                 invoicePrintResponse.setTotal(getOrder.getTotalPrice());
