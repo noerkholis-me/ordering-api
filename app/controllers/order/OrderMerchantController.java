@@ -42,7 +42,6 @@ public class OrderMerchantController extends BaseController {
 
     private static BaseResponse response = new BaseResponse();
 
-
     public static Result getOrderList(Long storeId, int offset, int limit, String statusOrder) throws Exception {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
@@ -50,7 +49,7 @@ public class OrderMerchantController extends BaseController {
 
                 Query<Order> query = null;
                 // default query find by merchant id
-                query = OrderRepository.findAllOrderByMerchantId(merchant.id);
+                query = OrderRepository.findAllOrderByMerchantId(merchant);
 
                 // check store id --> mandatory
                 if (storeId != null && storeId != 0L) {
@@ -62,12 +61,13 @@ public class OrderMerchantController extends BaseController {
                     query = OrderRepository.findAllOrderByStoreId(storeId);
                 }
 
-                Integer totalData = OrderRepository.getTotalData(query);
+                Integer totalData = OrderRepository.getTotalData(query, statusOrder);
 
                 List<OrderList> orderLists = new ArrayList<>();
                 List<Order> orders = OrderRepository.findAllOrderWithFilter(query, offset, limit, statusOrder);
                 if (orders.isEmpty() || orders.size() == 0) {
-                    response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", orderLists);
+                    response.setBaseResponse(totalData, offset, limit, success + " Showing data order",
+                            orderLists);
                     return ok(Json.toJson(response));
                 }
 
@@ -91,7 +91,9 @@ public class OrderMerchantController extends BaseController {
                         if (order.getMember() != null) {
                             member = Member.findByIdMember(order.getMember().id);
                         }
-                        String customerName = member == null || member.fullName.equalsIgnoreCase("") ? "GENERAL CUSTOMER ("+order.getStore().storeName+")" : member.fullName;
+                        String customerName = member == null || member.fullName.equalsIgnoreCase("")
+                                ? "GENERAL CUSTOMER (" + order.getStore().storeName + ")"
+                                : member.fullName;
                         orderRes.setCustomerName(customerName);
 
                         // get store
@@ -142,12 +144,12 @@ public class OrderMerchantController extends BaseController {
                     }
                 }
 
-
                 // System.out.println(">>>>> Total Data : " + totalData);
                 // System.out.println(">>>>> Total Data Orders : " + orders.size());
                 // System.out.println(">>>>> order list : " + orderLists.size());
 
-                response.setBaseResponse(totalData, offset, limit, success + " Berhasil menampilkan data order", orderLists);
+                response.setBaseResponse(totalData, offset, limit, success + " Berhasil menampilkan data order",
+                        orderLists);
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
                 LOGGER.error("Error when getting list data orders");
@@ -158,38 +160,41 @@ public class OrderMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result checkStatusOrderNumber(int offset, int limit, String statusOrder, String email, String phoneNumber, String storeCode) throws Exception {
-        if(email != null && email != "" || phoneNumber != null && phoneNumber != "") {
+    public static Result checkStatusOrderNumber(int offset, int limit, String statusOrder, String email,
+            String phoneNumber, String storeCode) throws Exception {
+        if (email != null && email != "" || phoneNumber != null && phoneNumber != "") {
             Member memberUser = Member.findDataCustomer(email, phoneNumber);
-            
-            if(memberUser != null){
+
+            if (memberUser != null) {
                 try {
 
                     Query<Order> query = null;
                     // default query find by merchant id
                     Store store = null;
                     store = Store.findByStoreCode(storeCode);
-                    if(store == null) {
+                    if (store == null) {
                         response.setBaseResponse(0, 0, 0, "Store tidak ditemukan", null);
                         return notFound(Json.toJson(response));
                     }
-                    query = OrderRepository.find.where().eq("t0.user_id", memberUser.id).eq("t0.store_id", store.id).order("t0.created_at desc");
+                    query = OrderRepository.find.where().eq("t0.user_id", memberUser.id).eq("t0.store_id", store.id)
+                            .order("t0.created_at desc");
 
                     // check store id --> mandatory
                     // if (storeId != null && storeId != 0L) {
-                    //     if (store == null) {
-                    //         response.setBaseResponse(0, 0, 0, "store id does not exists", null);
-                    //         return badRequest(Json.toJson(response));
-                    //     }
-                    //     query = OrderRepository.findAllOrderByStoreId(storeId);
+                    // if (store == null) {
+                    // response.setBaseResponse(0, 0, 0, "store id does not exists", null);
+                    // return badRequest(Json.toJson(response));
+                    // }
+                    // query = OrderRepository.findAllOrderByStoreId(storeId);
                     // }
 
-                    Integer totalData = OrderRepository.getTotalData(query);
+                    Integer totalData = OrderRepository.getTotalData(query, statusOrder);
 
                     List<OrderList> orderLists = new ArrayList<>();
                     List<Order> orders = OrderRepository.findAllOrderWithFilter(query, offset, limit, statusOrder);
                     if (orders.isEmpty() || orders.size() == 0) {
-                        response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", orderLists);
+                        response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction",
+                                orderLists);
                         return ok(Json.toJson(response));
                     }
 
@@ -212,7 +217,9 @@ public class OrderMerchantController extends BaseController {
                         if (order.getMember() != null) {
                             member = Member.findByIdMember(order.getMember().id);
                         }
-                        String customerName = member == null || member.fullName.equalsIgnoreCase("") ? "GENERAL CUSTOMER ("+order.getStore().storeName+")" : member.fullName;
+                        String customerName = member == null || member.fullName.equalsIgnoreCase("")
+                                ? "GENERAL CUSTOMER (" + order.getStore().storeName + ")"
+                                : member.fullName;
                         orderRes.setCustomerName(customerName);
 
                         // get store
@@ -262,7 +269,6 @@ public class OrderMerchantController extends BaseController {
                         orderLists.add(orderRes);
                     }
 
-
                     // System.out.println(">>>>> Total Data : " + totalData);
                     // System.out.println(">>>>> Total Data Orders : " + orders.size());
                     // System.out.println(">>>>> order list : " + orderLists.size());
@@ -281,17 +287,18 @@ public class OrderMerchantController extends BaseController {
         return badRequest(Json.toJson(response));
     }
 
-    public static Result orderReportMerchant(String startDate, String endDate, int offset, int limit, String statusOrder, Long storeId) throws Exception {
+    public static Result orderReportMerchant(String startDate, String endDate, int offset, int limit,
+            String statusOrder, Long storeId) throws Exception {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
 
                 Query<Order> query = null;
                 // default query find by merchant id
-                if(startDate != null) {
-                    query = OrderRepository.findAllOrderReportWithFilter(merchant.id, startDate, endDate);
+                if (startDate != null) {
+                    query = OrderRepository.findAllOrderReportWithFilter(merchant, startDate, endDate);
                 } else {
-                    query = OrderRepository.findAllOrderByMerchantId(merchant.id);
+                    query = OrderRepository.findAllOrderByMerchantId(merchant);
                 }
 
                 // check store id --> mandatory
@@ -304,12 +311,13 @@ public class OrderMerchantController extends BaseController {
                     query = OrderRepository.findAllOrderByStoreId(storeId);
                 }
 
-                Integer totalData = OrderRepository.getTotalData(query);
+                Integer totalData = OrderRepository.getTotalData(query, statusOrder);
 
                 List<OrderList> orderLists = new ArrayList<>();
                 List<Order> orders = OrderRepository.findAllOrderWithFilter(query, offset, limit, statusOrder);
                 if (orders.isEmpty() || orders.size() == 0) {
-                    response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", orderLists);
+                    response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction",
+                            orderLists);
                     return ok(Json.toJson(response));
                 }
 
@@ -323,7 +331,9 @@ public class OrderMerchantController extends BaseController {
                         break;
                     }
                     OrderPayment getOrderPayment = orderPayment.get();
-                    if (getOrderPayment.getStatus().equalsIgnoreCase("PAID") || getOrderPayment.getStatus().equalsIgnoreCase("CANCEL") || getOrderPayment.getStatus().equalsIgnoreCase("CANCELED")) {
+                    if (getOrderPayment.getStatus().equalsIgnoreCase("PAID")
+                            || getOrderPayment.getStatus().equalsIgnoreCase("CANCEL")
+                            || getOrderPayment.getStatus().equalsIgnoreCase("CANCELED")) {
                         // System.out.println(">>>>> Order payment when paid <<<<<");
                         orderRes.setInvoiceNumber(getOrderPayment.getInvoiceNo());
                         orderRes.setOrderNumber(order.getOrderNumber());
@@ -333,7 +343,9 @@ public class OrderMerchantController extends BaseController {
                         if (order.getMember() != null) {
                             member = Member.findByIdMember(order.getMember().id);
                         }
-                        String customerName = member == null || member.fullName.equalsIgnoreCase("") ? "GENERAL CUSTOMER ("+order.getStore().storeName+")" : member.fullName;
+                        String customerName = member == null || member.fullName.equalsIgnoreCase("")
+                                ? "GENERAL CUSTOMER (" + order.getStore().storeName + ")"
+                                : member.fullName;
                         orderRes.setCustomerName(customerName);
 
                         // get store
@@ -384,7 +396,8 @@ public class OrderMerchantController extends BaseController {
                     }
                 }
 
-                response.setBaseResponse(totalData, offset, limit, " Berhasil menampilkan data order report", orderLists);
+                response.setBaseResponse(totalData, offset, limit, " Berhasil menampilkan data order report",
+                        orderLists);
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
                 LOGGER.error("Error when getting list data orders");
@@ -395,17 +408,18 @@ public class OrderMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result downloadTransaction(String startDate, String endDate, int offset, int limit, String statusOrder, Long storeId) throws Exception {
+    public static Result downloadTransaction(String startDate, String endDate, int offset, int limit,
+            String statusOrder, Long storeId) throws Exception {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
 
                 Query<Order> query = null;
                 // default query find by merchant id
-                if(startDate != null) {
-                    query = OrderRepository.findAllOrderReportWithFilter(merchant.id, startDate, endDate);
+                if (startDate != null) {
+                    query = OrderRepository.findAllOrderReportWithFilter(merchant, startDate, endDate);
                 } else {
-                    query = OrderRepository.findAllOrderByMerchantId(merchant.id);
+                    query = OrderRepository.findAllOrderByMerchantId(merchant);
                 }
 
                 // check store id --> mandatory
@@ -418,20 +432,21 @@ public class OrderMerchantController extends BaseController {
                     query = OrderRepository.findAllOrderByStoreId(storeId);
                 }
 
-                Integer totalData = OrderRepository.getTotalData(query);
+                Integer totalData = OrderRepository.getTotalData(query, statusOrder);
 
                 List<OrderList> orderLists = new ArrayList<>();
                 List<Order> orders = OrderRepository.findAllOrderWithFilter(query, offset, limit, statusOrder);
                 if (orders.isEmpty() || orders.size() == 0) {
-                    response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", orderLists);
+                    response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction",
+                            orderLists);
                     return ok(Json.toJson(response));
                 }
-                
+
                 File file = DownloadOrderReport.downloadOrderReport(orders);
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddhhmmss");
-                String filenameOrderReport = "OrderReport-" +simpleDateFormat.format(new Date()).toString()+".xlsx";
+                String filenameOrderReport = "OrderReport-" + simpleDateFormat.format(new Date()).toString() + ".xlsx";
                 response().setContentType("application/vnd.ms-excel");
-                response().setHeader("Content-disposition", "attachment; filename="+filenameOrderReport);
+                response().setHeader("Content-disposition", "attachment; filename=" + filenameOrderReport);
                 return ok(file);
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -463,7 +478,8 @@ public class OrderMerchantController extends BaseController {
 
                 AppSettings appSettings = AppSettingRepository.findByMerchantId(store.getMerchant().id);
                 if (appSettings == null) {
-                    String sandboxImage = Constant.getInstance().getImageUrl().concat("/assets/images/logo-sandbox.png");
+                    String sandboxImage = Constant.getInstance().getImageUrl()
+                            .concat("/assets/images/logo-sandbox.png");
                     invoicePrintResponse.setImageStoreUrl(sandboxImage);
                 }
 
@@ -501,7 +517,8 @@ public class OrderMerchantController extends BaseController {
                 invoicePrintResponse.setSubTotal(getOrder.getSubTotal());
                 invoicePrintResponse.setTaxPrice(orderPayment.getTaxPrice());
 
-                Optional<FeeSettingMerchant> feeSetting = FeeSettingMerchantRepository.findByLatestFeeSetting(store.getMerchant().id);
+                Optional<FeeSettingMerchant> feeSetting = FeeSettingMerchantRepository
+                        .findByLatestFeeSetting(store.getMerchant().id);
                 if (!feeSetting.isPresent()) {
                     invoicePrintResponse.setTaxPercentage(feeSetting.get().getTax());
                     invoicePrintResponse.setServicePercentage(feeSetting.get().getService());
@@ -514,7 +531,8 @@ public class OrderMerchantController extends BaseController {
                 invoicePrintResponse.setTotal(getOrder.getTotalPrice());
                 invoicePrintResponse.setOrderQueue(getOrder.getOrderQueue());
 
-                response.setBaseResponse(1, offset, limit, success + " success showing data invoice.", invoicePrintResponse);
+                response.setBaseResponse(1, offset, limit, success + " success showing data invoice.",
+                        invoicePrintResponse);
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -529,6 +547,5 @@ public class OrderMerchantController extends BaseController {
             return unauthorized(Json.toJson(response));
         }
     }
-
 
 }

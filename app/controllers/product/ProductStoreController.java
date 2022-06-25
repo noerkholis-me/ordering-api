@@ -37,15 +37,16 @@ public class ProductStoreController extends BaseController {
     private static BaseResponse response = new BaseResponse();
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    
+
     public static Result createProductStore() {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
             try {
                 JsonNode json = request().body().asJson();
-                
+
                 ProductStoreResponse request = objectMapper.readValue(json.toString(), ProductStoreResponse.class);
-                ProductMerchant productMerchant = ProductMerchantRepository.findById(request.getProductId(), ownMerchant);
+                ProductMerchant productMerchant = ProductMerchantRepository.findById(request.getProductId(),
+                        ownMerchant);
                 if (productMerchant == null) {
                     response.setBaseResponse(0, 0, 0, " Product not found.", null);
                     return badRequest(Json.toJson(response));
@@ -53,6 +54,14 @@ public class ProductStoreController extends BaseController {
                 Store store = Store.findById(request.getStoreId());
                 if (store == null) {
                     response.setBaseResponse(0, 0, 0, " Product not found.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                ProductStore psQuery = ProductStoreRepository.find.where().eq("productMerchant", productMerchant)
+                        .eq("store", store).findUnique();
+                if (psQuery != null) {
+                    response.setBaseResponse(0, 0, 0,
+                            "Tidak dapat menambahkan " + productMerchant.getProductName() + " ke toko yang sama.",
+                            null);
                     return badRequest(Json.toJson(response));
                 }
                 String validate = validateCreateProductStore(request);
@@ -65,13 +74,13 @@ public class ProductStoreController extends BaseController {
                         newProductStore.setMerchant(ownMerchant);
                         newProductStore.setActive(request.getIsActive());
                         newProductStore.setStorePrice(request.getStorePrice());
-                        if(request.getDiscountType() != null){
+                        if (request.getDiscountType() != null) {
                             newProductStore.setDiscountType(request.getDiscountType());
                         }
-                        if(request.getDiscount() != null){
+                        if (request.getDiscount() != null) {
                             newProductStore.setDiscount(request.getDiscount());
                         }
-                        if(request.getFinalPrice() != null){
+                        if (request.getFinalPrice() != null) {
                             newProductStore.setFinalPrice(request.getFinalPrice());
                         }
                         newProductStore.save();
@@ -100,7 +109,6 @@ public class ProductStoreController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-
     public static String validateCreateProductStore(ProductStoreResponse request) {
         if (request == null)
             return "Bidang tidak boleh nol atau kosong";
@@ -123,10 +131,12 @@ public class ProductStoreController extends BaseController {
             try {
                 List<ProductResponseStore> responses = new ArrayList<>();
                 List<ProductMerchant> totalData = ProductMerchantRepository.getTotalDataPage(query);
-                List<ProductMerchant> productMerchants = ProductMerchantRepository.findProductWithPaging(query, sort, filter, offset, limit);
+                List<ProductMerchant> productMerchants = ProductMerchantRepository.findProductWithPaging(query, sort,
+                        filter, offset, limit);
                 for (ProductMerchant data : productMerchants) {
                     ProductResponseStore responseProd = new ProductResponseStore();
-                    Query<ProductStore> queryPS = ProductStoreRepository.find.where().eq("t0.product_id", data.id).eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+                    Query<ProductStore> queryPS = ProductStoreRepository.find.where().eq("t0.product_id", data.id)
+                            .eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
                     List<ProductStore> dataPS = ProductStoreRepository.getDataProductStore(queryPS);
                     List<ProductResponseStore.ProductStore> responsesProductStore = new ArrayList<>();
                     responseProd.setProductId(data.id);
@@ -151,12 +161,12 @@ public class ProductStoreController extends BaseController {
                                 .build();
                         responseProd.setProductDetail(productDetailResponse);
                     }
-                    
+
                     responseProd.setMerchantId(data.getMerchant().id);
 
-                    for(ProductStore dataPStore : dataPS) {
+                    for (ProductStore dataPStore : dataPS) {
                         ProductResponseStore.ProductStore responsePStore = new ProductResponseStore.ProductStore();
-                        
+
                         responsePStore.setId(dataPStore.id);
                         responsePStore.setStoreId(dataPStore.getStore().id);
                         responsePStore.setProductId(dataPStore.getProductMerchant().id);
@@ -173,13 +183,15 @@ public class ProductStoreController extends BaseController {
                             return badRequest(Json.toJson(response));
                         }
                         responsePStore.setStoresName(store.storeName);
-                        
+
                         responsesProductStore.add(responsePStore);
                         responseProd.setProductStore(responsePStore != null ? responsesProductStore : null);
                     }
                     responses.add(responseProd);
                 }
-                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : productMerchants.size() , offset, limit, success + " menampilkan data", responses);
+                response.setBaseResponse(
+                        filter == null || filter.equals("") ? totalData.size() : productMerchants.size(), offset, limit,
+                        success + " menampilkan data", responses);
                 return ok(Json.toJson(response));
             } catch (IOException e) {
                 Logger.error("allDetail", e);
@@ -197,7 +209,7 @@ public class ProductStoreController extends BaseController {
         if (ownMerchant != null) {
             try {
                 JsonNode json = request().body().asJson();
-                
+
                 ProductStoreResponse request = objectMapper.readValue(json.toString(), ProductStoreResponse.class);
                 String validate = validateCreateProductStore(request);
                 if (validate == null) {
@@ -208,7 +220,8 @@ public class ProductStoreController extends BaseController {
                             response.setBaseResponse(0, 0, 0, error + " product store tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
                         }
-                        ProductMerchant productMerchant = ProductMerchantRepository.findById(request.getProductId(), ownMerchant);
+                        ProductMerchant productMerchant = ProductMerchantRepository.findById(request.getProductId(),
+                                ownMerchant);
                         if (productMerchant == null) {
                             response.setBaseResponse(0, 0, 0, " Product not found.", null);
                             return badRequest(Json.toJson(response));
@@ -223,13 +236,13 @@ public class ProductStoreController extends BaseController {
                         productStore.setMerchant(ownMerchant);
                         productStore.setActive(request.getIsActive());
                         productStore.setStorePrice(request.getStorePrice());
-                        if(request.getDiscountType() != null){
+                        if (request.getDiscountType() != null) {
                             productStore.setDiscountType(request.getDiscountType());
                         }
-                        if(request.getDiscount() != null){
+                        if (request.getDiscount() != null) {
                             productStore.setDiscount(request.getDiscount());
                         }
-                        if(request.getFinalPrice() != null){
+                        if (request.getFinalPrice() != null) {
                             productStore.setFinalPrice(request.getFinalPrice());
                         }
                         productStore.update();
@@ -265,33 +278,33 @@ public class ProductStoreController extends BaseController {
     public static Result deleteProductStore(Long id) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-                if (id != null) {
-                    Transaction trx = Ebean.beginTransaction();
-                    try {
-                        ProductStore productStore = ProductStoreRepository.findByIdAndMerchantId(id, ownMerchant.id);
-                        if (productStore == null) {
-                            response.setBaseResponse(0, 0, 0, error + " produk store tidak tersedia.", null);
-                            return badRequest(Json.toJson(response));
-                        }
-
-                        productStore.isDeleted = true;
-                        productStore.update();
-                        trx.commit();
-
-                        response.setBaseResponse(1,offset, 1, success + " menghapus produk store", productStore);
-                        return ok(Json.toJson(response));
-                    } catch (Exception e) {
-                        logger.error("Error saat menghapus produk store", e);
-                        e.printStackTrace();
-                        trx.rollback();
-                    } finally {
-                        trx.end();
+            if (id != null) {
+                Transaction trx = Ebean.beginTransaction();
+                try {
+                    ProductStore productStore = ProductStoreRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                    if (productStore == null) {
+                        response.setBaseResponse(0, 0, 0, error + " produk store tidak tersedia.", null);
+                        return badRequest(Json.toJson(response));
                     }
-                    response.setBaseResponse(0, 0, 0, error, null);
-                    return badRequest(Json.toJson(response));
+
+                    productStore.isDeleted = true;
+                    productStore.update();
+                    trx.commit();
+
+                    response.setBaseResponse(1, offset, 1, success + " menghapus produk store", productStore);
+                    return ok(Json.toJson(response));
+                } catch (Exception e) {
+                    logger.error("Error saat menghapus produk store", e);
+                    e.printStackTrace();
+                    trx.rollback();
+                } finally {
+                    trx.end();
                 }
-                response.setBaseResponse(0, 0, 0, "Tidak dapat menemukan produk store id", null);
+                response.setBaseResponse(0, 0, 0, error, null);
                 return badRequest(Json.toJson(response));
+            }
+            response.setBaseResponse(0, 0, 0, "Tidak dapat menemukan produk store id", null);
+            return badRequest(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
@@ -309,7 +322,9 @@ public class ProductStoreController extends BaseController {
                 try {
                     ProductMerchant productMerchants = ProductMerchantRepository.findById(id, ownMerchant);
                     ProductResponseStore responseProduct = new ProductResponseStore();
-                    Query<ProductStore> queryPS = ProductStoreRepository.find.where().eq("t0.product_id", productMerchants.id).eq("t0.is_deleted", false).eq("t0.merchant_id", ownMerchant.id).order("t0.id");
+                    Query<ProductStore> queryPS = ProductStoreRepository.find.where()
+                            .eq("t0.product_id", productMerchants.id).eq("t0.is_deleted", false)
+                            .eq("t0.merchant_id", ownMerchant.id).order("t0.id");
                     List<ProductStore> dataPS = ProductStoreRepository.getDataProductStore(queryPS);
                     List<ProductResponseStore.ProductStore> responsesProductStore = new ArrayList<>();
                     responseProduct.setProductId(productMerchants.id);
@@ -317,7 +332,8 @@ public class ProductStoreController extends BaseController {
                     responseProduct.setIsActive(productMerchants.getIsActive());
                     // ================================================================ //
 
-                    ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productMerchants);
+                    ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository
+                            .findByProduct(productMerchants);
                     if (productMerchantDetail != null) {
                         ProductDetailResponse productDetailResponse = ProductDetailResponse.builder()
                                 .productType(productMerchantDetail.getProductType())
@@ -334,12 +350,12 @@ public class ProductStoreController extends BaseController {
                                 .build();
                         responseProduct.setProductDetail(productDetailResponse);
                     }
-                    
+
                     responseProduct.setMerchantId(productMerchants.getMerchant().id);
 
-                    for(ProductStore dataPStore : dataPS) {
+                    for (ProductStore dataPStore : dataPS) {
                         ProductResponseStore.ProductStore responsePStore = new ProductResponseStore.ProductStore();
-                        
+
                         responsePStore.setId(dataPStore.id);
                         responsePStore.setStoreId(dataPStore.getStore().id);
                         responsePStore.setProductId(dataPStore.getProductMerchant().id);
@@ -382,42 +398,42 @@ public class ProductStoreController extends BaseController {
     @ApiOperation(value = "Status Produk Store", notes = "Status Produk Store.\n" + swaggerInfo
             + "", response = BaseResponse.class, httpMethod = "PUT")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "product store form", dataType = "temp.swaggermap.ProductStoreForm", required = true, paramType = "body", value = "product store form") })
-        public static Result setStatus(Long id) {
-            Merchant ownMerchant = checkMerchantAccessAuthorization();
-            if (ownMerchant != null) {
+            @ApiImplicitParam(name = "product store form", dataType = "temp.swaggermap.ProductStoreForm", required = true, paramType = "body", value = "product store form") })
+    public static Result setStatus(Long id) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            try {
+                JsonNode json = request().body().asJson();
+                ProductStoreResponse request = objectMapper.readValue(json.toString(), ProductStoreResponse.class);
+                Transaction trx = Ebean.beginTransaction();
                 try {
-                    JsonNode json = request().body().asJson();
-                    ProductStoreResponse request = objectMapper.readValue(json.toString(), ProductStoreResponse.class);
-                    Transaction trx = Ebean.beginTransaction();
-                    try {
-                        ProductStore productStore = ProductStoreRepository.findByIdAndMerchantId(id, ownMerchant.id);
-                        if (productStore == null) {
-                            response.setBaseResponse(0, 0, 0, error + " produk store tidak tersedia.", null);
-                            return badRequest(Json.toJson(response));
-                        }
-                        productStore.setActive(request.getIsActive());
-                        productStore.update();
-    
-                        trx.commit();
-                        response.setBaseResponse(1, offset, 1, success + " mengubah status produk store", productStore);
-                        return ok(Json.toJson(response));
-                    } catch (Exception e) {
-                        logger.error("Error saat mengubah status produk store", e);
-                        e.printStackTrace();
-                        trx.rollback();
-                    } finally {
-                        trx.end();
+                    ProductStore productStore = ProductStoreRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                    if (productStore == null) {
+                        response.setBaseResponse(0, 0, 0, error + " produk store tidak tersedia.", null);
+                        return badRequest(Json.toJson(response));
                     }
-                    response.setBaseResponse(0, 0, 0, error, null);
-                    return badRequest(Json.toJson(response));
+                    productStore.setActive(request.getIsActive());
+                    productStore.update();
+
+                    trx.commit();
+                    response.setBaseResponse(1, offset, 1, success + " mengubah status produk store", productStore);
+                    return ok(Json.toJson(response));
                 } catch (Exception e) {
-                    logger.error("Error saat parsing json", e);
+                    logger.error("Error saat mengubah status produk store", e);
                     e.printStackTrace();
+                    trx.rollback();
+                } finally {
+                    trx.end();
                 }
+                response.setBaseResponse(0, 0, 0, error, null);
+                return badRequest(Json.toJson(response));
+            } catch (Exception e) {
+                logger.error("Error saat parsing json", e);
+                e.printStackTrace();
             }
-            response.setBaseResponse(0, 0, 0, unauthorized, null);
-            return unauthorized(Json.toJson(response));
         }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
 
 }
