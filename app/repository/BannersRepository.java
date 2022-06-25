@@ -14,27 +14,28 @@ import java.text.SimpleDateFormat;
 
 public class BannersRepository extends Model {
 
-    public static Finder<Long, Banners> find = new Finder<>(Long.class, Banners.class);
+	public static Finder<Long, Banners> find = new Finder<>(Long.class, Banners.class);
 
-    public static Banners findByIdAndMerchantId(Long id, Long merchantId) {
-        try {
+	public static Banners findByIdAndMerchantId(Long id, Merchant merchant) {
+		try {
 			return find.where()
-				.eq("id", id)
-				.eq("merchant_id", merchantId)
-				.eq("is_deleted", Boolean.FALSE)
-				.findUnique();
+					.eq("id", id)
+					.eq("merchant", merchant)
+					.eq("is_deleted", Boolean.FALSE)
+					.findUnique();
 		} catch (PersistenceException e) {
 			e.printStackTrace();
 			return null;
 		}
-    }
+	}
 
-    public static List<Banners> getDataBanners(Query<Banners> reqQuery, String sort, String filter, int offset, int limit)
+	public static List<Banners> getDataBanners(Query<Banners> reqQuery, String sort, String filter, int offset,
+			int limit)
 			throws IOException {
 		Query<Banners> query = reqQuery;
 
 		if (!"".equals(sort)) {
-            query = query.orderBy(sort);
+			query = query.orderBy(sort);
 		} else {
 			query = query.orderBy("t0.updated_at desc");
 		}
@@ -42,10 +43,9 @@ public class BannersRepository extends Model {
 		ExpressionList<Banners> exp = query.where();
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-
 		exp = exp.disjunction();
 		exp = exp.ilike("t0.banner_name", "%" + filter + "%");
-        // exp = exp.endjunction();
+		// exp = exp.endjunction();
 
 		query = exp.query();
 
@@ -68,7 +68,7 @@ public class BannersRepository extends Model {
 
 		ExpressionList<Banners> exp = query.where();
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        // exp = exp.endjunction();
+		// exp = exp.endjunction();
 
 		query = exp.query();
 

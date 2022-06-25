@@ -27,7 +27,6 @@ public class SeedDefaultConfiguration {
 	private static final String API_SHIPPER_SUBURB = "suburbs?apiKey=";
 	private static final String API_SHIPPER_AREA = "areas?apiKey=";
 
-
 	private static HttpURLConnection connProvince;
 	private static HttpURLConnection connCity;
 	private static HttpURLConnection connSuburb;
@@ -45,19 +44,19 @@ public class SeedDefaultConfiguration {
 			roleAdminMerchant.save();
 		}
 
-
-
 		Merchant getMerchant = Merchant.find.where().eq("email", "sandbox.wgs@gmail.com").findUnique();
 		Merchant newMerchant;
 		if (getMerchant == null) {
 			String password = Encryption.EncryptAESCBCPCKS5Padding("qwerty123");
-			newMerchant = new Merchant(password, "sandbox.wgs@gmail.com", "M", "Sandbox Merchant", "sandbox", "sandbox store", "APPROVED", "Bandung", "Jl. Soekarno Hatta No. 112", "62899436521", true);
+			newMerchant = new Merchant(password, "sandbox.wgs@gmail.com", "M", "Sandbox Merchant", "sandbox",
+					"sandbox store", "APPROVED", "Bandung", "Jl. Soekarno Hatta No. 112", "62899436521", true);
 			newMerchant.role = Role.find.where().eq("name", "Admin Merchant").findUnique();
 			newMerchant.save();
 		}
 		newMerchant = getMerchant;
 		// create default data role merchant
-		RoleMerchant roleMerchant = RoleMerchant.find.where().eq("name", "Admin").eq("merchant", newMerchant).findUnique();
+		RoleMerchant roleMerchant = RoleMerchant.find.where().eq("name", "Admin").eq("merchant", newMerchant)
+				.findUnique();
 		if (roleMerchant == null) {
 			roleMerchant = new RoleMerchant("Admin", "admin", "Administrator", true, newMerchant);
 			roleMerchant.setMerchant(newMerchant);
@@ -79,7 +78,8 @@ public class SeedDefaultConfiguration {
 				"Can view, create, and edit banner product list data.", true, false));
 		features.add(new Feature("Additional Category", "additionalcategory", "Information",
 				"Can view, create, and edit additional category data.", true, false));
-		features.add(new Feature("Promo", "promo", "Information", "Can view, create, and edit promo data.", true, false));
+		features.add(
+				new Feature("Promo", "promo", "Information", "Can view, create, and edit promo data.", true, false));
 		features.add(new Feature("FAQ", "faq", "Information", "Can view, create, and edit FAQ data.", true, false));
 		features.add(new Feature("Static Page", "staticpage", "Information",
 				"Can view, create, and edit static page data.", true, false));
@@ -88,7 +88,8 @@ public class SeedDefaultConfiguration {
 		features.add(
 				new Feature("Footer", "footer", "Information", "Can view, create, and edit footer data.", true, false));
 		features.add(
-				new Feature("Article", "article", "Information", "Can view, create, and edit article data.", true, false));
+				new Feature("Article", "article", "Information", "Can view, create, and edit article data.", true,
+						false));
 		features.add(new Feature("Article Comment", "articlecomment", "Information",
 				"Can view, create, and edit article data.", true, false));
 		features.add(new Feature("Customer List", "customer", "Customers",
@@ -98,7 +99,8 @@ public class SeedDefaultConfiguration {
 		features.add(new Feature("Categories", "category", "Master Products",
 				"Can view, create, and edit category data.", true, false));
 		features.add(
-				new Feature("Brands", "brand", "Master Products", "Can view, create, and edit brand data.", true, false));
+				new Feature("Brands", "brand", "Master Products", "Can view, create, and edit brand data.", true,
+						false));
 		features.add(new Feature("Master Attribute", "attribute", "Master Products",
 				"Can view, create, and edit attribute data.", true, false));
 		features.add(new Feature("New Product", "newproduct", "Products", "Can create product.", true, false));
@@ -120,8 +122,10 @@ public class SeedDefaultConfiguration {
 				"Can view, create, and edit merchant data.", true, false));
 		features.add(new Feature("Whizliz Merchant", "ownmerchant", "Merchants",
 				"Can view, create, and edit own merchant data.", true, false));
-		features.add(new Feature("Orders", "order", "Shop", "Can view, create, and edit sales order data.", true, false));
-		features.add(new Feature("Settlement", "settlement", "Shop", "Can view and create settlement data.", true, false));
+		features.add(
+				new Feature("Orders", "order", "Shop", "Can view, create, and edit sales order data.", true, false));
+		features.add(
+				new Feature("Settlement", "settlement", "Shop", "Can view and create settlement data.", true, false));
 		features.add(new Feature("Payment Confirmation", "paymentconfirmation", "Shop",
 				"Can view, create, and edit payment confirmation data.", true, false));
 		features.add(new Feature("Bank Account", "bank", "Shop", "Can view, create, and edit bank data.", true, false));
@@ -132,15 +136,20 @@ public class SeedDefaultConfiguration {
 		features.add(new Feature("Master Courier", "courier", "Shop",
 				"Can view, create, and edit master courier data.", true, false));
 		features.add(
-				new Feature("Return Customer", "returncustomer", "Return", "Can view return customer data.", true, false));
-		features.add(new Feature("Return Vendor", "returnvendor", "Return", "Can view return vendor data.", true, false));
+				new Feature("Return Customer", "returncustomer", "Return", "Can view return customer data.", true,
+						false));
+		features.add(
+				new Feature("Return Vendor", "returnvendor", "Return", "Can view return vendor data.", true, false));
 		features.add(new Feature("Voucher List", "voucher", "Voucher", "Can view, create, and edit voucher data.",
 				true, false));
 		features.add(
-				new Feature("Order Report", "orderreport", "Reports", "Can view report order report data.", true, false));
+				new Feature("Order Report", "orderreport", "Reports", "Can view report order report data.", true,
+						false));
 		features.add(new Feature("Top Sales", "topsales", "Reports", "Can view report top sales data.", true, false));
-		features.add(new Feature("Role", "role", "User Management", "Can view, create, and edit role data.", true, false));
-		features.add(new Feature("User", "user", "User Management", "Can view, create, and edit user data.", true, false));
+		features.add(
+				new Feature("Role", "role", "User Management", "Can view, create, and edit role data.", true, false));
+		features.add(
+				new Feature("User", "user", "User Management", "Can view, create, and edit user data.", true, false));
 		features.add(new Feature("Product List", "authproduct", "Authorization",
 				"Can view, approve, reject product data.", true, false));
 		features.add(new Feature("Product Stoct", "authproductstock", "Authorization",
@@ -157,7 +166,8 @@ public class SeedDefaultConfiguration {
 		features.add(new Feature("Setting Maximum Shipping", "maximumshippingsetting", "Preference",
 				"Can view, create, edit setting maximum shipping", true, false));
 		features.add(
-				new Feature("Master Size", "size", "Master Products", "Can view, create, edit size data.", true, false));
+				new Feature("Master Size", "size", "Master Products", "Can view, create, edit size data.", true,
+						false));
 		features.add(new Feature("Master Color", "color", "Master Products", "Can view, create, edit color data.",
 				true, false));
 		features.add(new Feature("Loyalty Point", "loyaltypoint", "Loyalty Point",
@@ -167,62 +177,85 @@ public class SeedDefaultConfiguration {
 		features.add(new Feature("Mobile Version", "mobileversion", "Information",
 				"Can view, create, and edit mobile version data.", true, false));
 		features.add(
-				new Feature("Partner", "partner", "Information", "Can view, create, and edit partner data.", true, false));
+				new Feature("Partner", "partner", "Information", "Can view, create, and edit partner data.", true,
+						false));
 		features.add(
-				new Feature("Catalog", "catalog", "Information", "Can view, create, and edit catalog data.", true, false));
+				new Feature("Catalog", "catalog", "Information", "Can view, create, and edit catalog data.", true,
+						false));
 		features.add(
-				new Feature("Mega Menu Banner", "megamenubanner", "Information", "Can view, create, and edit mega menu banner data.", true, false));
+				new Feature("Mega Menu Banner", "megamenubanner", "Information",
+						"Can view, create, and edit mega menu banner data.", true, false));
 		features.add(
-				new Feature("Product Price", "productprice", "Products", "Can view, create, and edit override product price data.", true, false));
+				new Feature("Product Price", "productprice", "Products",
+						"Can view, create, and edit override product price data.", true, false));
 		features.add(
-				new Feature("Pick Up Point", "pickuppoint", "Merchant", "Can view, create, and edit pick up point data.", true, false));
+				new Feature("Pick Up Point", "pickuppoint", "Merchant",
+						"Can view, create, and edit pick up point data.", true, false));
 
-		// ============================ FEATURE FOR MERCHANT================================================ //
+		// ============================ FEATURE FOR
+		// MERCHANT================================================ //
 		features.add(
 				new Feature("Dashboard Merchant", "dashboardmerchant", "Dashboard", "Can view dashboard.", true, true));
 		features.add(
-				new Feature("Banner", "bannermerchant", "Information", "Can view, create and edit banner data.", true, true));
+				new Feature("Banner", "bannermerchant", "Information", "Can view, create and edit banner data.", true,
+						true));
 		features.add(
-				new Feature("Customer", "customermerchant", "Customers", "Can view, create and edit customer data.", true, true));
+				new Feature("Customer", "customermerchant", "Customers", "Can view, create and edit customer data.",
+						true, true));
 		features.add(
-				new Feature("Product", "productmerchant", "Products", "Can view, create and edit product data.", true, true));
+				new Feature("Product", "productmerchant", "Products", "Can view, create and edit product data.", true,
+						true));
 		features.add(
 				new Feature("Brand", "brandmerchant", "Products", "Can view, create and edit brand data.", true, true));
 		features.add(
-				new Feature("Category", "categorymerchant", "Products", "Can view, create and edit category data.", true, true));
+				new Feature("Category", "categorymerchant", "Products", "Can view, create and edit category data.",
+						true, true));
 		features.add(
-				new Feature("Product Store", "productstoremerchant", "Products", "Can view, create and edit product store data.", true, true));
+				new Feature("Product Store", "productstoremerchant", "Products",
+						"Can view, create and edit product store data.", true, true));
 		features.add(
 				new Feature("Store", "storemerchant", "Stores", "Can view, create and edit store data.", true, true));
 		features.add(
-				new Feature("Pickup Point Store", "pickuppointstoremerchant", "Stores", "Can view, create and edit pickup point store data.", true, true));
+				new Feature("Pickup Point Store", "pickuppointstoremerchant", "Stores",
+						"Can view, create and edit pickup point store data.", true, true));
 		features.add(
-				new Feature("Pickup Point", "pickuppointmerchant", "Stores", "Can view, create and edit pickup point data.", true, true));
+				new Feature("Pickup Point", "pickuppointmerchant", "Stores",
+						"Can view, create and edit pickup point data.", true, true));
 		features.add(
-				new Feature("Product Add On", "productmerchant", "Products", "Can view, create and edit table type data.", true, true));
+				new Feature("Product Add On", "productaddon", "Products", "Can view, create and edit table type data.",
+						true, true));
 		features.add(
-				new Feature("Report Order", "ordermerchant", "Orders", "Can view, create and edit table type data.", true, true));
+				new Feature("Report Order", "reportorder", "Orders", "Can view, create and edit table type data.", true,
+						true));
 		features.add(
-				new Feature("Order", "ordermerchant", "Orders", "Can view, create and edit transaction data.", true, true));
+				new Feature("Order", "ordermerchant", "Orders", "Can view, create and edit transaction data.", true,
+						true));
 		features.add(
-				new Feature("Transaction", "transactionmerchant", "Finance", "Can view, create and edit transaction data.", true, true));
+				new Feature("Transaction", "transactionmerchant", "Finance",
+						"Can view, create and edit transaction data.", true, true));
 		features.add(
-				new Feature("Withdraw", "withdrawmerchant", "Finance", "Can view, create and edit withdraw data.", true, true));
+				new Feature("Withdraw", "withdrawmerchant", "Finance", "Can view, create and edit withdraw data.", true,
+						true));
 		features.add(
 				new Feature("Bank", "bankmerchant", "Finance", "Can view, create and edit bank data.", true, true));
 		features.add(
-				new Feature("App Setting", "appsettingmerchant", "Settings", "Can view, create and edit app setting data.", true, true));
+				new Feature("App Setting", "appsettingmerchant", "Settings",
+						"Can view, create and edit app setting data.", true, true));
 		features.add(
-				new Feature("Fee Setting", "feesettingmerchant", "Settings", "Can view, create and edit fee setting data.", true, true));
+				new Feature("Fee Setting", "feesettingmerchant", "Settings",
+						"Can view, create and edit fee setting data.", true, true));
 		features.add(
-				new Feature("Loyalty Setting", "loyaltysettingmerchant", "Settings", "Can view, create and edit loyalty setting data.", true, true));
+				new Feature("Loyalty Setting", "loyaltysettingmerchant", "Settings",
+						"Can view, create and edit loyalty setting data.", true, true));
 		features.add(
 				new Feature("User", "usermerchant", "Users", "Can view, create and edit user data.", true, true));
 		features.add(
 				new Feature("Role", "rolemerchant", "Users", "Can view, create and edit role data.", true, true));
 		features.add(
-				new Feature("Store Access", "storeaccessmerchant", "Users", "Can view, create and edit store access data.", true, true));
-		// ============================ ROLE FEATURE ================================================ //
+				new Feature("Store Access", "storeaccessmerchant", "Users",
+						"Can view, create and edit store access data.", true, true));
+		// ============================ ROLE FEATURE
+		// ================================================ //
 		List<Feature> featureIsNotMerchant = features.stream()
 				.filter(notMerchant -> !notMerchant.isMerchant).collect(Collectors.toList());
 		List<Feature> featureIsMerchant = features.stream()
@@ -250,7 +283,8 @@ public class SeedDefaultConfiguration {
 				Feature getByKey = Feature.getFeatureByKey(feature.key);
 				if (getByKey == null) {
 					feature.save();
-					List<RoleMerchantFeature> roleMerchantFeatures = RoleMerchantFeature.findByRoleMerchantId(roleMerchant.id);
+					List<RoleMerchantFeature> roleMerchantFeatures = RoleMerchantFeature
+							.findByRoleMerchantId(roleMerchant.id);
 					if (roleMerchantFeatures.isEmpty()) {
 						new RoleMerchantFeature(feature, roleMerchant, true, true, true, true).save();
 					}
@@ -308,8 +342,9 @@ public class SeedDefaultConfiguration {
 			configSettingss.add(new ConfigSettings("displaynotif", "sum_pending_order", "sum_pending_order", "0"));
 			configSettingss.add(new ConfigSettings("loyaltysetting", "loyaltysetting", "loyaltysetting",
 					"1##2020-08-10##2020-08-31##200000##14##1##1##2020-07-23"));
-			configSettingss.add(new ConfigSettings("loyaltysetting_referral","max_referral_point_trx", "max_referral_point_trx", "1"));
-			configSettingss.add(new ConfigSettings("store","radius", "default_radius", "50"));
+			configSettingss.add(new ConfigSettings("loyaltysetting_referral", "max_referral_point_trx",
+					"max_referral_point_trx", "1"));
+			configSettingss.add(new ConfigSettings("store", "radius", "default_radius", "50"));
 			for (ConfigSettings configSettings : configSettingss) {
 				configSettings.save();
 			}
@@ -481,9 +516,9 @@ public class SeedDefaultConfiguration {
 		}
 
 		// city only
-//		if (District.find.findRowCount() == 0) {
-//			RajaOngkirService.getInstance().saveCities(RajaOngkirService.getInstance().getCities());
-//		}
+		// if (District.find.findRowCount() == 0) {
+		// RajaOngkirService.getInstance().saveCities(RajaOngkirService.getInstance().getCities());
+		// }
 
 		// city with subdistrict
 		Logger.info("SEED - DISTRICT-TOWNSHIP (RO-API)");
@@ -608,28 +643,26 @@ public class SeedDefaultConfiguration {
 					connProvince.addRequestProperty("User-Agent", "Shipper/");
 
 					int status = connProvince.getResponseCode();
-					if(status==200){
+					if (status == 200) {
 
 						// BEGIN READING AND ADDING PROVINCE
 						readerProvince = new BufferedReader(new InputStreamReader(connProvince.getInputStream()));
-						while((lineProvince = readerProvince.readLine())!=null){
+						while ((lineProvince = readerProvince.readLine()) != null) {
 							responseContentProvince.append(lineProvince);
 						}
 						readerProvince.close();
 						// END READING AND ADDING PROVINCE
 
-
-
 						JSONObject jsonProvince = new JSONObject(responseContentProvince.toString());
 						JSONArray arrayProvince = jsonProvince.getJSONObject("data").getJSONArray("rows");
-						for (int i=0;i<arrayProvince.length();i++){
+						for (int i = 0; i < arrayProvince.length(); i++) {
 
 							JSONObject pve = arrayProvince.getJSONObject(i);
 
 							Transaction txn = Ebean.beginTransaction();
 							ShipperProvince objShipperProvince = new ShipperProvince();
 
-							try{
+							try {
 
 								UserCms cms = cmsSync;
 								objShipperProvince.id = Long.valueOf(pve.getInt("id"));
@@ -637,38 +670,35 @@ public class SeedDefaultConfiguration {
 								objShipperProvince.userCms = cms;
 								objShipperProvince.save();
 
-
 								BufferedReader readerCity;
 								String lineCity;
 								StringBuffer responseContentCity = new StringBuffer();
 
-								URL urlCity = new URL(cityUrlApi+"&province="+pve.getInt("id"));
+								URL urlCity = new URL(cityUrlApi + "&province=" + pve.getInt("id"));
 								connCity = (HttpURLConnection) urlCity.openConnection();
 								connCity.addRequestProperty("User-Agent", "Shipper/");
 
-
 								int statusCity = connCity.getResponseCode();
-								if(statusCity==200){
+								if (statusCity == 200) {
 									txn.commit();
 
 									// BEGIN READING AND ADDING CITY
 									readerCity = new BufferedReader(new InputStreamReader(connCity.getInputStream()));
-									while((lineCity = readerCity.readLine())!=null){
+									while ((lineCity = readerCity.readLine()) != null) {
 										responseContentCity.append(lineCity);
 									}
 
 									readerCity.close();
 									// END READING AND ADDING CITY
 
-
 									JSONObject jsonCity = new JSONObject(responseContentCity.toString());
 									JSONArray arrayCity = jsonCity.getJSONObject("data").getJSONArray("rows");
-									for (int a=0;a<arrayCity.length();a++){
+									for (int a = 0; a < arrayCity.length(); a++) {
 
 										Transaction txnCity = Ebean.beginTransaction();
 										JSONObject cty = arrayCity.getJSONObject(a);
 										ShipperCity objShipperCity = new ShipperCity();
-										try{
+										try {
 
 											objShipperCity.id = Long.valueOf(cty.getInt("id"));
 											objShipperCity.userCms = objShipperProvince.userCms;
@@ -676,41 +706,41 @@ public class SeedDefaultConfiguration {
 											objShipperCity.shipperProvince = objShipperProvince;
 											objShipperCity.provinceName = objShipperProvince.shipperProvincename;
 											objShipperCity.save();
-											//txnCity.commit();
-
+											// txnCity.commit();
 
 											BufferedReader readerSuburb;
 											String lineSuburb;
 											StringBuffer responseContentSuburb = new StringBuffer();
 
-											URL urlSuburb = new URL(suburbUrlApi+"&city="+cty.getInt("id"));
+											URL urlSuburb = new URL(suburbUrlApi + "&city=" + cty.getInt("id"));
 											connSuburb = (HttpURLConnection) urlSuburb.openConnection();
 											connSuburb.addRequestProperty("User-Agent", "Shipper/");
 
-
 											int statusSuburb = connSuburb.getResponseCode();
-											if(statusSuburb==200){
+											if (statusSuburb == 200) {
 												txnCity.commit();
 
 												// BEGIN READING AND ADDING SUBURB
-												readerSuburb = new BufferedReader(new InputStreamReader(connSuburb.getInputStream()));
-												while((lineSuburb = readerSuburb.readLine())!=null){
+												readerSuburb = new BufferedReader(
+														new InputStreamReader(connSuburb.getInputStream()));
+												while ((lineSuburb = readerSuburb.readLine()) != null) {
 													responseContentSuburb.append(lineSuburb);
 												}
 
 												readerSuburb.close();
 												// END READING AND ADDING SUBURB
 
-
-												JSONObject jsonSuburb = new JSONObject(responseContentSuburb.toString());
-												JSONArray arraySuburb = jsonSuburb.getJSONObject("data").getJSONArray("rows");
-												for (int x=0;x<arraySuburb.length();x++){
+												JSONObject jsonSuburb = new JSONObject(
+														responseContentSuburb.toString());
+												JSONArray arraySuburb = jsonSuburb.getJSONObject("data")
+														.getJSONArray("rows");
+												for (int x = 0; x < arraySuburb.length(); x++) {
 
 													Transaction txnSuburb = Ebean.beginTransaction();
 													JSONObject sbr = arraySuburb.getJSONObject(x);
 													ShipperSuburb objShipperSuburb = new ShipperSuburb();
 
-													try{
+													try {
 
 														objShipperSuburb.id = Long.valueOf(sbr.getInt("id"));
 														objShipperSuburb.userCms = objShipperProvince.userCms;
@@ -718,52 +748,54 @@ public class SeedDefaultConfiguration {
 														objShipperSuburb.name = sbr.getString("name");
 														objShipperSuburb.alias = sbr.getString("alias");
 														objShipperSuburb.save();
-														//txnSuburb.commit();
-
-
+														// txnSuburb.commit();
 
 														BufferedReader readerArea;
 														String lineArea;
 														StringBuffer responseContentArea = new StringBuffer();
 
-														URL urlArea = new URL(areaUrlApi+"&suburb="+sbr.getInt("id"));
+														URL urlArea = new URL(
+																areaUrlApi + "&suburb=" + sbr.getInt("id"));
 														connArea = (HttpURLConnection) urlArea.openConnection();
 														connArea.addRequestProperty("User-Agent", "Shipper/");
 
-
 														int statusArea = connArea.getResponseCode();
-														if(statusArea==200){
+														if (statusArea == 200) {
 															txnSuburb.commit();
 
 															// BEGIN READING AND ADDING AREA
-															readerArea = new BufferedReader(new InputStreamReader(connArea.getInputStream()));
-															while((lineArea = readerArea.readLine())!=null){
+															readerArea = new BufferedReader(
+																	new InputStreamReader(connArea.getInputStream()));
+															while ((lineArea = readerArea.readLine()) != null) {
 																responseContentArea.append(lineArea);
 															}
 
 															readerArea.close();
 															// END READING AND ADDING AREA
 
-															JSONObject jsonArea = new JSONObject(responseContentArea.toString());
-															JSONArray arrayArea = jsonArea.getJSONObject("data").getJSONArray("rows");
-															for (int y=0;y<arrayArea.length();y++){
+															JSONObject jsonArea = new JSONObject(
+																	responseContentArea.toString());
+															JSONArray arrayArea = jsonArea.getJSONObject("data")
+																	.getJSONArray("rows");
+															for (int y = 0; y < arrayArea.length(); y++) {
 
 																Transaction txnArea = Ebean.beginTransaction();
 																JSONObject area = arrayArea.getJSONObject(y);
 																ShipperArea objShipperArea = new ShipperArea();
 
-																try{
+																try {
 
 																	objShipperArea.id = Long.valueOf(area.getInt("id"));
 																	objShipperArea.userCms = objShipperProvince.userCms;
 																	objShipperArea.shipperSuburb = objShipperSuburb;
 																	objShipperArea.name = area.getString("name");
 																	objShipperArea.alias = area.getString("alias");
-																	objShipperArea.postCode = area.getString("postcode");
+																	objShipperArea.postCode = area
+																			.getString("postcode");
 																	objShipperArea.save();
 																	txnArea.commit();
 
-																}catch (Exception e) {
+																} catch (Exception e) {
 																	e.printStackTrace();
 																	txnArea.rollback();
 																} finally {
@@ -773,8 +805,7 @@ public class SeedDefaultConfiguration {
 															}
 														}
 
-
-													}catch (Exception e) {
+													} catch (Exception e) {
 														e.printStackTrace();
 														txnSuburb.rollback();
 													} finally {
@@ -783,12 +814,11 @@ public class SeedDefaultConfiguration {
 
 												}
 
-
-											}else{
+											} else {
 												txnCity.rollback();
 											}
 
-										}catch (Exception e) {
+										} catch (Exception e) {
 											e.printStackTrace();
 											txnCity.rollback();
 										} finally {
@@ -797,12 +827,11 @@ public class SeedDefaultConfiguration {
 
 									}
 
-								}else{
+								} else {
 									txn.rollback();
 								}
 
-
-							}catch (Exception e) {
+							} catch (Exception e) {
 								e.printStackTrace();
 								txn.rollback();
 							} finally {
@@ -813,15 +842,14 @@ public class SeedDefaultConfiguration {
 
 					}
 
-				}catch(Exception e){
+				} catch (Exception e) {
 					e.printStackTrace();
-				}finally{
+				} finally {
 					connArea.disconnect();
 					connSuburb.disconnect();
 					connCity.disconnect();
 					connProvince.disconnect();
 				}
-
 
 				// ============================= END ADD SHIPPER
 
