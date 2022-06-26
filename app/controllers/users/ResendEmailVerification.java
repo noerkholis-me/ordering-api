@@ -32,7 +32,6 @@ import utils.ImageUtil;
 
 import java.io.IOException;
 
-
 @Api(value = "/users/resend/verification", description = "User and Merchant Profile")
 public class ResendEmailVerification extends BaseController {
 
@@ -43,23 +42,24 @@ public class ResendEmailVerification extends BaseController {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static Result resendEmailVerificationUserMerchant(String emailAddress) {
-        Transaction trx = Ebean.beginTransaction();
         try {
             // VALIDATION
             // =======================================================================
-            if(emailAddress == null || emailAddress == ""){
+            if (emailAddress == null || emailAddress == "") {
                 response.setBaseResponse(0, 0, 0, "Email tidak boleh kosong", null);
                 return badRequest(Json.toJson(response));
             }
             // =======================================================================
-            
+
             UserMerchant getUserMerchantData = UserMerchantRepository.forResendEmail(emailAddress);
 
-            if(getUserMerchantData != null && getUserMerchantData.getPassword() != null && getUserMerchantData.isActive == false) {
+            if (getUserMerchantData != null && getUserMerchantData.getPassword() != null
+                    && getUserMerchantData.isActive == false) {
                 getUserMerchantData.isActive = Boolean.FALSE;
 
                 // CREATE ACTIVATION CODE
-                String forActivation = Encryption.EncryptAESCBCPCKS5Padding(String.valueOf(getUserMerchantData.id) + String.valueOf(System.currentTimeMillis()));
+                String forActivation = Encryption.EncryptAESCBCPCKS5Padding(
+                        String.valueOf(getUserMerchantData.id) + String.valueOf(System.currentTimeMillis()));
                 getUserMerchantData.setActivationCode(forActivation);
 
                 // START TO SEND EMAIL VERIFICATION
@@ -67,52 +67,47 @@ public class ResendEmailVerification extends BaseController {
                     try {
                         MailConfig.sendmail(getUserMerchantData.getEmail(), MailConfig.subjectActivation,
                                 MailConfig.renderVerificationAccount(forActivation, getUserMerchantData.fullName));
-        
+
                     } catch (Exception e) {
                         e.printStackTrace();
-                        trx.rollback();
-                    } finally {
-                        trx.end();
                     }
                 });
                 thread.start();
 
                 getUserMerchantData.update();
-                trx.commit();
 
                 response.setBaseResponse(0, 0, 0, "Berhasil mengirim ulang pesan. Silahkan cek Email!", null);
                 return notFound(Json.toJson(response));
-            } else if(getUserMerchantData != null && getUserMerchantData.getPassword() == null && getUserMerchantData.isActive == false) {
+            } else if (getUserMerchantData != null && getUserMerchantData.getPassword() == null
+                    && getUserMerchantData.isActive == false) {
                 getUserMerchantData.isActive = Boolean.FALSE;
 
                 // CREATE ACTIVATION CODE
-                String forActivation = Encryption.EncryptAESCBCPCKS5Padding(String.valueOf(getUserMerchantData.id) + String.valueOf(System.currentTimeMillis()));
+                String forActivation = Encryption.EncryptAESCBCPCKS5Padding(
+                        String.valueOf(getUserMerchantData.id) + String.valueOf(System.currentTimeMillis()));
                 getUserMerchantData.setActivationCode(forActivation);
 
                 // START TO SEND EMAIL VERIFICATION
                 Thread thread = new Thread(() -> {
                     try {
                         MailConfig.sendmail(getUserMerchantData.getEmail(), MailConfig.subjectActivation,
-                                MailConfig.renderMailSendCreatePasswordCMSTemplate(forActivation, getUserMerchantData.fullName));
-        
+                                MailConfig.renderMailSendCreatePasswordCMSTemplate(forActivation,
+                                        getUserMerchantData.fullName));
+
                     } catch (Exception e) {
                         e.printStackTrace();
-                        trx.rollback();
-                    } finally {
-                        trx.end();
                     }
                 });
                 thread.start();
 
                 getUserMerchantData.update();
-                trx.commit();
 
                 response.setBaseResponse(0, 0, 0, "Berhasil mengirim ulang pesan. Silahkan cek Email!", null);
                 return notFound(Json.toJson(response));
             }
             response.setBaseResponse(0, 0, 0, "Profile tidak ditemukan", null);
             return notFound(Json.toJson(response));
-            
+
         } catch (Exception e) {
             logger.error("Error saat parsing json", e);
             e.printStackTrace();
