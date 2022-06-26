@@ -77,7 +77,7 @@ public class ResendEmailVerification extends BaseController {
                 getUserMerchantData.update();
 
                 response.setBaseResponse(0, 0, 0, "Berhasil mengirim ulang pesan. Silahkan cek Email!", null);
-                return notFound(Json.toJson(response));
+                return ok(Json.toJson(response));
             } else if (getUserMerchantData != null && getUserMerchantData.getPassword() == null
                     && getUserMerchantData.isActive == false) {
                 getUserMerchantData.isActive = Boolean.FALSE;
@@ -103,7 +103,7 @@ public class ResendEmailVerification extends BaseController {
                 getUserMerchantData.update();
 
                 response.setBaseResponse(0, 0, 0, "Berhasil mengirim ulang pesan. Silahkan cek Email!", null);
-                return notFound(Json.toJson(response));
+                return ok(Json.toJson(response));
             }
             response.setBaseResponse(0, 0, 0, "Profile tidak ditemukan", null);
             return notFound(Json.toJson(response));
