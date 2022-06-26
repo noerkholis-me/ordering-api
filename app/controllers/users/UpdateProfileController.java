@@ -32,7 +32,6 @@ import utils.ImageUtil;
 
 import java.io.IOException;
 
-
 @Api(value = "/users/update/data", description = "User and Merchant Profile")
 public class UpdateProfileController extends BaseController {
 
@@ -44,7 +43,7 @@ public class UpdateProfileController extends BaseController {
 
     public static Result updateMerchantData() {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
-        if(ownMerchant != null){
+        if (ownMerchant != null) {
             Transaction trx = Ebean.beginTransaction();
             try {
                 JsonNode json = request().body().asJson();
@@ -52,72 +51,74 @@ public class UpdateProfileController extends BaseController {
 
                 // VALIDATION
                 // =======================================================================
-                if(request.getEmail() == null || request.getEmail() == ""){
+                if (request.getEmail() == null || request.getEmail() == "") {
                     response.setBaseResponse(0, 0, 0, "Email tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(request.getName() == null || request.getName() == ""){
+                if (request.getName() == null || request.getName() == "") {
                     response.setBaseResponse(0, 0, 0, "Nama Merchant tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(request.getPhone() == null || request.getPhone() == ""){
+                if (request.getPhone() == null || request.getPhone() == "") {
                     response.setBaseResponse(0, 0, 0, "Telepon tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(request.getAddress() == null || request.getAddress() == ""){
+                if (request.getAddress() == null || request.getAddress() == "") {
                     response.setBaseResponse(0, 0, 0, "Alamat tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(request.getProvinceId() == null || request.getProvinceId() == 0){
+                if (request.getProvinceId() == null || request.getProvinceId() == 0) {
                     response.setBaseResponse(0, 0, 0, "Provinsi tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(request.getCityId() == null || request.getCityId() == 0){
+                if (request.getCityId() == null || request.getCityId() == 0) {
                     response.setBaseResponse(0, 0, 0, "Kota tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(request.getDistrictId() == null || request.getDistrictId() == 0){
+                if (request.getDistrictId() == null || request.getDistrictId() == 0) {
                     response.setBaseResponse(0, 0, 0, "Kecamatan tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(request.getSubDistrictId() == null || request.getSubDistrictId() == 0){
+                if (request.getSubDistrictId() == null || request.getSubDistrictId() == 0) {
                     response.setBaseResponse(0, 0, 0, "Desa/Kelurahan tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
                 // =======================================================================
 
                 Merchant getMerchantData = Merchant.merchantGetId(ownMerchant.id);
-                if(getMerchantData == null) {
+                if (getMerchantData == null) {
                     response.setBaseResponse(0, 0, 0, "Merchant tidak ditemukan", null);
                     return notFound(Json.toJson(response));
                 }
 
                 ShipperProvince shipperProvince = ShipperProvince.findById(request.getProvinceId());
-                if(shipperProvince == null) {
+                if (shipperProvince == null) {
                     response.setBaseResponse(0, 0, 0, "Provinsi tidak ditemukan", null);
                     return notFound(Json.toJson(response));
                 }
                 ShipperCity shipperCity = ShipperCity.findById(request.getCityId());
-                if(shipperCity == null) {
+                if (shipperCity == null) {
                     response.setBaseResponse(0, 0, 0, "Kota tidak ditemukan", null);
                     return notFound(Json.toJson(response));
                 }
-                ShipperArea shipperArea = ShipperArea.findById(request.getDistrictId());
-                if(shipperArea == null) {
-                    response.setBaseResponse(0, 0, 0, "District tidak ditemukan", null);
+                ShipperSuburb shipperSuburb = ShipperSuburb.findById(request.getDistrictId());
+                if (shipperSuburb == null) {
+                    response.setBaseResponse(0, 0, 0, "Kecamatan tidak ditemukan", null);
                     return notFound(Json.toJson(response));
                 }
-                ShipperSuburb shipperSuburb = ShipperSuburb.findById(request.getSubDistrictId());
-                if(shipperSuburb == null) {
-                    response.setBaseResponse(0, 0, 0, "Sub Urban tidak ditemukan", null);
+                ShipperArea shipperArea = ShipperArea.findById(request.getSubDistrictId());
+                if (shipperArea == null) {
+                    response.setBaseResponse(0, 0, 0, "Kelurahan tidak ditemukan", null);
                     return notFound(Json.toJson(response));
                 }
 
-                if(request.getEmail() != null && request.getEmail() != "" && !request.getEmail().equalsIgnoreCase(getMerchantData.email)){
+                if (request.getEmail() != null && request.getEmail() != ""
+                        && !request.getEmail().equalsIgnoreCase(getMerchantData.email)) {
                     getMerchantData.email = request.getEmail();
                     getMerchantData.isActive = Boolean.FALSE;
                     getMerchantData.status = "PENDING APPROVAL";
-                    String forActivation = Encryption.EncryptAESCBCPCKS5Padding(String.valueOf(getMerchantData.id) + String.valueOf(System.currentTimeMillis()));
+                    String forActivation = Encryption.EncryptAESCBCPCKS5Padding(
+                            String.valueOf(getMerchantData.id) + String.valueOf(System.currentTimeMillis()));
 
                     getMerchantData.activationCode = forActivation;
 
@@ -126,7 +127,7 @@ public class UpdateProfileController extends BaseController {
                         try {
                             MailConfig.sendmail(request.getEmail(), MailConfig.subjectActivation,
                                     MailConfig.renderVerificationAccount(forActivation, getMerchantData.fullName));
-        
+
                         } catch (Exception e) {
                             e.printStackTrace();
                             trx.rollback();
@@ -139,7 +140,9 @@ public class UpdateProfileController extends BaseController {
                 getMerchantData.fullName = request.getName();
                 getMerchantData.name = request.getName();
                 getMerchantData.companyName = request.getName();
-                getMerchantData.domain = request.getMerchantUrl() != null && request.getMerchantUrl() != "" ? request.getMerchantUrl() : null;
+                getMerchantData.domain = request.getMerchantUrl() != null && request.getMerchantUrl() != ""
+                        ? request.getMerchantUrl()
+                        : null;
                 getMerchantData.merchantUrlPage = request.getMerchantUrl();
                 getMerchantData.phone = request.getPhone();
                 getMerchantData.address = request.getAddress();
@@ -153,7 +156,7 @@ public class UpdateProfileController extends BaseController {
 
                 response.setBaseResponse(1, 0, 1, "Berhasil mengupdate data", getMerchantData.id);
                 return ok(Json.toJson(response));
-            
+
             } catch (Exception e) {
                 logger.error("Error saat parsing json", e);
                 e.printStackTrace();
@@ -168,37 +171,39 @@ public class UpdateProfileController extends BaseController {
 
     public static Result updatePasswordMerchantData() {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
-        if(ownMerchant != null){
+        if (ownMerchant != null) {
             Transaction trx = Ebean.beginTransaction();
             try {
                 JsonNode json = request().body().asJson();
                 ProfileMerchantRequest request = objectMapper.readValue(json.toString(), ProfileMerchantRequest.class);
 
                 Merchant getMerchantData = Merchant.merchantGetId(ownMerchant.id);
-                if(getMerchantData == null) {
+                if (getMerchantData == null) {
                     response.setBaseResponse(0, 0, 0, "Merchant tidak ditemukan", null);
                     return notFound(Json.toJson(response));
                 }
 
                 // VALIDATION
                 // =======================================================================
-                if(request.getPassword() == null || request.getPassword() == ""){
+                if (request.getPassword() == null || request.getPassword() == "") {
                     response.setBaseResponse(0, 0, 0, "Password tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(request.getConfirmPassword() == null || request.getConfirmPassword() == ""){
+                if (request.getConfirmPassword() == null || request.getConfirmPassword() == "") {
                     response.setBaseResponse(0, 0, 0, "Confirmation Password tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(!request.getConfirmPassword().equals(request.getPassword())){
+                if (!request.getConfirmPassword().equals(request.getPassword())) {
                     response.setBaseResponse(0, 0, 0, "Confirmation Password tidak sama", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(Encryption.EncryptAESCBCPCKS5Padding(request.getPassword()).equalsIgnoreCase(getMerchantData.password)){
+                if (Encryption.EncryptAESCBCPCKS5Padding(request.getPassword())
+                        .equalsIgnoreCase(getMerchantData.password)) {
                     response.setBaseResponse(0, 0, 0, "Password tidak boleh sama dengan sebelumnya", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(!Encryption.EncryptAESCBCPCKS5Padding(request.getOldPassword()).equalsIgnoreCase(getMerchantData.password)){
+                if (!Encryption.EncryptAESCBCPCKS5Padding(request.getOldPassword())
+                        .equalsIgnoreCase(getMerchantData.password)) {
                     response.setBaseResponse(0, 0, 0, "Password lama yang anda masukkan salah", null);
                     return badRequest(Json.toJson(response));
                 }
@@ -210,7 +215,7 @@ public class UpdateProfileController extends BaseController {
 
                 response.setBaseResponse(1, 0, 1, "Berhasil mengupdate password", getMerchantData.id);
                 return ok(Json.toJson(response));
-            
+
             } catch (Exception e) {
                 logger.error("Error saat parsing json", e);
                 e.printStackTrace();
@@ -225,38 +230,41 @@ public class UpdateProfileController extends BaseController {
 
     public static Result updateUserMerchantData(Long userMerchantId) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
-        if(ownMerchant != null){
+        if (ownMerchant != null) {
             Transaction trx = Ebean.beginTransaction();
             try {
                 JsonNode json = request().body().asJson();
-                ProfileUserMerchantRequest request = objectMapper.readValue(json.toString(), ProfileUserMerchantRequest.class);
+                ProfileUserMerchantRequest request = objectMapper.readValue(json.toString(),
+                        ProfileUserMerchantRequest.class);
 
                 // VALIDATION
                 // =======================================================================
-                if(request.getEmail() == null || request.getEmail() == ""){
+                if (request.getEmail() == null || request.getEmail() == "") {
                     response.setBaseResponse(0, 0, 0, "Email tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(request.getFirstName() == null || request.getFirstName() == ""){
+                if (request.getFirstName() == null || request.getFirstName() == "") {
                     response.setBaseResponse(0, 0, 0, "Nama tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(request.getLastName() == null || request.getLastName() == ""){
+                if (request.getLastName() == null || request.getLastName() == "") {
                     response.setBaseResponse(0, 0, 0, "Nama tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
                 // =======================================================================
-                
+
                 UserMerchant getUserMerchantData = UserMerchantRepository.findAccountById(userMerchantId);
-                if(getUserMerchantData == null) {
+                if (getUserMerchantData == null) {
                     response.setBaseResponse(0, 0, 0, "User Merchant tidak ditemukan", null);
                     return notFound(Json.toJson(response));
                 }
 
-                if(request.getEmail() != null && request.getEmail() != "" && !request.getEmail().equalsIgnoreCase(getUserMerchantData.getEmail())){
+                if (request.getEmail() != null && request.getEmail() != ""
+                        && !request.getEmail().equalsIgnoreCase(getUserMerchantData.getEmail())) {
                     getUserMerchantData.setEmail(request.getEmail());
                     getUserMerchantData.isActive = Boolean.FALSE;
-                    String forActivation = Encryption.EncryptAESCBCPCKS5Padding(String.valueOf(getUserMerchantData.id) + String.valueOf(System.currentTimeMillis()));
+                    String forActivation = Encryption.EncryptAESCBCPCKS5Padding(
+                            String.valueOf(getUserMerchantData.id) + String.valueOf(System.currentTimeMillis()));
 
                     getUserMerchantData.setActivationCode(forActivation);
 
@@ -265,7 +273,7 @@ public class UpdateProfileController extends BaseController {
                         try {
                             MailConfig.sendmail(request.getEmail(), MailConfig.subjectActivation,
                                     MailConfig.renderVerificationAccount(forActivation, getUserMerchantData.fullName));
-        
+
                         } catch (Exception e) {
                             e.printStackTrace();
                             trx.rollback();
@@ -275,7 +283,7 @@ public class UpdateProfileController extends BaseController {
                     });
                     thread.start();
                 }
-                getUserMerchantData.setFullName(request.getFirstName()+" "+request.getLastName());
+                getUserMerchantData.setFullName(request.getFirstName() + " " + request.getLastName());
                 getUserMerchantData.setFirstName(request.getFirstName());
                 getUserMerchantData.setLastName(request.getLastName());
                 getUserMerchantData.setRole(getUserMerchantData.getRole());
@@ -284,7 +292,7 @@ public class UpdateProfileController extends BaseController {
 
                 response.setBaseResponse(1, 0, 1, "Berhasil mengupdate data", getUserMerchantData.id);
                 return ok(Json.toJson(response));
-            
+
             } catch (Exception e) {
                 logger.error("Error saat parsing json", e);
                 e.printStackTrace();
@@ -303,30 +311,30 @@ public class UpdateProfileController extends BaseController {
 
             // VALIDATION
             // =======================================================================
-            if(activationCode == null || activationCode == ""){
+            if (activationCode == null || activationCode == "") {
                 response.setBaseResponse(0, 0, 0, "Activation code tidak boleh kosong", null);
                 return badRequest(Json.toJson(response));
             }
             // =======================================================================
-            
+
             UserMerchant getUserMerchantData = UserMerchantRepository.findByActivationCode(activationCode);
             Merchant getMerchantData = Merchant.findByActivationCode(activationCode);
-            if(getUserMerchantData != null) {
+            if (getUserMerchantData != null) {
                 getUserMerchantData.isActive = Boolean.TRUE;
                 getUserMerchantData.setActivationCode("");
                 getUserMerchantData.update();
                 trx.commit();
-                return redirect(Helper.MERCHANT_URL+"/activation?success=1");
-            } else if(getMerchantData != null) {
+                return redirect(Helper.MERCHANT_URL + "/activation?success=1");
+            } else if (getMerchantData != null) {
                 getMerchantData.isActive = Boolean.TRUE;
                 getMerchantData.activationCode = "";
                 getMerchantData.update();
                 trx.commit();
-                return redirect(Helper.MERCHANT_URL+"/activation?success=1");
+                return redirect(Helper.MERCHANT_URL + "/activation?success=1");
             }
             response.setBaseResponse(0, 0, 0, "Profile tidak ditemukan", null);
             return notFound(Json.toJson(response));
-            
+
         } catch (Exception e) {
             logger.error("Error saat parsing json", e);
             e.printStackTrace();
@@ -339,41 +347,44 @@ public class UpdateProfileController extends BaseController {
 
     public static Result updatePasswordUserMerchantData(Long userMerchantId) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
-        if(ownMerchant != null){
+        if (ownMerchant != null) {
             Transaction trx = Ebean.beginTransaction();
             try {
                 JsonNode json = request().body().asJson();
-                ProfileUserMerchantRequest request = objectMapper.readValue(json.toString(), ProfileUserMerchantRequest.class);
-                
+                ProfileUserMerchantRequest request = objectMapper.readValue(json.toString(),
+                        ProfileUserMerchantRequest.class);
+
                 UserMerchant getUserMerchantData = UserMerchantRepository.findAccountById(userMerchantId);
-                if(getUserMerchantData == null) {
+                if (getUserMerchantData == null) {
                     response.setBaseResponse(0, 0, 0, "User Merchant tidak ditemukan", null);
                     return notFound(Json.toJson(response));
                 }
 
                 // VALIDATION
                 // =======================================================================
-                if(request.getPassword() == null || request.getPassword() == ""){
+                if (request.getPassword() == null || request.getPassword() == "") {
                     response.setBaseResponse(0, 0, 0, "Password tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(request.getConfirmPassword() == null || request.getConfirmPassword() == ""){
+                if (request.getConfirmPassword() == null || request.getConfirmPassword() == "") {
                     response.setBaseResponse(0, 0, 0, "Confirmation Password tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(!request.getConfirmPassword().equals(request.getPassword())){
+                if (!request.getConfirmPassword().equals(request.getPassword())) {
                     response.setBaseResponse(0, 0, 0, "Confirmation Password tidak sama", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(Encryption.EncryptAESCBCPCKS5Padding(request.getPassword()).equalsIgnoreCase(getUserMerchantData.getPassword())){
+                if (Encryption.EncryptAESCBCPCKS5Padding(request.getPassword())
+                        .equalsIgnoreCase(getUserMerchantData.getPassword())) {
                     response.setBaseResponse(0, 0, 0, "Password tidak boleh sama dengan sebelumnya", null);
                     return badRequest(Json.toJson(response));
                 }
-                if(!Encryption.EncryptAESCBCPCKS5Padding(request.getOldPassword()).equalsIgnoreCase(getUserMerchantData.getPassword())){
+                if (!Encryption.EncryptAESCBCPCKS5Padding(request.getOldPassword())
+                        .equalsIgnoreCase(getUserMerchantData.getPassword())) {
                     response.setBaseResponse(0, 0, 0, "Password lama yang anda masukkan salah", null);
                     return badRequest(Json.toJson(response));
                 }
-                // =======================================================================                
+                // =======================================================================
 
                 getUserMerchantData.setPassword(Encryption.EncryptAESCBCPCKS5Padding(request.getPassword()));
                 getUserMerchantData.update();
@@ -381,7 +392,7 @@ public class UpdateProfileController extends BaseController {
 
                 response.setBaseResponse(1, 0, 1, "Berhasil mengupdate data", getUserMerchantData.id);
                 return ok(Json.toJson(response));
-            
+
             } catch (Exception e) {
                 logger.error("Error saat parsing json", e);
                 e.printStackTrace();
@@ -393,6 +404,5 @@ public class UpdateProfileController extends BaseController {
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
     }
-
 
 }
