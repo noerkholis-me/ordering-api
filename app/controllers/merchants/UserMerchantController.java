@@ -58,7 +58,7 @@ public class UserMerchantController extends BaseController {
                         }
 
                         UserMerchant newUserMerchant = new UserMerchant();
-                        constructRequestModel(newUserMerchant, request, role, ownMerchant);
+                        constructRequestModel(newUserMerchant, request, role, ownMerchant, Boolean.FALSE);
                         newUserMerchant.save();
 
                         String forActivation = Encryption.EncryptAESCBCPCKS5Padding(String.valueOf(newUserMerchant.id) + String.valueOf(System.currentTimeMillis()));
@@ -128,7 +128,7 @@ public class UserMerchantController extends BaseController {
                             response.setBaseResponse(0, 0, 0, error + " Role id not found.", null);
                             return badRequest(Json.toJson(response));
                         }
-                        constructRequestModel(userMerchant, request, role, ownMerchant);
+                        constructRequestModel(userMerchant, request, role, ownMerchant, request.getIsActive());
                         userMerchant.update();
                         trx.commit();
 
@@ -170,10 +170,47 @@ public class UserMerchantController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
                 userMerchant.isDeleted = true;
+                userMerchant.isActive = false;
                 userMerchant.update();
                 trx.commit();
 
                 response.setBaseResponse(1,offset, 1, success + " delete user successfully", userMerchant.isDeleted);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                logger.error("Error while delete user", e);
+                e.printStackTrace();
+                trx.rollback();
+            } finally {
+                trx.end();
+            }
+            response.setBaseResponse(0, 0, 0, error, null);
+            return badRequest(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    public static Result setStatus(Long id) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        JsonNode json = request().body().asJson();
+        if (ownMerchant != null) {
+            Transaction trx = Ebean.beginTransaction();
+            try {
+                UserMerchant userMerchant = UserMerchantRepository.findById(id, ownMerchant);
+                UserMerchantRequest request = objectMapper.readValue(json.toString(), UserMerchantRequest.class);
+                if (userMerchant == null) {
+                    response.setBaseResponse(0, 0, 0, "User merchant tidak ditemukan", null);
+                    return badRequest(Json.toJson(response));
+                }
+                if (userMerchant.getPassword() == null && userMerchant.isActive == false && request.getIsActive() == true) {
+                    response.setBaseResponse(0, 0, 0, "Tidak bisa mengaktifkan! Silahkan kirim email verifikasi kepada user!", null);
+                    return badRequest(Json.toJson(response));
+                }
+                userMerchant.isActive = request.getIsActive();
+                userMerchant.update();
+                trx.commit();
+
+                response.setBaseResponse(1,offset, 1, "Sukses mengubah status merchant", userMerchant.isDeleted);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 logger.error("Error while delete user", e);
@@ -229,12 +266,12 @@ public class UserMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    private static UserMerchant constructRequestModel(UserMerchant userMerchant, UserMerchantRequest request, RoleMerchant role, Merchant merchant) {
+    private static UserMerchant constructRequestModel(UserMerchant userMerchant, UserMerchantRequest request, RoleMerchant role, Merchant merchant, Boolean statusActive) {
         userMerchant.setFirstName(request.getFirstName());
         userMerchant.setLastName(request.getLastName());
         userMerchant.setFullName(request.getFirstName() + " " + request.getLastName());
         userMerchant.setEmail(request.getEmail());
-        userMerchant.setActive(Boolean.TRUE);
+        userMerchant.setActive(statusActive);
         userMerchant.setRole(role);
         return userMerchant;
     }
@@ -286,6 +323,7 @@ public class UserMerchantController extends BaseController {
                     response.setGender(data.getGender());
                     response.setMerchantId(data.getRole().getMerchant().id);
                     response.setRoleId(data.getRole().id);
+                    response.setRoleName(data.getRole().getName());
                     responses.add(response);
                 }
                 response.setBaseResponse(filter == null || filter == "" ? totalData.size() : responseIndex.size() , offset, limit, success + " showing data", responses);

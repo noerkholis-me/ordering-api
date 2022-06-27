@@ -23,6 +23,9 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = false)
 public class Order extends BaseModel {
 
+    public static final String NEW_ORDER = "NEW_ORDER";
+    public static final String CANCELLED = "CANCELLED";
+
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedTimestamp
     @Column(name = "order_date")

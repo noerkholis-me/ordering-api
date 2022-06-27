@@ -31,6 +31,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.io.File;
+import java.io.FileOutputStream;
+
+import service.DownloadOrderReport;
 
 public class CheckoutOrderController extends BaseController {
 
@@ -122,16 +126,19 @@ public class CheckoutOrderController extends BaseController {
                                 // create product add on
                                 ProductAddOn productAddOn = ProductAddOnRepository.findByProductAssignIdAndProductId(productOrderAddOn.getProductAssignId(), productOrderAddOn.getProductId());
                                 if (productAddOn != null) {
-                                    OrderDetailAddOn orderDetailAddOn = new OrderDetailAddOn();
-                                    orderDetailAddOn.setOrderDetail(orderDetail);
-                                    orderDetailAddOn.setProductAddOn(productAddOn);
-                                    orderDetailAddOn.setQuantity(productOrderAddOn.getProductQty());
-                                    orderDetailAddOn.setNotes(productOrderAddOn.getNotes());
-                                    orderDetailAddOn.setProductPrice(productOrderAddOn.getProductPrice());
-                                    orderDetailAddOn.setProductName(productAddOn.getProductMerchant().getProductName());
-                                    orderDetailAddOn.setProductAssignId(productAddOn.getProductAssignId());
-                                    orderDetailAddOn.setSubTotal(productOrderAddOn.getSubTotal());
-                                    orderDetailAddOn.save();
+                                    ProductMerchant addOn = ProductMerchantRepository.findById(productAddOn.getProductAssignId());
+                                    if (addOn != null) {
+                                        OrderDetailAddOn orderDetailAddOn = new OrderDetailAddOn();
+                                        orderDetailAddOn.setOrderDetail(orderDetail);
+                                        orderDetailAddOn.setProductAddOn(productAddOn);
+                                        orderDetailAddOn.setQuantity(productOrderAddOn.getProductQty());
+                                        orderDetailAddOn.setNotes(productOrderAddOn.getNotes());
+                                        orderDetailAddOn.setProductPrice(productOrderAddOn.getProductPrice());
+                                        orderDetailAddOn.setProductName(addOn.getProductName());
+                                        orderDetailAddOn.setProductAssignId(productAddOn.getProductAssignId());
+                                        orderDetailAddOn.setSubTotal(productOrderAddOn.getSubTotal());
+                                        orderDetailAddOn.save();
+                                    }
                                 }
                             }
                         }
@@ -302,85 +309,6 @@ public class CheckoutOrderController extends BaseController {
         response.setBaseResponse(0, 0, 0, "Error", null);
         return badRequest(Json.toJson(response));
     }
-
-    public static Result listOrderMerchant(Long storeId, int offset, int limit, String statusOrder) {
-        Merchant ownMerchant = checkMerchantAccessAuthorization();
-        if(ownMerchant != null) {
-            String querySqlStore = "";
-            if(storeId != null && storeId != 0){
-                querySqlStore = "t0.store_id in (select st.id from STORE st where st.merchant_id = "+ownMerchant.id+" and st.id = " +storeId+ " and st.is_active = true and st.is_deleted = false)";
-            } else {
-                querySqlStore = "t0.store_id in (select st.id from STORE st where st.merchant_id = "+ownMerchant.id+" and st.is_active = true and st.is_deleted = false)";
-            }
-            String querySqlOrderPayment = "t0.id in (select op.id from order_payment op where op.status = 'PAID' AND  op.is_deleted = " +false+ ")";
-            Query<Order> queryData = OrderRepository.find.where().raw(querySqlStore).raw(querySqlOrderPayment).eq("t0.status", statusOrder).order("t0.created_at desc");
-            List<Order> dataOrder = OrderRepository.findOrderByStatus(queryData, offset, limit);
-            List<OrderList> orderListResponses = new ArrayList<>();
-            for(Order orderData: dataOrder){
-                OrderList orderListResponse = new OrderList();
-
-                List<OrderDetail> orderDetailList = OrderRepository.findDataOrderDetail(orderData.id, "MAIN");
-
-                Member member = null;
-                if(orderData.getMember() != null){
-                    member = Member.findByIdMember(orderData.getMember().id);
-                }
-
-                orderListResponse.setInvoiceNumber(orderData.getOrderPayment().getInvoiceNo());
-                orderListResponse.setOrderNumber(orderData.getOrderNumber());
-                orderListResponse.setCustomerName(member != null ? member.fullName : "General Customer (" + orderData.getStore().storeName + ")");                
-                orderListResponse.setMerchantName(orderData.getStore().getMerchant().fullName);
-                orderListResponse.setTotalAmount(orderData.getTotalPrice());
-                orderListResponse.setOrderType(orderData.getOrderType());
-                orderListResponse.setStatusOrder(orderData.getStatus());
-                orderListResponse.setOrderQueue(orderData.getOrderQueue());
-                
-                List<OrderList.ProductOrderDetail> responsesOrderDetail = new ArrayList<>();
-                for(OrderDetail oDetail : orderDetailList) {
-                    OrderList.ProductOrderDetail responseOrderDetail = new OrderList.ProductOrderDetail();
-                    
-                    responseOrderDetail.setProductId(oDetail.getProductMerchant().id);
-                    responseOrderDetail.setProductName(oDetail.getProductName());
-                    responseOrderDetail.setProductPrice(oDetail.getProductPrice());
-                    responseOrderDetail.setProductQty(oDetail.getQuantity());
-                    responseOrderDetail.setNotes(oDetail.getNotes());
-                    
-                    List<OrderList.ProductOrderDetail.ProductAdditionalList> responsesProductAdditional = new ArrayList<>();
-                    List<OrderDetail> orderProductAdditionalList = OrderRepository.findDataOrderProductAdditional(orderData.id, oDetail.getProductMerchant().id, "ADDITIONAL");
-                    if(orderProductAdditionalList != null){
-                        for(OrderDetail oDetails : orderProductAdditionalList) {
-                            
-                            OrderList.ProductOrderDetail.ProductAdditionalList responseProductAdditional = new OrderList.ProductOrderDetail.ProductAdditionalList();
-            
-                            responseProductAdditional.setProductId(oDetails.getProductMerchant().id);
-                            responseProductAdditional.setProductName(oDetails.getProductName());
-                            responseProductAdditional.setProductPrice(oDetails.getProductPrice());
-                            responseProductAdditional.setProductQty(oDetails.getQuantity());
-                            responseProductAdditional.setNotes(oDetails.getNotes());
-                            responsesProductAdditional.add(responseProductAdditional);
-                        }
-                    }
-                    responseOrderDetail.setProductAddOn(orderProductAdditionalList != null ? responsesProductAdditional : null);
-                    responsesOrderDetail.add(responseOrderDetail);
-                    
-                }
-
-                orderListResponse.setProductOrderDetail(responsesOrderDetail);
-
-                OrderPayment oPayment = OrderRepository.findDataOrderPayment(orderData.id);
-                orderListResponse.setPaymentType(oPayment.getPaymentType());
-                orderListResponse.setPaymentChannel(oPayment.getPaymentChannel());
-                orderListResponse.setTotalAmountPayment(oPayment.getTotalAmount());
-                orderListResponse.setPaymentDate(oPayment.getPaymentDate());
-                orderListResponse.setStatus(oPayment.getStatus());
-                orderListResponses.add(orderListResponse);
-            }
-            response.setBaseResponse(dataOrder.size(), offset, limit, success, orderListResponses);
-            return ok(Json.toJson(response));
-        }
-        response.setBaseResponse(0, 0, 0, unauthorized, null);
-        return unauthorized(Json.toJson(response));
-    }
     
     public static Integer createQueue(Long storeCode) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -426,178 +354,45 @@ public class CheckoutOrderController extends BaseController {
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
     }
-    
-    public static Result checkStatusOrderNumber(String email, String phoneNumber) {
-        if(email != null && email != "" || phoneNumber != null && phoneNumber != "") {
-            Member memberUser = Member.findDataCustomer(email, phoneNumber);
-            
-            if(memberUser != null){
-                List<Order> dataOrder = OrderRepository.findOrderDataByUser(memberUser.id);
-                List<OrderList> orderListResponses = new ArrayList<>();
-                for(Order orderData: dataOrder){
-                    OrderList orderListResponse = new OrderList();
-                    
-                    List<OrderDetail> orderDetailList = OrderRepository.findDataOrderDetail(orderData.id, "MAIN");
-                    
-                    Member member = null;
-                    if(orderData.getMember() != null){
-                        member = Member.findByIdMember(orderData.getMember().id);
-                    }
-                    
-                    orderListResponse.setInvoiceNumber(orderData.getOrderPayment().getInvoiceNo());
-                    orderListResponse.setOrderNumber(orderData.getOrderNumber());
-                    orderListResponse.setCustomerName(member != null ? member.fullName : "General Customer (" + orderData.getStore().storeName + ")");                
-                    orderListResponse.setMerchantName(orderData.getStore().getMerchant().fullName);
-                    orderListResponse.setTotalAmount(orderData.getTotalPrice());
-                    orderListResponse.setOrderType(orderData.getOrderType());
-                    orderListResponse.setStatusOrder(orderData.getStatus());
-                    orderListResponse.setOrderQueue(orderData.getOrderQueue());
-                    
-                    List<OrderList.ProductOrderDetail> responsesOrderDetail = new ArrayList<>();
-                    for(OrderDetail oDetail : orderDetailList) {
-                        OrderList.ProductOrderDetail responseOrderDetail = new OrderList.ProductOrderDetail();
-                        
-                        responseOrderDetail.setProductId(oDetail.getProductMerchant().id);
-                        responseOrderDetail.setProductName(oDetail.getProductName());
-                        responseOrderDetail.setProductPrice(oDetail.getProductPrice());
-                        responseOrderDetail.setProductQty(oDetail.getQuantity());
-                        responseOrderDetail.setNotes(oDetail.getNotes());
-                        
-                        List<OrderList.ProductOrderDetail.ProductAdditionalList> responsesProductAdditional = new ArrayList<>();
-                        List<OrderDetail> orderProductAdditionalList = OrderRepository.findDataOrderProductAdditional(orderData.id, oDetail.getProductMerchant().id, "ADDITIONAL");
-                        if(orderProductAdditionalList != null){
-                            for(OrderDetail oDetails : orderProductAdditionalList) {
-                                
-                                OrderList.ProductOrderDetail.ProductAdditionalList responseProductAdditional = new OrderList.ProductOrderDetail.ProductAdditionalList();
-                                
-                                responseProductAdditional.setProductId(oDetails.getProductMerchant().id);
-                                responseProductAdditional.setProductName(oDetails.getProductName());
-                                responseProductAdditional.setProductPrice(oDetails.getProductPrice());
-                                responseProductAdditional.setProductQty(oDetails.getQuantity());
-                                responseProductAdditional.setNotes(oDetails.getNotes());
-                                responsesProductAdditional.add(responseProductAdditional);
-                            }
-                        }
-                        responseOrderDetail.setProductAddOn(orderProductAdditionalList != null ? responsesProductAdditional : null);
-                        responsesOrderDetail.add(responseOrderDetail);
-                        
-                    }
-                    
-                    orderListResponse.setProductOrderDetail(responsesOrderDetail);
-                    
-                    OrderPayment oPayment = OrderRepository.findDataOrderPayment(orderData.id);
-                    orderListResponse.setPaymentType(oPayment.getPaymentType());
-                    orderListResponse.setPaymentChannel(oPayment.getPaymentChannel());
-                    orderListResponse.setTotalAmountPayment(oPayment.getTotalAmount());
-                    orderListResponse.setPaymentDate(oPayment.getPaymentDate());
-                    orderListResponse.setStatus(oPayment.getStatus());
-                    orderListResponses.add(orderListResponse);
-                }
-                response.setBaseResponse(dataOrder.size(), 0, 0, "Berhasil menampilkan data", orderListResponses);
-                return ok(Json.toJson(response));
-            }
-            
-            response.setBaseResponse(0, 0, 0, "Email atau Nomor Telepon tidak ditemukan", null);
-            return badRequest(Json.toJson(response));
-        }
-        response.setBaseResponse(0, 0, 0, "Email atau Nomor Telepon dibutuhkan", null);
-        return badRequest(Json.toJson(response));
-    }
-    
-    public static Result orderReportMerchant(String startDate, String endDate, int offset, int limit, String statusOrder) {
-        Merchant ownMerchant = checkMerchantAccessAuthorization();
-        if(ownMerchant != null) {
-            try {
-                String querySqlStore = "t0.store_id in (select st.id from STORE st where st.merchant_id = "+ownMerchant.id+" and st.is_active = true and st.is_deleted = false)";
-                String querySqlOrderPayment = "t0.id in (select op.id from order_payment op where op.status = 'PAID' AND op.is_deleted = " +false+ ")";
-                Query<Order> queryData = null;
-                if(statusOrder != null && statusOrder != "" && startDate != null && startDate != ""){
-                    if(endDate == null || endDate == ""){
-                        response.setBaseResponse(0, 0, 0, "Tanggal akhir tidak boleh null atau kosong", null);
-                        return badRequest(Json.toJson(response));
-                    }
 
-                    queryData = OrderRepository.find.where().raw(querySqlStore).raw(querySqlOrderPayment).eq("t0.status", statusOrder).raw("t0.order_date between '"+startDate+"' and '"+endDate+"'").order("t0.created_at desc");
-                } else if(statusOrder != null && statusOrder != ""){
-                    queryData = OrderRepository.find.where().raw(querySqlStore).raw(querySqlOrderPayment).eq("t0.status", statusOrder).order("t0.created_at desc");
-                } else if(startDate != null && startDate != ""){
-                    if(endDate == null || endDate == ""){
-                        response.setBaseResponse(0, 0, 0, "Tanggal akhir tidak boleh null atau kosong", null);
-                        return badRequest(Json.toJson(response));
-                    }
-                    queryData = OrderRepository.find.where().raw(querySqlStore).raw(querySqlOrderPayment).raw("t0.order_date between '"+startDate+"' and '"+endDate+"'").order("t0.created_at desc");
-                } else {
-                    queryData = OrderRepository.find.where().raw(querySqlStore).raw(querySqlOrderPayment).order("t0.created_at desc");
+    public static Result cancelOrder() {
+        int authority = checkAccessAuthorization("all");
+        if (authority == 200 || authority == 203) {
+
+            JsonNode jsonNode = request().body().asJson();
+            String orderNumber = jsonNode.get("order_number").asText();
+            Transaction trx = Ebean.beginTransaction();
+            try {
+                Optional<Order> order = OrderRepository.findByOrderNumber(orderNumber);
+                if (!order.isPresent()) {
+                    response.setBaseResponse(0, 0, 0, "Nomor order tidak ditemukan", null);
+                    return badRequest(Json.toJson(response));
                 }
-                List<Order> dataOrder = OrderRepository.findOrderByStatus(queryData, offset, limit);
-                List<OrderList> orderListResponses = new ArrayList<>();
-                for(Order orderData: dataOrder){
-                    OrderList orderListResponse = new OrderList();
-        
-                    List<OrderDetail> orderDetailList = OrderRepository.findDataOrderDetail(orderData.id, "MAIN");
-        
-                    Member member = null;
-                    if(orderData.getMember() != null){
-                        member = Member.findByIdMember(orderData.getMember().id);
-                    }
-        
-                    orderListResponse.setInvoiceNumber(orderData.getOrderPayment().getInvoiceNo());
-                    orderListResponse.setOrderNumber(orderData.getOrderNumber());
-                    orderListResponse.setCustomerName(member != null ? member.fullName : "General Customer (" + orderData.getStore().storeName + ")");                
-                    orderListResponse.setMerchantName(orderData.getStore().getMerchant().fullName);
-                    orderListResponse.setTotalAmount(orderData.getTotalPrice());
-                    orderListResponse.setOrderType(orderData.getOrderType());
-                    orderListResponse.setStatusOrder(orderData.getStatus());
-                    orderListResponse.setOrderQueue(orderData.getOrderQueue());
-                    
-                    List<OrderList.ProductOrderDetail> responsesOrderDetail = new ArrayList<>();
-                    for(OrderDetail oDetail : orderDetailList) {
-                        OrderList.ProductOrderDetail responseOrderDetail = new OrderList.ProductOrderDetail();
-                        
-                        responseOrderDetail.setProductId(oDetail.getProductMerchant().id);
-                        responseOrderDetail.setProductName(oDetail.getProductName());
-                        responseOrderDetail.setProductPrice(oDetail.getProductPrice());
-                        responseOrderDetail.setProductQty(oDetail.getQuantity());
-                        responseOrderDetail.setNotes(oDetail.getNotes());
-                        
-                        List<OrderList.ProductOrderDetail.ProductAdditionalList> responsesProductAdditional = new ArrayList<>();
-                        List<OrderDetail> orderProductAdditionalList = OrderRepository.findDataOrderProductAdditional(orderData.id, oDetail.getProductMerchant().id, "ADDITIONAL");
-                        if(orderProductAdditionalList != null){
-                            for(OrderDetail oDetails : orderProductAdditionalList) {
-                                
-                                OrderList.ProductOrderDetail.ProductAdditionalList responseProductAdditional = new OrderList.ProductOrderDetail.ProductAdditionalList();
-                
-                                responseProductAdditional.setProductId(oDetails.getProductMerchant().id);
-                                responseProductAdditional.setProductName(oDetails.getProductName());
-                                responseProductAdditional.setProductPrice(oDetails.getProductPrice());
-                                responseProductAdditional.setProductQty(oDetails.getQuantity());
-                                responseProductAdditional.setNotes(oDetails.getNotes());
-                                responsesProductAdditional.add(responseProductAdditional);
-                            }
-                        }
-                        responseOrderDetail.setProductAddOn(orderProductAdditionalList != null ? responsesProductAdditional : null);
-                        responsesOrderDetail.add(responseOrderDetail);
-                        
-                    }
-        
-                    orderListResponse.setProductOrderDetail(responsesOrderDetail);
-        
-                    OrderPayment oPayment = OrderRepository.findDataOrderPayment(orderData.id);
-                    orderListResponse.setPaymentType(oPayment.getPaymentType());
-                    orderListResponse.setPaymentChannel(oPayment.getPaymentChannel());
-                    orderListResponse.setTotalAmountPayment(oPayment.getTotalAmount());
-                    orderListResponse.setPaymentDate(oPayment.getPaymentDate());
-                    orderListResponse.setStatus(oPayment.getStatus());
-                    orderListResponses.add(orderListResponse);
-                }
-                response.setBaseResponse(dataOrder.size(), offset, limit, success, orderListResponses);
+
+                order.get().setStatus(Order.CANCELLED);
+
+                order.get().update();
+
+                trx.commit();
+
+                response.setBaseResponse(1, 0, 0, "Berhasil membatalkan pesanan. Dengan nomor order " + orderNumber, orderNumber);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
-                logger.error("Error", e);
+                logger.error("Error saat mengubah status", e);
                 e.printStackTrace();
+                trx.rollback();
+            } finally {
+                trx.end();
             }
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
         }
-        response.setBaseResponse(0, 0, 0, unauthorized, null);
-        return unauthorized(Json.toJson(response));
+        response.setBaseResponse(0, 0, 0, error, null);
+        return ok(Json.toJson(response));
     }
+
 }

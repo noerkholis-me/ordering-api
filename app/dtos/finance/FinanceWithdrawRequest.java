@@ -18,4 +18,7 @@ public class FinanceWithdrawRequest {
     private BigDecimal amount;
     @JsonProperty("store_id")
     private Long storeId;
+    @JsonProperty("request_by")
+    private String requestBy;
+    
 }

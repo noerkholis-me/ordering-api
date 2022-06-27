@@ -9,6 +9,9 @@ import models.Store;
 import models.merchant.*;
 import play.db.ebean.Model;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class ProductMerchantRepository extends Model {
@@ -29,6 +32,23 @@ public class ProductMerchantRepository extends Model {
 
     public static Query<ProductMerchant> findProductIsActiveAndMerchant(Merchant merchant, Boolean isActive) {
         return find.where().eq("isDeleted", false).eq("isActive", isActive).eq("merchant", merchant).order("id");
+    }
+
+    public static Integer getTotalProduct(Merchant merchant, String startDate, String endDate) throws Exception {
+        Query<ProductMerchant> productMerchantQuery = find.where()
+                .eq("isActive", true)
+                .eq("merchant", merchant)
+                .query();
+
+        ExpressionList<ProductMerchant> exp = productMerchantQuery.where();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        Date start = simpleDateFormat.parse(startDate.concat(" 00:00:00.0"));
+        Date end = simpleDateFormat.parse(endDate.concat(" 23:59:00.0"));
+
+        Timestamp startTimestamp = new Timestamp(start.getTime());
+        Timestamp endTimestamp = new Timestamp(end.getTime());
+        exp.between("t0.created_at", startTimestamp, endTimestamp);
+        return productMerchantQuery.findList().size();
     }
 
     public static List<ProductMerchant> getTotalDataPage (Query<ProductMerchant> reqQuery) {

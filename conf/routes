@@ -330,6 +330,7 @@ GET         /merchant/users/list                        controllers.merchants.Us
 GET         /merchant/users/:id/view                    controllers.merchants.UserMerchantController.viewUser(id:Long)
 DELETE      /merchant/users/:id/delete                  controllers.merchants.UserMerchantController.deleteUsers(id:Long)
 PUT         /merchant/users/:id/edit                    controllers.merchants.UserMerchantController.editUser(id:Long)
+PUT         /merchant/users/:id/edit/status             controllers.merchants.UserMerchantController.setStatus(id:Long)
 
 #ROLE
 GET     /merchant/role/list                        controllers.merchants.RoleMerchantController.listRole(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
@@ -375,6 +376,7 @@ PUT     /merchant/subcategory/:id/status                  controllers.categories
 #LEVEL 3
 POST    /merchant/subscategory/:catid/:subid               controllers.categories.SubCategoryMerchantController.createSubsCategory(catid:Long, subid:Long)
 PUT     /merchant/subscategory/:id/update                  controllers.categories.SubCategoryMerchantController.editSubsCategory(id:Long)
+PUT     /merchant/subscategory/:id/status                  controllers.categories.SubCategoryMerchantController.setStatusSubsCategory(id:Long)
 DELETE  /merchant/subscategory/:id/delete                  controllers.categories.SubCategoryMerchantController.deleteSubsCategory(id:Long)
 GET     /merchant/subscategory/data/list                   controllers.categories.SubCategoryMerchantController.listSubsCategory(sort:String ?= "", filter:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET     /merchant/subscategory/:id/detail                  controllers.categories.SubCategoryMerchantController.viewSubsCategory(id:Long)
@@ -438,9 +440,9 @@ PUT   /merchant/productstore/:id/status                  controllers.product.Pro
 #ORDER
 POST /users/order/checkout                               controllers.users.CheckoutOrderController.checkoutOrder()
 POST /users/order/payment                                controllers.users.CheckoutOrderController.payment()
-GET  /users/order/checkstatus                            controllers.users.CheckoutOrderController.checkStatusOrderNumber(email:String ?= "", phone_number:String ?= "")
-GET     /merchant/orders/list                            controllers.users.CheckoutOrderController.listOrderMerchant(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 0, status_order:String ?= "")
+GET  /users/order/checkstatus                            controllers.order.OrderMerchantController.checkStatusOrderNumber(offset:Int ?= 0, limit:Int ?= 10, statusOrder:String ?= "", email:String ?= "", phone_number:String ?= "", store_code: String)
 PUT  /merchant/order/changestatus                        controllers.users.CheckoutOrderController.changeStatusFromMerchant()
+PUT  /users/order/cancel                              controllers.users.CheckoutOrderController.cancelOrder()
 
 #PAYMENT
 GET  /users/order/:orderNumber/payment                   controllers.payment.PaymentController.checkStatusPayment(orderNumber: String)
@@ -529,7 +531,8 @@ DELETE       /merchant/bankaccount/:id                          controllers.merc
 GET          /merchant/bankaccount/:id                          controllers.merchants.BankAccountMerchantController.getBankAccountById(id: Long)
 
 #ORDER REPORT MERCHANTS
-GET         /merchant/order/reports/data                controllers.users.CheckoutOrderController.orderReportMerchant(start_date:String ?= "", end_date:String ?= "", offset:Int ?= 0, limit:Int ?= 10, status_order:String ?= "")
+GET         /merchant/order/reports/data                controllers.order.OrderMerchantController.orderReportMerchant(start_date:String ?= "", end_date:String ?= "", offset:Int ?= 0, limit:Int ?= 0, status_order:String ?= "", store_id:Long ?= 0)
+GET         /merchant/order/reports/data/download       controllers.order.OrderMerchantController.downloadTransaction(start_date:String ?= "", end_date:String ?= "", offset:Int ?= 0, limit:Int ?= 0, status_order:String ?= "", store_id:Long ?= 0)
 
 #FINANCE TRANSACTION
 GET         /merchant/finance/transaction                       controllers.finance.FinanceTransactionController.getAllTransaction(store_id:Long ?= 0, start_date: String ?= "", end_date: String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, status: String?="")
@@ -539,3 +542,24 @@ POST        /merchant/finance/withdraw/request-withdraw                  control
 GET         /merchant/finance/withdraw/download                 controllers.finance.FinanceWithdrawController.downloadWithdraw(store_id:Long ?= 0, start_date: String ?= "", end_date: String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, status: String?="")
 GET         /merchant/finance/transaction/active-balance                 controllers.finance.FinanceTransactionController.getActiveBalance(store_id:Long ?= 0)
 
+# ORDER LIST
+GET         /merchant/orders/list                 controllers.order.OrderMerchantController.getOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="")
+
+# UPDATE PROFILE
+PUT         /merchant/update/profile              controllers.users.UpdateProfileController.updateMerchantData()
+PUT         /merchant/update/password              controllers.users.UpdateProfileController.updatePasswordMerchantData()
+PUT         /users/merchant/update/:id_user/profile        controllers.users.UpdateProfileController.updateUserMerchantData(id_user: Long)
+PUT         /users/merchant/update/:id_user/password        controllers.users.UpdateProfileController.updatePasswordUserMerchantData(id_user: Long)
+
+# REDIRECT AND RESEND
+GET         /re/account-activation                  controllers.users.UpdateProfileController.verifyUserMerchantEmail(token: String ?= "")
+POST         /resend/account-activation                  controllers.users.ResendEmailVerification.resendEmailVerificationUserMerchant(email: String ?= "")
+
+# DASHBOARD
+GET         /merchant/dashboard/total-customer      controllers.dashboard.DashboardController.getTotalCustomer(start_date: String?= "", end_date: String?= "")
+GET         /merchant/dashboard/total-product      controllers.dashboard.DashboardController.getTotalProduct(start_date: String?= "", end_date: String?= "")
+GET         /merchant/dashboard/total-transaction-amount      controllers.dashboard.DashboardController.getTotalTransactionAmount()
+GET         /merchant/dashboard/total-transaction      controllers.dashboard.DashboardController.getTotalTransaction(start_date: String?= "", end_date: String?= "")
+GET         /merchant/dashboard/total-withdraw      controllers.dashboard.DashboardController.getTotalWithdraw(start_date: String?= "", end_date: String?= "")
+
+GET         /merchant/order/print-invoice/:orderNumber      controllers.order.OrderMerchantController.printInvoice(orderNumber: String)

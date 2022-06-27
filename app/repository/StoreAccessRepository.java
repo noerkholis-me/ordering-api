@@ -15,40 +15,41 @@ import java.text.SimpleDateFormat;
 
 public class StoreAccessRepository extends Model {
 
-    public static Finder<Long, StoreAccess> find = new Finder<>(Long.class, StoreAccess.class);
-    public static Finder<Long, StoreAccessDetail> findDetail = new Finder<>(Long.class, StoreAccessDetail.class);
+	public static Finder<Long, StoreAccess> find = new Finder<>(Long.class, StoreAccess.class);
+	public static Finder<Long, StoreAccessDetail> findDetail = new Finder<>(Long.class, StoreAccessDetail.class);
 
 	public static StoreAccess findById(Long id) {
 		return find.where().eq("user_merchant_id", id).eq("is_deleted", false).eq("is_active", true).findUnique();
-    }
-    
-    public static StoreAccessDetail findByIdStore(Long store_id, Long store_access_id) {
-		return findDetail.where().eq("store_access_id", store_access_id).eq("store_id", store_id).findUnique();
-    }
-    
-    public static List<StoreAccessDetail> findByIdStoreAccess(Long store_access_id) {
-		return findDetail.where().eq("store_access_id", store_access_id).findList();
-    }
+	}
 
-    public static StoreAccess findByIdAndMerchantId(Long id, Long merchantId) {
-        try {
+	public static StoreAccessDetail findByIdStore(Long store_id, Long store_access_id) {
+		return findDetail.where().eq("store_access_id", store_access_id).eq("store_id", store_id).findUnique();
+	}
+
+	public static List<StoreAccessDetail> findByIdStoreAccess(Long store_access_id) {
+		return findDetail.where().eq("store_access_id", store_access_id).findList();
+	}
+
+	public static StoreAccess findByIdAndMerchantId(Long id, Merchant merchant) {
+		try {
 			return find.where()
-				.eq("id", id)
-				.eq("merchant_id", merchantId)
-				.eq("is_deleted", Boolean.FALSE)
-				.findUnique();
+					.eq("id", id)
+					.eq("merchant", merchant)
+					.eq("is_deleted", Boolean.FALSE)
+					.findUnique();
 		} catch (PersistenceException e) {
 			e.printStackTrace();
 			return null;
 		}
-    }
+	}
 
-    public static List<StoreAccess> getDataStoreAccess(Query<StoreAccess> reqQuery, String sort, String filter, int offset, int limit)
+	public static List<StoreAccess> getDataStoreAccess(Query<StoreAccess> reqQuery, String sort, String filter,
+			int offset, int limit)
 			throws IOException {
 		Query<StoreAccess> query = reqQuery;
 
 		if (!"".equals(sort)) {
-            query = query.orderBy(sort);
+			query = query.orderBy(sort);
 		} else {
 			query = query.orderBy("t0.updated_at desc");
 		}
@@ -56,6 +57,7 @@ public class StoreAccessRepository extends Model {
 		ExpressionList<StoreAccess> exp = query.where();
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
+		exp = exp.ilike("userMerchant.fullName", "%" + filter + "%");
 		query = exp.query();
 
 		int total = query.findList().size();
@@ -69,9 +71,9 @@ public class StoreAccessRepository extends Model {
 		return resData;
 	}
 
-    public static List<StoreAccess> getDataStoreAccess(Query<StoreAccess> reqQuery)
+	public static List<StoreAccess> getDataStoreAccess(Query<StoreAccess> reqQuery)
 			throws IOException {
-        Query<StoreAccess> query = reqQuery;
+		Query<StoreAccess> query = reqQuery;
 		query = query.orderBy("t0.updated_at desc");
 
 		ExpressionList<StoreAccess> exp = query.where();
@@ -120,9 +122,9 @@ public class StoreAccessRepository extends Model {
 		List<StoreAccessDetail> resData = query.findPagingList(0).getPage(0).getList();
 
 		return resData;
-    }
-    
-    public static List<StoreAccessDetail> findByIdAssign(Query<StoreAccessDetail> reqQuery)
+	}
+
+	public static List<StoreAccessDetail> findByIdAssign(Query<StoreAccessDetail> reqQuery)
 			throws IOException {
 		Query<StoreAccessDetail> query = reqQuery;
 

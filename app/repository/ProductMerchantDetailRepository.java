@@ -27,6 +27,10 @@ public class ProductMerchantDetailRepository extends Model {
         return find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "ADDITIONAL").findUnique();
     }
 
+    public static ProductMerchantDetail getTypeData(Long productId) {
+        return find.where().eq("t0.is_deleted", false).eq("t0.product_merchant_id", productId).findUnique();
+    }
+
     public static List<ProductMerchantDetail> findDataAdditionalForMerchant(Query<ProductMerchantDetail> reqQuery, Long merchantId) {
         Query<ProductMerchantDetail> query = reqQuery;
 

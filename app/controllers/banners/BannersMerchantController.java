@@ -89,7 +89,6 @@ public class BannersMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-
     public static String validateCreateBanners(BannersRequest request) {
         if (request == null)
             return "Bidang tidak boleh nol atau kosong";
@@ -118,7 +117,8 @@ public class BannersMerchantController extends BaseController {
     public static Result listBanners(String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<Banners> query = BannersRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+            Query<Banners> query = BannersRepository.find.where().eq("t0.is_deleted", false).eq("merchant", ownMerchant)
+                    .order("t0.id");
             try {
                 List<BannersResponse> responses = new ArrayList<>();
                 List<Banners> totalData = BannersRepository.getTotalData(query);
@@ -137,7 +137,8 @@ public class BannersMerchantController extends BaseController {
                     response.setMerchantId(data.getMerchant().id);
                     responses.add(response);
                 }
-                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size() , offset, limit, success + " menampilkan data", responses);
+                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size(),
+                        offset, limit, success + " menampilkan data", responses);
                 return ok(Json.toJson(response));
             } catch (IOException e) {
                 Logger.error("allDetail", e);
@@ -164,19 +165,19 @@ public class BannersMerchantController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        Banners banners = BannersRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        Banners banners = BannersRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (banners == null) {
                             response.setBaseResponse(0, 0, 0, error + " banner tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
                         }
                         banners.setBannerName(request.getBannerName());
-                        if(request.getBannerImageWeb() != null){
+                        if (request.getBannerImageWeb() != null) {
                             banners.setBannerImageWeb(request.getBannerImageWeb());
                         }
-                        if(request.getBannerImageMobile() != null){
+                        if (request.getBannerImageMobile() != null) {
                             banners.setBannerImageMobile(request.getBannerImageMobile());
                         }
-                        if(request.getBannerImageKiosk() != null){
+                        if (request.getBannerImageKiosk() != null) {
                             banners.setBannerImageKiosk(request.getBannerImageKiosk());
                         }
                         banners.setActive(request.isActive());
@@ -215,33 +216,33 @@ public class BannersMerchantController extends BaseController {
     public static Result deleteBrand(Long id) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-                if (id != null) {
-                    Transaction trx = Ebean.beginTransaction();
-                    try {
-                        Banners banners = BannersRepository.findByIdAndMerchantId(id, ownMerchant.id);
-                        if (banners == null) {
-                            response.setBaseResponse(0, 0, 0, error + " banner tidak tersedia.", null);
-                            return badRequest(Json.toJson(response));
-                        }
-
-                        banners.isDeleted = true;
-                        banners.update();
-                        trx.commit();
-
-                        response.setBaseResponse(1,offset, 1, success + " menghapus banner", banners);
-                        return ok(Json.toJson(response));
-                    } catch (Exception e) {
-                        logger.error("Error saat menghapus banner", e);
-                        e.printStackTrace();
-                        trx.rollback();
-                    } finally {
-                        trx.end();
+            if (id != null) {
+                Transaction trx = Ebean.beginTransaction();
+                try {
+                    Banners banners = BannersRepository.findByIdAndMerchantId(id, ownMerchant);
+                    if (banners == null) {
+                        response.setBaseResponse(0, 0, 0, error + " banner tidak tersedia.", null);
+                        return badRequest(Json.toJson(response));
                     }
-                    response.setBaseResponse(0, 0, 0, error, null);
-                    return badRequest(Json.toJson(response));
+
+                    banners.isDeleted = true;
+                    banners.update();
+                    trx.commit();
+
+                    response.setBaseResponse(1, offset, 1, success + " menghapus banner", banners);
+                    return ok(Json.toJson(response));
+                } catch (Exception e) {
+                    logger.error("Error saat menghapus banner", e);
+                    e.printStackTrace();
+                    trx.rollback();
+                } finally {
+                    trx.end();
                 }
-                response.setBaseResponse(0, 0, 0, "Tidak dapat menemukan banner id", null);
+                response.setBaseResponse(0, 0, 0, error, null);
                 return badRequest(Json.toJson(response));
+            }
+            response.setBaseResponse(0, 0, 0, "Tidak dapat menemukan banner id", null);
+            return badRequest(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
@@ -257,7 +258,7 @@ public class BannersMerchantController extends BaseController {
             if (id != null) {
                 Transaction trx = Ebean.beginTransaction();
                 try {
-                    Banners banners = BannersRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                    Banners banners = BannersRepository.findByIdAndMerchantId(id, ownMerchant);
                     if (banners == null) {
                         response.setBaseResponse(0, 0, 0, error + " banner tidak tersedia.", null);
                         return badRequest(Json.toJson(response));
@@ -273,7 +274,7 @@ public class BannersMerchantController extends BaseController {
                     bannersResponse.setDateFrom(banners.getDateFrom());
                     bannersResponse.setDateTo(banners.getDateTo());
 
-                    response.setBaseResponse(1,offset, 1, success + " menampilkan detail banner", bannersResponse);
+                    response.setBaseResponse(1, offset, 1, success + " menampilkan detail banner", bannersResponse);
                     return ok(Json.toJson(response));
                 } catch (Exception e) {
                     logger.error("Error saat menampilkan detail banner", e);
@@ -295,55 +296,56 @@ public class BannersMerchantController extends BaseController {
     @ApiOperation(value = "Status Banners", notes = "Status Banners.\n" + swaggerInfo
             + "", response = BaseResponse.class, httpMethod = "PUT")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "banner form", dataType = "temp.swaggermap.BannerForm", required = true, paramType = "body", value = "banner form") })
-        public static Result setStatus(Long id) {
-            Merchant ownMerchant = checkMerchantAccessAuthorization();
-            if (ownMerchant != null) {
+            @ApiImplicitParam(name = "banner form", dataType = "temp.swaggermap.BannerForm", required = true, paramType = "body", value = "banner form") })
+    public static Result setStatus(Long id) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            try {
+                JsonNode json = request().body().asJson();
+                BannersRequest request = objectMapper.readValue(json.toString(), BannersRequest.class);
+                Transaction trx = Ebean.beginTransaction();
                 try {
-                    JsonNode json = request().body().asJson();
-                    BannersRequest request = objectMapper.readValue(json.toString(), BannersRequest.class);
-                    Transaction trx = Ebean.beginTransaction();
-                    try {
-                        Banners banners = BannersRepository.findByIdAndMerchantId(id, ownMerchant.id);
-                        if (banners == null) {
-                            response.setBaseResponse(0, 0, 0, error + " banners tidak tersedia.", null);
-                            return badRequest(Json.toJson(response));
-                        }
-                        banners.setActive(request.isActive());
-                        banners.update();
-    
-                        trx.commit();
-                        response.setBaseResponse(1, offset, 1, success + " mengubah status banner", banners);
-                        return ok(Json.toJson(response));
-                    } catch (Exception e) {
-                        logger.error("Error saat mengubah status banner", e);
-                        e.printStackTrace();
-                        trx.rollback();
-                    } finally {
-                        trx.end();
+                    Banners banners = BannersRepository.findByIdAndMerchantId(id, ownMerchant);
+                    if (banners == null) {
+                        response.setBaseResponse(0, 0, 0, error + " banners tidak tersedia.", null);
+                        return badRequest(Json.toJson(response));
                     }
-                    response.setBaseResponse(0, 0, 0, error, null);
-                    return badRequest(Json.toJson(response));
+                    banners.setActive(request.isActive());
+                    banners.update();
+
+                    trx.commit();
+                    response.setBaseResponse(1, offset, 1, success + " mengubah status banner", banners);
+                    return ok(Json.toJson(response));
                 } catch (Exception e) {
-                    logger.error("Error saat parsing json", e);
+                    logger.error("Error saat mengubah status banner", e);
                     e.printStackTrace();
+                    trx.rollback();
+                } finally {
+                    trx.end();
                 }
+                response.setBaseResponse(0, 0, 0, error, null);
+                return badRequest(Json.toJson(response));
+            } catch (Exception e) {
+                logger.error("Error saat parsing json", e);
+                e.printStackTrace();
             }
-            response.setBaseResponse(0, 0, 0, unauthorized, null);
-            return unauthorized(Json.toJson(response));
         }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
 
-
-        // BANNERS FOR HOMEPAGE
-        @ApiOperation(value = "Get all banner list.", notes = "Returns list of banner.\n" + swaggerInfo
+    // BANNERS FOR HOMEPAGE
+    @ApiOperation(value = "Get all banner list.", notes = "Returns list of banner.\n" + swaggerInfo
             + "", response = Banners.class, responseContainer = "List", httpMethod = "GET")
     public static Result listBannersHomepage(Long merchantId) {
         Merchant ownMerchant = Merchant.merchantGetId(merchantId);
 
-        Timestamp dateNow = new Timestamp(System.currentTimeMillis()); 
+        Timestamp dateNow = new Timestamp(System.currentTimeMillis());
         System.out.println(dateNow);
         if (ownMerchant != null) {
-            Query<Banners> query = BannersRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).eq("t0.is_active", true).betweenProperties("t0.date_from", "t0.date_to", dateNow).order("t0.date_from");
+            Query<Banners> query = BannersRepository.find.where().eq("t0.is_deleted", false)
+                    .eq("t0.merchant_id", merchantId).eq("t0.is_active", true)
+                    .betweenProperties("t0.date_from", "t0.date_to", dateNow).order("t0.date_from");
             try {
                 List<BannersResponse> responses = new ArrayList<>();
                 List<Banners> totalData = BannersRepository.getTotalData(query);
@@ -362,7 +364,8 @@ public class BannersMerchantController extends BaseController {
                     response.setMerchantId(data.getMerchant().id);
                     responses.add(response);
                 }
-                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size() , offset, limit, success + " menampilkan data", responses);
+                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size(),
+                        offset, limit, success + " menampilkan data", responses);
                 return ok(Json.toJson(response));
             } catch (IOException e) {
                 Logger.error("allDetail", e);

@@ -4,12 +4,15 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hokeba.util.CommonFunction;
+import dtos.FeatureAndPermissionSession;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * this class for entity / domain model
@@ -42,6 +45,7 @@ public class UserMerchant extends BaseModel {
     @Getter @Setter
     public String fullName;
 
+    @Getter @Setter
     public String phone;
 
     @Size(max = 1)
@@ -76,6 +80,15 @@ public class UserMerchant extends BaseModel {
     @JoinColumn(name="role_id", referencedColumnName = "id")
     @Getter @Setter
     public RoleMerchant role;
+
+    @Getter @Setter
+    @Column(name = "reset_token")
+    public String resetToken;
+
+    @Column(name = "reset_time")
+    @Getter @Setter
+    private Long resetTime;
+
 
 //    @OneToOne
 //    @JsonProperty("merchant")
@@ -112,6 +125,25 @@ public class UserMerchant extends BaseModel {
     @Transient
     public String getBirthDateFormat() {
         return CommonFunction.getDate(birthDate);
+    }
+
+    public List<FeatureAndPermissionSession> checkFeatureAndPermissions() {
+        List<RoleMerchantFeature> roleMerchantFeatures = RoleMerchantFeature.findByRoleMerchantId(this.role.id);
+        if (roleMerchantFeatures == null || roleMerchantFeatures.isEmpty()) {
+            return null;
+        }
+        List<RoleMerchantFeature> myFeature = this.role.getFeatureList();
+        List<FeatureAndPermissionSession> featureAndPermissionSessionList = new ArrayList<>();
+        for (RoleMerchantFeature feature : myFeature) {
+            FeatureAndPermissionSession featureAndPermissionSession = new FeatureAndPermissionSession();
+            featureAndPermissionSession.setFeatureName(feature.getFeature().name);
+            featureAndPermissionSession.setIsView(feature.getIsView());
+            featureAndPermissionSession.setIsAdd(feature.getIsAdd());
+            featureAndPermissionSession.setIsEdit(feature.getIsEdit());
+            featureAndPermissionSession.setIsDelete(feature.getIsDelete());
+            featureAndPermissionSessionList.add(featureAndPermissionSession);
+        }
+        return featureAndPermissionSessionList;
     }
 
 }

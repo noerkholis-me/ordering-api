@@ -52,6 +52,10 @@ public class MerchantLog extends BaseModel {
     @JsonBackReference
     public Merchant merchant;
 
+    @ManyToOne
+    @JsonBackReference
+    public UserMerchant userMerchant;
+
     @Transient
     public Long getMerchantId() {
         if (merchant != null)
@@ -65,30 +69,41 @@ public class MerchantLog extends BaseModel {
         return Encryption.SHA1(new Date().toString() + "MERCHANTHOKEBATOKEN" + username + password);
     }
 
-    public static MerchantLog loginMerchant(String deviceModel, String deviceType, String deviceId, Merchant member) {
+    public static MerchantLog loginMerchant(String deviceModel, String deviceType, String deviceId, Merchant member, UserMerchant userMerchant, Boolean userType) {
         MerchantLog log = new MerchantLog();
         try {
             if (deviceType.equalsIgnoreCase(DEV_TYPE_ANDROID) || deviceType.equalsIgnoreCase(DEV_TYPE_IOS)) {
-                log.expiredDate = new DateTime(new Date()).plusDays(30).toDate();
+                log.expiredDate = new DateTime(new Date()).plusHours(1).toDate();
             } else if (deviceType.equalsIgnoreCase(DEV_TYPE_WEB)) {
-                log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
+                log.expiredDate = new DateTime(new Date()).plusHours(1).toDate();
             } else {
                 return null;
             }
             String userCode = "";
             String passCode = "";
-            if(member.email!=null){
-                userCode = member.email;
-                passCode = member.password;
+            if (userType == Boolean.TRUE) {
+                if(member.email!=null){
+                    userCode = member.email;
+                    passCode = member.password;
+                }
+                log.memberType = "merchant";
+                log.token = generateToken(userCode, passCode);
+            } else {
+                if(userMerchant.email != null){
+                    userCode = userMerchant.email;
+                    passCode = userMerchant.password;
+                }
+                log.memberType = "user_merchant";
+                log.token = generateToken(userCode, passCode);
             }
-            log.token = generateToken(userCode, passCode);
+
             log.deviceModel = deviceModel;
             log.deviceType = deviceType;
             log.deviceId = deviceId;
 
             log.isActive = true;
-            log.memberType = "merchant";
             log.merchant = member;
+            log.userMerchant = userMerchant;
             log.save();
         } catch (Exception e) {
             // TODO: handle exception
@@ -111,7 +126,8 @@ public class MerchantLog extends BaseModel {
 
     public static MerchantLog isMerchantAuthorized(String token, String apiKey) {
         // validate token
-        MerchantLog log = MerchantLog.find.where().eq("token", token).eq("is_active", true).eq("member_type", "merchant")
+        MerchantLog log = MerchantLog.find.where().eq("token", token)
+                .eq("is_active", true)
                 .setMaxRows(1).findUnique();
 
         // validate api key

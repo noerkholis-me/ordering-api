@@ -21,6 +21,7 @@ public class ProductAddOnRepository extends Model {
         return find.where()
                 .eq("t0.product_assign_id", productAssignId)
                 .eq("t0.product_id", productId)
+                .eq("t0.is_deleted", false)
                 .findUnique();
     }
 

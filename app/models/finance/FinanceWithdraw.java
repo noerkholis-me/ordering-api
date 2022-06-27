@@ -2,6 +2,8 @@ package models.finance;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import models.BaseModel;
 import models.Store;
 
@@ -16,8 +18,9 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = false)
 public class FinanceWithdraw extends BaseModel {
 
-    public static final String WAITING_CONFIRMATION = "Waiting Confirmation";
-    public static final String APPROVED = "Approved";
+    public static final String WAITING_CONFIRMATION = "WAITING_CONFIRMATION";
+    public static final String APPROVED = "APPROVED";
+    public static final String REJECTED = "REJECTED";
 
     @Column(name = "event_id")
     private String eventId;
@@ -36,6 +39,21 @@ public class FinanceWithdraw extends BaseModel {
 
     @Column(name = "account_number")
     private String accountNumber;
+
+    @Column(name = "account_name")
+    private String accountName;
+
+    @Column(name = "bank_name")
+    private String bankName;
+
+    @Column(name = "request_by")
+    private String requestBy;
+
+    @Column(name = "approval_date")
+    private Date approvalDate;
+
+    @Column(name = "approved_by")
+    private String approvedBy;
 
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "store_id", referencedColumnName = "id")

@@ -1,6 +1,7 @@
 package controllers.finance;
 
 import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Query;
 import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,19 +13,18 @@ import models.Merchant;
 import models.Store;
 import models.finance.FinanceTransaction;
 import models.finance.FinanceWithdraw;
+import models.merchant.BankAccountMerchant;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import repository.BankAccountMerchantRepository;
 import repository.finance.FinanceTransactionRepository;
 import repository.finance.FinanceWithdrawRepository;
 import service.DownloadTransactionService;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class FinanceWithdrawController extends BaseController {
 
@@ -37,8 +37,19 @@ public class FinanceWithdrawController extends BaseController {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
-                List<FinanceWithdraw> financeWithdraws = FinanceWithdrawRepository.findAllWithdraw(startDate, endDate, storeId, sort, offset, limit, status);
-                Integer totalData = FinanceWithdrawRepository.getTotalPage(storeId).size();
+                Query<FinanceWithdraw> query = null;
+                // default query find by merchant id
+                query = FinanceWithdrawRepository.finaAllWithdrawByMerchantId(merchant.id);
+                if (storeId != null && storeId != 0L) {
+                    Store store = Store.findById(storeId);
+                    if (store == null) {
+                        response.setBaseResponse(0, 0, 0, "store id does not exists", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    query = FinanceWithdrawRepository.finaAllWithdrawByStoreId(storeId);
+                }
+                List<FinanceWithdraw> financeWithdraws = FinanceWithdrawRepository.findAllWithdraw(query, startDate, endDate, sort, offset, limit, status);
+                Integer totalData = FinanceWithdrawRepository.getTotalPage(query);
                 List<FinanceWithdrawResponse> financeWithdrawResponses = new ArrayList<>();
                 for (FinanceWithdraw financeWithdraw : financeWithdraws) {
                     FinanceWithdrawResponse financeWithdrawResponse = new FinanceWithdrawResponse();
@@ -46,6 +57,9 @@ public class FinanceWithdrawController extends BaseController {
                     financeWithdrawResponse.setDate(financeWithdraw.getDate());
                     financeWithdrawResponse.setStatus(financeWithdraw.getStatus());
                     financeWithdrawResponse.setAmount(financeWithdraw.getAmount());
+                    financeWithdrawResponse.setStoreId(financeWithdraw.getStore().id);
+                    financeWithdrawResponse.setStoreName(financeWithdraw.getStore().storeName);
+                    financeWithdrawResponse.setRequestBy(financeWithdraw.getRequestBy());
                     financeWithdrawResponses.add(financeWithdrawResponse);
                 }
                 response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", financeWithdrawResponses);
@@ -53,6 +67,8 @@ public class FinanceWithdrawController extends BaseController {
             } catch (Exception ex) {
                 LOGGER.error("Error when getting transaction withdraw data");
                 ex.printStackTrace();
+                response.setBaseResponse(0, offset, limit, error + " Showing data transaction", null);
+                return internalServerError(Json.toJson(response));
             }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
@@ -71,6 +87,21 @@ public class FinanceWithdrawController extends BaseController {
                     response.setBaseResponse(0, 0, 0, inputParameter + " store not found.", null);
                     return badRequest(Json.toJson(response));
                 }
+
+                BigDecimal currentBalance = store.getActiveBalance();
+                BigDecimal requestAmount = request.getAmount();
+
+                if (requestAmount.compareTo(currentBalance) == 1) {
+                    response.setBaseResponse(0, 0, 0, inputParameter + " amount should be less than active balance", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                Optional<BankAccountMerchant> bankAccountMerchant = BankAccountMerchantRepository.findByAccountNumber(request.getAccountNumber());
+                if (!bankAccountMerchant.isPresent()) {
+                    response.setBaseResponse(0, 0, 0, inputParameter + " account number not found", null);
+                    return badRequest(Json.toJson(response));
+                }
+
                 Transaction trx = Ebean.beginTransaction();
                 try {
                     FinanceWithdraw financeWithdraw = new FinanceWithdraw();
@@ -79,17 +110,28 @@ public class FinanceWithdrawController extends BaseController {
                     financeWithdraw.setDate(new Date());
                     financeWithdraw.setStatus(FinanceWithdraw.WAITING_CONFIRMATION);
                     financeWithdraw.setAmount(request.getAmount());
-                    financeWithdraw.setAccountNumber(request.getAccountNumber());
+                    financeWithdraw.setAccountNumber(bankAccountMerchant.get().getAccountNumber());
+                    financeWithdraw.setAccountName(bankAccountMerchant.get().getAccountName());
+                    financeWithdraw.setBankName(bankAccountMerchant.get().getBankName());
+                    financeWithdraw.setRequestBy(request.getRequestBy());
                     financeWithdraw.setStore(store);
                     financeWithdraw.save();
 
                     // do minus from store
                     BigDecimal currentActiveBalance = store.getActiveBalance();
-                    LOGGER.info("current active balance : " + currentActiveBalance);
+                    LOGGER.info("current active balance store : " + currentActiveBalance);
                     BigDecimal lastActiveBalance = currentActiveBalance.subtract(request.getAmount());
-                    LOGGER.info("last active balance : " + lastActiveBalance);
+                    LOGGER.info("last active balance store : " + lastActiveBalance);
                     store.setActiveBalance(lastActiveBalance);
                     store.update();
+
+                    // do minus from merchant
+                    BigDecimal currentTotalBalance = merchant.totalActiveBalance;
+                    LOGGER.info("current total balance : " + currentTotalBalance);
+                    BigDecimal lastTotalBalance = currentTotalBalance.subtract(request.getAmount());
+                    LOGGER.info("last total balance : " + lastTotalBalance);
+                    merchant.totalActiveBalance = lastTotalBalance;
+                    merchant.update();
 
                     FinanceTransaction financeTransaction = new FinanceTransaction();
                     financeTransaction.setEventId(UUID.randomUUID().toString());
@@ -126,7 +168,18 @@ public class FinanceWithdrawController extends BaseController {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
-                List<FinanceWithdraw> financeWithdraws = FinanceWithdrawRepository.findAllWithdraw(startDate, endDate, storeId, sort, offset, limit, status);
+                Query<FinanceWithdraw> query = null;
+                // default query find by merchant id
+                query = FinanceWithdrawRepository.finaAllWithdrawByMerchantId(merchant.id);
+                if (storeId != null && storeId != 0L) {
+                    Store store = Store.findById(storeId);
+                    if (store == null) {
+                        response.setBaseResponse(0, 0, 0, "store id does not exists", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    query = FinanceWithdrawRepository.finaAllWithdrawByStoreId(storeId);
+                }
+                List<FinanceWithdraw> financeWithdraws = FinanceWithdrawRepository.findAllWithdraw(query, startDate, endDate, sort, offset, limit, status);
                 File file = DownloadTransactionService.downloadTransaction(new ArrayList<>(), FinanceTransaction.WITHDRAW, financeWithdraws);
                 response().setContentType("application/vnd.ms-excel");
                 response().setHeader("Content-disposition", "attachment; filename=withdraw.xlsx");

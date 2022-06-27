@@ -681,4 +681,8 @@ public class Merchant extends BaseModel{
     	return Merchant.find.where().eq("t0.id", merchantId).orderBy("t0.id asc").setMaxRows(1).findUnique();
     }
 
+    public static Merchant findByActivationCode(String activationCode) {
+    	return Merchant.find.where().eq("t0.activation_code", activationCode).setMaxRows(1).findUnique();
+    }
+
 }

@@ -38,13 +38,25 @@ public class MailConfig {
 	// Using Mail Gun Mail Server
 	public static boolean sendmail(String recipients, String subject, String contentTemplate) {
 		Properties props = new Properties();
-		props.put("mail.smtp.auth", "true");
+		props.setProperty("mail.smtp.host", smtp);
+		props.setProperty("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+		props.setProperty("mail.smtp.socketFactory.fallback", "false");
+		props.setProperty("mail.smtp.port", "465");
+		props.setProperty("mail.smtp.socketFactory.port", "465");
 		props.put("mail.smtp.starttls.enable", "true");
-		props.put("mail.smtp.host", smtp);
-		props.put("mail.smtp.port", "587");
+		props.put("mail.smtp.auth", "true");
 		props.put("mail.debug", "true");
-		props.put("mail.smtp.sendpartial", "true");
-		props.put("mail.smtp.ssl.enable", "false");
+		props.put("mail.store.protocol", "pop3");
+		props.put("mail.transport.protocol", "smtp");
+		props.put("mail.debug.auth", "true");
+		props.setProperty( "mail.pop3.socketFactory.fallback", "false");
+//		props.put("mail.smtp.auth", "true");
+//		props.put("mail.smtp.starttls.enable", "true");
+//		props.put("mail.smtp.host", smtp);
+//		props.put("mail.smtp.port", "465");
+//		props.put("mail.debug", "true");
+//		props.put("mail.smtp.sendpartial", "true");
+		props.put("mail.smtp.ssl.enable", "true");
 		props.put("mail.smtp.ssl.trust", "*");
 		props.put("mail.smtp.ssl.protocols", "TLSv1.2");
 
@@ -87,9 +99,9 @@ public class MailConfig {
 
     }
 
-    public static String renderMailForgotPasswordMerchantTemplate(Merchant member, String url) {
+    public static String renderMailForgotPasswordMerchantTemplate(String resetToken, String name, String url) {
         return views.html.ForgotPasswordEmail
-                .render(member.name, url + "/" + member.resetToken, Constant.getInstance().getImageUrl().concat("mail"))
+                .render(name, url + "/" + resetToken, Constant.getInstance().getImageUrl())
                 .toString();
 
     }
@@ -120,7 +132,35 @@ public class MailConfig {
 		String url = Helper.MERCHANT_URL + "/account-activation/" + activationCode;
 
 		try {
-			String html = views.html.verificationEmail.render(fullName, url).toString();
+			String html = views.html.verificationEmail.render(fullName, url, Constant.getInstance().getImageUrl()).toString();
+			return html;
+		} catch (Exception ignored) {
+
+		}
+		return "";
+	}
+
+	public static String renderMailSendCreatePasswordBackendTemplate(String activationCode, String fullName) {
+		Merchant dt = new Merchant();
+		Form<Merchant> formData = Form.form(Merchant.class).fill(dt);
+		String url = Helper.BACKEND_URL + "/account-activation/" + activationCode;
+
+		try {
+			String html = views.html.verificationEmail.render(fullName, url, Constant.getInstance().getImageUrl()).toString();
+			return html;
+		} catch (Exception ignored) {
+
+		}
+		return "";
+	}
+
+	public static String renderVerificationAccount(String activationCode, String fullName) {
+		Merchant dt = new Merchant();
+		Form<Merchant> formData = Form.form(Merchant.class).fill(dt);
+		String url = Helper.API_URL + "/re/account-activation?token=" + activationCode;
+
+		try {
+			String html = views.html.verificationEmailChange.render(fullName, url, Constant.getInstance().getImageUrl()).toString();
 			return html;
 		} catch (Exception ignored) {
 

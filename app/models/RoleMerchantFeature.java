@@ -5,14 +5,12 @@ import com.avaje.ebean.Query;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import play.db.ebean.Model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import java.util.List;
 
 @Entity
@@ -64,7 +62,21 @@ public class RoleMerchantFeature extends Model {
     }
 
     public static List<RoleMerchantFeature> findByRoleMerchantId(Long roleMerchantId) {
-        return find.where().eq("roleMerchantId", roleMerchantId).findList();
+
+        String SQL = "select role_merchant_id, feature_id, is_view, is_add, is_edit, is_delete " +
+                "FROM role_merchant_feature rmf where rmf.role_merchant_id = " + roleMerchantId;
+        RawSql rawSql = RawSqlBuilder.parse(SQL)
+                .columnMapping("role_merchant_id", "roleMerchantId")
+                .columnMapping("feature_id", "featureId")
+                .columnMapping("is_view", "isView")
+                .columnMapping("is_add", "isAdd")
+                .columnMapping("is_edit", "isEdit")
+                .columnMapping("is_delete", "isDelete")
+                .create();
+        Query<RoleMerchantFeature> query = Ebean.find(RoleMerchantFeature.class);
+        query.setRawSql(rawSql);
+
+        return query.findList();
     }
 
     public static List<RoleMerchantFeature> getFeaturesByRole(Long id){

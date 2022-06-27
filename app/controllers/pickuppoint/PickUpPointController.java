@@ -304,7 +304,7 @@ public class PickUpPointController extends BaseController {
                     //For PUPList
                     List<PickupPointKiosKResponse.PickupPointMerchant> responseDatas = new ArrayList<>();
                     
-                    Query<PickUpPointMerchant> queryPuPointList = PickUpPointRepository.find.where().eq("t0.is_deleted", false).eq("t0.store_id", storeId).order("t0.id");
+                    Query<PickUpPointMerchant> queryPuPointList = PickUpPointRepository.find.where().eq("t0.is_active", true).eq("t0.is_deleted", false).eq("t0.store_id", storeId).order("t0.id");
                     List<PickUpPointMerchant> pickuppointList = PickUpPointRepository.getListPickUpPoint(queryPuPointList, "", "", 0, 0, storeId);
 
                     responsePickupPoint.setId(puPointSetup.id);

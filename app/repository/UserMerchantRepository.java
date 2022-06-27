@@ -1,5 +1,6 @@
 package repository;
 
+import com.hokeba.util.Encryption;
 import models.Merchant;
 import models.UserMerchant;
 import play.db.ebean.Model;
@@ -34,11 +35,37 @@ public class UserMerchantRepository extends Model {
 		}
 	}
 
+	public static UserMerchant findByEmail(String email) {
+		return find.where()
+				.eq("email", email)
+				.eq("isActive", Boolean.TRUE)
+				.findUnique();
+	}
+
+	public static UserMerchant forResendEmail(String email) {
+		return find.where()
+				.eq("email", email)
+				.findUnique();
+	}
+
     public static UserMerchant findById(Long id, Merchant merchant) {
         return find.where()
             .eq("id", id)
             .eq("role.merchant", merchant)
             .eq("isActive", Boolean.TRUE)
+            .findUnique();
+	}
+	
+    public static UserMerchant findAccountById(Long id) {
+        return find.where()
+            .eq("id", id)
+            .eq("isActive", Boolean.TRUE)
+            .findUnique();
+    }
+	
+    public static UserMerchant findByActivationCode(String activationCode) {
+        return find.where()
+            .eq("activation_code", activationCode)
             .findUnique();
     }
 
@@ -96,5 +123,12 @@ public class UserMerchantRepository extends Model {
         UserMerchant data = find.where().eq("t0.activation_code", activationCode).findUnique();
         return data;
     }
+
+	public static UserMerchant login(String email, String password) {
+		String encPassword = Encryption.EncryptAESCBCPCKS5Padding(password);
+		UserMerchant member = find.where().and(Expr.eq("email", email), Expr.eq("password", encPassword))
+				.eq("isDeleted", false).setMaxRows(1).findUnique();
+		return member;
+	}
 
 }
