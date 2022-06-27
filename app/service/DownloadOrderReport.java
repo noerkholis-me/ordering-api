@@ -1,21 +1,19 @@
 package service;
 
-import models.transaction.*;
-import models.*;
-import models.merchant.*;
-import models.productaddon.*;
-import repository.*;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import models.*;
+import models.merchant.*;
+import models.transaction.*;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import repository.*;
+
 
 public class DownloadOrderReport {
 
@@ -216,11 +214,11 @@ public class DownloadOrderReport {
                             // Tipe Produk
                             ProductMerchantDetail pmdetailAddOn = ProductMerchantDetailRepository.getTypeData(orderDetailAddOn.getProductAssignId());
                             if (pmdetailAddOn != null) {
-                                rowSheet.createCell(8).setCellValue(pmdetail.getProductType());
+                                rowSheet.createCell(8).setCellValue(pmdetailAddOn.getProductType());
                                 rowSheet.getCell(8).setCellStyle(cellStyle);
                             }
 
-                            System.out.print("End of Product Add On ID");
+                            System.out.println("End of Product Add On ID");
 
                             // Harga Produk
                             rowSheet.createCell(9).setCellValue(orderDetailAddOn.getProductPrice().doubleValue());
