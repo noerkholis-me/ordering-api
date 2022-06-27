@@ -596,7 +596,7 @@ public class ProductMerchantController extends BaseController {
                 responseData.setProductName(productMerchant.getProductName());
                 responseData.setMerchantId(productMerchant.getMerchant().id);
                     
-                Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().raw("t0.product_id = " + productMerchantDetail.getProductMerchant().id + " AND t0.is_deleted = " + false + " AND t0.merchant_id = " + merchantId + " " + groupBy).order("t0.product_type asc");
+                Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().raw("t0.product_id = " + productMerchantDetail.getProductMerchant().id + "AND t0.is_active = " + true + " AND t0.is_deleted = " + false + " AND t0.merchant_id = " + merchantId + " " + groupBy).order("t0.product_type asc");
                 List<ProductAddOn> dataAddOn = ProductAddOnRepository.getDataForAddOn(queryProductAddOn);
                 List<ProductCustomerAdditionalResponse.ProductAddOn> responsesProductAddOn = new ArrayList<>();
                     

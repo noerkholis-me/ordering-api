@@ -22,6 +22,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.persistence.*;
 import javax.validation.constraints.Size;
+import java.math.BigDecimal;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -206,6 +207,9 @@ public class Merchant extends BaseModel{
 
     @ManyToOne(cascade = { CascadeType.ALL })
     public Role role;
+
+    @Column(name = "total_active_balance")
+    public BigDecimal totalActiveBalance;
 
     public Merchant(String password, String email, String gender, String fullName, String name, String companyName, String status, String cityName, String address, String phone, boolean isActive) {
         this.password = password;

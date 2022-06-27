@@ -37,12 +37,7 @@ public class StoreAccessController extends BaseController {
     private static BaseResponse response = new BaseResponse();
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
-
-//    @ApiOperation(value = "Create Category", notes = "Create Category.\n" + swaggerInfo
-//            + "", response = BaseResponse.class, httpMethod = "POST")
-//    @ApiImplicitParams({
-//            @ApiImplicitParam(name = "category form", dataType = "temp.swaggermap.CategoryForm", required = true, paramType = "body", value = "category form") })
-//    @BodyParser.Of(value = BodyParser.Json.class, maxLength = 50 * 1024 * 1024)
+    
     public static Result assignStoreAccess() {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
@@ -116,7 +111,7 @@ public class StoreAccessController extends BaseController {
     public static Result listUserAssign(String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<StoreAccess> query = StoreAccessRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.merchant_id", ownMerchant.id).eq("t0.user_merchant_id", 1).order("t0.id desc");
+            Query<StoreAccess> query = StoreAccessRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.merchant_id", ownMerchant.id).order("t0.id desc");
             try {
                 List<StoreAccessResponse> responsesStoreAccess = new ArrayList<>();
                 List<StoreAccess> totalData = StoreAccessRepository.getTotalData(query);
@@ -229,24 +224,36 @@ public class StoreAccessController extends BaseController {
                         if(newStoreAccess != null){
                             newStoreAccess.setUserMerchant(um);
                             newStoreAccess.setMerchant(ownMerchant);
-                            newStoreAccess.setIsActive(request.getIsActive());
+                            // newStoreAccess.setIsActive(request.getIsActive());  
                             // newStoreAccess.isDeleted = request.getIsDeleted();
                             newStoreAccess.update();
+
+                            // SOFT DELETE ALL DATA WITH RELATED ID
+                            List<StoreAccessDetail> storeDetailDataList = StoreAccessRepository.findByIdStoreAccess(newStoreAccess.id);
+                            for(StoreAccessDetail storeAccessDetail : storeDetailDataList){
+                                storeAccessDetail.isDeleted = Boolean.TRUE;
+                                storeAccessDetail.update();
+                            }
+
+                            // SEARCH DATA THAT RELATED TO STORE ID REQUEST
                             for(Store stores : store) {
                                 Store dataStore = Store.findById(stores.id);
                                 if(dataStore != null){
-                                    StoreAccessDetail storeDetailData = StoreAccessRepository.findByIdStore(stores.id);
+                                    StoreAccessDetail storeDetailData = StoreAccessRepository.findByIdStore(dataStore.id, newStoreAccess.id);
+                                    // UPDATE DATA THAT RELATED TO STORE ID REQUEST
                                     if(storeDetailData != null){
                                         storeDetailData.setStoreAccess(newStoreAccess);
                                         storeDetailData.setStore(dataStore);
+                                        storeDetailData.isDeleted = Boolean.FALSE;
                                         storeDetailData.update();
-                                    } else {
-                                        StoreAccessDetail storeAccessDetail = new StoreAccessDetail();
-                                        storeAccessDetail.setStoreAccess(newStoreAccess);
-                                        storeAccessDetail.isDeleted = Boolean.FALSE;
-                                        storeAccessDetail.setStore(dataStore);
-                                        storeAccessDetail.save();
                                     }
+                                } else {
+                                    // ADD DATA IF NOT EXIST
+                                    StoreAccessDetail storeAccessDetail = new StoreAccessDetail();
+                                    storeAccessDetail.setStoreAccess(newStoreAccess);
+                                    storeAccessDetail.isDeleted = Boolean.FALSE;
+                                    storeAccessDetail.setStore(dataStore);
+                                    storeAccessDetail.save();
                                 }
                             }
                             trx.commit();

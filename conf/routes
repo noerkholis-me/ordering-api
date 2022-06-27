@@ -376,6 +376,8 @@ PUT     /merchant/subcategory/:id/status                  controllers.categories
 POST    /merchant/subscategory/:catid/:subid               controllers.categories.SubCategoryMerchantController.createSubsCategory(catid:Long, subid:Long)
 PUT     /merchant/subscategory/:id/update                  controllers.categories.SubCategoryMerchantController.editSubsCategory(id:Long)
 DELETE  /merchant/subscategory/:id/delete                  controllers.categories.SubCategoryMerchantController.deleteSubsCategory(id:Long)
+GET     /merchant/subscategory/data/list                   controllers.categories.SubCategoryMerchantController.listSubsCategory(sort:String ?= "", filter:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET     /merchant/subscategory/:id/detail                  controllers.categories.SubCategoryMerchantController.viewSubsCategory(id:Long)
 
 #SEQUENCE
 GET     /merchant/category/sequencelist                 controllers.categories.SubCategoryMerchantController.listSequence()
@@ -513,3 +515,27 @@ PUT         /merchant/assign/store/access/:id_assign/update        controllers.s
 DELETE      /merchant/assign/store/access/:id_assign/delete        controllers.store.StoreAccessController.deleteStoreAssign(id_assign: Long)
 GET         /merchant/assign/store/list                 controllers.store.StoreAccessController.listUserAssign(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET         /merchant/assign/store/:user_merchant_id/detail      controllers.store.StoreAccessController.detailUserAssign(user_merchant_id: Long)
+
+#LOYALTY POINT
+POST         /merchant/loyalty/point/setting             controllers.loyalty.LoyaltyPointController.createLoyaltyPoint(subs_category_id: Long ?= 0)
+GET          /merchant/loyalty/point/list                controllers.loyalty.LoyaltyPointController.listPickupPoint(offset:Int ?= 0, limit:Int ?= 10)
+
+#BANK ACCOUNT
+POST         /merchant/bankaccount                              controllers.merchants.BankAccountMerchantController.addBankAccount()
+GET          /merchant/bankaccount                              controllers.merchants.BankAccountMerchantController.getAllBankAccount(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+PUT          /merchant/bankaccount/change-primary-account       controllers.merchants.BankAccountMerchantController.changePrimaryBankAccount()
+PUT          /merchant/bankaccount/:id                          controllers.merchants.BankAccountMerchantController.editBankAccount(id: Long)
+DELETE       /merchant/bankaccount/:id                          controllers.merchants.BankAccountMerchantController.deleteBankAccount(id: Long)
+GET          /merchant/bankaccount/:id                          controllers.merchants.BankAccountMerchantController.getBankAccountById(id: Long)
+
+#ORDER REPORT MERCHANTS
+GET         /merchant/order/reports/data                controllers.users.CheckoutOrderController.orderReportMerchant(start_date:String ?= "", end_date:String ?= "", offset:Int ?= 0, limit:Int ?= 10, status_order:String ?= "")
+
+#FINANCE TRANSACTION
+GET         /merchant/finance/transaction                       controllers.finance.FinanceTransactionController.getAllTransaction(store_id:Long ?= 0, start_date: String ?= "", end_date: String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, status: String?="")
+GET         /merchant/finance/transaction/download              controllers.finance.FinanceTransactionController.downloadTransaction(store_id:Long ?= 0, start_date: String ?= "", end_date: String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, status: String?="")
+GET         /merchant/finance/withdraw                          controllers.finance.FinanceWithdrawController.getAllWithdraw(store_id:Long ?= 0, start_date: String ?= "", end_date: String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, status: String?="")
+POST        /merchant/finance/withdraw/request-withdraw                  controllers.finance.FinanceWithdrawController.requestWithdraw()
+GET         /merchant/finance/withdraw/download                 controllers.finance.FinanceWithdrawController.downloadWithdraw(store_id:Long ?= 0, start_date: String ?= "", end_date: String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, status: String?="")
+GET         /merchant/finance/transaction/active-balance                 controllers.finance.FinanceTransactionController.getActiveBalance(store_id:Long ?= 0)
+

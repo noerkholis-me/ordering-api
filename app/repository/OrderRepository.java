@@ -49,7 +49,7 @@ public class OrderRepository extends Model {
     }
 
     public static List<OrderDetail> findDataOrderDetail(Long orderId, String productType) {
-        String queryRaw = "t0.product_store_id in (select product_merchant_id from product_merchant_detail where product_type = '"+productType+"')";
+        String queryRaw = "t0.product_id in (select product_merchant_id from product_merchant_detail where product_type = '"+productType+"')";
         Query<OrderDetail> query = findDetail.where().raw(queryRaw).eq("t0.order_id", orderId).order("t0.created_at desc");
         // query = query.orderBy("t0.created_at desc");
         
@@ -60,7 +60,7 @@ public class OrderRepository extends Model {
 
     public static List<OrderDetail> findDataOrderProductAdditional(Long orderId, Long productId, String productType) {
         
-        String queryRaw = "t0.product_store_id in (select pmd.product_merchant_id from product_merchant_detail pmd where pmd.product_type = '"+productType+"' AND pmd.product_merchant_id in (select pao.product_assign_id from product_add_on_merchant pao where pao.product_id = "+productId+" ORDER BY pao.id asc))";
+        String queryRaw = "t0.product_id in (select pmd.product_merchant_id from product_merchant_detail pmd where pmd.product_type = '"+productType+"' AND pmd.product_merchant_id in (select pao.product_assign_id from product_add_on_merchant pao where pao.product_id = "+productId+" ORDER BY pao.id asc))";
         Query<OrderDetail> query = findDetail.where().raw(queryRaw).eq("t0.order_id", orderId).order("t0.created_at desc");
         // query = query.orderBy("t0.created_at desc");
         
