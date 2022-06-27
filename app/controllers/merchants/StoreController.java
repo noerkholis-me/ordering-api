@@ -20,6 +20,7 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import utils.ShipperHelper;
+import java.math.BigDecimal;
 
 import java.util.ArrayList;
 import java.util.Base64;
@@ -253,6 +254,9 @@ public class StoreController extends BaseController {
         store.shipperSuburb = ShipperSuburb.findById(storeRequest.getSuburbId());
         store.shipperArea = ShipperArea.findById(storeRequest.getAreaId());
         store.storeGmap = storeRequest.getGoogleMapsUrl();
+        if(!isEdit){ 
+            store.activeBalance = BigDecimal.ZERO;
+        }
         String [] finalLotLang = getLongitudeLatitude(store.storeGmap);
         store.storeLatitude = Double.parseDouble(finalLotLang[0]);
         store.storeLongitude = Double.parseDouble(finalLotLang[1]);
