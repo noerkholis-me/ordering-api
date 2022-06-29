@@ -120,6 +120,24 @@ public class SubsCategoryMerchantRepository extends Model {
 
 		return resData;
 	}
+    
+    public static List<SubsCategoryMerchant> getForDetailKiosk(Query<SubsCategoryMerchant> reqQuery)
+			throws IOException {
+		Query<SubsCategoryMerchant> query = reqQuery;
+
+		query = query.orderBy("t0.sequence asc");
+
+		ExpressionList<SubsCategoryMerchant> exp = query.where();
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+		query = exp.query();
+
+		int total = query.findList().size();
+
+		List<SubsCategoryMerchant> resData = query.findPagingList(0).getPage(0).getList();
+
+		return resData;
+	}
 
 	public static List<SubsCategoryMerchant> getListSequence(Long merchantId) {
 		List<SubsCategoryMerchant> lists = new ArrayList<>();
