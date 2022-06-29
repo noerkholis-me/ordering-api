@@ -447,8 +447,8 @@ public class BrandMerchantController extends BaseController {
                         response.setBaseResponse(0, 0, 0, error + " brand tidak tersedia.", null);
                         return badRequest(Json.toJson(response));
                     }
-                    Query<SubsCategoryMerchant> querySubCategory = SubsCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).eq("t0.is_active", true).order("t0.id");
-                    List<SubsCategoryMerchant> dataSubCategory = SubsCategoryMerchantRepository.getDataForCategory(querySubCategory);
+                    Query<SubsCategoryMerchant> querySubCategory = SubsCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).eq("t0.is_active", true).order("t0.sequence asc");
+                    List<SubsCategoryMerchant> dataSubCategory = SubsCategoryMerchantRepository.getForDetailKiosk(querySubCategory);
                     List<BrandDetailResponse.SubsCategoryMerchant> categoryListResponses = new ArrayList<>();
 
                     // FOR RESPONSE
