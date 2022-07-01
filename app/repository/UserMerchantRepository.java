@@ -50,9 +50,9 @@ public class UserMerchantRepository extends Model {
 
     public static UserMerchant findById(Long id, Merchant merchant) {
         return find.where()
-            .eq("id", id)
+            .eq("t0.id", id)
             .eq("role.merchant", merchant)
-            .eq("isActive", Boolean.TRUE)
+            .eq("t0.is_deleted", Boolean.FALSE)
             .findUnique();
 	}
 	
