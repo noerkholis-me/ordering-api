@@ -1,5 +1,6 @@
 stages:
-  - prepare
+  - prepare-env
+  - prepare-app
   - build
   - deploy
   - deploy_production
@@ -9,8 +10,29 @@ cache:
   paths:
     - target/
     - sbt-cache/
-prepare:
-  stage: prepare
+
+prepare-env:
+  stage: prepare-env
+  variables:
+    SOURCE_BRANCH: conf/application-local.conf
+  rules:
+    - if: $CI_COMMIT_REF_NAME =~ /prod-do/
+      variables:
+        SOURCE_BRANCH: conf/application-prod.conf
+    - if: $CI_COMMIT_REF_NAME =~ /staging/
+      variables:
+        SOURCE_BRANCH: conf/application-staging.conf
+  script:
+    - echo $SOURCE_BRANCH
+    - cp $SOURCE_BRANCH conf/application.conf
+  artifacts:
+    paths:
+      - "conf/"
+    expire_in: 1 days
+
+
+prepare-app:
+  stage: prepare-app
   image: mozilla/sbt:8u292_1.5.7
   variables:
     SBT_VERSION: "1.5.7"
