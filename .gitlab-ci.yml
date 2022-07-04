@@ -14,17 +14,17 @@ cache:
 prepare-env:
   stage: prepare-env
   variables:
-    SOURCE_BRANCH: conf/application-local.properties
+    SOURCE_BRANCH: conf/application-local.conf
   rules:
     - if: $CI_COMMIT_REF_NAME =~ /prod-do/
       variables:
-        SOURCE_BRANCH: conf/application-prod.properties
+        SOURCE_BRANCH: conf/application-prod.conf
     - if: $CI_COMMIT_REF_NAME =~ /staging/
       variables:
-        SOURCE_BRANCH: conf/application-staging.properties
+        SOURCE_BRANCH: conf/application-staging.conf
   script:
     - echo $SOURCE_BRANCH
-    - cp $SOURCE_BRANCH conf/application.properties
+    - cp $SOURCE_BRANCH conf/application.conf
   artifacts:
     paths:
       - "conf/"
