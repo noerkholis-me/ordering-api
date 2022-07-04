@@ -2,6 +2,7 @@ stages:
   - prepare
   - build
   - deploy
+  - deploy_production
 cache:
   key: "$CI_BUILD_REF_NAME"
   untracked: true    
@@ -23,6 +24,7 @@ prepare:
     - sbt dist
   only:
     - staging
+    - prod-do
   timeout: 180m
   artifacts:
     paths:
@@ -49,6 +51,7 @@ build:
     - docker push "${CI_REGISTRY_IMAGE}:$CI_BUILD_REF"
   only:
     - staging
+    - prod-do
 
 deploy_staging:
   image: registry.cn-hangzhou.aliyuncs.com/haoshuwei24/kubectl:1.16.6
@@ -81,3 +84,15 @@ deploy_staging:
   only:
     - staging
 
+deploy_production:
+  stage: deploy_production
+  script:
+    - sed -i "s,_IMAGE:VERSION_,${CI_REGISTRY_IMAGE}:$CI_BUILD_REF," docker-compose.yml
+    - scp -P 222 docker-compose.yml deploy@165.22.252.218:~/api/
+    - ssh -p 222 deploy@165.22.252.218 docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry.stagingapps.net
+    - ssh -p 222 deploy@165.22.252.218 "cd api && docker compose up -d"
+  only:
+    - prod-do
+  tags:
+    - production
+  when: manual

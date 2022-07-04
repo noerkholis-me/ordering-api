@@ -61,6 +61,7 @@ public class SessionsController extends BaseController {
             @ApiImplicitParam(name = "login form", dataType = "temp.swaggermap.LoginForm", required = true, paramType = "body", value = "login form") })
     public static Result signIn() {
         JsonNode json = request().body().asJson();
+
         if (checkAccessAuthorization("guest") == 200 && json.has("email") && json.has("password")
                 && json.has("device_model") && json.has("device_id") && json.has("device_type")) {
 
@@ -81,6 +82,7 @@ public class SessionsController extends BaseController {
                     userType = Boolean.TRUE;
                 }
             }
+
             if (member != null || userMerchant != null) {
                 if (userType == Boolean.TRUE) {
                     if (!Merchant.STATUS_APPROVED.equals(member.status)) {
@@ -162,6 +164,7 @@ public class SessionsController extends BaseController {
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
+
     }
 
     private static MerchantSessionResponse toMerchantSessionResponse(Merchant member) {

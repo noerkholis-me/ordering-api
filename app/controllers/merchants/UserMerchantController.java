@@ -17,11 +17,13 @@ import dtos.merchant.*;
 import models.Merchant;
 import models.RoleMerchant;
 import models.UserMerchant;
+import models.store.*;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.UserMerchantRepository;
 import repository.RoleMerchantRepository;
+import repository.StoreAccessRepository;
 
 import java.util.*;
 import com.avaje.ebean.Query;
@@ -51,6 +53,11 @@ public class UserMerchantController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
+                        Merchant merchantData = Merchant.findByEmail(request.getEmail(), false);
+                        if(merchantData != null) {
+                            response.setBaseResponse(0, 0, 0, "Email terdaftar sebagai merchant, tidak dapat digunakan kembali", null);
+                            return badRequest(Json.toJson(response));
+                        }
                         RoleMerchant role = RoleMerchantRepository.find.byId(request.getRoleId());
                         if (role == null) {
                             response.setBaseResponse(0, 0, 0, error + " Role id not found.", null);
@@ -80,7 +87,7 @@ public class UserMerchantController extends BaseController {
 
                         trx.commit();
 
-                        response.setBaseResponse(1,offset, 1, success + " User created successfully", newUserMerchant);
+                        response.setBaseResponse(1,offset, 1, "Berhasil menambahkan user", newUserMerchant);
                         return ok(Json.toJson(response));
                     } catch (Exception e) {
                         logger.error("Error while creating user", e);
@@ -119,23 +126,58 @@ public class UserMerchantController extends BaseController {
                     try {
                         UserMerchant userMerchant = UserMerchantRepository.findById(id, ownMerchant);
                         if (userMerchant == null) {
-                            response.setBaseResponse(0, 0, 0, error + " User merchant not found.", null);
+                            response.setBaseResponse(0, 0, 0, "User merchant tidak ditemukan", null);
                             return badRequest(Json.toJson(response));
                         }
                         // need to refactor to role_merchant
                         RoleMerchant role = RoleMerchantRepository.find.byId(request.getRoleId());
                         if (role == null) {
-                            response.setBaseResponse(0, 0, 0, error + " Role id not found.", null);
+                            response.setBaseResponse(0, 0, 0, "Id Role tidak ditemukan", null);
                             return badRequest(Json.toJson(response));
                         }
-                        constructRequestModel(userMerchant, request, role, ownMerchant, request.getIsActive());
-                        userMerchant.update();
+
+                        if(!request.getEmail().equalsIgnoreCase(userMerchant.getEmail())){
+                            Merchant merchantData = Merchant.findByEmail(request.getEmail(), false);
+                            System.out.println("Kesini engga ya");
+                            if(merchantData != null) {
+                                response.setBaseResponse(0, 0, 0, "Email terdaftar sebagai merchant, tidak dapat digunakan kembali", null);
+                                return badRequest(Json.toJson(response));
+                            }
+                            System.out.println("Kesini engga ya 2222");
+                            UserMerchant userMerchantData = UserMerchantRepository.find.where().ne("t0.id", userMerchant.id).eq("t0.email", request.getEmail()).eq("role.merchant", ownMerchant).setMaxRows(1).findUnique();
+                            if(userMerchantData != null) {
+                                response.setBaseResponse(0, 0, 0, "Email sudah terdaftar, tidak bisa digunakan kembali.", null);
+                                return badRequest(Json.toJson(response));
+                            }
+                            System.out.println("Kesini engga ya 333");
+                            constructRequestModel(userMerchant, request, role, ownMerchant, Boolean.FALSE);
+                            System.out.println("Kesini engga ya 444");
+                            String forActivation = Encryption.EncryptAESCBCPCKS5Padding(String.valueOf(userMerchant.id) + String.valueOf(System.currentTimeMillis()));
+
+                            userMerchant.setActivationCode(forActivation);
+                            userMerchant.update();
+
+                            Thread thread = new Thread(() -> {
+                                try {
+                                    MailConfig.sendmail(userMerchant.getEmail(), MailConfig.subjectActivation,
+                                            MailConfig.renderVerificationAccount(forActivation, userMerchant.getFullName()));
+                
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            });
+
+                            thread.start();
+                        } else {
+                            constructRequestModel(userMerchant, request, role, ownMerchant, userMerchant.isActive);
+                            userMerchant.update();
+                        }
                         trx.commit();
 
                         response.setBaseResponse(1,offset, 1, success + " update user successfully", userMerchant);
                         return ok(Json.toJson(response));
                     } catch (Exception e) {
-                        logger.error("Error while creating user", e);
+                        logger.error("Ada kesalahan pada saat update user", e);
                         e.printStackTrace();
                         trx.rollback();
                     } finally {
@@ -169,12 +211,25 @@ public class UserMerchantController extends BaseController {
                     response.setBaseResponse(0, 0, 0, error + " User merchant not found.", null);
                     return badRequest(Json.toJson(response));
                 }
+                StoreAccess newStoreAccess = StoreAccessRepository.find.where().eq("t0.user_merchant_id", userMerchant.id).eq("merchant", ownMerchant).findUnique();
+                if (newStoreAccess != null) {
+                    newStoreAccess.setIsActive(Boolean.FALSE);
+                    newStoreAccess.isDeleted = Boolean.TRUE;
+                    newStoreAccess.update();
+                    Query<StoreAccessDetail> queryDetail = StoreAccessRepository.findDetail.where()
+                            .eq("t0.store_access_id", newStoreAccess.id).eq("t0.is_deleted", false).order("t0.id");
+                    List<StoreAccessDetail> storeDetailData = StoreAccessRepository.findByIdAssign(queryDetail);
+                    for (StoreAccessDetail storeaccess : storeDetailData) {
+                        storeaccess.isDeleted = Boolean.TRUE;
+                        storeaccess.update();
+                    }
+                }
                 userMerchant.isDeleted = true;
                 userMerchant.isActive = false;
                 userMerchant.update();
                 trx.commit();
 
-                response.setBaseResponse(1,offset, 1, success + " delete user successfully", userMerchant.isDeleted);
+                response.setBaseResponse(1,offset, 1, "Sukses menghapus user", userMerchant.isDeleted);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 logger.error("Error while delete user", e);
@@ -291,9 +346,9 @@ public class UserMerchantController extends BaseController {
             return "Last name cannot be more than 50 characters.";
         // =============================================================================================================== //
         if (isEdit == Boolean.FALSE) {
-            UserMerchant userMerchant = UserMerchantRepository.findByEmailAndRole_MerchantId(request.getEmail(), merchant);
+            UserMerchant userMerchant = UserMerchantRepository.find.where().eq("t0.email", request.getEmail()).eq("is_deleted", Boolean.FALSE).findUnique();
             if (userMerchant != null)
-                return "User email has been used.";
+                return "Email telah terdaftar";
         }
         return null;
     }
