@@ -30,6 +30,7 @@ prepare-env:
       - "conf/"
     expire_in: 1 days
 
+
 prepare-app:
   stage: prepare-app
   image: mozilla/sbt:8u292_1.5.7
