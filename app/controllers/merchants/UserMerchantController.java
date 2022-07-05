@@ -409,23 +409,20 @@ public class UserMerchantController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        UserMerchant activationCodes = UserMerchantRepository.findDataActivationCode(activationCode);
-                        Date simpleDateFormat = new Date();
-                        if (activationCodes == null) {
-                            response.setBaseResponse(0, 0, 0, error + " Activation Code id not found.", null);
+                        UserMerchant userMerchant = UserMerchantRepository.findDataActivationCode(activationCode);
+                        if (userMerchant == null) {
+                            response.setBaseResponse(0, 0, 0, error + " Activation Code id not found. Please call administrator for resend activation code.", null);
                             return badRequest(Json.toJson(response));
                         }
-                        UserMerchant newUserMerchant = new UserMerchant();
-                        newUserMerchant.isDeleted = false;
-                        newUserMerchant.password = Encryption.EncryptAESCBCPCKS5Padding(request.getPassword());
-                        newUserMerchant.isActive = true;
-                        newUserMerchant.activationCode = "";
-                        newUserMerchant.id = activationCodes.id;
-                        newUserMerchant.update();
+                        userMerchant.isDeleted = false;
+                        userMerchant.setPassword(Encryption.EncryptAESCBCPCKS5Padding(request.getPassword()));
+                        userMerchant.setActive(true);
+                        userMerchant.setActivationCode("");
+                        userMerchant.update();
 
                         trx.commit();
 
-                        response.setBaseResponse(1,offset, 1, success + " Password created successfully", newUserMerchant);
+                        response.setBaseResponse(1,offset, 1, success + " Password created successfully", userMerchant);
                         return ok(Json.toJson(response));
                     } catch (Exception e) {
                         logger.error("Error while creating password", e);
