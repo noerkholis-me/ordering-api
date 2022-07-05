@@ -4,6 +4,9 @@ metadata:
   name: __CI_PROJECT_NAME__-__CI_ENVIRONMENT_SLUG__-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: "1000m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
 spec:
   tls:
   - secretName: stagingapps.net
