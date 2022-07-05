@@ -685,4 +685,8 @@ public class Merchant extends BaseModel{
     	return Merchant.find.where().eq("t0.activation_code", activationCode).setMaxRows(1).findUnique();
     }
 
+    public static Merchant findByEmail(String email, Boolean is_deleted) {
+    	return Merchant.find.where().eq("t0.email", email).eq("t0.is_deleted", is_deleted).setMaxRows(1).findUnique();
+    }
+
 }
