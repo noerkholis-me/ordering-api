@@ -83,7 +83,7 @@ public class DashboardController extends BaseController {
             try {
                 BigDecimal totalActiveBalance = merchant.totalActiveBalance;
                 Map<String, Integer> data = new HashMap<>();
-                data.put("total_transaction_amount", totalActiveBalance.intValue());
+                data.put("total_transaction_amount", totalActiveBalance != null ? totalActiveBalance.intValue() : 0);
                 response.setBaseResponse(1, offset, limit, success + " Showing total transaction amount", data);
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
