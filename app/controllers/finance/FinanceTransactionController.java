@@ -124,7 +124,7 @@ public class FinanceTransactionController extends BaseController {
                     response.setBaseResponse(1, 0, 0, success + " Showing data active balance", activeBalanceResponse);
                     return ok(Json.toJson(response));
                 } catch (Exception e) {
-                    LOGGER.error("Error pada saat assign produk", e);
+                    LOGGER.error("Error pada saat get active balance", e);
                     e.printStackTrace();
                     trx.rollback();
                 } finally {

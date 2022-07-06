@@ -563,3 +563,7 @@ GET         /merchant/dashboard/total-transaction      controllers.dashboard.Das
 GET         /merchant/dashboard/total-withdraw      controllers.dashboard.DashboardController.getTotalWithdraw(start_date: String?= "", end_date: String?= "")
 
 GET         /merchant/order/print-invoice/:orderNumber      controllers.order.OrderMerchantController.printInvoice(orderNumber: String)
+
+# CUSTOMER
+GET         /merchant/customer                  controllers.merchants.CustomerController.getListCustomer(keyword:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, status: String ?= "ACTIVE")
+PUT         /merchant/customer/:id/change-status    controllers.merchants.CustomerController.changeStatus(id: Long)
