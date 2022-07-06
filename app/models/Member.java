@@ -8,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hokeba.util.CommonFunction;
 import com.hokeba.util.Constant;
 import com.hokeba.util.Encryption;
+import lombok.Getter;
+import lombok.Setter;
 import models.finance.FinanceTransaction;
 
 import javax.crypto.BadPaddingException;
@@ -186,6 +188,13 @@ public class Member extends BaseModel {
     @JsonIgnore
     @OneToMany(mappedBy = "referral")
     public List<MemberReferral> referral;
+
+    @ManyToOne(cascade = { CascadeType.ALL })
+    @JoinColumn(name = "merchant_id", referencedColumnName = "id")
+    @JsonIgnore
+    @Getter
+    @Setter
+    public Merchant merchant;
 
     public static Finder<Long, Member> find = new Finder<Long, Member>(Long.class, Member.class);
 
@@ -738,16 +747,8 @@ public class Member extends BaseModel {
         return find.where().eq("is_deleted", false).findRowCount();
     }
 
-    public String getRegisterDate(){
-        return CommonFunction.getDateTime(createdAt);
-    }
-
     public String getLastLogin(){
         return CommonFunction.getDateTime(lastLogin);
-    }
-
-    public String getLastPurchase(){
-        return CommonFunction.getDateTime(lastPurchase);
     }
 
     public String getBirthDate(){
