@@ -43,7 +43,7 @@ prepare-app:
     SBT_CACHE_DIR: "$CI_PROJECT_DIR/sbt-cache/.ivy/cache"
   script:
     - sbt clean compile
-#    - sbt dist
+    #- sbt dist
   only:
     - staging
     - prod-do
