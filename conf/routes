@@ -520,7 +520,8 @@ GET         /merchant/assign/store/:user_merchant_id/detail      controllers.sto
 
 #LOYALTY POINT
 POST         /merchant/loyalty/point/setting             controllers.loyalty.LoyaltyPointController.createLoyaltyPoint(subs_category_id: Long ?= 0)
-GET          /merchant/loyalty/point/list                controllers.loyalty.LoyaltyPointController.listPickupPoint(offset:Int ?= 0, limit:Int ?= 10)
+PUT          /merchant/loyalty/point/:id/setting         controllers.loyalty.LoyaltyPointController.updateLoyaltyPoint(id: Long, subs_category_id: Long ?= 0)
+GET          /merchant/loyalty/point/list                controllers.loyalty.LoyaltyPointController.listLoyaltyPoint(offset:Int ?= 0, limit:Int ?= 10)
 
 #BANK ACCOUNT
 POST         /merchant/bankaccount                              controllers.merchants.BankAccountMerchantController.addBankAccount()
@@ -556,9 +557,10 @@ GET         /re/account-activation                  controllers.users.UpdateProf
 POST         /resend/account-activation                  controllers.users.ResendEmailVerification.resendEmailVerificationUserMerchant(email: String ?= "")
 
 # DASHBOARD
+GET         /merchant/dashboard/chart/total-transaction-customer      controllers.dashboard.DashboardController.getTotalTransactionAndMember(start_date: String?= "", end_date: String?= "")
 GET         /merchant/dashboard/total-customer      controllers.dashboard.DashboardController.getTotalCustomer(start_date: String?= "", end_date: String?= "")
 GET         /merchant/dashboard/total-product      controllers.dashboard.DashboardController.getTotalProduct(start_date: String?= "", end_date: String?= "")
-GET         /merchant/dashboard/total-transaction-amount      controllers.dashboard.DashboardController.getTotalTransactionAmount()
+GET         /merchant/dashboard/total-transaction-amount      controllers.dashboard.DashboardController.getTotalTransactionAmount(start_date: String?= "", end_date: String?= "")
 GET         /merchant/dashboard/total-transaction      controllers.dashboard.DashboardController.getTotalTransaction(start_date: String?= "", end_date: String?= "")
 GET         /merchant/dashboard/total-withdraw      controllers.dashboard.DashboardController.getTotalWithdraw(start_date: String?= "", end_date: String?= "")
 
@@ -567,3 +569,7 @@ GET         /merchant/order/print-invoice/:orderNumber      controllers.order.Or
 # CUSTOMER
 GET         /merchant/customer                  controllers.merchants.CustomerController.getListCustomer(keyword:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, status: String ?= "ACTIVE")
 PUT         /merchant/customer/:id/change-status    controllers.merchants.CustomerController.changeStatus(id: Long)
+POST        /users/registration                 controllers.users.SessionsController.registerUser()
+
+# GET LOYALTY FE
+GET         /member/loyalty/:storeCode/get/data            controllers.loyalty.LoyaltyPointController.useLoyalty(email:String ?= "", phonenumber:String ?= "", storeCode:String)

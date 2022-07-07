@@ -40,4 +40,10 @@ public class OrderTransaction {
     @JsonProperty("table_id")
     private Long tableId;
 
+    // GET USAGE LOYALTY POINT
+    @JsonProperty("use_loyalty")
+    private Boolean useLoyalty;
+    @JsonProperty("loyalty_usage")
+    private BigDecimal loyaltyUsage;
+
 }
