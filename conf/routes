@@ -559,7 +559,7 @@ POST         /resend/account-activation                  controllers.users.Resen
 GET         /merchant/dashboard/chart/total-transaction-customer      controllers.dashboard.DashboardController.getTotalTransactionAndMember(start_date: String?= "", end_date: String?= "")
 GET         /merchant/dashboard/total-customer      controllers.dashboard.DashboardController.getTotalCustomer(start_date: String?= "", end_date: String?= "")
 GET         /merchant/dashboard/total-product      controllers.dashboard.DashboardController.getTotalProduct(start_date: String?= "", end_date: String?= "")
-GET         /merchant/dashboard/total-transaction-amount      controllers.dashboard.DashboardController.getTotalTransactionAmount()
+GET         /merchant/dashboard/total-transaction-amount      controllers.dashboard.DashboardController.getTotalTransactionAmount(start_date: String?= "", end_date: String?= "")
 GET         /merchant/dashboard/total-transaction      controllers.dashboard.DashboardController.getTotalTransaction(start_date: String?= "", end_date: String?= "")
 GET         /merchant/dashboard/total-withdraw      controllers.dashboard.DashboardController.getTotalWithdraw(start_date: String?= "", end_date: String?= "")
 

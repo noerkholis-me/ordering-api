@@ -108,11 +108,16 @@ public class DashboardController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result getTotalTransactionAmount() {
+    public static Result getTotalTransactionAmount(String startDate, String endDate) {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
-                BigDecimal totalActiveBalance = merchant.totalActiveBalance;
+                Query<FinanceTransaction> financeTransactionQuery = FinanceTransactionRepository.findAllTransactionByMerchantId(merchant.id);
+                List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findListTransaction(financeTransactionQuery, startDate, endDate, "IN");
+                BigDecimal totalActiveBalance = BigDecimal.ZERO;
+                for (FinanceTransaction financeTransaction : financeTransactions) {
+                    totalActiveBalance = totalActiveBalance.add(financeTransaction.getAmount());
+                }
                 Map<String, Integer> data = new HashMap<>();
                 data.put("total_transaction_amount", totalActiveBalance != null ? totalActiveBalance.intValue() : 0);
                 response.setBaseResponse(1, offset, limit, success + " Showing total transaction amount", data);
