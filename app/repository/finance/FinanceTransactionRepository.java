@@ -110,4 +110,25 @@ public class FinanceTransactionRepository extends BaseModel {
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
+    public static List<FinanceTransaction> findListTransaction(Query<FinanceTransaction> reqQuery, String startDate, String endDate, String status) throws ParseException {
+        Query<FinanceTransaction> query = reqQuery;
+
+        ExpressionList<FinanceTransaction> exp = query.where();
+        if (!startDate.equalsIgnoreCase("") && !endDate.equalsIgnoreCase("")) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            Date start = simpleDateFormat.parse(startDate.concat(" 00:00:00.0"));
+            Date end = simpleDateFormat.parse(endDate.concat(" 23:59:00.0"));
+
+            Timestamp startTimestamp = new Timestamp(start.getTime());
+            Timestamp endTimestamp = new Timestamp(end.getTime());
+            exp.between("t0.date", startTimestamp, endTimestamp);
+        }
+        if (!status.equalsIgnoreCase("")) {
+            exp = exp.eq("t0.status", status);
+        }
+        query = exp.query();
+
+        return query.findList();
+    }
+
 }
