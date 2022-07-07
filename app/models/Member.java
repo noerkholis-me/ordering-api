@@ -28,6 +28,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.math.BigDecimal;
 /**
  * Created by hendriksaragih on 2/4/17.
  */
@@ -168,9 +169,9 @@ public class Member extends BaseModel {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "Asia/Jakarta")
     public Date lastPurchase;
     
-    @JsonIgnore
-    @OneToMany(mappedBy = "member",cascade = CascadeType.ALL)
-    public List<LoyaltyPoint> loyaltyPoint;
+    // @JsonIgnore
+    // @OneToMany(mappedBy = "member",cascade = CascadeType.ALL)
+    // public List<LoyaltyPoint> loyaltyPoint;
 //    public List<LoyaltyPoint> loyaltyPoint = new ArrayList<LoyaltyPoint>();
 
     //odoo
@@ -195,6 +196,9 @@ public class Member extends BaseModel {
     @Getter
     @Setter
     public Merchant merchant;
+
+    @Column(name = "loyalty_point")
+    public BigDecimal loyaltyPoint;
 
     public static Finder<Long, Member> find = new Finder<Long, Member>(Long.class, Member.class);
 
