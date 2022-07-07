@@ -567,3 +567,4 @@ GET         /merchant/order/print-invoice/:orderNumber      controllers.order.Or
 # CUSTOMER
 GET         /merchant/customer                  controllers.merchants.CustomerController.getListCustomer(keyword:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, status: String ?= "ACTIVE")
 PUT         /merchant/customer/:id/change-status    controllers.merchants.CustomerController.changeStatus(id: Long)
+POST        /users/registration                 controllers.users.SessionsController.registerUser()

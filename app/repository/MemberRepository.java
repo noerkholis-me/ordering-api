@@ -17,6 +17,15 @@ public class MemberRepository extends Model {
         return Optional.ofNullable(find.where().eq("id", id).findUnique());
     }
 
+    public static Optional<Member> findByPhoneAndMerchantId(String phoneNumber, Long merchantId) {
+        return Optional.ofNullable(
+                find.where()
+                        .eq("phone", phoneNumber)
+                        .eq("merchant.id", merchantId)
+                        .findUnique()
+        );
+    }
+
     public static Integer getTotalPage(Query<Member> requestQuery) {
         Query<Member> query = requestQuery;
         ExpressionList<Member> exp = query.where();

@@ -1,7 +1,9 @@
 package controllers.users;
 
 import assets.JsonMask;
-import java.util.Random;
+
+import java.util.*;
+
 import assets.Tool;
 
 import com.avaje.ebean.Ebean;
@@ -45,6 +47,7 @@ import play.Logger;
 import play.Play;
 import play.libs.Json;
 import play.mvc.Result;
+import repository.MemberRepository;
 import sendinblue.ApiClient;
 import sendinblue.ApiException;
 import sendinblue.Configuration;
@@ -85,14 +88,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 /**
  * Created by hendriksaragih on 2/28/17.
@@ -258,6 +253,68 @@ public class SessionsController extends BaseController {
 		} catch (Exception e2) {
 			Logger.error("Email not send", e2);
 		}
+	}
+
+	public static Result registerUser() {
+		int authority = checkAccessAuthorization("all");
+		if (authority == 200 || authority == 203) {
+			JsonNode json = request().body().asJson();
+			String phone = json.get("phone").asText().toLowerCase();
+			Long merchantId = json.get("merchant_id").asLong();
+			try {
+				String validatePhoneNumber = validateRegister(phone);
+				if (!validatePhoneNumber.equalsIgnoreCase("")) {
+					response.setBaseResponse(0, 0, 0, inputParameter + " " + validatePhoneNumber, null);
+					return badRequest(Json.toJson(response));
+				}
+
+				Optional<Member> member = MemberRepository.findByPhoneAndMerchantId(phone, merchantId);
+				if (member.isPresent()) {
+					response.setBaseResponse(0, 0, 0, inputParameter + " phone number is exists.", null);
+					return badRequest(Json.toJson(response));
+				}
+
+				Merchant merchant = Merchant.merchantGetId(merchantId);
+				if (merchant == null) {
+					response.setBaseResponse(0, 0, 0, inputParameter + " merchant not found.", null);
+					return badRequest(Json.toJson(response));
+				}
+
+				Member newMember = new Member();
+				newMember.phone = phone;
+				newMember.firstName = "";
+				newMember.lastName = "";
+				newMember.fullName = "";
+				newMember.email = "";
+				newMember.lastPurchase = null;
+				newMember.setMerchant(merchant);
+				newMember.isActive = true;
+				newMember.save();
+
+				response.setBaseResponse(1, 0, 0, success + " register new customer", newMember.phone);
+				return ok(Json.toJson(response));
+			} catch (Exception e) {
+				e.printStackTrace();
+				response.setBaseResponse(0, 0, 0, error, null);
+				return internalServerError(Json.toJson(response));
+			}
+		} else if (authority == 403) {
+			response.setBaseResponse(0, 0, 0, forbidden, null);
+			return forbidden(Json.toJson(response));
+		} else {
+			response.setBaseResponse(0, 0, 0, unauthorized, null);
+			return unauthorized(Json.toJson(response));
+		}
+	}
+
+	private static String validateRegister(String phoneNumber) {
+		String errMessage = "";
+		if (!phoneNumber.isEmpty()) {
+			if (!phoneNumber.matches(CommonFunction.phoneRegex)) {
+				errMessage += "Phone format not valid.";
+			}
+		}
+		return errMessage;
 	}
 
 	public Result register() {
