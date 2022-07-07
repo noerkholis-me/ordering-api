@@ -6,6 +6,7 @@ import com.avaje.ebean.FetchConfig;
 import com.avaje.ebean.Query;
 import controllers.finance.FinanceTransactionController;
 import models.BaseModel;
+import models.Merchant;
 import models.Store;
 import models.finance.FinanceTransaction;
 import play.Logger;
