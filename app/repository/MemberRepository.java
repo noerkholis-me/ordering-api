@@ -4,8 +4,13 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import models.Member;
+import models.Merchant;
+import models.merchant.ProductMerchant;
 import play.db.ebean.Model;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +36,22 @@ public class MemberRepository extends Model {
         ExpressionList<Member> exp = query.where();
         query = exp.query();
         return query.findPagingList(0).getPage(0).getList().size();
+    }
+
+    public static Integer getTotalMember(Merchant merchant, String startDate, String endDate) throws Exception {
+        Query<Member> memberQuery = find.where()
+                .eq("merchant", merchant)
+                .query();
+
+        ExpressionList<Member> exp = memberQuery.where();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        Date start = simpleDateFormat.parse(startDate.concat(" 00:00:00.0"));
+        Date end = simpleDateFormat.parse(endDate.concat(" 23:59:00.0"));
+
+        Timestamp startTimestamp = new Timestamp(start.getTime());
+        Timestamp endTimestamp = new Timestamp(end.getTime());
+        exp.between("t0.created_at", startTimestamp, endTimestamp);
+        return memberQuery.findList().size();
     }
 
     public static Query<Member> findAllMemberByMerchantId(Long merchantId) {
