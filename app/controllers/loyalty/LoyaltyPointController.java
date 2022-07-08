@@ -244,10 +244,14 @@ public class LoyaltyPointController extends BaseController {
                 Store store = Store.find.where().eq("t0.store_code", storeCode).findUnique();
                 LoyaltyMemberResponse lmResponse = new LoyaltyMemberResponse();
                 Member memberData = null;
-                memberData = Member.find.where().eq("t0.email", email).eq("merchant", store.merchant).eq("t0.is_active", true).eq("t0.is_deleted", false).findUnique();
+                if(email != null && !email.equalsIgnoreCase("")){
+                    memberData = Member.find.where().eq("t0.email", email).eq("merchant", store.merchant).eq("t0.is_active", true).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
+                }
+
                 if(memberData == null) {
                     memberData = Member.find.where().eq("t0.phone", phoneNumber).eq("merchant", store.merchant).eq("t0.is_active", true).eq("t0.is_deleted", false).findUnique();
                 }
+                
                 if(memberData != null){
                     lmResponse.setFullName(memberData.fullName);
                     lmResponse.setEmail(memberData.email);
