@@ -42,9 +42,12 @@ public class UserMerchantRepository extends Model {
 				.findUnique();
 	}
 
-	public static UserMerchant forResendEmail(String email) {
+	public static UserMerchant forResendEmail(String email, Merchant merchant) {
 		return find.where()
-				.eq("email", email)
+				.eq("t0.email", email)
+				.eq("merchant", merchant)
+				.eq("t0.is_delete", Boolean.FALSE)
+				.setMaxRows(1)
 				.findUnique();
 	}
 
@@ -120,7 +123,7 @@ public class UserMerchantRepository extends Model {
 	}
 
 	public static UserMerchant findDataActivationCode(String activationCode) {
-        UserMerchant data = find.where().eq("t0.activation_code", activationCode).findUnique();
+        UserMerchant data = find.where().eq("t0.activation_code", activationCode).eq("t0.is_deleted", false).findUnique();
         return data;
     }
 
