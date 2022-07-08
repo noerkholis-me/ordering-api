@@ -66,12 +66,12 @@ public class CheckoutOrderController extends BaseController {
                 }
 
                 Member member = null;
-                if (orderRequest.getCustomerEmail() != null || !orderRequest.getCustomerEmail().equalsIgnoreCase("")) {
-                    member = Member.find.where().eq("t0.email", orderRequest.getCustomerEmail()).eq("t0.is_deleted", false).findUnique();
+                if (orderRequest.getCustomerEmail() != null && orderRequest.getCustomerEmail().equalsIgnoreCase("")) {
+                    member = Member.find.where().eq("t0.email", orderRequest.getCustomerEmail()).eq("merchant", store.merchant).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
                 }
 
                 if(member == null){
-                    if (orderRequest.getCustomerPhoneNumber() != null || !orderRequest.getCustomerPhoneNumber().equalsIgnoreCase("")) {
+                    if (orderRequest.getCustomerPhoneNumber() != null && !orderRequest.getCustomerPhoneNumber().equalsIgnoreCase("")) {
                         member = Member.find.where().eq("t0.phone", orderRequest.getCustomerPhoneNumber()).eq("t0.is_deleted", false).findUnique();
                     }
                 }
