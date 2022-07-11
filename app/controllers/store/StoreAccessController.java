@@ -130,10 +130,9 @@ public class StoreAccessController extends BaseController {
                     List<StoreAccessResponse.StoreAccessDetail> responsesDetail = new ArrayList<>();
 
                     StoreAccessResponse responseStoreAccess = new StoreAccessResponse();
-                    UserMerchant userMerchant = UserMerchantRepository.findById(data.getUserMerchant().id, ownMerchant);
                     responseStoreAccess.setId(data.id);
                     responseStoreAccess.setUserMerchantId(data.getUserMerchant().id);
-                    responseStoreAccess.setUserName(userMerchant.fullName);
+                    responseStoreAccess.setUserName(data.getUserMerchant().getFullName());
                     responseStoreAccess.setMerchantId(data.getMerchant().id);
                     responseStoreAccess.setIsActive(data.getIsActive());
                     for (StoreAccessDetail storeDetail : dataDetail) {

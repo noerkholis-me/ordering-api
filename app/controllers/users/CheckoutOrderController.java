@@ -21,6 +21,9 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.*;
+import models.loyalty.*;
+import repository.loyalty.*;
+import dtos.loyalty.*;
 import repository.pickuppoint.PickUpPointRepository;
 import service.PaymentService;
 import com.avaje.ebean.Query;
@@ -33,6 +36,8 @@ import java.util.List;
 import java.util.Optional;
 import java.io.File;
 import java.io.FileOutputStream;
+
+import java.math.RoundingMode;
 
 import service.DownloadOrderReport;
 
@@ -51,6 +56,7 @@ public class CheckoutOrderController extends BaseController {
             Transaction txn = Ebean.beginTransaction();
             try {
                 logger.info(">>> incoming order request..." + jsonNode.toString());
+
                 // request order
                 OrderTransaction orderRequest = objectMapper.readValue(jsonNode.toString(), OrderTransaction.class);
                 Store store = Store.findByStoreCode(orderRequest.getStoreCode());
@@ -60,8 +66,26 @@ public class CheckoutOrderController extends BaseController {
                 }
 
                 Member member = null;
-                if (orderRequest.getCustomerEmail() != null || !orderRequest.getCustomerEmail().equalsIgnoreCase("")) {
-                    member = Member.findByEmail(orderRequest.getCustomerEmail());
+                if (orderRequest.getCustomerEmail() != null && orderRequest.getCustomerEmail().equalsIgnoreCase("")) {
+                    member = Member.find.where().eq("t0.email", orderRequest.getCustomerEmail()).eq("merchant", store.merchant).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
+                }
+
+                if(member == null){
+                    if (orderRequest.getCustomerPhoneNumber() != null && !orderRequest.getCustomerPhoneNumber().equalsIgnoreCase("")) {
+                        member = Member.find.where().eq("t0.phone", orderRequest.getCustomerPhoneNumber()).eq("t0.is_deleted", false).findUnique();
+                    }
+                }
+
+                if (member != null && orderRequest.getUseLoyalty() == true) {
+                    if(orderRequest.getLoyaltyUsage().compareTo(member.loyaltyPoint) > 0){
+                        response.setBaseResponse(0, 0, 0, "Ups, point yang anda gunakan lebih besar dari point yang anda miliki", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                }
+
+                if (member == null && orderRequest.getUseLoyalty() == true) {
+                    response.setBaseResponse(0, 0, 0, "Ups, anda tidak dapat menggunakan loyalty point", null);
+                    return badRequest(Json.toJson(response));
                 }
 
                 // new oders
@@ -102,12 +126,16 @@ public class CheckoutOrderController extends BaseController {
                     order.setPickUpPointMerchant(null);
                     order.setPickupPointName(null);
                 }
+                if(orderRequest.getUseLoyalty() == true){
+                    order.setTotalLoyaltyUsage(orderRequest.getLoyaltyUsage());
+                }
 
                 order.save();
-
                 List<ProductOrderDetail> productOrderDetails = orderRequest.getProductOrderDetail();
                 StringBuilder message = new StringBuilder();
+                List<OrderForLoyaltyData> listOrderData = new ArrayList<>();
                 for (ProductOrderDetail productOrderDetail : productOrderDetails) {
+                    OrderForLoyaltyData listDataOrder = new OrderForLoyaltyData();
                     ProductMerchant productMerchant = ProductMerchantRepository.findById(productOrderDetail.getProductId());
                     if (productMerchant != null) {
                         OrderDetail orderDetail = new OrderDetail();
@@ -121,6 +149,14 @@ public class CheckoutOrderController extends BaseController {
                         orderDetail.setIsCustomizable(productOrderDetail.getIsCustomizable());
                         orderDetail.setOrder(order);
                         orderDetail.save();
+
+                        // ADD FOR LOYALTY
+                        listDataOrder.setSubsCategoryId(productMerchant.getSubsCategoryMerchant().id);
+                        listDataOrder.setSubsCategoryName(productMerchant.getSubsCategoryMerchant().getSubscategoryName());
+                        listDataOrder.setProductName(productMerchant.getProductName());
+                        listDataOrder.setProductPrice(productOrderDetail.getProductPrice());
+                        listDataOrder.setSubTotal(productOrderDetail.getSubTotal());
+
                         if (productOrderDetail.getProductOrderAddOns().size() != 0 || !productOrderDetail.getProductOrderAddOns().isEmpty()) {
                             for (ProductOrderAddOn productOrderAddOn : productOrderDetail.getProductOrderAddOns()) {
                                 // create product add on
@@ -128,6 +164,7 @@ public class CheckoutOrderController extends BaseController {
                                 if (productAddOn != null) {
                                     ProductMerchant addOn = ProductMerchantRepository.findById(productAddOn.getProductAssignId());
                                     if (addOn != null) {
+                                        OrderForLoyaltyData listDataForLoyalty = new OrderForLoyaltyData();
                                         OrderDetailAddOn orderDetailAddOn = new OrderDetailAddOn();
                                         orderDetailAddOn.setOrderDetail(orderDetail);
                                         orderDetailAddOn.setProductAddOn(productAddOn);
@@ -138,25 +175,91 @@ public class CheckoutOrderController extends BaseController {
                                         orderDetailAddOn.setProductAssignId(productAddOn.getProductAssignId());
                                         orderDetailAddOn.setSubTotal(productOrderAddOn.getSubTotal());
                                         orderDetailAddOn.save();
+                                        listDataForLoyalty.setSubsCategoryId(addOn.getSubsCategoryMerchant().id);
+                                        listDataForLoyalty.setSubsCategoryName(addOn.getSubsCategoryMerchant().getSubscategoryName());
+                                        listDataForLoyalty.setProductName(addOn.getProductName());
+                                        listDataForLoyalty.setProductPrice(productOrderAddOn.getProductPrice());
+                                        listDataForLoyalty.setSubTotal(productOrderAddOn.getSubTotal());
+                                        listOrderData.add(listDataForLoyalty);
                                     }
                                 }
                             }
                         }
+                        listOrderData.add(listDataOrder);
+                        
                     }
                 }
-                // validate product
-//                if (!message.toString().isEmpty()) {
-//                    txn.rollback();
-//                    response.setBaseResponse(0, 0, 0, message.toString(), null);
-//                    return badRequest(Json.toJson(response));
-//                }
-//                BigDecimal subTotal = new BigDecimal(0);
-//                BigDecimal totalPrice = new BigDecimal(0);
-//                for (OrderDetail orderDetail : orderDetails) {
-//                    subTotal = subTotal.add(orderDetail.getProductPrice().multiply(new BigDecimal(orderDetail.getQuantity())));
-//                    totalPrice = subTotal;
-//                    orderDetail.save();
-//                }
+                List<LoyaltyPointMerchant> lpMerchant = LoyaltyPointMerchantRepository.find.where().eq("merchant", store.merchant).eq("t0.is_deleted", false).findList();
+                
+                member.loyaltyPoint = member.loyaltyPoint.subtract(orderRequest.getLoyaltyUsage());
+                member.update();
+                if(member != null){
+                BigDecimal loyaltyMine = member.loyaltyPoint;
+                BigDecimal loyaltyPointGet = BigDecimal.ZERO;
+                    if(!lpMerchant.isEmpty()){
+                        for(LoyaltyPointMerchant lPoint: lpMerchant){
+                            BigDecimal subTotalPerCategory = BigDecimal.ZERO;
+                            BigDecimal totalLoyalty = BigDecimal.ZERO;
+                            for(OrderForLoyaltyData ofLD : listOrderData) {
+                                if(ofLD.getSubsCategoryId() == lPoint.getSubsCategoryMerchant().id){
+                                    System.out.print("Category "+ ofLD.getSubsCategoryName() + " Total : ");
+                                    subTotalPerCategory = subTotalPerCategory.add(ofLD.getSubTotal());
+                                    System.out.println(subTotalPerCategory);
+                                    System.out.println("=================");
+                                }
+                            }
+                            // GET TOTAL LOYALTY
+                            if(lPoint.getCashbackType().equalsIgnoreCase("Percentage")){
+                                totalLoyalty = subTotalPerCategory.multiply(lPoint.getCashbackValue());
+                                totalLoyalty = totalLoyalty.divide(new BigDecimal(100), 0, RoundingMode.DOWN);
+                                if(totalLoyalty.compareTo(lPoint.getMaxCashbackValue()) > 0){
+                                    System.out.print("Loyalty nya (max): ");
+                                    System.out.println(lPoint.getMaxCashbackValue());
+                                    loyaltyPointGet = loyaltyPointGet.add(lPoint.getMaxCashbackValue());
+                                    loyaltyMine = loyaltyMine.add(lPoint.getMaxCashbackValue());
+                                    member.loyaltyPoint = loyaltyMine;
+                                    member.update();
+                                } else {
+                                    System.out.print("Loyalty nya: ");
+                                    System.out.println(totalLoyalty);
+                                    loyaltyMine = loyaltyMine.add(totalLoyalty);
+                                    loyaltyPointGet = loyaltyPointGet.add(totalLoyalty);
+                                    member.loyaltyPoint = loyaltyMine;
+                                    member.update();
+                                }
+                            } else {
+                                totalLoyalty = lPoint.getCashbackValue();
+                                System.out.print("Loyalty nya (max point): ");
+                                System.out.println(totalLoyalty);
+                                loyaltyPointGet = loyaltyPointGet.add(totalLoyalty);
+                                member.loyaltyPoint = loyaltyMine.add(totalLoyalty);
+                                member.update();
+                            }
+                        }
+                    }
+                    System.out.print("Existing loyalty: ");
+                    System.out.println(loyaltyMine);
+                    System.out.print("Get Loyalty: ");
+                    System.out.println(loyaltyPointGet);
+                    LoyaltyPointHistory lPointHistory = LoyaltyPointHistoryRepository.findByMember(member);
+                    Date date = new Date();
+                    if(lPointHistory != null){
+                        date = lPointHistory.getExpiredDate();
+                        date.setYear(date.getYear()+1);
+                    } else {
+                        date.setYear(date.getYear()+1);
+                    }
+
+                    LoyaltyPointHistory lpHistory = new LoyaltyPointHistory();
+                    lpHistory.setPoint(loyaltyMine);
+                    lpHistory.setAdded(loyaltyPointGet);
+                    lpHistory.setUsed(orderRequest.getLoyaltyUsage());
+                    lpHistory.setMember(member);
+                    lpHistory.setOrder(order);
+                    lpHistory.setExpiredDate(date);
+                    lpHistory.setMerchant(store.merchant);
+                    lpHistory.save();
+                }
 
                 order.setSubTotal(orderRequest.getSubTotal());
                 order.setTotalPrice(orderRequest.getTotalPrice());

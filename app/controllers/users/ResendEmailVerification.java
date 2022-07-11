@@ -42,6 +42,7 @@ public class ResendEmailVerification extends BaseController {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static Result resendEmailVerificationUserMerchant(String emailAddress) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
         try {
             // VALIDATION
             // =======================================================================
@@ -51,7 +52,7 @@ public class ResendEmailVerification extends BaseController {
             }
             // =======================================================================
 
-            UserMerchant getUserMerchantData = UserMerchantRepository.forResendEmail(emailAddress);
+            UserMerchant getUserMerchantData = UserMerchantRepository.forResendEmail(emailAddress, ownMerchant);
 
             if (getUserMerchantData != null && getUserMerchantData.getPassword() != null
                     && getUserMerchantData.isActive == false) {

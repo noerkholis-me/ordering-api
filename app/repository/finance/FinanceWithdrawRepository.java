@@ -89,5 +89,22 @@ public class FinanceWithdrawRepository extends BaseModel {
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
+    public static List<FinanceWithdraw> findAllWithdrawList(Query<FinanceWithdraw> reqQuery, String startDate, String endDate) throws ParseException {
+        Query<FinanceWithdraw> query = reqQuery;
+
+        ExpressionList<FinanceWithdraw> exp = query.where();
+        if (!startDate.equalsIgnoreCase("") && !endDate.equalsIgnoreCase("")) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            Date start = simpleDateFormat.parse(startDate.concat(" 00:00:00.0"));
+            Date end = simpleDateFormat.parse(endDate.concat(" 23:59:00.0"));
+
+            Timestamp startTimestamp = new Timestamp(start.getTime());
+            Timestamp endTimestamp = new Timestamp(end.getTime());
+            exp.between("t0.date", startTimestamp, endTimestamp);
+        }
+
+        return query.findList();
+    }
+
 
 }

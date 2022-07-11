@@ -260,6 +260,10 @@ public class SeedDefaultConfiguration {
 				.filter(notMerchant -> !notMerchant.isMerchant).collect(Collectors.toList());
 		List<Feature> featureIsMerchant = features.stream()
 				.filter(merchant -> merchant.isMerchant).collect(Collectors.toList());
+
+		Integer featureCount = Feature.find.where().findRowCount();
+		Integer featuresSize = featureIsMerchant.size() + featureIsNotMerchant.size();
+
 		if (Feature.find.findRowCount() == 0) {
 			// create default data Role Feature
 			for (Feature feature : featureIsNotMerchant) {
@@ -271,7 +275,7 @@ public class SeedDefaultConfiguration {
 				new RoleFeature(feature, roleAdminMerchant, 210).save();
 				new RoleMerchantFeature(feature, roleMerchant, true, true, true, true).save();
 			}
-		} else {
+		} else if (featureCount != featuresSize) {
 			// this is for new feature from seed, please refactor for another case
 			for (Feature feature : featureIsNotMerchant) {
 				Feature getByKey = Feature.getFeatureByKey(feature.key);

@@ -8,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hokeba.util.CommonFunction;
 import com.hokeba.util.Constant;
 import com.hokeba.util.Encryption;
+import lombok.Getter;
+import lombok.Setter;
 import models.finance.FinanceTransaction;
 
 import javax.crypto.BadPaddingException;
@@ -26,6 +28,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.math.BigDecimal;
 /**
  * Created by hendriksaragih on 2/4/17.
  */
@@ -166,9 +169,9 @@ public class Member extends BaseModel {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "Asia/Jakarta")
     public Date lastPurchase;
     
-    @JsonIgnore
-    @OneToMany(mappedBy = "member",cascade = CascadeType.ALL)
-    public List<LoyaltyPoint> loyaltyPoint;
+    // @JsonIgnore
+    // @OneToMany(mappedBy = "member",cascade = CascadeType.ALL)
+    // public List<LoyaltyPoint> loyaltyPoint;
 //    public List<LoyaltyPoint> loyaltyPoint = new ArrayList<LoyaltyPoint>();
 
     //odoo
@@ -186,6 +189,16 @@ public class Member extends BaseModel {
     @JsonIgnore
     @OneToMany(mappedBy = "referral")
     public List<MemberReferral> referral;
+
+    @ManyToOne(cascade = { CascadeType.ALL })
+    @JoinColumn(name = "merchant_id", referencedColumnName = "id")
+    @JsonIgnore
+    @Getter
+    @Setter
+    public Merchant merchant;
+
+    @Column(name = "loyalty_point")
+    public BigDecimal loyaltyPoint;
 
     public static Finder<Long, Member> find = new Finder<Long, Member>(Long.class, Member.class);
 
@@ -738,16 +751,8 @@ public class Member extends BaseModel {
         return find.where().eq("is_deleted", false).findRowCount();
     }
 
-    public String getRegisterDate(){
-        return CommonFunction.getDateTime(createdAt);
-    }
-
     public String getLastLogin(){
         return CommonFunction.getDateTime(lastLogin);
-    }
-
-    public String getLastPurchase(){
-        return CommonFunction.getDateTime(lastPurchase);
     }
 
     public String getBirthDate(){
