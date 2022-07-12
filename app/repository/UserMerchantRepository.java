@@ -45,8 +45,8 @@ public class UserMerchantRepository extends Model {
 	public static UserMerchant forResendEmail(String email, Merchant merchant) {
 		return find.where()
 				.eq("t0.email", email)
-				.eq("merchant", merchant)
-				.eq("t0.is_delete", Boolean.FALSE)
+				.eq("role.merchant", merchant)
+				.eq("t0.is_deleted", Boolean.FALSE)
 				.setMaxRows(1)
 				.findUnique();
 	}
