@@ -132,7 +132,11 @@ public class RoleMerchantController extends BaseController {
                         featureAssignResponses = toFeaturesResponse(roleMerchantFeatures);
                     }
                     response.setId(data.id);
-                    response.setName(data.getName());
+                    if(data.isCashier()){
+                        response.setName(data.getName()+" (POS)");
+                    } else {
+                        response.setName(data.getName());
+                    }
                     response.setDescription(data.getDescription());
                     response.setKey(data.getKey());
                     response.setMerchantId(data.getMerchant().id);
