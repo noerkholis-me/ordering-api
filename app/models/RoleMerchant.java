@@ -30,6 +30,11 @@ public class RoleMerchant extends BaseModel {
     @Column(name = "is_active")
     public boolean isActive;
 
+    @JsonProperty("is_cashier")
+    @Getter @Setter
+    @Column(name = "is_cashier")
+    public boolean isCashier;
+
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "merchant_id", referencedColumnName = "id")
     @JsonIgnore
@@ -45,12 +50,13 @@ public class RoleMerchant extends BaseModel {
 
     }
 
-    public RoleMerchant(String name, String key, String description, boolean isActive, Merchant merchant) {
+    public RoleMerchant(String name, String key, String description, boolean isActive, boolean isCashier, Merchant merchant) {
         this.name = name;
         this.key = key;
         this.description = description;
         this.isActive = isActive;
         this.merchant = merchant;
+        this.isCashier = isCashier;
     }
 
     public RoleMerchant(String name, String key, String description, boolean isActive, Merchant merchant, List<RoleMerchantFeature> featureList) {
