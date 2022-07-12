@@ -46,6 +46,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static models.MerchantLog.DEV_TYPE_MINI_POS;
+
 /**
  * Created by hendriksaragih on 2/28/17.
  */
@@ -92,7 +94,10 @@ public class SessionsController extends BaseController {
                     if (member.isActive){
                         try {
                             MerchantLog log = MerchantLog.loginMerchant(deviceModel, deviceType, deviceId, member, userMerchant, userType);
-                            if (log == null) {
+                            if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_MINI_POS)){
+                                response.setBaseResponse(0, 0, 0, "Akun anda tidak memiliki akses ke perangkat kasir, Silahkan hubungi administrator.", null);
+                                return forbidden(Json.toJson(response));
+                            } else if (log == null) {
                                 response.setBaseResponse(0, 0, 0, inputParameter, null);
                                 return badRequest(Json.toJson(response));
                             }
@@ -121,7 +126,10 @@ public class SessionsController extends BaseController {
                     if (userMerchant.isActive){
                         try {
                             MerchantLog log = MerchantLog.loginMerchant(deviceModel, deviceType, deviceId, member, userMerchant, userType);
-                            if (log == null) {
+                            if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_MINI_POS)){
+                                response.setBaseResponse(0, 0, 0, "Akun anda tidak memiliki akses ke perangkat kasir, Silahkan hubungi administrator.", null);
+                                return forbidden(Json.toJson(response));
+                            } else if (log == null) {
                                 response.setBaseResponse(0, 0, 0, inputParameter, null);
                                 return badRequest(Json.toJson(response));
                             }
@@ -152,11 +160,10 @@ public class SessionsController extends BaseController {
                             e.printStackTrace();
                         }
                         response.setBaseResponse(0, 0, 0, error, null);
-                        return badRequest(Json.toJson(response));
                     }else{
                         response.setBaseResponse(0, 0, 0, "Your account hasn't actived, please check and verify from your email", null);
-                        return badRequest(Json.toJson(response));
                     }
+                    return badRequest(Json.toJson(response));
                 }
             }
             response.setBaseResponse(0, 0, 0, "Wrong username or password", null);

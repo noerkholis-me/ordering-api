@@ -16,6 +16,7 @@ public class Constant {
     private String apiKeyWeb = null;
     private String apiKeyIOS = null;
     private String apiKeyAndroid = null;
+    private String apiKeyMiniPos = null;
     private String catalogPath = null;
     
     //odoo
@@ -102,6 +103,13 @@ public class Constant {
             apiKeyAndroid = Play.application().configuration().getString("whizliz.api_key.android");
         }
         return apiKeyAndroid;
+    }
+
+    public String getApiKeyMiniPos() {
+        if (apiKeyMiniPos == null){
+            apiKeyMiniPos = Play.application().configuration().getString("whizliz.api_key.mini_pos");
+        }
+        return apiKeyMiniPos;
     }
 
     public String getImageUrl() {
