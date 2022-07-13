@@ -57,30 +57,10 @@ public class Global extends GlobalSettings {
 	@Override
 	public void onStart(Application app) {
 		super.onStart(app);
-		SeedDefaultConfiguration.seedFeature();
-		SeedDefaultConfiguration.seedUser();
-		SeedDefaultConfiguration.seedConfigSetting();
-		SeedDefaultConfiguration.seedPaymentExpiration();
-		SeedDefaultConfiguration.seedRegionDistrictTownshipVillage();
-		SeedDefaultConfiguration.seedLoyaltyPageBanner();
-		SeedDefaultConfiguration.seedCurrency();
-		SeedDefaultConfiguration.seedMobileVersion();
-		SeedDefaultConfiguration.seedRegionDistrictFromRajaOngkir();
-		SeedDefaultConfiguration.seedCourier();
-		SeedDefaultConfiguration.seedOwnMerchant();
-		SeedDefaultConfiguration.seedMasterVariance();
-		SeedDefaultConfiguration.seedSyncShipper();
-//        SynchronizeController.syncSeed();
-
-//		jobs.add(new ServiceJob("* * * * * ?").scheduleIntervalMinutes());
-
-//		jobs.add(new ElasticSearchServiceJob("*/30 * * * * ?").scheduleIntervalMinutes(30));
-
-//		jobs.add(new DailyJob("0 0 1 * * ?").scheduleInterval());
-//		jobs.add(new GoogleCatalogJob("0 0 2 * * ?").scheduleInterval());
-		
-//		jobs.add(new WeeklySettlementJob("0 0 3 ? * MON,WED,FRI").scheduleInterval());
-//		jobs.add(new OrderDeliverCheckJob("0 0 2 * * ?").scheduleInterval());
+		Runnable seeder = new SeedRunnable();
+		Thread seederThread = new Thread(seeder);
+		seederThread.setPriority(Thread.MAX_PRIORITY);
+		seederThread.start();
 
 	}
 
@@ -94,6 +74,54 @@ public class Global extends GlobalSettings {
 		}
 
 		super.onStop(app);
+	}
+	public class SeedRunnable implements Runnable {
+		@Override
+		public void run() {
+			Logger.info("SeedRunnable.run...");
+			try {
+				Logger.info("Seeding Features...");
+				SeedDefaultConfiguration.seedFeature();
+				Logger.info("Seeding Features done.\nSeeding User...");
+				SeedDefaultConfiguration.seedUser();
+				Logger.info("Seeding users done.\nSeeding Configuration...");
+				SeedDefaultConfiguration.seedConfigSetting();
+				Logger.info("Seeding config setting done.\n Seeding Payment Expiration...");
+				SeedDefaultConfiguration.seedPaymentExpiration();
+				Logger.info("Seeding payment expiration done.\nSeeding District, Township and Village...");
+				SeedDefaultConfiguration.seedRegionDistrictTownshipVillage();
+				Logger.info("Seeding region done.\nSeeding Loyalty...");
+				SeedDefaultConfiguration.seedLoyaltyPageBanner();
+				Logger.info("Seeding loyalty done.\nSeeding Currency...");
+				SeedDefaultConfiguration.seedCurrency();
+				Logger.info("Seeding currency done.\nSeeding Mobile version...");
+				SeedDefaultConfiguration.seedMobileVersion();
+				Logger.info("Seeding mobile version done.\nSeeding Region District From RajaOngkir...");
+				SeedDefaultConfiguration.seedRegionDistrictFromRajaOngkir();
+				Logger.info("Seeding region district from rajaongkir done.\nSeeding Courier...");
+				SeedDefaultConfiguration.seedCourier();
+				Logger.info("Seeding courier done.\nSeeding Own Merchant...");
+				SeedDefaultConfiguration.seedOwnMerchant();
+				Logger.info("Seeding own merchant done.\nSeeding master variance...");
+				SeedDefaultConfiguration.seedMasterVariance();
+				Logger.info("Seeding master variance done.\nSeeding Shipper...");
+				SeedDefaultConfiguration.seedSyncShipper();
+				Logger.info("Seeding shipper done.\n");
+				//        SynchronizeController.syncSeed();
+
+				//		jobs.add(new ServiceJob("* * * * * ?").scheduleIntervalMinutes());
+
+				//		jobs.add(new ElasticSearchServiceJob("*/30 * * * * ?").scheduleIntervalMinutes(30));
+
+				//		jobs.add(new DailyJob("0 0 1 * * ?").scheduleInterval());
+				//		jobs.add(new GoogleCatalogJob("0 0 2 * * ?").scheduleInterval());
+
+				//		jobs.add(new WeeklySettlementJob("0 0 3 ? * MON,WED,FRI").scheduleInterval());
+				//		jobs.add(new OrderDeliverCheckJob("0 0 2 * * ?").scheduleInterval());
+			} catch (Exception ex) {
+				System.out.println("[ERROR] SeedDefaultConfiguration: " + ex.getMessage());
+			}
+		}
 	}
 
 }
