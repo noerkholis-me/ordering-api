@@ -142,6 +142,11 @@ public class SessionsController extends BaseController {
                                 return badRequest(Json.toJson(response));
                             }
 
+                            if(profileData.getStoreAccess().getStoreData() == null || profileData.getStoreAccess().getStoreData().size() == 0){
+                                response.setBaseResponse(0, 0, 0, "User belum mempunyai akses toko. Silahkan hubungi administrator.", null);
+                                return badRequest(Json.toJson(response));
+                            }
+
                             if (userMerchant.checkFeatureAndPermissions() == null) {
                                 response.setBaseResponse(0, 0, 0, "User belum mempunyai hak akses", null);
                                 return badRequest(Json.toJson(response));
@@ -627,7 +632,7 @@ public class SessionsController extends BaseController {
         if (actor != null && actor.id != null) {
             Merchant currentMerchant = Merchant.find.byId(actor.id);
             ObjectMapper om = new ObjectMapper();
-            om.addMixInAnnotations(Merchant.class, JsonMask.class);
+            om.addMixIn(Merchant.class, JsonMask.class);
             response.setBaseResponse(1, offset, 1, success, Json.parse(om.writeValueAsString(currentMerchant)));
             return ok(Json.toJson(response));
         }
@@ -635,14 +640,17 @@ public class SessionsController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result getUserProfile() throws JsonProcessingException {
+    public static Result getUserProfile() throws IOException {
         UserMerchant user = checkUserMerchantAccessAuthorization();
         if (user != null && user.id != null) {
             UserMerchant currentUser = UserMerchantRepository.find.byId(user.id);
-            ObjectMapper om = new ObjectMapper();
-            om.addMixInAnnotations(UserMerchant.class, JsonMask.class);
-            response.setBaseResponse(1, offset, 1, success, Json.parse(om.writeValueAsString(currentUser)));
-            return ok(Json.toJson(response));
+            if(currentUser != null) {
+                RoleMerchant roleMerchant = currentUser.getRole();
+                UserMerchantSessionResponse profileData = toUserMerchantSessionResponse(currentUser);
+                profileData.setRole(roleMerchant);
+                response.setBaseResponse(1, offset, 1, success, profileData);
+                return ok(Json.toJson(response));
+            }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
