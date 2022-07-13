@@ -307,6 +307,7 @@ public class RoleMerchantController extends BaseController {
                     roleMerchantResponse.setName(roleMerchant.getName());
                     roleMerchantResponse.setDescription(roleMerchant.getDescription());
                     roleMerchantResponse.setKey(roleMerchant.getKey());
+                    roleMerchantResponse.setIsCashier(roleMerchant.isCashier());
                     roleMerchantResponse.setMerchantId(roleMerchant.getMerchant().id);
                     roleMerchantResponse.setFeatures(featureAssignResponses);
 
