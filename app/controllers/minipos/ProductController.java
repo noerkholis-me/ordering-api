@@ -73,19 +73,20 @@ public class ProductController extends BaseController {
         return forbidden(Json.toJson(response));
     }
 
-    public static Result listProductMiniPos(int offset, int limit, Long storeId, Long categoryId) {
+    public static Result listProductMiniPos(int offset, int limit, Long storeId, Long categoryId, String keyword) {
         UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
         if (userMerchant != null) {
             Transaction trx = Ebean.beginTransaction();
             try {
                 Merchant ownMerchant = userMerchant.getRole().getMerchant();
                 String querySql;
+                String searchQuery = keyword != null && keyword.length() > 0 ? " and lower(pm.product_name) like '%"+keyword+"%'" : "";
                 if(categoryId > 0){
-                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+ownMerchant.id+" and pm.subs_category_merchant_id = "+categoryId+" and pm.is_active = "+true+" and pm.is_deleted = false)";
+                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+ownMerchant.id+" and pm.subs_category_merchant_id = "+categoryId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
                 } else {
-                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+ownMerchant.id+" and pm.is_active = "+true+" and pm.is_deleted = false)";
+                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+ownMerchant.id+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
                 }
-                Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.id asc");
+                Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.created_at desc");
                 List<ProductMerchantDetail> dataProductDetail = ProductMerchantDetailRepository.getDataByPagination(query, offset, limit);
 
                 List<ProductMiniPosResponse> listProductResponsePos = new ArrayList<>();
