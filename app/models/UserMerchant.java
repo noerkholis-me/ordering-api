@@ -1,5 +1,7 @@
 package models;
 
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Update;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -144,6 +146,14 @@ public class UserMerchant extends BaseModel {
             featureAndPermissionSessionList.add(featureAndPermissionSession);
         }
         return featureAndPermissionSessionList;
+    }
+
+    public static void removeAllToken(Long id) {
+        Update<MerchantLog> upd = Ebean.createUpdate(MerchantLog.class,
+                "UPDATE merchant_log SET is_active=:isActive WHERE is_active=true and user_merchant_id=:memberId");
+        upd.set("isActive", false);
+        upd.set("memberId", id);
+        upd.execute();
     }
 
 }
