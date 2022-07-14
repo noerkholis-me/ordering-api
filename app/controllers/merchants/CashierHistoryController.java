@@ -1,12 +1,15 @@
 package controllers.merchants;
 
 import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Query;
 import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
 import controllers.BaseController;
+import dtos.cashier.CashierHistoryResponse;
 import dtos.cashier.CashierOpenPosRequest;
+import models.Member;
 import models.Merchant;
 import models.Store;
 import models.UserMerchant;
@@ -15,9 +18,13 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.UserMerchantRepository;
+import repository.cashierhistory.CashierHistoryMerchantRepository;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 public class CashierHistoryController extends BaseController {
 
@@ -50,14 +57,25 @@ public class CashierHistoryController extends BaseController {
 
                     Store store = Store.findById(cashierOpenPosRequest.getStoreId());
                     if (store == null) {
-
+                        response.setBaseResponse(0, 0, 0, inputParameter + " store tidak ditemukan", null);
+                        return badRequest(Json.toJson(response));
                     }
+
 
                     CashierHistoryMerchant cashier = new CashierHistoryMerchant();
                     cashier.setSessionCode(CashierHistoryMerchant.generateSessionCode(cashierOpenPosRequest.getUserMerchantId(), cashierOpenPosRequest.getStoreId()));
                     cashier.setIsActive(Boolean.TRUE);
                     cashier.setStartTime(new Date());
-                    return null;
+                    cashier.setUserMerchant(userMerchant);
+                    cashier.setStartTotalAmount(cashierOpenPosRequest.getStartTotalAmount());
+                    cashier.setStore(store);
+
+                    cashier.save();
+
+                    trx.commit();
+
+                    response.setBaseResponse(1, 0, 0, success, cashier.id);
+                    return ok(Json.toJson(response));
                 } catch (Exception e) {
                     LOGGER.error("Error while creating session cashier", e);
                     e.printStackTrace();
@@ -76,6 +94,48 @@ public class CashierHistoryController extends BaseController {
         }
         response.setBaseResponse(0, 0, 0, error, null);
         return internalServerError(Json.toJson(response));
+    }
+
+    public static Result getAllCashierHistory(int limit, int offset, Long storeId) {
+        Merchant merchant = checkMerchantAccessAuthorization();
+        if (merchant != null) {
+            try {
+
+                System.out.println("merchant id >>> " + merchant);
+
+                Query<CashierHistoryMerchant> query = null;
+                query = CashierHistoryMerchantRepository.findAllCashierHistoryByMerchantId(merchant.id);
+                if (storeId != null && storeId != 0L) {
+                    Store store = Store.findById(storeId);
+                    if (store == null) {
+                        response.setBaseResponse(0, 0, 0, "store tidak ditemukan", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    query = CashierHistoryMerchantRepository.findAllCashierHistoryByStoreId(storeId);
+                }
+                List<CashierHistoryMerchant> cashierHistoryMerchants = CashierHistoryMerchantRepository.findAllCashierHistory(query, offset, limit);
+                Integer totalData = CashierHistoryMerchantRepository.getTotalData(query);
+                List<CashierHistoryResponse> responses = new ArrayList<>();
+                for (CashierHistoryMerchant historyMerchant : cashierHistoryMerchants) {
+                    CashierHistoryResponse response = new CashierHistoryResponse();
+                    response.setCashierName(historyMerchant.getUserMerchant().getFullName());
+                    response.setSessionCode(historyMerchant.getSessionCode());
+                    response.setStartTime(historyMerchant.getStartTime());
+                    response.setEndTime(historyMerchant.getEndTime());
+                    response.setStoreName(historyMerchant.getStore().storeName);
+                    responses.add(response);
+                }
+                response.setBaseResponse(totalData, offset, limit, success + " menampilkan data history cashier", responses);
+                return ok(Json.toJson(response));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                response.setBaseResponse(0, 0, 0, error, null);
+                return internalServerError(Json.toJson(response));
+            }
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
     }
 
     private static String validateRequest(CashierOpenPosRequest cashierOpenPosRequest) {

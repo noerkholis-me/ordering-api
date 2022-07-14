@@ -24,6 +24,7 @@ import dtos.UserMerchantSessionResponse;
 import dtos.merchant.MerchantSessionResponse;
 import dtos.store.StoreAccessResponse;
 import models.*;
+import models.merchant.CashierHistoryMerchant;
 import models.store.StoreAccess;
 import models.store.StoreAccessDetail;
 import play.Logger;
@@ -33,6 +34,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import repository.StoreAccessRepository;
 import repository.UserMerchantRepository;
+import repository.cashierhistory.CashierHistoryMerchantRepository;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -247,6 +249,14 @@ public class SessionsController extends BaseController {
             userMerchantResponse.setStoreAccess(responseStoreAccess);
         } else {
             userMerchantResponse.setStoreAccess(null);
+        }
+
+        // open or close pos
+        Optional<CashierHistoryMerchant> userCashierHistory = CashierHistoryMerchantRepository.findByUserActiveCashierAndOpen(userMerchant.id);
+        if (userCashierHistory.isPresent()) {
+            userMerchantResponse.setIsOpen(Boolean.TRUE);
+        } else {
+            userMerchantResponse.setIsOpen(Boolean.FALSE);
         }
 
         return userMerchantResponse;

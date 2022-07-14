@@ -4,10 +4,8 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import models.merchant.CashierHistoryMerchant;
-import models.transaction.Order;
 import play.db.ebean.Model;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +20,17 @@ public class CashierHistoryMerchantRepository extends Model {
                     .eq("userMerchant.id", userMerchantId)
                     .eq("store.id", storeId)
                     .findUnique()
+        );
+    }
+
+    public static Optional<CashierHistoryMerchant> findByUserActiveCashierAndOpen(Long userMerchantId) {
+        return Optional.ofNullable(
+                find.where()
+                        .eq("isActive", true)
+                        .eq("userMerchant.id", userMerchantId)
+                        .isNull("endTime")
+                        .setMaxRows(1)
+                        .findUnique()
         );
     }
 

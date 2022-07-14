@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
-@Table(name = "cashier_history_merchant")
+@Table(name = "session_cashier")
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
