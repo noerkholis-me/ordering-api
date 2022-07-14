@@ -133,7 +133,7 @@ public class MerchantLog extends BaseModel {
     }
 
     public static boolean logoutMerchant(String token) {
-        MerchantLog log = MerchantLog.find.where().eq("token", token).eq("is_active", true).eq("member_type", "merchant")
+        MerchantLog log = MerchantLog.find.where().eq("token", token).eq("is_active", true)
                 .setMaxRows(1).findUnique();
         if (log != null) {
             log.isActive = false;
