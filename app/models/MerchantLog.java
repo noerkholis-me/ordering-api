@@ -80,11 +80,20 @@ public class MerchantLog extends BaseModel {
             } else if (deviceType.equalsIgnoreCase(DEV_TYPE_WEB)) {
                 log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
             } else if (deviceType.equalsIgnoreCase(DEV_TYPE_MINI_POS)) {
-                RoleMerchant roleMerchant = RoleMerchantRepository.findByIdAndMerchantId(member.id, member);
-                if(roleMerchant != null && roleMerchant.isCashier) {
-                    log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
+                if(userType){
+                    List<RoleMerchant> roleMerchant = RoleMerchantRepository.findByMerchantId(member);
+                    if(!roleMerchant.isEmpty() && roleMerchant.stream().findFirst().get().isCashier()) {
+                        log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
+                    } else {
+                        return null;
+                    }
                 } else {
-                    return null;
+                    RoleMerchant roleMerchant = RoleMerchantRepository.find.where().eq("id", userMerchant.getRole().id).findUnique();
+                    if(roleMerchant != null && roleMerchant.isCashier()) {
+                        log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
+                    } else {
+                        return null;
+                    }
                 }
             } else {
                 return null;
@@ -150,7 +159,7 @@ public class MerchantLog extends BaseModel {
         if (log != null && ((log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_WEB) && apiKey.equalsIgnoreCase(keyWeb))
                 || (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_IOS) && apiKey.equalsIgnoreCase(keyIos))
                 || (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_ANDROID) && apiKey.equalsIgnoreCase(keyAndroid))
-                || (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_MINI_POS) && apiKey.equalsIgnoreCase(keyMiniPos)))) {
+                || (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_MINI_POS) && (apiKey.equalsIgnoreCase(keyMiniPos) || apiKey.equalsIgnoreCase(keyWeb))))) {
             if (today.before(log.expiredDate)) {
                 return log;
             } else {
