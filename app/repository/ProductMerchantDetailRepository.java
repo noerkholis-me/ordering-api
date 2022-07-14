@@ -85,4 +85,11 @@ public class ProductMerchantDetailRepository extends Model {
         return query.findPagingList(0).getPage(0).getList();
     }
 
+    public static List<ProductMerchantDetail> getDataByPagination(Query<ProductMerchantDetail> reqQuery, int offset, int limit) {
+        Query<ProductMerchantDetail> query = reqQuery;
+        ExpressionList<ProductMerchantDetail> exp = query.where();
+        query = exp.query();
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
 }
