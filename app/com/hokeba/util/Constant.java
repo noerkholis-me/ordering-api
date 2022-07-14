@@ -34,6 +34,7 @@ public class Constant {
     private String odooPassword = null;
     private String ckeditorImageUrl = null;
     public static final String defaultCurrency = "IDR";
+    private String posUrl = null;
 
     public static Constant getInstance() {
         if (instance == null) {
@@ -195,4 +196,12 @@ public class Constant {
         }
         return ckeditorImageUrl;
     }
+
+    public String getPosUrl() {
+        if (posUrl == null){
+            posUrl = Play.application().configuration().getString("sandbox.pos.url");
+        }
+        return posUrl;
+    }
+
 }
