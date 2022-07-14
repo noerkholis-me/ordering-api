@@ -1,43 +1,22 @@
 package controllers.minipos;
 
 import com.avaje.ebean.Ebean;
-import com.avaje.ebean.Page;
 import com.avaje.ebean.Query;
 import com.avaje.ebean.Transaction;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
-import com.hokeba.http.response.global.ServiceResponse;
-import com.hokeba.mapping.request.MapProductMerchant;
-import com.hokeba.mapping.request.MapProductMerchant2;
-import com.hokeba.mapping.response.*;
-import com.hokeba.social.requests.MailchimpProductRequest;
-import com.hokeba.social.requests.MailchimpProductVariantRequest;
-import com.hokeba.social.service.MailchimpService;
-import com.hokeba.util.CommonFunction;
-import com.hokeba.util.Secured;
 import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-import com.wordnik.swagger.annotations.ApiResponses;
 
-import assets.Tool;
 import controllers.BaseController;
-import models.merchant.*;
+import dtos.product.ProductMiniPosResponse;
+import dtos.product.ProductPosCategoryResponse;
 import models.merchant.*;
 import models.*;
 import repository.*;
 import dtos.category.*;
 import play.Logger;
-import play.Play;
 import play.libs.Json;
-import play.mvc.BodyParser;
-import play.mvc.Http;
 import play.mvc.Result;
-import play.mvc.Security;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -51,9 +30,10 @@ public class ProductController extends BaseController {
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public static Result listCategoryMiniPOS() {
-        Merchant ownMerchant = checkMerchantAccessAuthorization();
-        if(ownMerchant != null){
+        UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
+        if(userMerchant != null){
             try {
+                Merchant ownMerchant = userMerchant.getRole().getMerchant();
                 Query<SubsCategoryMerchant> query  = SubsCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("merchant", ownMerchant).order("t0.id asc");
                 List<SubsCategoryMerchant> subsCategoryMerchant = SubsCategoryMerchantRepository.getDataSubsCategory(query, sort, filter, offset, limit);
                 List<SubsCategoryMerchantResponse> subsCategoryMerchantList = new ArrayList<>();
@@ -69,8 +49,8 @@ public class ProductController extends BaseController {
                         scmResponse.setSubscategoryName(scm.getSubscategoryName());
                         scmResponse.setImageWeb(scm.getImageWeb());
                         scmResponse.setImageMobile(scm.getImageMobile());
-                        scmResponse.setIsActive(scm.getIsActive());
-                        scmResponse.setIsDeleted(scm.getIsDeleted());
+                        scmResponse.setIsActive(scm.isActive());
+                        scmResponse.setIsDeleted(scm.isDeleted());
                         scmResponse.setImageMobile(scm.getImageMobile());
                         scmResponse.setSequence(scm.getSequence());
                         scmResponse.setCategoryId(scm.getCategoryMerchant().id);
@@ -80,7 +60,7 @@ public class ProductController extends BaseController {
                     }
                 }
 
-                response.setBaseResponse(subsCategoryMerchantList.size(), 0, 0, "Berhasil menambahkan user", subsCategoryMerchantList);
+                response.setBaseResponse(subsCategoryMerchantList.size(), 0, 0, "Berhasil menampilkan kategori produk", subsCategoryMerchantList);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 logger.error("Error while parsing json", e);
@@ -91,6 +71,84 @@ public class ProductController extends BaseController {
         }
         response.setBaseResponse(0, 0, 0, "Unauthorize", null);
         return forbidden(Json.toJson(response));
+    }
+
+    public static Result listProductMiniPos(int offset, int limit, Long storeId, Long categoryId, String keyword) {
+        UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
+        if (userMerchant != null) {
+            Transaction trx = Ebean.beginTransaction();
+            try {
+                Merchant ownMerchant = userMerchant.getRole().getMerchant();
+                String querySql;
+                String searchQuery = keyword != null && keyword.length() > 0 ? " and lower(pm.product_name) like '%"+keyword+"%'" : "";
+                if(categoryId > 0){
+                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+ownMerchant.id+" and pm.subs_category_merchant_id = "+categoryId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
+                } else {
+                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+ownMerchant.id+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
+                }
+                Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.created_at desc");
+                List<ProductMerchantDetail> dataProductDetail = ProductMerchantDetailRepository.getDataByPagination(query, offset, limit);
+
+                List<ProductMiniPosResponse> listProductResponsePos = new ArrayList<>();
+                for(ProductMerchantDetail productMerchantDetail : dataProductDetail){
+                    ProductMiniPosResponse productResponsePos = new ProductMiniPosResponse();
+                    ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(productMerchantDetail.getProductMerchant().id, ownMerchant.id);
+                    ProductStore productStore = ProductStoreRepository.findForCust(productMerchant.id, storeId, ownMerchant.id);
+                    productResponsePos.setProductId(productMerchant.id);
+                    productResponsePos.setProductName(productMerchant.getProductName());
+                    productResponsePos.setProductType(productMerchantDetail.getProductType());
+                    productResponsePos.setIsCustomizable(productMerchantDetail.getIsCustomizable());
+                    productResponsePos.setIsActive(productMerchant.getIsActive());
+                    productResponsePos.setMerchantId(productMerchant.getMerchant().id);
+
+                    if(productStore != null) {
+                        productResponsePos.setProductPrice(productStore.getStorePrice());
+                        productResponsePos.setDiscountType(productStore.getDiscountType());
+                        productResponsePos.setDiscount(productStore.getDiscount());
+                        productResponsePos.setProductPriceAfterDiscount(productStore.getFinalPrice());
+                        // set category
+                        ProductPosCategoryResponse scmResponse = new ProductPosCategoryResponse();
+                        SubsCategoryMerchant scm = productStore.productMerchant.getSubsCategoryMerchant();
+                        scmResponse.setId(scm.getId());
+                        scmResponse.setName(scm.getSubscategoryName());
+                        productResponsePos.setCategory(scmResponse);
+                    } else {
+                        productResponsePos.setProductPrice(productMerchantDetail.getProductPrice());
+                        productResponsePos.setDiscountType(productMerchantDetail.getDiscountType());
+                        productResponsePos.setDiscount(productMerchantDetail.getDiscount());
+                        productResponsePos.setProductPriceAfterDiscount(productMerchantDetail.getProductPriceAfterDiscount());
+                        // set category
+                        ProductPosCategoryResponse scmResponse = new ProductPosCategoryResponse();
+                        SubsCategoryMerchant scm = productMerchantDetail.getProductMerchant().getSubsCategoryMerchant();
+                        scmResponse.setId(scm.getId());
+                        scmResponse.setName(scm.getSubscategoryName());
+                        productResponsePos.setCategory(scmResponse);
+                    }
+
+                    ProductMerchantDescription productMerchantDescription = ProductMerchantDescriptionRepository.findByProductMerchantDetail(productMerchantDetail);
+                    if (productMerchantDescription != null) {
+                        productResponsePos.setShortDescription(productMerchantDescription.getShortDescription());
+                        productResponsePos.setLongDescription(productMerchantDescription.getLongDescription());
+                    }
+
+                    productResponsePos.setProductImageMain(productMerchantDetail.getProductImageMain());
+                    listProductResponsePos.add(productResponsePos);
+                }
+
+                response.setBaseResponse(dataProductDetail.size(), 0, 0, "Berhasil menampilkan daftar produk", listProductResponsePos);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                logger.error("Error saat menampilkan produk", e);
+                e.printStackTrace();
+                trx.rollback();
+            } finally {
+                trx.end();
+            }
+            response.setBaseResponse(0, 0, 0, error, null);
+            return badRequest(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, "Tidak dapat menampilkan produk", null);
+        return badRequest(Json.toJson(response));
     }
 
 }
