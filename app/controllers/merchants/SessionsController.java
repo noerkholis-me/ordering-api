@@ -125,6 +125,7 @@ public class SessionsController extends BaseController {
                         return badRequest(Json.toJson(response));
                     }
                 } else {
+                    assert userMerchant != null;
                     if (userMerchant.isActive){
                         try {
                             MerchantLog log = MerchantLog.loginMerchant(deviceModel, deviceType, deviceId, member, userMerchant, userType);
@@ -139,6 +140,11 @@ public class SessionsController extends BaseController {
                             UserMerchantSessionResponse profileData = toUserMerchantSessionResponse(userMerchant);
 
                             if (profileData.getStoreAccess() == null) {
+                                response.setBaseResponse(0, 0, 0, "User belum mempunyai akses toko. Silahkan hubungi administrator.", null);
+                                return badRequest(Json.toJson(response));
+                            }
+
+                            if(profileData.getStoreAccess().getStoreData() == null || profileData.getStoreAccess().getStoreData().size() == 0){
                                 response.setBaseResponse(0, 0, 0, "User belum mempunyai akses toko. Silahkan hubungi administrator.", null);
                                 return badRequest(Json.toJson(response));
                             }
@@ -448,46 +454,36 @@ public class SessionsController extends BaseController {
         JsonNode json = request().body().asJson();
         if (checkAccessAuthorization("guest") == 200 && json.has("email")) {
             String email = json.findPath("email").asText();
-            Merchant member = Merchant.find.where().eq("is_active", true).eq("email", email).setMaxRows(1).findUnique();
+            Boolean isCashier = json.findPath("is_cashier").asBoolean();
+            // check to merchant and user merchant
+            Merchant member = null;
+            UserMerchant userMerchant = null;
+            Boolean userType = Boolean.FALSE;
+            member = Merchant.find.where().eq("is_active", true).eq("email", email).setMaxRows(1).findUnique();
             if (member != null) {
-                Long now = System.currentTimeMillis();
-                String merchantEmail = member.email;
-                String forgotPasswordCode = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
-                String redirect = Constant.getInstance().getMerchantUrl() + "/reset-password" + "/" + forgotPasswordCode;
-                try {
-                    member.resetToken = Encryption.EncryptAESCBCPCKS5Padding(member.email+now);
-                    member.resetTime = now;
-                    member.update();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                Thread thread = new Thread(() -> {
-                    try {
-                        MailConfig.sendmail(member.email, MailConfig.subjectForgotPassword, MailConfig.renderMailForgotPasswordMerchantTemplate(member.resetToken, member.fullName, redirect));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
-                thread.start();
-                response.setBaseResponse(1, 0, 1, success, null);
-                return ok(Json.toJson(response));
+                userType = Boolean.TRUE;
             } else {
-                UserMerchant userMerchant = UserMerchantRepository.findByEmail(email);
-                if (userMerchant != null) {
+                userMerchant = UserMerchantRepository.findByEmail(email);
+                userType = Boolean.FALSE;
+            }
+
+            if (member != null || userMerchant != null) {
+                if (userType == Boolean.TRUE) {
                     Long now = System.currentTimeMillis();
-                    String merchantEmail = userMerchant.getEmail();
+                    String merchantEmail = member.email;
                     String forgotPasswordCode = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
                     String redirect = Constant.getInstance().getMerchantUrl() + "/reset-password" + "/" + forgotPasswordCode;
                     try {
-                        userMerchant.setResetToken(Encryption.EncryptAESCBCPCKS5Padding(member.email+now));
-                        userMerchant.setResetTime(now);
+                        member.resetToken = Encryption.EncryptAESCBCPCKS5Padding(member.email+now);
+                        member.resetTime = now;
                         member.update();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+                    Merchant finalMember = member;
                     Thread thread = new Thread(() -> {
                         try {
-                            MailConfig.sendmail(userMerchant.getEmail(), MailConfig.subjectForgotPassword, MailConfig.renderMailForgotPasswordMerchantTemplate(userMerchant.getResetToken(), userMerchant.getFullName(), redirect));
+                            MailConfig.sendmail(finalMember.email, MailConfig.subjectForgotPassword, MailConfig.renderMailForgotPasswordMerchantTemplate(finalMember.resetToken, finalMember.fullName, redirect));
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -496,10 +492,44 @@ public class SessionsController extends BaseController {
                     response.setBaseResponse(1, 0, 1, success, null);
                     return ok(Json.toJson(response));
                 } else {
-                    response.setBaseResponse(0, 0, 0, notFound, null);
-                    return notFound(Json.toJson(response));
+                    Long now = System.currentTimeMillis();
+                    String merchantEmail = userMerchant.getEmail();
+                    String redirect = "";
+
+                    // is cashier
+                    if(isCashier == Boolean.TRUE) {
+                        System.out.println("is cashier true");
+                        String forgotPasswordCodePos = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
+                        redirect = Constant.getInstance().getPosUrl() + "/reset-password" + "/" + forgotPasswordCodePos;
+                    } else {
+                        String forgotPasswordCode = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
+                        redirect = Constant.getInstance().getMerchantUrl() + "/reset-password" + "/" + forgotPasswordCode;
+                    }
+
+                    try {
+                        userMerchant.setResetToken(Encryption.EncryptAESCBCPCKS5Padding(userMerchant.email + "-" + String.valueOf(now)));
+                        userMerchant.setResetTime(now);
+                        userMerchant.update();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    String finalRedirect = redirect;
+                    UserMerchant finalUserMerchant = userMerchant;
+                    Thread thread = new Thread(() -> {
+                        try {
+                            MailConfig.sendmail(finalUserMerchant.getEmail(), MailConfig.subjectForgotPassword, MailConfig.renderMailForgotPasswordMerchantTemplate(finalUserMerchant.getResetToken(), finalUserMerchant.getFullName(), finalRedirect));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                    thread.start();
+                    response.setBaseResponse(1, 0, 1, success, null);
+                    return ok(Json.toJson(response));
                 }
+
             }
+            response.setBaseResponse(0, 0, 0, notFound, null);
+            return notFound(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
@@ -518,27 +548,62 @@ public class SessionsController extends BaseController {
                 return badRequest(Json.toJson(response));
             }
 
+            // check to merchant and user merchant
+            Merchant member = null;
+            UserMerchant userMerchant = null;
+
+            Boolean userType = Boolean.FALSE;
+
+            member = Merchant.find.where().eq("is_active", true).eq("reset_token", key).setMaxRows(1).findUnique();
+            if (member != null) {
+                userType = Boolean.TRUE;
+            } else {
+                userMerchant = UserMerchantRepository.find.where().eq("is_active", true).eq("reset_token", key).setMaxRows(1).findUnique();
+                userType = Boolean.FALSE;
+            }
+
             Transaction txn = Ebean.beginTransaction();
             try {
-                Merchant member = Merchant.find.where().eq("is_active", true).eq("reset_token", key).setMaxRows(1).findUnique();
-                if (member != null) {
-                    Date requestDate = new Date(member.resetTime);
+                if (member != null || userMerchant != null) {
+                    if (userType == Boolean.TRUE) {
+                        Date requestDate = new Date(member.resetTime);
 
-                    Calendar cal = Calendar.getInstance();
-                    cal.setTime(requestDate);
-                    cal.add(Calendar.HOUR, 1);
-                    if (cal.getTime().before(new Date(System.currentTimeMillis()))) {
-                        response.setBaseResponse(0, 0, 0, "Session has expired", null);
-                        return badRequest(Json.toJson(response));
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(requestDate);
+                        cal.add(Calendar.HOUR, 1);
+                        if (cal.getTime().before(new Date(System.currentTimeMillis()))) {
+                            response.setBaseResponse(0, 0, 0, "Session has expired", null);
+                            return badRequest(Json.toJson(response));
+                        }
+
+                        member.password = Encryption.EncryptAESCBCPCKS5Padding(newPass);
+                        member.resetToken = "";
+                        member.update();
+                        Merchant.removeAllToken(member.id);
+                        txn.commit();
+                        response.setBaseResponse(1, 0, 1, success, null);
+                        return ok(Json.toJson(response));
+                    } else {
+                        Date requestDate = new Date(userMerchant.getResetTime());
+
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(requestDate);
+                        cal.add(Calendar.HOUR, 1);
+                        if (cal.getTime().before(new Date(System.currentTimeMillis()))) {
+                            response.setBaseResponse(0, 0, 0, "Session has expired", null);
+                            return badRequest(Json.toJson(response));
+                        }
+
+                        userMerchant.setPassword(Encryption.EncryptAESCBCPCKS5Padding(newPass));
+                        userMerchant.setResetToken("");
+                        userMerchant.update();
+
+                        UserMerchant.removeAllToken(userMerchant.id);
+
+                        txn.commit();
+                        response.setBaseResponse(1, 0, 1, success, null);
+                        return ok(Json.toJson(response));
                     }
-
-                    member.password = Encryption.EncryptAESCBCPCKS5Padding(newPass);
-                    member.resetToken = "";
-                    member.save();
-                    Merchant.removeAllToken(member.id);
-                    txn.commit();
-                    response.setBaseResponse(1, 0, 1, success, null);
-                    return ok(Json.toJson(response));
                 }
                 response.setBaseResponse(0, 0, 0, notFound, null);
                 return notFound(Json.toJson(response));
@@ -633,11 +698,28 @@ public class SessionsController extends BaseController {
 
     public static Result getProfile() throws JsonProcessingException {
         Merchant actor = checkMerchantAccessAuthorization();
-        if (actor != null) {
+        if (actor != null && actor.id != null) {
+            Merchant currentMerchant = Merchant.find.byId(actor.id);
             ObjectMapper om = new ObjectMapper();
-            om.addMixInAnnotations(Merchant.class, JsonMask.class);
-            response.setBaseResponse(1, offset, 1, success, Json.parse(om.writeValueAsString(actor)));
+            om.addMixIn(Merchant.class, JsonMask.class);
+            response.setBaseResponse(1, offset, 1, success, Json.parse(om.writeValueAsString(currentMerchant)));
             return ok(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    public static Result getUserProfile() throws IOException {
+        UserMerchant user = checkUserMerchantAccessAuthorization();
+        if (user != null && user.id != null) {
+            UserMerchant currentUser = UserMerchantRepository.find.byId(user.id);
+            if(currentUser != null) {
+                RoleMerchant roleMerchant = currentUser.getRole();
+                UserMerchantSessionResponse profileData = toUserMerchantSessionResponse(currentUser);
+                profileData.setRole(roleMerchant);
+                response.setBaseResponse(1, offset, 1, success, profileData);
+                return ok(Json.toJson(response));
+            }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));

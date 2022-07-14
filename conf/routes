@@ -331,6 +331,7 @@ GET         /merchant/users/:id/view                    controllers.merchants.Us
 DELETE      /merchant/users/:id/delete                  controllers.merchants.UserMerchantController.deleteUsers(id:Long)
 PUT         /merchant/users/:id/edit                    controllers.merchants.UserMerchantController.editUser(id:Long)
 PUT         /merchant/users/:id/edit/status             controllers.merchants.UserMerchantController.setStatus(id:Long)
+GET     /merchant/users/session/profile					controllers.merchants.SessionsController.getUserProfile()
 
 #ROLE
 GET     /merchant/role/list                        controllers.merchants.RoleMerchantController.listRole(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
@@ -578,3 +579,4 @@ GET         /member/loyalty/:storeCode/get/data            controllers.loyalty.L
 # ================================== Mini POS ========================================== #
 POST        /pos/open-pos                                  controllers.merchants.CashierHistoryController.openPos()
 GET         /merchant/cashier-history                      controllers.merchants.CashierHistoryController.getAllCashierHistory(limit:Int ?= 10, offset:Int ?= 0, store_id:Long ?= 0)
+GET         /pos/category-list                             controllers.minipos.ProductController.listCategoryMiniPOS()
