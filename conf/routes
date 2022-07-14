@@ -573,3 +573,8 @@ POST        /users/registration                 controllers.users.SessionsContro
 
 # GET LOYALTY FE
 GET         /member/loyalty/:storeCode/get/data            controllers.loyalty.LoyaltyPointController.useLoyalty(email:String ?= "", phonenumber:String ?= "", storeCode:String)
+
+
+# ================================== Mini POS ========================================== #
+POST        /pos/open-pos                                  controllers.merchants.CashierHistoryController.openPos()
+GET         /merchant/cashier-history                      controllers.merchants.CashierHistoryController.getAllCashierHistory(limit:Int ?= 10, offset:Int ?= 0, store_id:Long ?= 0)
