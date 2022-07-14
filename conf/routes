@@ -331,6 +331,7 @@ GET         /merchant/users/:id/view                    controllers.merchants.Us
 DELETE      /merchant/users/:id/delete                  controllers.merchants.UserMerchantController.deleteUsers(id:Long)
 PUT         /merchant/users/:id/edit                    controllers.merchants.UserMerchantController.editUser(id:Long)
 PUT         /merchant/users/:id/edit/status             controllers.merchants.UserMerchantController.setStatus(id:Long)
+GET     /merchant/users/session/profile					controllers.merchants.SessionsController.getUserProfile()
 
 #ROLE
 GET     /merchant/role/list                        controllers.merchants.RoleMerchantController.listRole(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)

@@ -77,7 +77,6 @@ public class UserMerchant extends BaseModel {
     @Column(name = "is_active")
     public boolean isActive;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name="role_id", referencedColumnName = "id")
     @Getter @Setter
