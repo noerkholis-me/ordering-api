@@ -137,7 +137,7 @@ public class BaseController extends Controller {
             String apiKey     = request().headers().get(API_KEY)[0];
             String token      = request().headers().get(TOKEN)[0];
             MerchantLog target = MerchantLog.isMerchantAuthorized(token, apiKey);
-            if (target != null && target.userMerchant != null) {
+            if (target.userMerchant != null) {
                 return target.userMerchant;
             }
         }
