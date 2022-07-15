@@ -46,7 +46,7 @@ public class SubCategoryMerchantController extends BaseController {
     public static Result createSubCategory(Long id) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<SubCategoryMerchant> query = SubCategoryMerchantRepository.find.where().eq("t0.category_id", id).eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+            Query<SubCategoryMerchant> query = SubCategoryMerchantRepository.find.where().eq("t0.category_id", id).eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
             try {
                 Http.MultipartFormData body = request().body().asMultipartFormData();
                 List<SubCategoryMerchant> totalData = SubCategoryMerchantRepository.getTotalSubCategory(query);
@@ -54,7 +54,7 @@ public class SubCategoryMerchantController extends BaseController {
                     response.setBaseResponse(0, 0, 0, error + " sub kategori sudah mencapai batas maksimum.", null);
                     return badRequest(Json.toJson(response));
                 }
-                CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                 if(categoryMerchant == null) {
                     response.setBaseResponse(0, 0, 0, error + " kategori tidak ditemukan.", null);
                     return badRequest(Json.toJson(response));
@@ -70,7 +70,7 @@ public class SubCategoryMerchantController extends BaseController {
                 }
                 SubCategoryMerchantResponse request = objectMapper.readValue(json.toString(), SubCategoryMerchantResponse.class);
                 String validate = validateCreateSubCategory(request);
-                SubCategoryMerchant latestSubCat = SubCategoryMerchantRepository.getLatestSequence(ownMerchant.id);
+                SubCategoryMerchant latestSubCat = SubCategoryMerchantRepository.getLatestSequence(ownMerchant);
                 int lastSequence = 0;
                 if(latestSubCat == null) {
                     lastSequence = lastSequence + 1;
@@ -158,12 +158,12 @@ public class SubCategoryMerchantController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (subCategoryMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
                         }
-                        CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(subCategoryMerchant.getCategoryMerchant().id, ownMerchant.id);
+                        CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(subCategoryMerchant.getCategoryMerchant().id, ownMerchant);
                         if(categoryMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " kategori tidak ditemukan.", null);
                             return badRequest(Json.toJson(response));
@@ -225,7 +225,7 @@ public class SubCategoryMerchantController extends BaseController {
                 if (id != null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (subCategoryMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
@@ -260,7 +260,7 @@ public class SubCategoryMerchantController extends BaseController {
             if (id != null) {
                 Transaction trx = Ebean.beginTransaction();
                 try {
-                    SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                    SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                     if (subCategoryMerchant == null) {
                         response.setBaseResponse(0, 0, 0, error + " sub kategori merchant tidak tersedia.", null);
                         return badRequest(Json.toJson(response));
@@ -297,7 +297,7 @@ public class SubCategoryMerchantController extends BaseController {
     public static Result listSubCategory(String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<SubCategoryMerchant> query = SubCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+            Query<SubCategoryMerchant> query = SubCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant", ownMerchant).order("t0.id");
             try {
                 List<SubCategoryMerchantResponse> responses = new ArrayList<>();
                 List<SubCategoryMerchant> totalData = SubCategoryMerchantRepository.getTotalData(query);
@@ -331,10 +331,10 @@ public class SubCategoryMerchantController extends BaseController {
     public static Result listSequence() {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<SubsCategoryMerchant> query = SubsCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+            Query<SubsCategoryMerchant> query = SubsCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant", ownMerchant).order("t0.id");
             try {
                 List<SubsCategoryMerchantResponse> responses = new ArrayList<>();
-                List<SubsCategoryMerchant> responseIndex = SubsCategoryMerchantRepository.getListSequence(ownMerchant.id);
+                List<SubsCategoryMerchant> responseIndex = SubsCategoryMerchantRepository.getListSequence(ownMerchant);
                 for (SubsCategoryMerchant data : responseIndex) {
                     SubsCategoryMerchantResponse response = new SubsCategoryMerchantResponse();
                     response.setId(data.id);
@@ -374,7 +374,7 @@ public class SubCategoryMerchantController extends BaseController {
                         List<SubsCategoryMerchant> responses = new ArrayList<>();
                         SubsCategoryMerchant subsCategoryMerchant = new SubsCategoryMerchant();
                         for (SubsCategoryMerchantResponse data : request){
-                            subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(data.id, ownMerchant.id);
+                            subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(data.id, ownMerchant);
                             if (subsCategoryMerchant == null) {
                                 response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
                                 return badRequest(Json.toJson(response));
@@ -418,7 +418,7 @@ public class SubCategoryMerchantController extends BaseController {
                     SubCategoryMerchantResponse request = objectMapper.readValue(json.toString(), SubCategoryMerchantResponse.class);
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (subCategoryMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " sub category tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
@@ -451,7 +451,7 @@ public class SubCategoryMerchantController extends BaseController {
         public static Result createSubsCategory(Long catId, Long id) {
             Merchant ownMerchant = checkMerchantAccessAuthorization();
             if (ownMerchant != null) {
-                Query<SubsCategoryMerchant> query = SubsCategoryMerchantRepository.find.where().eq("t0.subcategory_id", id).eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+                Query<SubsCategoryMerchant> query = SubsCategoryMerchantRepository.find.where().eq("t0.subcategory_id", id).eq("t0.is_deleted", false).eq("t0.merchant", ownMerchant).order("t0.id");
                 try {
                     Http.MultipartFormData body = request().body().asMultipartFormData();
                     List<SubsCategoryMerchant> totalData = SubsCategoryMerchantRepository.getTotalSubsCategory(query);
@@ -459,12 +459,12 @@ public class SubCategoryMerchantController extends BaseController {
                         response.setBaseResponse(0, 0, 0, error + " sub kategori sudah mencapai batas maksimum.", null);
                         return badRequest(Json.toJson(response));
                     }
-                    CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(catId, ownMerchant.id);
+                    CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(catId, ownMerchant);
                     if(categoryMerchant == null) {
                         response.setBaseResponse(0, 0, 0, error + " sub kategori tidak ditemukan.", null);
                         return badRequest(Json.toJson(response));
                     }
-                    SubCategoryMerchant subcategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                    SubCategoryMerchant subcategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                     if(subcategoryMerchant == null) {
                         response.setBaseResponse(0, 0, 0, error + " sub kategori tidak ditemukan.", null);
                         return badRequest(Json.toJson(response));
@@ -473,7 +473,7 @@ public class SubCategoryMerchantController extends BaseController {
 
                     SubsCategoryMerchantResponse request = objectMapper.readValue(json.toString(), SubsCategoryMerchantResponse.class);
                     String validate = validateCreateSubsCategory(request);
-                    SubsCategoryMerchant latestSubsCat = SubsCategoryMerchantRepository.getLatestSequence(ownMerchant.id);
+                    SubsCategoryMerchant latestSubsCat = SubsCategoryMerchantRepository.getLatestSequence(ownMerchant);
                     int lastSequence = 0;
                     if(latestSubsCat == null) {
                         lastSequence = lastSequence + 1;
@@ -529,17 +529,17 @@ public class SubCategoryMerchantController extends BaseController {
                     if (validate == null) {
                         Transaction trx = Ebean.beginTransaction();
                         try {
-                            SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                            SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                             if (subsCategoryMerchant == null) {
                                 response.setBaseResponse(0, 0, 0, error + " subs kategori tidak tersedia.", null);
                                 return badRequest(Json.toJson(response));
                             }
-                            CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(subsCategoryMerchant.getCategoryMerchant().id, ownMerchant.id);
+                            CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(subsCategoryMerchant.getCategoryMerchant().id, ownMerchant);
                             if(categoryMerchant == null) {
                                 response.setBaseResponse(0, 0, 0, error + " kategori tidak ditemukan.", null);
                                 return badRequest(Json.toJson(response));
                             }
-                            SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(subsCategoryMerchant.getSubCategoryMerchant().id, ownMerchant.id);
+                            SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(subsCategoryMerchant.getSubCategoryMerchant().id, ownMerchant);
                             if (subCategoryMerchant == null) {
                                 response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
                                 return badRequest(Json.toJson(response));
@@ -591,17 +591,17 @@ public class SubCategoryMerchantController extends BaseController {
 
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (subsCategoryMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " subs kategori tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
                         }
-                        CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(subsCategoryMerchant.getCategoryMerchant().id, ownMerchant.id);
+                        CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(subsCategoryMerchant.getCategoryMerchant().id, ownMerchant);
                         if(categoryMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " kategori tidak ditemukan.", null);
                             return badRequest(Json.toJson(response));
                         }
-                        SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(subsCategoryMerchant.getSubCategoryMerchant().id, ownMerchant.id);
+                        SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(subsCategoryMerchant.getSubCategoryMerchant().id, ownMerchant);
                         if (subCategoryMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
@@ -636,7 +636,7 @@ public class SubCategoryMerchantController extends BaseController {
                     if (id != null) {
                         Transaction trx = Ebean.beginTransaction();
                         try {
-                            SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                            SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                             if (subsCategoryMerchant == null) {
                                 response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
                                 return badRequest(Json.toJson(response));
@@ -671,7 +671,7 @@ public class SubCategoryMerchantController extends BaseController {
                 if (id != null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (subsCategoryMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " sub kategori merchant tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
@@ -712,7 +712,7 @@ public class SubCategoryMerchantController extends BaseController {
             if (ownMerchant != null) {
                 Transaction trx = Ebean.beginTransaction();
                 try {
-                    Query<SubsCategoryMerchant> query  = SubsCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.merchant_id", ownMerchant.id).order("t0.id asc");
+                    Query<SubsCategoryMerchant> query  = SubsCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.merchant_id", ownMerchant).order("t0.id asc");
                     List<SubsCategoryMerchant> subsCategoryMerchant = SubsCategoryMerchantRepository.getDataSubsCategory(query, sort, filter, offset, limit);
                     List<SubsCategoryMerchantResponse> subsCategoryMerchantList = new ArrayList<>();
 
