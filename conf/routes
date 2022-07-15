@@ -578,3 +578,8 @@ GET         /member/loyalty/:storeCode/get/data            controllers.loyalty.L
 # ================================== Mini POS ========================================== #
 POST        /pos/open-pos                                  controllers.merchants.CashierHistoryController.openPos()
 GET         /merchant/cashier-history                      controllers.merchants.CashierHistoryController.getAllCashierHistory(limit:Int ?= 10, offset:Int ?= 0, store_id:Long ?= 0)
+
+
+# Dashboard Mini POS
+GET         /pos/:storeId/get-total-cash                        controllers.dashboard.DashboardPOSController.getTotalCashPos(storeId: Long)
+GET         /pos/get-order-information                       controllers.dashboard.DashboardPOSController.getOrderInformation()
