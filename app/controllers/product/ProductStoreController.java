@@ -136,7 +136,7 @@ public class ProductStoreController extends BaseController {
                 for (ProductMerchant data : productMerchants) {
                     ProductResponseStore responseProd = new ProductResponseStore();
                     Query<ProductStore> queryPS = ProductStoreRepository.find.where().eq("t0.product_id", data.id)
-                            .eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+                            .eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
                     List<ProductStore> dataPS = ProductStoreRepository.getDataProductStore(queryPS);
                     List<ProductResponseStore.ProductStore> responsesProductStore = new ArrayList<>();
                     responseProd.setProductId(data.id);
@@ -215,7 +215,7 @@ public class ProductStoreController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        ProductStore productStore = ProductStoreRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        ProductStore productStore = ProductStoreRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (productStore == null) {
                             response.setBaseResponse(0, 0, 0, error + " product store tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
@@ -281,7 +281,7 @@ public class ProductStoreController extends BaseController {
             if (id != null) {
                 Transaction trx = Ebean.beginTransaction();
                 try {
-                    ProductStore productStore = ProductStoreRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                    ProductStore productStore = ProductStoreRepository.findByIdAndMerchantId(id, ownMerchant);
                     if (productStore == null) {
                         response.setBaseResponse(0, 0, 0, error + " produk store tidak tersedia.", null);
                         return badRequest(Json.toJson(response));
@@ -407,7 +407,7 @@ public class ProductStoreController extends BaseController {
                 ProductStoreResponse request = objectMapper.readValue(json.toString(), ProductStoreResponse.class);
                 Transaction trx = Ebean.beginTransaction();
                 try {
-                    ProductStore productStore = ProductStoreRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                    ProductStore productStore = ProductStoreRepository.findByIdAndMerchantId(id, ownMerchant);
                     if (productStore == null) {
                         response.setBaseResponse(0, 0, 0, error + " produk store tidak tersedia.", null);
                         return badRequest(Json.toJson(response));

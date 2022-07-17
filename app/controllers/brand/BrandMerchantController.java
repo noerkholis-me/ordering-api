@@ -198,7 +198,7 @@ public class BrandMerchantController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (brandMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " brand tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
@@ -282,7 +282,7 @@ public class BrandMerchantController extends BaseController {
                 if (id != null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        BrandMerchant BrandMerchant = BrandMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        BrandMerchant BrandMerchant = BrandMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (BrandMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " brand tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
@@ -321,7 +321,7 @@ public class BrandMerchantController extends BaseController {
             if (id != null) {
                 Transaction trx = Ebean.beginTransaction();
                 try {
-                    BrandMerchant BrandMerchant = BrandMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                    BrandMerchant BrandMerchant = BrandMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                     if (BrandMerchant == null) {
                         response.setBaseResponse(0, 0, 0, error + " brand merchant tidak tersedia.", null);
                         return badRequest(Json.toJson(response));
@@ -370,7 +370,7 @@ public class BrandMerchantController extends BaseController {
                     BrandMerchantResponse request = objectMapper.readValue(json.toString(), BrandMerchantResponse.class);
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (brandMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " brand tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
@@ -404,7 +404,7 @@ public class BrandMerchantController extends BaseController {
     public static Result listBrandHomepage(Long merchantId, int offset) {
         Merchant ownMerchant = Merchant.merchantGetId(merchantId);
         if (ownMerchant != null) {
-            Query<BrandMerchant> query = BrandMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).eq("t0.is_active", true).order("t0.name");
+            Query<BrandMerchant> query = BrandMerchantRepository.find.where().eq("t0.is_deleted", false).eq("merchant", ownMerchant).eq("t0.is_active", true).order("t0.name");
             try {
                 List<BrandMerchantResponse> responses = new ArrayList<>();
                 List<BrandMerchant> totalData = BrandMerchantRepository.getTotalData(query);
@@ -440,14 +440,15 @@ public class BrandMerchantController extends BaseController {
     // FOR HOME CUSTOMER
     public static Result detailBrandHome(Long id, Long merchantId, Long storeId) {
             if (id != null) {
+                Merchant ownMerchant = Merchant.merchantGetId(merchantId);
                 Transaction trx = Ebean.beginTransaction();
                 try {
-                    BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(id, merchantId);
+                    BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                     if (brandMerchant == null) {
                         response.setBaseResponse(0, 0, 0, error + " brand tidak tersedia.", null);
                         return badRequest(Json.toJson(response));
                     }
-                    Query<SubsCategoryMerchant> querySubCategory = SubsCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).eq("t0.is_active", true).order("t0.sequence asc");
+                    Query<SubsCategoryMerchant> querySubCategory = SubsCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("merchant", ownMerchant).eq("t0.is_active", true).order("t0.sequence asc");
                     List<SubsCategoryMerchant> dataSubCategory = SubsCategoryMerchantRepository.getForDetailKiosk(querySubCategory);
                     List<BrandDetailResponse.SubsCategoryMerchant> categoryListResponses = new ArrayList<>();
 
@@ -487,7 +488,7 @@ public class BrandMerchantController extends BaseController {
                         for(ProductMerchantDetail productMerchantDetail : productMerchantDetails){
                             BrandDetailResponse.SubsCategoryMerchant.ProductMerchant productResponses = new BrandDetailResponse.SubsCategoryMerchant.ProductMerchant();
                             ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(productMerchantDetail.getProductMerchant().id, merchantId);
-                            ProductStore productStore = ProductStoreRepository.findForCust(productMerchant.id, storeId, merchantId);
+                            ProductStore productStore = ProductStoreRepository.findForCust(productMerchant.id, storeId, ownMerchant);
                             productResponses.setProductId(productMerchant.id);
                             productResponses.setProductName(productMerchant.getProductName());
                             productResponses.setProductType(productMerchantDetail.getProductType());
