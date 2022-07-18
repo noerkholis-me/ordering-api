@@ -142,7 +142,7 @@ public class BrandMerchantController extends BaseController {
     public static Result listBrand(String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<BrandMerchant> query = BrandMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", getUserMerchant().id).order("t0.id");
+            Query<BrandMerchant> query = BrandMerchantRepository.find.where().eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
             try {
                 List<BrandMerchantResponse> responses = new ArrayList<>();
                 List<BrandMerchant> totalData = BrandMerchantRepository.getTotalData(query);
@@ -467,7 +467,7 @@ public class BrandMerchantController extends BaseController {
                     brandDetailResponse.setMerchantId(brandMerchant.getMerchant().id);
                     for(SubsCategoryMerchant subsCategory : dataSubCategory){
                         BrandDetailResponse.SubsCategoryMerchant categoryResponses = new BrandDetailResponse.SubsCategoryMerchant();
-                        Query<ProductMerchant> queryProduct = ProductMerchantRepository.find.where().eq("t0.subs_category_merchant_id", subsCategory.id).eq("t0.brand_merchant_id", id).eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.merchant_id", merchantId).order("t0.id");
+                        Query<ProductMerchant> queryProduct = ProductMerchantRepository.find.where().eq("t0.subs_category_merchant_id", subsCategory.id).eq("t0.brand_merchant_id", id).eq("t0.is_deleted", false).eq("t0.is_active", true).eq("merchant", ownMerchant).order("t0.id");
                         List<ProductMerchant> dataProduct = ProductMerchantRepository.getDataProductStore(queryProduct);
 
                         String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.subs_category_merchant_id = "+subsCategory.id+" and pm.brand_merchant_id = "+id+" and pm.is_active = "+true+" and pm.is_deleted = false)";
