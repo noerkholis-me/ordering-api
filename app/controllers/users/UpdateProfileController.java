@@ -51,19 +51,23 @@ public class UpdateProfileController extends BaseController {
 
                 // VALIDATION
                 // =======================================================================
-                if (request.getEmail() == null || request.getEmail() == "") {
+                if (request.getEmail() == null || Objects.equals(request.getEmail(), "")) {
                     response.setBaseResponse(0, 0, 0, "Email tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if (request.getName() == null || request.getName() == "") {
+                if (!Helper.isValidEmailAddress(request.getEmail())) {
+                    response.setBaseResponse(0, 0, 0, "Email tidak valid", null);
+                    return badRequest(Json.toJson(response));
+                }
+                if (request.getName() == null || Objects.equals(request.getName(), "")) {
                     response.setBaseResponse(0, 0, 0, "Nama Merchant tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if (request.getPhone() == null || request.getPhone() == "") {
+                if (request.getPhone() == null || Objects.equals(request.getPhone(), "")) {
                     response.setBaseResponse(0, 0, 0, "Telepon tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if (request.getAddress() == null || request.getAddress() == "") {
+                if (request.getAddress() == null || Objects.equals(request.getAddress(), "")) {
                     response.setBaseResponse(0, 0, 0, "Alamat tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
@@ -112,7 +116,7 @@ public class UpdateProfileController extends BaseController {
                     return notFound(Json.toJson(response));
                 }
 
-                if (request.getEmail() != null && request.getEmail() != ""
+                if (request.getEmail() != null && !Objects.equals(request.getEmail(), "")
                         && !request.getEmail().equalsIgnoreCase(getMerchantData.email)) {
                     getMerchantData.email = request.getEmail();
                     getMerchantData.isActive = Boolean.FALSE;
@@ -239,16 +243,20 @@ public class UpdateProfileController extends BaseController {
 
                 // VALIDATION
                 // =======================================================================
-                if (request.getEmail() == null || request.getEmail() == "") {
+                if (request.getEmail() == null || Objects.equals(request.getEmail(), "")) {
                     response.setBaseResponse(0, 0, 0, "Email tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
-                if (request.getFirstName() == null || request.getFirstName() == "") {
-                    response.setBaseResponse(0, 0, 0, "Nama tidak boleh kosong", null);
+                if (!Helper.isValidEmailAddress(request.getEmail())) {
+                    response.setBaseResponse(0, 0, 0, "Email tidak valid", null);
                     return badRequest(Json.toJson(response));
                 }
-                if (request.getLastName() == null || request.getLastName() == "") {
-                    response.setBaseResponse(0, 0, 0, "Nama tidak boleh kosong", null);
+                if (request.getFirstName() == null || Objects.equals(request.getFirstName(), "")) {
+                    response.setBaseResponse(0, 0, 0, "Nama Depan tidak boleh kosong", null);
+                    return badRequest(Json.toJson(response));
+                }
+                if (request.getLastName() == null || Objects.equals(request.getLastName(), "")) {
+                    response.setBaseResponse(0, 0, 0, "Nama Belakang tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
                 // =======================================================================
@@ -399,6 +407,18 @@ public class UpdateProfileController extends BaseController {
                 trx.rollback();
             } finally {
                 trx.end();
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+    public static Result updateUserProfile() {
+        MerchantLog merchantLog = checkUserAccessAuthorization();
+        if(merchantLog != null) {
+            if (merchantLog.userMerchant != null && merchantLog.userMerchant.id != null && merchantLog.userMerchant.id > 0) {
+                return updateUserMerchantData(merchantLog.userMerchant.id);
+            } else if (merchantLog.merchant != null) {
+                return updateMerchantData();
             }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
