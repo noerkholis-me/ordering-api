@@ -239,8 +239,9 @@ public class CashierHistoryController extends BaseController {
             try {
                 System.out.println("user merchant id >>> " + ownUser.id);
                 Optional<CashierHistoryMerchant> cashierHistoryMerchant = Optional.empty();
+                Store store = null;
                 if (storeId != null && storeId != 0L) {
-                    Store store = Store.findById(storeId);
+                    store = Store.findById(storeId);
                     if (store == null) {
                         response.setBaseResponse(0, 0, 0, "store tidak ditemukan", null);
                         return badRequest(Json.toJson(response));
@@ -258,6 +259,7 @@ public class CashierHistoryController extends BaseController {
                 CashierReportResponse cashierReportResponse = new CashierReportResponse();
                 cashierReportResponse.setId(cashierHistoryMerchant.get().id);
                 cashierReportResponse.setCashierName(cashierHistoryMerchant.get().getUserMerchant().getFullName());
+                cashierReportResponse.setStoreName(store.storeName);
                 cashierReportResponse.setStartTime(cashierHistoryMerchant.get().getStartTime());
                 cashierReportResponse.setEndTime(cashierHistoryMerchant.get().getEndTime());
                 cashierReportResponse.setSessionCode(cashierHistoryMerchant.get().getSessionCode());
@@ -266,6 +268,7 @@ public class CashierHistoryController extends BaseController {
                 cashierReportResponse.setClosingCashCashier(Helper.convertCurrencyIDR(closingCashier));
                 cashierReportResponse.setMarginCash(Helper.convertCurrencyIDR(closingSystem.subtract(closingCashier)));
                 cashierReportResponse.setNotes(cashierHistoryMerchant.get().getNotes());
+
                 response.setBaseResponse(1, offset, limit, success + " menampilkan data penutupan kasir", cashierReportResponse);
                 return ok(Json.toJson(response));
             } catch (Exception ex) {

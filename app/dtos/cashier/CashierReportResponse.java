@@ -19,6 +19,8 @@ public class CashierReportResponse {
     private Long id;
     @JsonProperty("cashier_name")
     private String cashierName;
+    @JsonProperty("store_name")
+    private String storeName;
     @JsonProperty("start_time")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Jakarta")
     private Date startTime;
