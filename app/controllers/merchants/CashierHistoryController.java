@@ -185,22 +185,22 @@ public class CashierHistoryController extends BaseController {
                         return badRequest(Json.toJson(response));
                     }
                     CashierHistoryMerchant cashierHistoryMerchant = lastSessionCashier.get();
-                        cashierHistoryMerchant.setEndTime(new Date());
-                        BigDecimal endTotalAmount = OrderRepository.getTotalClosingCashier(userMerchant.id,
-                                cashierHistoryMerchant.getStartTime(), cashierHistoryMerchant.getEndTime(), cashierClosePosRequest.getStoreId());
-                        if(endTotalAmount.compareTo(cashierClosePosRequest.getCloseTotalAmountCash()) > 0 &&
-                                cashierClosePosRequest.getNotes() == null || cashierClosePosRequest.getNotes().isEmpty()){
-                            response.setBaseResponse(0, 0, 0,
-                                    "Terdapat selisih antara penutupan kasir sistem dengan closing yang anda masukkan, Silahkan masukkan Catatan!", null);
-                            return badRequest(Json.toJson(response));
-                        }
-                        cashierHistoryMerchant.setEndTotalAmount(endTotalAmount);
-                        cashierHistoryMerchant.setEndTotalAmountCash(cashierClosePosRequest.getCloseTotalAmountCash());
-                        cashierHistoryMerchant.setNotes(cashierClosePosRequest.getNotes());
-                        cashierHistoryMerchant.update(cashierHistoryMerchant.id);
-                        trx.commit();
+                    cashierHistoryMerchant.setEndTime(new Date());
+                    BigDecimal endTotalAmount = OrderRepository.getTotalClosingCashier(userMerchant.id,
+                            cashierHistoryMerchant.getStartTime(), cashierHistoryMerchant.getEndTime(), cashierClosePosRequest.getStoreId());
+                    if(endTotalAmount.compareTo(cashierClosePosRequest.getCloseTotalAmountCash()) > 0 &&
+                            cashierClosePosRequest.getNotes() == null || cashierClosePosRequest.getNotes().isEmpty()){
+                        response.setBaseResponse(0, 0, 0,
+                                "Terdapat selisih antara penutupan kasir sistem dengan closing yang anda masukkan, Silahkan masukkan Catatan!", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    cashierHistoryMerchant.setEndTotalAmount(endTotalAmount);
+                    cashierHistoryMerchant.setEndTotalAmountCash(cashierClosePosRequest.getCloseTotalAmountCash());
+                    cashierHistoryMerchant.setNotes(cashierClosePosRequest.getNotes());
+                    cashierHistoryMerchant.update(cashierHistoryMerchant.id);
+                    trx.commit();
 
-                        response.setBaseResponse(1, 0, 0, "Closing Berhasil", cashierHistoryMerchant.id);
+                    response.setBaseResponse(1, 0, 0, "Closing Berhasil", cashierHistoryMerchant.id);
 
                     return ok(Json.toJson(response));
                 } catch (Exception e) {
@@ -343,7 +343,7 @@ public class CashierHistoryController extends BaseController {
             return unauthorized(Json.toJson(response));
         }
     }
-    public static Result closePOSReport(int offset, int limit, Long storeId) {
+    public static Result closePOSReport(int offset, int limit, Long storeId, String sessionCode, String startDate, String endDate) {
         UserMerchant ownUser = checkUserMerchantAccessAuthorization();
         if (ownUser != null) {
             try {
@@ -358,6 +358,12 @@ public class CashierHistoryController extends BaseController {
                         return badRequest(Json.toJson(response));
                     }
                     query = CashierHistoryMerchantRepository.findAllCashierReportByUserMerchant(storeId, ownUser.id);
+                    if(sessionCode != null && !sessionCode.isEmpty()) {
+                        query =  query.where().ilike("sessionCode", "%" + sessionCode + "%").query();
+                    }
+                    if(startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+                        query = CashierHistoryMerchantRepository.findAllCashierReportByDate(startDate, endDate);
+                    }
                 }
                 if (query != null) {
                     cashierHistoryMerchant = CashierHistoryMerchantRepository.findAllCashierReport(query, offset, limit);
