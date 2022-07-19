@@ -97,6 +97,10 @@ public class CheckoutOrderController extends BaseController {
                 order.setStatus(OrderStatus.NEW_ORDER.getStatus());
                 order.setStore(store);
                 order.setMember(member);
+                UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
+                if(userMerchant != null){
+                    order.setUserMerchant(userMerchant);
+                }
                 // pickup point and table
                 if (orderRequest.getOrderType().equalsIgnoreCase("TAKEAWAY") && orderRequest.getDeviceType().equalsIgnoreCase("KIOSK")) {
                     // check pickup point

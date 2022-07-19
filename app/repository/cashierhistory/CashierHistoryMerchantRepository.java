@@ -70,4 +70,15 @@ public class CashierHistoryMerchantRepository extends Model {
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
+    public static Optional<CashierHistoryMerchant> findLastSessionCashier(Long userMerchantId, Long storeId) {
+        return Optional.ofNullable(
+                find.where()
+                        .eq("isActive", true)
+                        .eq("userMerchant.id", userMerchantId)
+                        .eq("store.id", storeId)
+                        .orderBy("t0.updated_at desc")
+                        .findList().get(0)
+        );
+    }
+
 }

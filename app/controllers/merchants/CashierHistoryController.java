@@ -6,9 +6,12 @@ import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
+import com.hokeba.util.Helper;
 import controllers.BaseController;
+import dtos.cashier.CashierClosePosRequest;
 import dtos.cashier.CashierHistoryResponse;
 import dtos.cashier.CashierOpenPosRequest;
+import dtos.cashier.CashierReportResponse;
 import models.Member;
 import models.Merchant;
 import models.Store;
@@ -17,6 +20,7 @@ import models.merchant.CashierHistoryMerchant;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import repository.OrderRepository;
 import repository.UserMerchantRepository;
 import repository.cashierhistory.CashierHistoryMerchantRepository;
 
@@ -149,4 +153,129 @@ public class CashierHistoryController extends BaseController {
         return null;
     }
 
+    /**
+     * controller for close POS
+     */
+    public static Result closePos() {
+        UserMerchant currentUserMerchant = checkUserMerchantAccessAuthorization();
+        if (currentUserMerchant != null) {
+            JsonNode json = request().body().asJson();
+            try {
+                CashierClosePosRequest cashierClosePosRequest = objectMapper.readValue(json.toString(), CashierClosePosRequest.class);
+                Transaction trx = Ebean.beginTransaction();
+                try {
+                    String message = validateClosePosRequest(cashierClosePosRequest);
+                    if (message != null) {
+                        response.setBaseResponse(0, 0, 0, inputParameter + " " + message, null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    UserMerchant userMerchant = UserMerchantRepository.findAccountById(currentUserMerchant.id);
+                    if (userMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, inputParameter + " user merchant tidak ditemukan", null);
+                        return badRequest(Json.toJson(response));
+                    }
+
+                    Store store = Store.findById(cashierClosePosRequest.getStoreId());
+                    if (store == null) {
+                        response.setBaseResponse(0, 0, 0, inputParameter + " store tidak ditemukan", null);
+                        return badRequest(Json.toJson(response));
+                    }
+
+
+                    Optional<CashierHistoryMerchant> lastSessionCashier = CashierHistoryMerchantRepository.findLastSessionCashier(userMerchant.id, store.id);
+                    if(!lastSessionCashier.isPresent()){
+                        response.setBaseResponse(0, 0, 0, "Kode sesi tidak ditemukan", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    CashierHistoryMerchant cashierHistoryMerchant = lastSessionCashier.get();
+                        cashierHistoryMerchant.setEndTime(new Date());
+                        BigDecimal endTotalAmount = OrderRepository.getTotalClosingCashier(userMerchant.id,
+                                cashierHistoryMerchant.getStartTime(), cashierHistoryMerchant.getEndTime(), cashierClosePosRequest.getStoreId());
+                        if(endTotalAmount.compareTo(cashierClosePosRequest.getCloseTotalAmountCash()) > 0 &&
+                                cashierClosePosRequest.getNotes() == null || cashierClosePosRequest.getNotes().isEmpty()){
+                            response.setBaseResponse(0, 0, 0,
+                                    "Terdapat selisih antara penutupan kasir sistem dengan closing yang anda masukkan, Silahkan masukkan Catatan!", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        cashierHistoryMerchant.setEndTotalAmount(endTotalAmount);
+                        cashierHistoryMerchant.setEndTotalAmountCash(cashierClosePosRequest.getCloseTotalAmountCash());
+                        cashierHistoryMerchant.setNotes(cashierClosePosRequest.getNotes());
+                        cashierHistoryMerchant.update(cashierHistoryMerchant.id);
+                        trx.commit();
+
+                        response.setBaseResponse(1, 0, 0, "Closing Berhasil", cashierHistoryMerchant.id);
+
+                    return ok(Json.toJson(response));
+                } catch (Exception e) {
+                    LOGGER.error("Error while updating session cashier", e);
+                    e.printStackTrace();
+                    trx.rollback();
+                } finally {
+                    trx.end();
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                response.setBaseResponse(0, 0, 0, error, null);
+                return internalServerError(Json.toJson(response));
+            }
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, error, null);
+        return internalServerError(Json.toJson(response));
+    }
+    private static String validateClosePosRequest(CashierClosePosRequest cashierClosePosRequest) {
+        if (cashierClosePosRequest.getCloseTotalAmountCash() == null)
+            return "Nominal Closing (by Kasir) tidak boleh kosong";
+        if (cashierClosePosRequest.getCloseTotalAmountCash().compareTo(new BigDecimal(1000)) < 0)
+            return "Nominal Closing (by Kasir) tidak boleh kurang dari 1000";
+
+        return null;
+    }
+    public static Result closePOSResult(Long storeId) {
+        UserMerchant ownUser = checkUserMerchantAccessAuthorization();
+        if (ownUser != null) {
+            try {
+                System.out.println("user merchant id >>> " + ownUser.id);
+                Optional<CashierHistoryMerchant> cashierHistoryMerchant = Optional.empty();
+                if (storeId != null && storeId != 0L) {
+                    Store store = Store.findById(storeId);
+                    if (store == null) {
+                        response.setBaseResponse(0, 0, 0, "store tidak ditemukan", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    cashierHistoryMerchant = CashierHistoryMerchantRepository.findLastSessionCashier(ownUser.id, storeId);
+                }
+                if (!cashierHistoryMerchant.isPresent()) {
+                    response.setBaseResponse(0, 0, 0, "session cashier tidak ditemukan", null);
+                    return badRequest(Json.toJson(response));
+                }
+                BigDecimal closingSystem = new BigDecimal(
+                        cashierHistoryMerchant.get().getEndTotalAmount() != null ? cashierHistoryMerchant.get().getEndTotalAmount().toString() : "0");
+                BigDecimal closingCashier = new BigDecimal(cashierHistoryMerchant.get().getEndTotalAmountCash() != null ?
+                        cashierHistoryMerchant.get().getEndTotalAmountCash().toString() : "0");
+                CashierReportResponse cashierReportResponse = new CashierReportResponse();
+                cashierReportResponse.setId(cashierHistoryMerchant.get().id);
+                cashierReportResponse.setCashierName(cashierHistoryMerchant.get().getUserMerchant().getFullName());
+                cashierReportResponse.setStartTime(cashierHistoryMerchant.get().getStartTime());
+                cashierReportResponse.setEndTime(cashierHistoryMerchant.get().getEndTime());
+                cashierReportResponse.setSessionCode(cashierHistoryMerchant.get().getSessionCode());
+                cashierReportResponse.setInitialCash(Helper.convertCurrencyIDR(cashierHistoryMerchant.get().getStartTotalAmount()));
+                cashierReportResponse.setClosingCashSystem(Helper.convertCurrencyIDR(closingSystem));
+                cashierReportResponse.setClosingCashCashier(Helper.convertCurrencyIDR(closingCashier));
+                cashierReportResponse.setMarginCash(Helper.convertCurrencyIDR(closingSystem.subtract(closingCashier)));
+                cashierReportResponse.setNotes(cashierHistoryMerchant.get().getNotes());
+                response.setBaseResponse(1, offset, limit, success + " menampilkan data penutupan kasir", cashierReportResponse);
+                return ok(Json.toJson(response));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                response.setBaseResponse(0, 0, 0, error, null);
+                return internalServerError(Json.toJson(response));
+            }
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+    }
 }
