@@ -29,6 +29,9 @@ public class CashierHistoryMerchant extends BaseModel {
     @Column(name = "end_total_amount")
     private BigDecimal endTotalAmount;
 
+    @Column(name = "end_total_amount_cash")
+    private BigDecimal endTotalAmountCash;
+
     @Column(name = "start_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date startTime;
@@ -36,6 +39,9 @@ public class CashierHistoryMerchant extends BaseModel {
     @Column(name = "end_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date endTime;
+
+    @Column(name = "notes")
+    private String notes;
 
     @Column(name = "is_active")
     private Boolean isActive;
@@ -55,7 +61,8 @@ public class CashierHistoryMerchant extends BaseModel {
                 .eq("isActive", true)
                 .eq("userMerchant.id", userMerchantId)
                 .eq("store.id", storeId)
-                .findUnique();
+                .orderBy("id desc")
+                .findList().get(0);
 
         String seqNum = "";
         if(cashier == null){
