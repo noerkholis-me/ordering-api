@@ -8,12 +8,15 @@ import play.Play;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 //import org.apache.commons.mail.DefaultAuthenticator;
 //import org.apache.commons.mail.HtmlEmail;
@@ -254,6 +257,15 @@ public class Helper {
             return null;
         }
     }
-
-
+    public static boolean isValidEmailAddress(String email) {
+        String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
+        java.util.regex.Pattern p = java.util.regex.Pattern.compile(ePattern);
+        java.util.regex.Matcher m = p.matcher(email);
+        return m.matches();
+    }
+    //convert BigDecimal to Currency IDR
+    public static String convertCurrencyIDR(BigDecimal value) {
+        NumberFormat formatter = NumberFormat.getIntegerInstance(new Locale("id", "ID"));
+        return formatter.format(value != null ? value : new BigDecimal(0) );
+    }
 }

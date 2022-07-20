@@ -22,12 +22,12 @@ public class SubCategoryMerchantRepository extends Model {
 		return find.where().eq("id", id).findUnique();
 	}
 
-    public static SubCategoryMerchant findByIdAndMerchantId(Long id, Long merchantId) {
+    public static SubCategoryMerchant findByIdAndMerchantId(Long id, Merchant merchant) {
         try {
 			return find.where()
-				.eq("id", id)
-				.eq("merchant_id", merchantId)
-				.eq("is_deleted", Boolean.FALSE)
+				.eq("t0.id", id)
+				.eq("merchant", merchant)
+				.eq("t0.is_deleted", Boolean.FALSE)
 				.findUnique();
 		} catch (PersistenceException e) {
 			e.printStackTrace();
@@ -120,23 +120,23 @@ public class SubCategoryMerchantRepository extends Model {
 		return resData;
 	}
 
-	public static List<SubCategoryMerchant> getListSequence(Long merchantId) {
+	public static List<SubCategoryMerchant> getListSequence(Merchant merchant) {
 		List<SubCategoryMerchant> lists = new ArrayList<>();
         lists = find.where()
-                .eq("merchant_id", merchantId)
-				.eq("is_deleted", Boolean.FALSE)
-				.eq("is_active", Boolean.TRUE)
-				.orderBy("sequence ASC").findList();
+                .eq("merchant", merchant)
+				.eq("t0.is_deleted", Boolean.FALSE)
+				.eq("t0.is_active", Boolean.TRUE)
+				.orderBy("t0.sequence ASC").findList();
 				
 				return lists;
 	}
 
-	public static SubCategoryMerchant getLatestSequence(Long merchantId) {
+	public static SubCategoryMerchant getLatestSequence(Merchant merchant) {
 		try {
 			return find.where()
-				.eq("merchant_id", merchantId)
-				.eq("is_deleted", Boolean.FALSE)
-				.orderBy("sequence DESC")
+				.eq("merchant", merchant)
+				.eq("t0.is_deleted", Boolean.FALSE)
+				.orderBy("t0.sequence DESC")
 				.setMaxRows(1).findUnique();
 		} catch (PersistenceException e) {
 			e.printStackTrace();

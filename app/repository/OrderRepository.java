@@ -8,6 +8,8 @@ import models.transaction.*;
 import models.*;
 import play.db.ebean.Model;
 
+import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -172,4 +174,20 @@ public class OrderRepository extends Model {
         return findDetail.where().eq("order.id", orderId).findList();
     }
 
+    public static List<Order> findOrderByUserMerchant(UserMerchant userMerchant){
+        return find.where().eq("user_merchant", userMerchant).findList();
+    }
+
+    public static BigDecimal getTotalClosingCashier(Long userMerchantId, Date startDate, Date endDate, Long storeId){
+        List<Order> orderList = find.where()
+                .raw("t0.store_id = "+storeId
+                        +" and t0.user_merchant_id = " + userMerchantId
+                        + " and t0.status = 'PAID' and t0.order_date between '" + startDate + "' and '" + endDate + "'")
+                .findList();
+        BigDecimal total = new BigDecimal(0);
+        for(Order order : orderList){
+            total = total.add(order.getTotalPrice());
+        }
+        return total;
+    }
 }
