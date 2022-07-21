@@ -406,7 +406,7 @@ public class CashierHistoryController extends BaseController {
         if (ownUser != null) {
             try {
                 System.out.println("user merchant id >>> " + ownUser.id);
-                Query<CashierHistoryMerchant> query = null;
+                Query<CashierHistoryMerchant> query = CashierHistoryMerchantRepository.findAllCashierReportByUserMerchantId(ownUser.id);
                 List<CashierHistoryMerchant> cashierHistoryMerchant = new ArrayList<>();
                 Store store = null;
                 if (storeId != null && storeId != 0L) {
@@ -415,13 +415,13 @@ public class CashierHistoryController extends BaseController {
                         response.setBaseResponse(0, 0, 0, "store tidak ditemukan", null);
                         return badRequest(Json.toJson(response));
                     }
-                    query = CashierHistoryMerchantRepository.findAllCashierReportByUserMerchant(storeId, ownUser.id);
-                    if(sessionCode != null && !sessionCode.isEmpty()) {
-                        query =  query.where().ilike("sessionCode", "%" + sessionCode + "%").query();
-                    }
-                    if(startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
-                        query = CashierHistoryMerchantRepository.findAllCashierReportByDate(startDate, endDate);
-                    }
+                    query = CashierHistoryMerchantRepository.findAllCashierReportByUserMerchant(query, storeId, ownUser.id);
+                }
+                if(startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+                    query = CashierHistoryMerchantRepository.findAllCashierReportByDate(query, startDate, endDate);
+                }
+                if(sessionCode != null && !sessionCode.isEmpty()) {
+                    query =  query.where().ilike("sessionCode", "%" + sessionCode + "%").query();
                 }
                 if (query != null) {
                     cashierHistoryMerchant = CashierHistoryMerchantRepository.findAllCashierReport(query, offset, limit);
@@ -435,7 +435,7 @@ public class CashierHistoryController extends BaseController {
                             cashierHistoryMerchant1.getEndTotalAmountCash().toString() : "0");
                     cashierReportResponse.setId(cashierHistoryMerchant1.id);
                     cashierReportResponse.setCashierName(cashierHistoryMerchant1.getUserMerchant().getFullName());
-                    cashierReportResponse.setStoreName(store.storeName);
+                    cashierReportResponse.setStoreName(cashierHistoryMerchant1.store.storeName);
                     cashierReportResponse.setStartTime(cashierHistoryMerchant1.getStartTime());
                     cashierReportResponse.setEndTime(cashierHistoryMerchant1.getEndTime());
                     cashierReportResponse.setSessionCode(cashierHistoryMerchant1.getSessionCode());
