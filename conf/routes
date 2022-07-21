@@ -415,6 +415,7 @@ GET     /merchant/product/list/additional           controllers.product.ProductM
 
 GET     /product/detail                             controllers.product.ProductMerchantController.productDetail(product_id: Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0)
 GET     /product/additional                         controllers.product.ProductMerchantController.productAdditional(product_id: Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0)
+GET     /pos/product/additional                         controllers.product.ProductMerchantController.posProductAdditional(product_id: Long ?= 0, store_id:Long ?= 0)
 
 GET     /product/kiosk/list                         controllers.product.ProductMerchantController.productListKiosk(brand_id:Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0)
 
@@ -575,7 +576,7 @@ POST        /users/registration                 controllers.users.SessionsContro
 
 # GET LOYALTY FE
 GET         /member/loyalty/:storeCode/get/data            controllers.loyalty.LoyaltyPointController.useLoyalty(email:String ?= "", phonenumber:String ?= "", storeCode:String)
-
+POST         /member/loyalty/check           controllers.loyalty.LoyaltyPointController.checkMember()
 
 # ================================== Mini POS ========================================== #
 POST        /pos/open-pos                                  controllers.merchants.CashierHistoryController.openPos()
@@ -583,6 +584,7 @@ POST        /pos/close-pos                                  controllers.merchant
 GET        /pos/close-pos                                  controllers.merchants.CashierHistoryController.closePOSResult(store_id:Long ?= 0)
 GET        /pos/close-pos/print                                 controllers.merchants.CashierHistoryController.printClosePOSResult(store_id:Long ?= 0, session_code:String ?= "")
 GET        /pos/close-pos/report                                  controllers.merchants.CashierHistoryController.closePOSReport(offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0, session_code:String ?= "", start_date:String ?= "", end_date:String ?= "")
+GET        /pos/close-pos/report/download                                  controllers.merchants.CashierHistoryController.downloadClosePOSReport(offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0, session_code:String ?= "", start_date:String ?= "", end_date:String ?= "")
 GET         /merchant/cashier-history                      controllers.merchants.CashierHistoryController.getAllCashierHistory(limit:Int ?= 10, offset:Int ?= 0, store_id:Long ?= 0)
 GET         /pos/category-list                             controllers.minipos.ProductController.listCategoryMiniPOS()
 GET         /pos/product-list                             controllers.minipos.ProductController.listProductMiniPos(offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "")

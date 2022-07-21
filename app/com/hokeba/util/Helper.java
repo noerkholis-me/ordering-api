@@ -13,10 +13,10 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Base64;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 //import org.apache.commons.mail.DefaultAuthenticator;
 //import org.apache.commons.mail.HtmlEmail;
@@ -267,5 +267,38 @@ public class Helper {
     public static String convertCurrencyIDR(BigDecimal value) {
         NumberFormat formatter = NumberFormat.getIntegerInstance(new Locale("id", "ID"));
         return formatter.format(value != null ? value : new BigDecimal(0) );
+    }
+
+    // is valid phone number with country code +62
+    public static boolean isValidPhoneNumber(String phoneNumber) {
+        String regex = "^[0-9]{10,15}$";
+        //String regex2 = "^(?:\\+?[0-9]){6,14}[0-9]$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(phoneNumber);
+        return matcher.matches();
+    }
+    // get first name
+    public static String getFirstName(String name) {
+        String[] names = name.split(" ");
+        if(names.length > 1) {
+            return names[0];
+        } else {
+            return name;
+        }
+    }
+    // get last name
+    public static String getLastName(String fullName) {
+        List<String> nameList = Arrays.stream(fullName.split(" ")).collect(Collectors.toList());
+        final int[] nameIndex = {0};
+        return nameList.stream().map(s-> {
+            nameIndex[0]++;
+            if(nameIndex[0] != 1 && nameIndex[0] < nameList.size()){
+                return s.concat(" ");
+            } else if(nameIndex[0] == nameList.size()){
+                return s;
+            } else {
+                return "";
+            }
+        }).collect(Collectors.joining());
     }
 }

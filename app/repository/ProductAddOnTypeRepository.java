@@ -20,6 +20,11 @@ public class ProductAddOnTypeRepository extends Model {
     public static ProductAddOnType findByNameAndMerchant(String productType, Long merchantId) {
         return find.where().eq("product_type", productType).eq("merchant_id", merchantId).eq("is_active", Boolean.TRUE).findUnique();
     }
+    
+    public static List<ProductAddOnType> findByMerchantId(Merchant merchant) {
+        return find.where().eq("merchant", merchant).findPagingList(0).getPage(0).getList();
+    }
+
 
     public static List<ProductAddOnType> getTotalDataPage (Query<ProductAddOnType> reqQuery) {
         Query<ProductAddOnType> query = reqQuery;
