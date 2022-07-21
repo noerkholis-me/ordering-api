@@ -9,6 +9,9 @@ import models.*;
 import play.db.ebean.Model;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -178,11 +181,13 @@ public class OrderRepository extends Model {
         return find.where().eq("user_merchant", userMerchant).findList();
     }
 
-    public static BigDecimal getTotalClosingCashier(Long userMerchantId, Date startDate, Date endDate, Long storeId){
+    public static BigDecimal getTotalClosingCashier(Long userMerchantId, Date startDate, Date endDate, Long storeId) {
+        Timestamp startTimestamp = new Timestamp(startDate.getTime());
+        Timestamp endTimestamp = new Timestamp(endDate.getTime());
         List<Order> orderList = find.where()
                 .raw("t0.store_id = "+storeId
                         +" and t0.user_merchant_id = " + userMerchantId
-                        + " and t0.status = 'PAID' and t0.order_date between '" + startDate + "' and '" + endDate + "'")
+                        + " and t0.status = 'PAID' and t0.order_date between '" + startTimestamp + "' and '" + endTimestamp + "'")
                 .findList();
         BigDecimal total = new BigDecimal(0);
         for(Order order : orderList){

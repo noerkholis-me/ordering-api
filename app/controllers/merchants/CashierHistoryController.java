@@ -206,20 +206,20 @@ public class CashierHistoryController extends BaseController {
                     LOGGER.error("Error while updating session cashier", e);
                     e.printStackTrace();
                     trx.rollback();
+                    response.setBaseResponse(0, 0, 0, e.getMessage(), null);
+                    return internalServerError(Json.toJson(response));
                 } finally {
                     trx.end();
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
-                response.setBaseResponse(0, 0, 0, error, null);
+                response.setBaseResponse(0, 0, 0, ex.getMessage(), null);
                 return internalServerError(Json.toJson(response));
             }
         } else {
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         }
-        response.setBaseResponse(0, 0, 0, error, null);
-        return internalServerError(Json.toJson(response));
     }
     private static String validateClosePosRequest(CashierClosePosRequest cashierClosePosRequest) {
         if (cashierClosePosRequest.getCloseTotalAmountCash() == null)
