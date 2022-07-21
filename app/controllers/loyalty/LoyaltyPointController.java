@@ -5,7 +5,7 @@ import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
-import com.wordnik.swagger.annotations.Api;
+import com.hokeba.util.Helper;
 import controllers.BaseController;
 import dtos.loyalty.*;
 import models.loyalty.*;
@@ -16,7 +16,9 @@ import play.mvc.Result;
 import repository.loyalty.*;
 import repository.*;
 
+import java.math.BigDecimal;
 import java.util.*;
+
 import com.avaje.ebean.Query;
 
 public class LoyaltyPointController extends BaseController {
@@ -240,16 +242,23 @@ public class LoyaltyPointController extends BaseController {
     public static Result useLoyalty(String email, String phoneNumber, String storeCode) {
         if (email != null || phoneNumber != null) {
             try {
-                JsonNode json = request().body().asJson();
                 Store store = Store.find.where().eq("t0.store_code", storeCode).findUnique();
                 LoyaltyMemberResponse lmResponse = new LoyaltyMemberResponse();
                 Member memberData = null;
-                if(email != null && !email.equalsIgnoreCase("")){
-                    memberData = Member.find.where().eq("t0.email", email).eq("merchant", store.merchant).eq("t0.is_active", true).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
+                if(email != null && !email.isEmpty()){
+                    if(!Helper.isValidEmailAddress(email)){
+                        response.setBaseResponse(0, 0, 0, "Email tidak valid", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    memberData = Member.find.where().eq("t0.email", email).eq("merchant", store.getMerchant()).eq("t0.is_active", true).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
                 }
 
-                if(memberData == null) {
-                    memberData = Member.find.where().eq("t0.phone", phoneNumber).eq("merchant", store.merchant).eq("t0.is_active", true).eq("t0.is_deleted", false).findUnique();
+                if(memberData == null && phoneNumber != null && !phoneNumber.isEmpty()){
+                    if(!Helper.isValidPhoneNumber(phoneNumber)){
+                        response.setBaseResponse(0, 0, 0, "Nomor telepon tidak valid", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    memberData = Member.find.where().eq("t0.phone", phoneNumber).eq("merchant", store.getMerchant()).eq("t0.is_active", true).eq("t0.is_deleted", false).findUnique();
                 }
                 
                 if(memberData != null){
@@ -272,6 +281,93 @@ public class LoyaltyPointController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
+    public static Result checkMember() {
+        MerchantLog merchantLog = checkUserAccessAuthorization();
+        if (merchantLog != null && (merchantLog.userMerchant != null || merchantLog.merchant != null)) {
+            try {
+                JsonNode json = request().body().asJson();
+                LoyaltyCheckMemberRequest request = objectMapper.readValue(json.toString(), LoyaltyCheckMemberRequest.class);
+                Merchant merchant = merchantLog.userMerchant.getRole().getMerchant() != null ? merchantLog.userMerchant.getRole().getMerchant() : merchantLog.merchant;
+                LoyaltyCheckMemberResponse lmResponse = new LoyaltyCheckMemberResponse();
+                Member memberData = null;
+                if(request.getEmail() != null && !request.getEmail().isEmpty()){
+                    if(!Helper.isValidEmailAddress(request.getEmail())){
+                        response.setBaseResponse(0, 0, 0, "Email tidak valid", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    memberData = Member.find.where().eq("t0.email", request.getEmail()).eq("merchant", merchant).eq("t0.is_active", true).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
+                    if(memberData == null){
+                        if(request.getFullName().isEmpty()){
+                            response.setBaseResponse(0, 0, 0, "Nama pemesan tidak boleh kosong", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        Member newMember = new Member();
+                        newMember.phone = "";
+                        newMember.firstName = Helper.getFirstName(request.getFullName());
+                        newMember.lastName = Helper.getLastName(request.getFullName());
+                        newMember.fullName = request.getFullName();
+                        newMember.email = request.getEmail();
+                        newMember.lastPurchase = null;
+                        newMember.setMerchant(merchant);
+                        newMember.isActive = true;
+                        newMember.loyaltyPoint = new BigDecimal(0);
+                        newMember.save();
+                        memberData = newMember;
+                    }
+                }
+
+                if(memberData == null && request.getPhoneNumber() != null && !request.getPhoneNumber().isEmpty()){
+                    if(!Helper.isValidPhoneNumber(request.getPhoneNumber())){
+                        response.setBaseResponse(0, 0, 0, "Nomor telepon tidak valid", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    memberData = Member.find.where().eq("t0.phone", request.getPhoneNumber()).eq("merchant", merchant).eq("t0.is_active", true).eq("t0.is_deleted", false).findUnique();
+                    if(memberData == null){
+                        if(request.getFullName().isEmpty()){
+                            response.setBaseResponse(0, 0, 0, "Nama pemesan tidak boleh kosong", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        Member newMember = new Member();
+                        newMember.phone = request.getPhoneNumber();
+                        newMember.firstName = Helper.getFirstName(request.getFullName());
+                        newMember.lastName = Helper.getLastName(request.getFullName());
+                        newMember.fullName = request.getFullName();
+                        newMember.email = "";
+                        newMember.lastPurchase = null;
+                        newMember.setMerchant(merchant);
+                        newMember.isActive = true;
+                        newMember.loyaltyPoint = new BigDecimal(0);
+                        newMember.save();
+                        memberData = newMember;
+                    }
+                }
+
+                if(memberData != null){
+                    lmResponse.setMemberId(memberData.id);
+                    lmResponse.setFirstName(memberData.firstName);
+                    lmResponse.setLastName(memberData.lastName);
+                    lmResponse.setFullName(memberData.fullName);
+                    lmResponse.setEmail(memberData.email);
+                    lmResponse.setPhone(memberData.phone);
+                    lmResponse.setIsHaveLoyaltyPoint(memberData.loyaltyPoint.compareTo(new BigDecimal(0)) > 0);
+                    lmResponse.setLoyaltyPoint(Helper.convertCurrencyIDR(memberData.loyaltyPoint));
+                    response.setBaseResponse(1, 0, 1, "Data Member berhasil di tampilkan", lmResponse);
+                    return ok(Json.toJson(response));
+                } else if(request.getPhoneNumber().isEmpty() || request.getEmail().isEmpty()) {
+                    response.setBaseResponse(0, 0, 0, "Nomor telepon / email diperlukan", null);
+                } else {
+                    response.setBaseResponse(0, 0, 0, "Data tidak ditemukan", null);
+                    return notFound(Json.toJson(response));
+                }
+            } catch (Exception e) {
+                logger.error("Error saat parsing json", e);
+                e.printStackTrace();
+            }
+        } else {
+            response.setBaseResponse(0, 0, 0, "User tidak memiliki akses", null);
+        }
+        return unauthorized(Json.toJson(response));
+    }
     // public static Result updateStatusPickUpPoint(Long id) {
     //     Merchant ownMerchant = checkMerchantAccessAuthorization();
     //     if (ownMerchant != null) {
