@@ -451,7 +451,7 @@ public class SubCategoryMerchantController extends BaseController {
         public static Result createSubsCategory(Long catId, Long id) {
             Merchant ownMerchant = checkMerchantAccessAuthorization();
             if (ownMerchant != null) {
-                Query<SubsCategoryMerchant> query = SubsCategoryMerchantRepository.find.where().eq("t0.subcategory_id", id).eq("t0.is_deleted", false).eq("t0.merchant", ownMerchant).order("t0.id");
+                Query<SubsCategoryMerchant> query = SubsCategoryMerchantRepository.find.where().eq("t0.subcategory_id", id).eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
                 try {
                     Http.MultipartFormData body = request().body().asMultipartFormData();
                     List<SubsCategoryMerchant> totalData = SubsCategoryMerchantRepository.getTotalSubsCategory(query);

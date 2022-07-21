@@ -671,6 +671,59 @@ public class ProductMerchantController extends BaseController {
         return badRequest(Json.toJson(response));
     }
 
+    public static Result posProductAdditional(Long productId, Long storeId){
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            List<ProductAddOnType>dataAddOnType = ProductAddOnTypeRepository.findByMerchantId(ownMerchant);
+            try {                    
+                List<MiniPosAdditionalResponse> responsesTypeProductAddOn = new ArrayList<>();
+                for(ProductAddOnType dataProductAddOnType : dataAddOnType) {
+                    MiniPosAdditionalResponse responseTypeProductAddOn = new MiniPosAdditionalResponse();
+                    responseTypeProductAddOn.setProductType(dataProductAddOnType.getProductType());
+                    Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().eq("t0.product_type",dataProductAddOnType.getProductType()).eq("t0.product_id", productId).eq("merchant", ownMerchant).order("t0.product_type asc");
+                    List<ProductAddOn> dataAddOn = ProductAddOnRepository.getDataForAddOn(queryProductAddOn);
+                    List<MiniPosAdditionalResponse.ProductAddOn> responsesProductAddOn = new ArrayList<>();
+                    for(ProductAddOn dataProductAddOn : dataAddOn) {
+                        ProductStore productStore = ProductStoreRepository.findForCust(dataProductAddOn.getProductAssignId(), storeId, ownMerchant);
+                        ProductMerchantDetail forDetail = ProductMerchantDetailRepository.findDetailAdditionalProduct(dataProductAddOn.getProductAssignId(), dataProductAddOn.getMerchant().id);
+                        ProductMerchant productMerchantAssign = ProductMerchantRepository.findByIdProductRecommend(dataProductAddOn.getProductAssignId(), dataProductAddOn.getMerchant().id);
+                                            
+                        MiniPosAdditionalResponse.ProductAddOn responseAddOn = new MiniPosAdditionalResponse.ProductAddOn();
+                        responseAddOn.setProductId(dataProductAddOn.getProductMerchant().id);
+                        responseAddOn.setProductAssignId(dataProductAddOn.getProductAssignId());
+                        responseAddOn.setProductName(productMerchantAssign.getProductName());
+                        if (productStore != null) {
+                            responseAddOn.setProductPrice(productStore.getStorePrice());
+                            responseAddOn.setDiscountType(productStore.getDiscountType());
+                            responseAddOn.setDiscount(productStore.getDiscount());
+                            responseAddOn.setProductPriceAfterDiscount(productStore.getFinalPrice());
+                        } else {
+                            responseAddOn.setProductPrice(forDetail.getProductPrice());
+                            responseAddOn.setDiscountType(forDetail.getDiscountType());
+                            responseAddOn.setDiscount(forDetail.getDiscount());
+                            responseAddOn.setProductPriceAfterDiscount(forDetail.getProductPriceAfterDiscount());
+                        }
+                        responseAddOn.setProductImageMain(forDetail.getProductImageMain());
+                        responseAddOn.setProductImage1(forDetail.getProductImage1());
+                        responseAddOn.setProductImage2(forDetail.getProductImage2());
+                        responseAddOn.setProductImage3(forDetail.getProductImage3());
+                        responseAddOn.setProductImage4(forDetail.getProductImage4());
+                        responsesProductAddOn.add(responseAddOn);
+                    }
+                    responseTypeProductAddOn.setProductAddOn(responsesProductAddOn != null ? responsesProductAddOn : null);
+                    responsesTypeProductAddOn.add(responseTypeProductAddOn);
+                }
+                response.setBaseResponse(1, 0, 1, "Berhasil menampilkan data", responsesTypeProductAddOn);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                Logger.error("Error", e);
+            }
+            response.setBaseResponse(0, 0, 0, error, null);
+            return badRequest(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, "Merchant tidak ditemukan", null);
+        return badRequest(Json.toJson(response));
+    }
     // FOR HOME CUSTOMER
     public static Result productListKiosk(Long brandId, Long merchantId, Long storeId, Long categoryId) {
         if (brandId != null) {
