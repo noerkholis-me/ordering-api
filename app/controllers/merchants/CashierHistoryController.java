@@ -255,7 +255,14 @@ public class CashierHistoryController extends BaseController {
                 CashierReportResponse cashierReportResponse = new CashierReportResponse();
                 cashierReportResponse.setId(cashierHistoryMerchant.get().id);
                 cashierReportResponse.setCashierName(cashierHistoryMerchant.get().getUserMerchant().getFullName());
-                cashierReportResponse.setStoreName(cashierHistoryMerchant.get().store.storeName);
+                if(cashierHistoryMerchant.get().getStore() != null && !cashierHistoryMerchant.get().getStore().storeName.isEmpty()){
+                    cashierReportResponse.setStoreName(cashierHistoryMerchant.get().getStore().storeName);
+                } else if(cashierHistoryMerchant.get().getStore() != null && cashierHistoryMerchant.get().getStore().id != null){
+                    store = Store.findById(cashierHistoryMerchant.get().getStore().id);
+                    cashierReportResponse.setStoreName(store.storeName);
+                } else {
+                    cashierReportResponse.setStoreName(store.storeName);
+                }
                 cashierReportResponse.setStartTime(cashierHistoryMerchant.get().getStartTime());
                 cashierReportResponse.setEndTime(cashierHistoryMerchant.get().getEndTime());
                 cashierReportResponse.setSessionCode(cashierHistoryMerchant.get().getSessionCode());
@@ -318,7 +325,14 @@ public class CashierHistoryController extends BaseController {
                         cashierHistoryMerchant.get().getEndTotalAmountCash().toString() : "0");
                 cashierClosePrintResponse.setId(cashierHistoryMerchant.get().id);
                 cashierClosePrintResponse.setCashierName(cashierHistoryMerchant.get().getUserMerchant().getFullName());
-                cashierClosePrintResponse.setStoreName(cashierHistoryMerchant.get().store.storeName);
+                if(cashierHistoryMerchant.get().getStore() != null && !cashierHistoryMerchant.get().getStore().storeName.isEmpty()){
+                    cashierClosePrintResponse.setStoreName(cashierHistoryMerchant.get().getStore().storeName);
+                } else if(cashierHistoryMerchant.get().getStore() != null && cashierHistoryMerchant.get().getStore().id != null){
+                    store = Store.findById(cashierHistoryMerchant.get().getStore().id);
+                    cashierClosePrintResponse.setStoreName(store.storeName);
+                } else if(store != null){
+                    cashierClosePrintResponse.setStoreName(store.storeName);
+                }
                 cashierClosePrintResponse.setStartTime(cashierHistoryMerchant.get().getStartTime());
                 cashierClosePrintResponse.setEndTime(cashierHistoryMerchant.get().getEndTime());
                 cashierClosePrintResponse.setSessionCode(cashierHistoryMerchant.get().getSessionCode());
@@ -374,7 +388,14 @@ public class CashierHistoryController extends BaseController {
                             cashierHistoryMerchant1.getEndTotalAmountCash().toString() : "0");
                     cashierReportResponse.setId(cashierHistoryMerchant1.id);
                     cashierReportResponse.setCashierName(cashierHistoryMerchant1.getUserMerchant().getFullName());
-                    cashierReportResponse.setStoreName(cashierHistoryMerchant1.store.storeName);
+                    if(cashierHistoryMerchant1.getStore() != null && !cashierHistoryMerchant1.getStore().storeName.isEmpty()){
+                        cashierReportResponse.setStoreName(cashierHistoryMerchant1.getStore().storeName);
+                    } else if(cashierHistoryMerchant1.getStore() != null && cashierHistoryMerchant1.getStore().id != null){
+                        store = Store.findById(cashierHistoryMerchant1.getStore().id);
+                        cashierReportResponse.setStoreName(store.storeName);
+                    } else if(store != null){
+                        cashierReportResponse.setStoreName(store.storeName);
+                    }
                     cashierReportResponse.setStartTime(cashierHistoryMerchant1.getStartTime());
                     cashierReportResponse.setEndTime(cashierHistoryMerchant1.getEndTime());
                     cashierReportResponse.setSessionCode(cashierHistoryMerchant1.getSessionCode());
