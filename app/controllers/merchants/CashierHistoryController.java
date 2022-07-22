@@ -456,7 +456,14 @@ public class CashierHistoryController extends BaseController {
                             cashierHistoryMerchant1.getEndTotalAmountCash().toString() : "0");
                     cashierReportResponse.setId(cashierHistoryMerchant1.id);
                     cashierReportResponse.setCashierName(cashierHistoryMerchant1.getUserMerchant().getFullName());
-                    cashierReportResponse.setStoreName(cashierHistoryMerchant1.store.storeName);
+                    if(cashierHistoryMerchant1.getStore() != null && !cashierHistoryMerchant1.getStore().storeName.isEmpty()){
+                        cashierReportResponse.setStoreName(cashierHistoryMerchant1.getStore().storeName);
+                    } else if(cashierHistoryMerchant1.getStore() != null && cashierHistoryMerchant1.getStore().id != null){
+                        store = Store.findById(cashierHistoryMerchant1.getStore().id);
+                        cashierReportResponse.setStoreName(store.storeName);
+                    } else if(store != null){
+                        cashierReportResponse.setStoreName(store.storeName);
+                    }
                     cashierReportResponse.setStartTime(cashierHistoryMerchant1.getStartTime());
                     cashierReportResponse.setEndTime(cashierHistoryMerchant1.getEndTime());
                     cashierReportResponse.setSessionCode(cashierHistoryMerchant1.getSessionCode());
