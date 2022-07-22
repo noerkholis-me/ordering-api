@@ -134,4 +134,10 @@ public class UserMerchantRepository extends Model {
 		return member;
 	}
 
+	public static boolean isPasswordValid(String email, String password) {
+		String encPassword2 = Encryption.EncryptAESCBCPCKS5Padding(password);
+		UserMerchant member = findByEmail(email);
+		return member.password.equals(encPassword2);
+	}
+
 }
