@@ -80,22 +80,25 @@ public class SessionsController extends BaseController {
             Boolean userType = Boolean.FALSE;
 
             if (email.matches(CommonFunction.emailRegex)) {
-                userMerchant = UserMerchantRepository.login(email, password);
+                userMerchant = UserMerchantRepository.findByEmail(email);
                 if (userMerchant == null) {
-                    member = Merchant.login(email, password);
+                    member = Merchant.findByEmail(email, false);
                     if (member != null) {
-                        if(!Merchant.isPasswordValid(email, password)){
+                        if(!Merchant.isPasswordValid(member.password, password)){
                             response.setBaseResponse(0, 0, 0, "Email atau password yang anda masukkan salah!", null);
                             return badRequest(Json.toJson(response));
                         }
                         userType = Boolean.TRUE;
                     }
                 } else {
-                    if(!UserMerchantRepository.isPasswordValid(email, password)){
+                    if(!UserMerchantRepository.isPasswordValid(userMerchant.getPassword(), password)){
                         response.setBaseResponse(0, 0, 0, "Email atau password yang anda masukkan salah!", null);
                         return badRequest(Json.toJson(response));
                     }
                 }
+            } else {
+                response.setBaseResponse(0, 0, 0, "Email yang anda masukkan tidak valid!", null);
+                return badRequest(Json.toJson(response));
             }
 
             if (member != null || userMerchant != null) {
