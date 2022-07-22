@@ -75,40 +75,46 @@ public class CashierHistoryMerchantRepository extends Model {
     }
 
     public static Optional<CashierHistoryMerchant> findLastSessionCashier(Long userMerchantId, Long storeId) {
-        return Optional.ofNullable(
-                find.where()
+        return find.where()
                         .eq("isActive", true)
                         .eq("userMerchant.id", userMerchantId)
                         .eq("store.id", storeId)
                         .orderBy("t0.updated_at desc")
-                        .findList().get(0)
-        );
+                        .findList().stream().findFirst();
     }
-    public static Optional<CashierHistoryMerchant> findBySessionCode(Long userMerchantId, Long storeId, String sessionCode) {
-        return Optional.ofNullable(
-                find.where()
+    public static Optional<CashierHistoryMerchant> findBySessionCode(String sessionCode) {
+        return find.where()
                         .eq("isActive", true)
-                        .eq("userMerchant.id", userMerchantId)
-                        .eq("store.id", storeId)
                         .eq("sessionCode", sessionCode)
-                        .findList().get(0)
-        );
+                        .findList().stream().findFirst();
     }
 
-    public static Query<CashierHistoryMerchant> findAllCashierReportByDate(String startDate, String endDate) throws ParseException {
+    public static Query<CashierHistoryMerchant> findAllCashierReportByDate(Query<CashierHistoryMerchant> query, String startDate, String endDate) throws ParseException {
+        if(query == null){
+            query = Ebean.find(CashierHistoryMerchant.class);
+        }
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         Date start = simpleDateFormat.parse(startDate.concat(" 00:00:00.0"));
         Date end = simpleDateFormat.parse(endDate.concat(" 23:59:00.0"));
         Timestamp startTimestamp = new Timestamp(start.getTime());
         Timestamp endTimestamp = new Timestamp(end.getTime());
-        return Ebean.find(CashierHistoryMerchant.class)
+        return query
                 .where()
                 .between("start_time", startTimestamp, endTimestamp)
                 .query();
     }
-    public static Query<CashierHistoryMerchant> findAllCashierReportByUserMerchant(Long storeId, Long userMerchantId) {
-        return Ebean.find(CashierHistoryMerchant.class)
+    public static Query<CashierHistoryMerchant> findAllCashierReportByUserMerchant(Query<CashierHistoryMerchant> query, Long storeId, Long userMerchantId) {
+        if(query == null){
+            query = Ebean.find(CashierHistoryMerchant.class);
+        }
+        return query
                 .where().eq("store.id", storeId)
+                .eq("userMerchant.id", userMerchantId)
+                .query();
+    }
+    public static Query<CashierHistoryMerchant> findAllCashierReportByUserMerchantId(Long userMerchantId) {
+        return Ebean.find(CashierHistoryMerchant.class)
+                .where()
                 .eq("userMerchant.id", userMerchantId)
                 .query();
     }
