@@ -11,6 +11,7 @@ import models.UserMerchant;
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Optional;
 
 @Entity
 @Table(name = "session_cashier")
@@ -57,18 +58,18 @@ public class CashierHistoryMerchant extends BaseModel {
     private static final Finder<Long, CashierHistoryMerchant> find = new Finder<>(Long.class, CashierHistoryMerchant.class);
 
     public static String generateSessionCode(Long userMerchantId, Long storeId){
-        CashierHistoryMerchant cashier = find.where()
+        Optional<CashierHistoryMerchant> cashier = find.where()
                 .eq("isActive", true)
                 .eq("userMerchant.id", userMerchantId)
                 .eq("store.id", storeId)
                 .orderBy("id desc")
-                .findList().get(0);
+                .findList().stream().findFirst();
 
         String seqNum = "";
-        if(cashier == null){
+        if(!cashier.isPresent()){
             seqNum = "00001";
         }else{
-            seqNum = cashier.sessionCode.substring(cashier.sessionCode.length() - 5);
+            seqNum = cashier.get().sessionCode.substring(cashier.get().sessionCode.length() - 5);
             int seq = Integer.parseInt(seqNum)+1;
             seqNum = "00000" + String.valueOf(seq);
             seqNum = seqNum.substring(seqNum.length() - 5);
