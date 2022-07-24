@@ -193,7 +193,7 @@ public class CategoryMerchantController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (categoryMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " kategori tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
@@ -254,7 +254,7 @@ public class CategoryMerchantController extends BaseController {
                 if (id != null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        CategoryMerchant CategoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        CategoryMerchant CategoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (CategoryMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " kategori tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
@@ -293,7 +293,7 @@ public class CategoryMerchantController extends BaseController {
             if (id != null) {
                 Transaction trx = Ebean.beginTransaction();
                 try {
-                    CategoryMerchant CategoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                    CategoryMerchant CategoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                     if (CategoryMerchant == null) {
                         response.setBaseResponse(0, 0, 0, error + " kategori merchant tidak tersedia.", null);
                         return badRequest(Json.toJson(response));
@@ -368,7 +368,7 @@ public class CategoryMerchantController extends BaseController {
                     CategoryMerchantResponse request = objectMapper.readValue(json.toString(), CategoryMerchantResponse.class);
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant.id);
+                        CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (categoryMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " category tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
