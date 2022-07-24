@@ -5,6 +5,7 @@ import dtos.store.StoreAccessResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import models.RoleMerchant;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,6 +28,8 @@ public class UserMerchantSessionResponse {
     private String birthDate;
     @JsonProperty("is_active")
     private String isActive;
+    @JsonProperty("role")
+    private RoleMerchant role;
     @JsonProperty("store_access")
     private StoreAccessResponse storeAccess;
 
