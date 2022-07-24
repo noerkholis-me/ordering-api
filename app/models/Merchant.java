@@ -571,6 +571,11 @@ public class Merchant extends BaseModel{
         return member;
     }
 
+    public static boolean isPasswordValid(String encPassword, String password){
+        String encPassword2 = Encryption.EncryptAESCBCPCKS5Padding(password);
+        return encPassword.equals(encPassword2);
+    }
+
     public String changePassword(String oldPass, String newPass, String conPass)
             throws InvalidKeyException, InvalidAlgorithmParameterException, NoSuchAlgorithmException,
             NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {

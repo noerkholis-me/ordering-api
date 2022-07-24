@@ -3,10 +3,7 @@ package models.transaction;
 import com.avaje.ebean.annotation.CreatedTimestamp;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import models.BaseModel;
-import models.Member;
-import models.Merchant;
-import models.Store;
+import models.*;
 import models.merchant.TableMerchant;
 import models.pupoint.PickUpPointMerchant;
 
@@ -88,6 +85,10 @@ public class Order extends BaseModel {
     
     @Column(name = "total_loyalty_usage")
     private BigDecimal totalLoyaltyUsage;
+
+    @ManyToOne(cascade = { CascadeType.ALL })
+    @JoinColumn(name = "user_merchant_id", referencedColumnName = "id")
+    private UserMerchant userMerchant;
 
     // ================================================================ //
 
