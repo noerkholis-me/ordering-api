@@ -121,7 +121,7 @@ public static final String passwordRegex = "^.{8,}$";
 			return "Please input password and confirm password";
 		}
 		if (!CommonFunction.passwordValidation(password)) {
-			return "Password must be at least 6 character, has no whitespace, "
+			return "Password must be at least 8 character, has no whitespace, "
 					+ "and have at least 3 variations from uppercase, lowercase, number, or symbol";
 		}
 		if (!confPassword.equals(password)) {
