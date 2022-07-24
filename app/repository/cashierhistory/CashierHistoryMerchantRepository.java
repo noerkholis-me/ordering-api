@@ -80,5 +80,15 @@ public class CashierHistoryMerchantRepository extends Model {
                         .findList().get(0)
         );
     }
+    public static Optional<CashierHistoryMerchant> findBySessionCode(Long userMerchantId, Long storeId, String sessionCode) {
+        return Optional.ofNullable(
+                find.where()
+                        .eq("isActive", true)
+                        .eq("userMerchant.id", userMerchantId)
+                        .eq("store.id", storeId)
+                        .eq("sessionCode", sessionCode)
+                        .findList().get(0)
+        );
+    }
 
 }

@@ -6,20 +6,20 @@ import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
+import com.hokeba.util.Constant;
 import com.hokeba.util.Helper;
 import controllers.BaseController;
-import dtos.cashier.CashierClosePosRequest;
-import dtos.cashier.CashierHistoryResponse;
-import dtos.cashier.CashierOpenPosRequest;
-import dtos.cashier.CashierReportResponse;
+import dtos.cashier.*;
 import models.Member;
 import models.Merchant;
 import models.Store;
 import models.UserMerchant;
+import models.appsettings.AppSettings;
 import models.merchant.CashierHistoryMerchant;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import repository.AppSettingRepository;
 import repository.OrderRepository;
 import repository.UserMerchantRepository;
 import repository.cashierhistory.CashierHistoryMerchantRepository;
@@ -270,6 +270,71 @@ public class CashierHistoryController extends BaseController {
                 cashierReportResponse.setNotes(cashierHistoryMerchant.get().getNotes());
 
                 response.setBaseResponse(1, offset, limit, success + " menampilkan data penutupan kasir", cashierReportResponse);
+                return ok(Json.toJson(response));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                response.setBaseResponse(0, 0, 0, error, null);
+                return internalServerError(Json.toJson(response));
+            }
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+    }
+    public static Result printClosePOSResult(Long storeId, String sessionCode) {
+        UserMerchant ownUser = checkUserMerchantAccessAuthorization();
+        if (ownUser != null) {
+            try {
+                System.out.println("user merchant id >>> " + ownUser.id);
+                Optional<CashierHistoryMerchant> cashierHistoryMerchant = Optional.empty();
+                Store store = null;
+                if (storeId != null && storeId != 0L) {
+                    store = Store.findById(storeId);
+                    if (store == null) {
+                        response.setBaseResponse(0, 0, 0, "store tidak ditemukan", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    if(sessionCode != null && !sessionCode.isEmpty()) {
+                        cashierHistoryMerchant = CashierHistoryMerchantRepository.findBySessionCode(ownUser.id, storeId, sessionCode);
+                    } else {
+                        cashierHistoryMerchant = CashierHistoryMerchantRepository.findLastSessionCashier(ownUser.id, storeId);
+                    }
+                }
+                if (!cashierHistoryMerchant.isPresent()) {
+                    response.setBaseResponse(0, 0, 0, "session cashier tidak ditemukan", null);
+                    return badRequest(Json.toJson(response));
+                }
+                CashierClosePrintResponse cashierClosePrintResponse = new CashierClosePrintResponse();
+
+                AppSettings appSettings = AppSettingRepository.findByMerchantId(store.getMerchant().id);
+                if (appSettings == null) {
+                    String sandboxImage = Constant.getInstance().getImageUrl()
+                            .concat("/assets/images/logo-sandbox.png");
+                    cashierClosePrintResponse.setImageStoreUrl(sandboxImage);
+                }else {
+                    cashierClosePrintResponse.setImageStoreUrl(appSettings.getAppLogo());
+                }
+                cashierClosePrintResponse.setStoreName(store.storeName);
+                cashierClosePrintResponse.setStoreAddress(store.storeAddress);
+                cashierClosePrintResponse.setStorePhoneNumber(store.storePhone);
+
+                BigDecimal closingSystem = new BigDecimal(
+                        cashierHistoryMerchant.get().getEndTotalAmount() != null ? cashierHistoryMerchant.get().getEndTotalAmount().toString() : "0");
+                BigDecimal closingCashier = new BigDecimal(cashierHistoryMerchant.get().getEndTotalAmountCash() != null ?
+                        cashierHistoryMerchant.get().getEndTotalAmountCash().toString() : "0");
+                cashierClosePrintResponse.setId(cashierHistoryMerchant.get().id);
+                cashierClosePrintResponse.setCashierName(cashierHistoryMerchant.get().getUserMerchant().getFullName());
+                cashierClosePrintResponse.setStoreName(store.storeName);
+                cashierClosePrintResponse.setStartTime(cashierHistoryMerchant.get().getStartTime());
+                cashierClosePrintResponse.setEndTime(cashierHistoryMerchant.get().getEndTime());
+                cashierClosePrintResponse.setSessionCode(cashierHistoryMerchant.get().getSessionCode());
+                cashierClosePrintResponse.setInitialCash(Helper.convertCurrencyIDR(cashierHistoryMerchant.get().getStartTotalAmount()));
+                cashierClosePrintResponse.setClosingCashSystem(Helper.convertCurrencyIDR(closingSystem));
+                cashierClosePrintResponse.setClosingCashCashier(Helper.convertCurrencyIDR(closingCashier));
+                cashierClosePrintResponse.setMarginCash(Helper.convertCurrencyIDR(closingSystem.subtract(closingCashier)));
+                cashierClosePrintResponse.setNotes(cashierHistoryMerchant.get().getNotes());
+
+                response.setBaseResponse(1, offset, limit, success + " menampilkan data penutupan kasir", cashierClosePrintResponse);
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
                 ex.printStackTrace();
