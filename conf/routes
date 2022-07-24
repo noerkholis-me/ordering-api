@@ -586,4 +586,4 @@ GET         /pos/:storeId/get-total-cash                        controllers.dash
 GET         /pos/get-order-information                       controllers.dashboard.DashboardPOSController.getOrderInformation()
 GET         /pos/category-list                             controllers.minipos.ProductController.listCategoryMiniPOS()
 GET         /pos/category-list                             controllers.minipos.ProductController.listCategoryMiniPOS()
-GET         /pos/product-list                             controllers.minipos.ProductController.listProductMiniPos(offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0, category_id:Long ?= 0)
+GET         /pos/product-list                             controllers.minipos.ProductController.listProductMiniPos(offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "")
