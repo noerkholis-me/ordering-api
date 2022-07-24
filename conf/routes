@@ -582,6 +582,7 @@ POST        /pos/open-pos                                  controllers.merchants
 POST        /pos/close-pos                                  controllers.merchants.CashierHistoryController.closePos()
 GET        /pos/close-pos                                  controllers.merchants.CashierHistoryController.closePOSResult(store_id:Long ?= 0)
 GET        /pos/close-pos/print                                 controllers.merchants.CashierHistoryController.printClosePOSResult(store_id:Long ?= 0, session_code:String ?= "")
+GET        /pos/close-pos/report                                  controllers.merchants.CashierHistoryController.closePOSReport(offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0)
 GET         /merchant/cashier-history                      controllers.merchants.CashierHistoryController.getAllCashierHistory(limit:Int ?= 10, offset:Int ?= 0, store_id:Long ?= 0)
 
 
