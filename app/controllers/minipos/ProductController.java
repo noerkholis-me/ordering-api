@@ -93,7 +93,7 @@ public class ProductController extends BaseController {
                 for(ProductMerchantDetail productMerchantDetail : dataProductDetail){
                     ProductMiniPosResponse productResponsePos = new ProductMiniPosResponse();
                     ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(productMerchantDetail.getProductMerchant().id, ownMerchant.id);
-                    ProductStore productStore = ProductStoreRepository.findForCust(productMerchant.id, storeId, ownMerchant.id);
+                    ProductStore productStore = ProductStoreRepository.findForCust(productMerchant.id, storeId, ownMerchant);
                     productResponsePos.setProductId(productMerchant.id);
                     productResponsePos.setProductName(productMerchant.getProductName());
                     productResponsePos.setProductType(productMerchantDetail.getProductType());

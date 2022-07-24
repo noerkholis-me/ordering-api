@@ -20,12 +20,12 @@ public class ProductStoreRepository extends Model {
 		return Optional.ofNullable(find.where().eq("id", id).findUnique());
 	}
 
-    public static ProductStore findByIdAndMerchantId(Long id, Long merchantId) {
+    public static ProductStore findByIdAndMerchantId(Long id, Merchant merchant) {
         try {
 			return find.where()
-				.eq("id", id)
-				.eq("merchant_id", merchantId)
-				.eq("is_deleted", Boolean.FALSE)
+				.eq("t0.id", id)
+				.eq("merchant", merchant)
+				.eq("t0.is_deleted", Boolean.FALSE)
 				.findUnique();
 		} catch (PersistenceException e) {
 			e.printStackTrace();
@@ -33,13 +33,13 @@ public class ProductStoreRepository extends Model {
 		}
     }
 
-    public static ProductStore findForCust(Long productId, Long storeId, Long merchantId) {
+    public static ProductStore findForCust(Long productId, Long storeId, Merchant merchant) {
         try {
 			return find.where()
-				.eq("product_id", productId)
-				.eq("store_id", storeId)
-				.eq("merchant_id", merchantId)
-				.eq("is_deleted", Boolean.FALSE)
+				.eq("t0.product_id", productId)
+				.eq("t0.store_id", storeId)
+				.eq("merchant", merchant)
+				.eq("t0.is_deleted", Boolean.FALSE)
 				.findUnique();
 		} catch (PersistenceException e) {
 			e.printStackTrace();
