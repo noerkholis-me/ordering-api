@@ -178,49 +178,48 @@ public class CashierHistoryController extends BaseController {
                         return badRequest(Json.toJson(response));
                     }
 
-
                     Optional<CashierHistoryMerchant> lastSessionCashier = CashierHistoryMerchantRepository.findLastSessionCashier(userMerchant.id, store.id);
                     if(!lastSessionCashier.isPresent()){
                         response.setBaseResponse(0, 0, 0, "Kode sesi tidak ditemukan", null);
                         return badRequest(Json.toJson(response));
                     }
                     CashierHistoryMerchant cashierHistoryMerchant = lastSessionCashier.get();
-                        cashierHistoryMerchant.setEndTime(new Date());
-                        BigDecimal endTotalAmount = OrderRepository.getTotalClosingCashier(userMerchant.id,
-                                cashierHistoryMerchant.getStartTime(), cashierHistoryMerchant.getEndTime(), cashierClosePosRequest.getStoreId());
-                        if(endTotalAmount.compareTo(cashierClosePosRequest.getCloseTotalAmountCash()) > 0 &&
-                                cashierClosePosRequest.getNotes() == null || cashierClosePosRequest.getNotes().isEmpty()){
-                            response.setBaseResponse(0, 0, 0,
-                                    "Terdapat selisih antara penutupan kasir sistem dengan closing yang anda masukkan, Silahkan masukkan Catatan!", null);
-                            return badRequest(Json.toJson(response));
-                        }
-                        cashierHistoryMerchant.setEndTotalAmount(endTotalAmount);
-                        cashierHistoryMerchant.setEndTotalAmountCash(cashierClosePosRequest.getCloseTotalAmountCash());
-                        cashierHistoryMerchant.setNotes(cashierClosePosRequest.getNotes());
-                        cashierHistoryMerchant.update(cashierHistoryMerchant.id);
-                        trx.commit();
+                    cashierHistoryMerchant.setEndTime(new Date());
+                    BigDecimal endTotalAmount = OrderRepository.getTotalClosingCashier(userMerchant.id,
+                            cashierHistoryMerchant.getStartTime(), cashierHistoryMerchant.getEndTime(), cashierClosePosRequest.getStoreId());
+                    if(endTotalAmount.compareTo(cashierClosePosRequest.getCloseTotalAmountCash()) > 0 &&
+                            cashierClosePosRequest.getNotes() == null || cashierClosePosRequest.getNotes().isEmpty()){
+                        response.setBaseResponse(0, 0, 0,
+                                "Terdapat selisih antara penutupan kasir sistem dengan closing yang anda masukkan, Silahkan masukkan Catatan!", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    cashierHistoryMerchant.setEndTotalAmount(endTotalAmount);
+                    cashierHistoryMerchant.setEndTotalAmountCash(cashierClosePosRequest.getCloseTotalAmountCash());
+                    cashierHistoryMerchant.setNotes(cashierClosePosRequest.getNotes());
+                    cashierHistoryMerchant.update(cashierHistoryMerchant.id);
+                    trx.commit();
 
-                        response.setBaseResponse(1, 0, 0, "Closing Berhasil", cashierHistoryMerchant.id);
+                    response.setBaseResponse(1, 0, 0, "Closing Berhasil", cashierHistoryMerchant.id);
 
                     return ok(Json.toJson(response));
                 } catch (Exception e) {
                     LOGGER.error("Error while updating session cashier", e);
                     e.printStackTrace();
                     trx.rollback();
+                    response.setBaseResponse(0, 0, 0, e.getMessage(), null);
+                    return internalServerError(Json.toJson(response));
                 } finally {
                     trx.end();
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
-                response.setBaseResponse(0, 0, 0, error, null);
+                response.setBaseResponse(0, 0, 0, ex.getMessage(), null);
                 return internalServerError(Json.toJson(response));
             }
         } else {
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         }
-        response.setBaseResponse(0, 0, 0, error, null);
-        return internalServerError(Json.toJson(response));
     }
     private static String validateClosePosRequest(CashierClosePosRequest cashierClosePosRequest) {
         if (cashierClosePosRequest.getCloseTotalAmountCash() == null)
@@ -256,7 +255,14 @@ public class CashierHistoryController extends BaseController {
                 CashierReportResponse cashierReportResponse = new CashierReportResponse();
                 cashierReportResponse.setId(cashierHistoryMerchant.get().id);
                 cashierReportResponse.setCashierName(cashierHistoryMerchant.get().getUserMerchant().getFullName());
-                cashierReportResponse.setStoreName(store.storeName);
+                if(cashierHistoryMerchant.get().getStore() != null && !cashierHistoryMerchant.get().getStore().storeName.isEmpty()){
+                    cashierReportResponse.setStoreName(cashierHistoryMerchant.get().getStore().storeName);
+                } else if(cashierHistoryMerchant.get().getStore() != null && cashierHistoryMerchant.get().getStore().id != null){
+                    store = Store.findById(cashierHistoryMerchant.get().getStore().id);
+                    cashierReportResponse.setStoreName(store.storeName);
+                } else {
+                    cashierReportResponse.setStoreName(store.storeName);
+                }
                 cashierReportResponse.setStartTime(cashierHistoryMerchant.get().getStartTime());
                 cashierReportResponse.setEndTime(cashierHistoryMerchant.get().getEndTime());
                 cashierReportResponse.setSessionCode(cashierHistoryMerchant.get().getSessionCode());
@@ -270,7 +276,7 @@ public class CashierHistoryController extends BaseController {
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
                 ex.printStackTrace();
-                response.setBaseResponse(0, 0, 0, error, null);
+                response.setBaseResponse(0, 0, 0, ex.getMessage(), null);
                 return internalServerError(Json.toJson(response));
             }
         } else {
@@ -291,11 +297,9 @@ public class CashierHistoryController extends BaseController {
                         response.setBaseResponse(0, 0, 0, "store tidak ditemukan", null);
                         return badRequest(Json.toJson(response));
                     }
-                    if(sessionCode != null && !sessionCode.isEmpty()) {
-                        cashierHistoryMerchant = CashierHistoryMerchantRepository.findBySessionCode(ownUser.id, storeId, sessionCode);
-                    } else {
-                        cashierHistoryMerchant = CashierHistoryMerchantRepository.findLastSessionCashier(ownUser.id, storeId);
-                    }
+                    cashierHistoryMerchant = CashierHistoryMerchantRepository.findLastSessionCashier(ownUser.id, storeId);
+                } else if(sessionCode != null && !sessionCode.isEmpty()) {
+                    cashierHistoryMerchant = CashierHistoryMerchantRepository.findBySessionCode(sessionCode);
                 }
                 if (!cashierHistoryMerchant.isPresent()) {
                     response.setBaseResponse(0, 0, 0, "session cashier tidak ditemukan", null);
@@ -303,7 +307,7 @@ public class CashierHistoryController extends BaseController {
                 }
                 CashierClosePrintResponse cashierClosePrintResponse = new CashierClosePrintResponse();
 
-                AppSettings appSettings = AppSettingRepository.findByMerchantId(store.getMerchant().id);
+                AppSettings appSettings = AppSettingRepository.findByMerchantId(cashierHistoryMerchant.get().store.getMerchant().id);
                 if (appSettings == null) {
                     String sandboxImage = Constant.getInstance().getImageUrl()
                             .concat("/assets/images/logo-sandbox.png");
@@ -311,9 +315,9 @@ public class CashierHistoryController extends BaseController {
                 }else {
                     cashierClosePrintResponse.setImageStoreUrl(appSettings.getAppLogo());
                 }
-                cashierClosePrintResponse.setStoreName(store.storeName);
-                cashierClosePrintResponse.setStoreAddress(store.storeAddress);
-                cashierClosePrintResponse.setStorePhoneNumber(store.storePhone);
+                cashierClosePrintResponse.setStoreName(cashierHistoryMerchant.get().store.storeName);
+                cashierClosePrintResponse.setStoreAddress(cashierHistoryMerchant.get().store.storeAddress);
+                cashierClosePrintResponse.setStorePhoneNumber(cashierHistoryMerchant.get().store.storePhone);
 
                 BigDecimal closingSystem = new BigDecimal(
                         cashierHistoryMerchant.get().getEndTotalAmount() != null ? cashierHistoryMerchant.get().getEndTotalAmount().toString() : "0");
@@ -321,7 +325,14 @@ public class CashierHistoryController extends BaseController {
                         cashierHistoryMerchant.get().getEndTotalAmountCash().toString() : "0");
                 cashierClosePrintResponse.setId(cashierHistoryMerchant.get().id);
                 cashierClosePrintResponse.setCashierName(cashierHistoryMerchant.get().getUserMerchant().getFullName());
-                cashierClosePrintResponse.setStoreName(store.storeName);
+                if(cashierHistoryMerchant.get().getStore() != null && !cashierHistoryMerchant.get().getStore().storeName.isEmpty()){
+                    cashierClosePrintResponse.setStoreName(cashierHistoryMerchant.get().getStore().storeName);
+                } else if(cashierHistoryMerchant.get().getStore() != null && cashierHistoryMerchant.get().getStore().id != null){
+                    store = Store.findById(cashierHistoryMerchant.get().getStore().id);
+                    cashierClosePrintResponse.setStoreName(store.storeName);
+                } else if(store != null){
+                    cashierClosePrintResponse.setStoreName(store.storeName);
+                }
                 cashierClosePrintResponse.setStartTime(cashierHistoryMerchant.get().getStartTime());
                 cashierClosePrintResponse.setEndTime(cashierHistoryMerchant.get().getEndTime());
                 cashierClosePrintResponse.setSessionCode(cashierHistoryMerchant.get().getSessionCode());
@@ -335,7 +346,7 @@ public class CashierHistoryController extends BaseController {
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
                 ex.printStackTrace();
-                response.setBaseResponse(0, 0, 0, error, null);
+                response.setBaseResponse(0, 0, 0, ex.getMessage(), null);
                 return internalServerError(Json.toJson(response));
             }
         } else {
@@ -343,12 +354,12 @@ public class CashierHistoryController extends BaseController {
             return unauthorized(Json.toJson(response));
         }
     }
-    public static Result closePOSReport(int offset, int limit, Long storeId) {
+    public static Result closePOSReport(int offset, int limit, Long storeId, String sessionCode, String startDate, String endDate) {
         UserMerchant ownUser = checkUserMerchantAccessAuthorization();
         if (ownUser != null) {
             try {
                 System.out.println("user merchant id >>> " + ownUser.id);
-                Query<CashierHistoryMerchant> query = null;
+                Query<CashierHistoryMerchant> query = CashierHistoryMerchantRepository.findAllCashierReportByUserMerchantId(ownUser.id);
                 List<CashierHistoryMerchant> cashierHistoryMerchant = new ArrayList<>();
                 Store store = null;
                 if (storeId != null && storeId != 0L) {
@@ -357,7 +368,13 @@ public class CashierHistoryController extends BaseController {
                         response.setBaseResponse(0, 0, 0, "store tidak ditemukan", null);
                         return badRequest(Json.toJson(response));
                     }
-                    query = CashierHistoryMerchantRepository.findAllCashierReportByUserMerchant(storeId, ownUser.id);
+                    query = CashierHistoryMerchantRepository.findAllCashierReportByUserMerchant(query, storeId, ownUser.id);
+                }
+                if(startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+                    query = CashierHistoryMerchantRepository.findAllCashierReportByDate(query, startDate, endDate);
+                }
+                if(sessionCode != null && !sessionCode.isEmpty()) {
+                    query =  query.where().ilike("sessionCode", "%" + sessionCode + "%").query();
                 }
                 if (query != null) {
                     cashierHistoryMerchant = CashierHistoryMerchantRepository.findAllCashierReport(query, offset, limit);
@@ -371,7 +388,14 @@ public class CashierHistoryController extends BaseController {
                             cashierHistoryMerchant1.getEndTotalAmountCash().toString() : "0");
                     cashierReportResponse.setId(cashierHistoryMerchant1.id);
                     cashierReportResponse.setCashierName(cashierHistoryMerchant1.getUserMerchant().getFullName());
-                    cashierReportResponse.setStoreName(store.storeName);
+                    if(cashierHistoryMerchant1.getStore() != null && !cashierHistoryMerchant1.getStore().storeName.isEmpty()){
+                        cashierReportResponse.setStoreName(cashierHistoryMerchant1.getStore().storeName);
+                    } else if(cashierHistoryMerchant1.getStore() != null && cashierHistoryMerchant1.getStore().id != null){
+                        store = Store.findById(cashierHistoryMerchant1.getStore().id);
+                        cashierReportResponse.setStoreName(store.storeName);
+                    } else if(store != null){
+                        cashierReportResponse.setStoreName(store.storeName);
+                    }
                     cashierReportResponse.setStartTime(cashierHistoryMerchant1.getStartTime());
                     cashierReportResponse.setEndTime(cashierHistoryMerchant1.getEndTime());
                     cashierReportResponse.setSessionCode(cashierHistoryMerchant1.getSessionCode());
@@ -386,7 +410,7 @@ public class CashierHistoryController extends BaseController {
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
                 ex.printStackTrace();
-                response.setBaseResponse(0, 0, 0, error, null);
+                response.setBaseResponse(0, 0, 0, ex.getMessage(), null);
                 return internalServerError(Json.toJson(response));
             }
         } else {
