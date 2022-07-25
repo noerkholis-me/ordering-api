@@ -543,7 +543,7 @@ public class SessionsController extends BaseController {
                 }
 
             }
-            response.setBaseResponse(0, 0, 0, notFound, null);
+            response.setBaseResponse(0, 0, 0, "Email tidak terdaftar", null);
             return notFound(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
