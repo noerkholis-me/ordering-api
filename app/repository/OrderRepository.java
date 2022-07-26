@@ -44,7 +44,7 @@ public class OrderRepository extends Model {
         return query.findPagingList(0).getPage(0).getList();
     }
 
-    public static List<Order> findOrderByStatus(Query<Order> reqQuery, int offset, int limit) {
+    public static List<Order> findOrders(Query<Order> reqQuery, int offset, int limit) {
         Query<Order> query = reqQuery;
         query = query.orderBy("t0.created_at desc");
 
@@ -195,4 +195,17 @@ public class OrderRepository extends Model {
         }
         return total;
     }
+
+    public static Integer getTotalOrder(Query<Order> reqQuery, String statusOrder) {
+        Query<Order> query = reqQuery;
+        ExpressionList<Order> exp = query.where();
+
+        if (!statusOrder.equalsIgnoreCase("") && !statusOrder.isEmpty()) {
+            exp = exp.eq("t0.status", statusOrder);
+        }
+        query = exp.query();
+        return query.findPagingList(0).getPage(0).getList().size();
+    }
+
+
 }
