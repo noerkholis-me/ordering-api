@@ -293,7 +293,7 @@ public class CheckoutOrderController extends BaseController {
                 request.setOrderNumber(orderNumber);
                 request.setDeviceType(orderRequest.getDeviceType());
                 if (member == null) {
-                    request.setCustomerName(store.storeName);
+                    request.setCustomerName("GENERAL_CUSTOMER");
                 } else {
                     request.setCustomerName(member.fullName);
                     request.setCustomerEmail(member.email);
