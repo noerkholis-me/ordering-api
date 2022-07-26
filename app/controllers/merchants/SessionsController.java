@@ -487,7 +487,7 @@ public class SessionsController extends BaseController {
                     Long now = System.currentTimeMillis();
                     String merchantEmail = member.email;
                     String forgotPasswordCode = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
-                    String redirect = Constant.getInstance().getMerchantUrl() + "/reset-password" + "/" + forgotPasswordCode;
+                    String redirect = Constant.getInstance().getMerchantUrl() + "/password-recovery" + "/" + forgotPasswordCode;
                     try {
                         member.resetToken = Encryption.EncryptAESCBCPCKS5Padding(member.email+now);
                         member.resetTime = now;
@@ -515,10 +515,10 @@ public class SessionsController extends BaseController {
                     if(isCashier == Boolean.TRUE) {
                         System.out.println("is cashier true");
                         String forgotPasswordCodePos = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
-                        redirect = Constant.getInstance().getPosUrl() + "/reset-password" + "/" + forgotPasswordCodePos;
+                        redirect = Constant.getInstance().getPosUrl() + "/password-recovery" + "/" + forgotPasswordCodePos;
                     } else {
                         String forgotPasswordCode = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
-                        redirect = Constant.getInstance().getMerchantUrl() + "/reset-password" + "/" + forgotPasswordCode;
+                        redirect = Constant.getInstance().getMerchantUrl() + "/password-recovery" + "/" + forgotPasswordCode;
                     }
 
                     try {
