@@ -143,7 +143,7 @@ public class ProductAddOnController extends BaseController {
                     ProductMerchantAssignResponse responses = new ProductMerchantAssignResponse();
                     
                     ProductMerchantAssignResponse responseData = new ProductMerchantAssignResponse();
-                    Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().eq("t0.product_id", productAddOn.getProductMerchant().id).eq("t0.is_active", true).eq("t0.is_deleted", false).eq("t0.merchant_id", ownMerchant.id).order("t0.id");
+                    Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().eq("t0.product_id", productAddOn.getProductMerchant().id).eq("t0.is_active", true).eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
                     List<ProductAddOn> dataAddOn = ProductAddOnRepository.getDataForAddOn(queryProductAddOn);
                     List<ProductMerchantAssignResponse.ProductAddOn> responsesProductAddOn = new ArrayList<>();
                     // responseData.setId(productAddOn.id);
@@ -242,7 +242,7 @@ public class ProductAddOnController extends BaseController {
                     responseData.setProductName(productMerchant.getProductName());
                     responseData.setMerchantId(productMerchant.getMerchant().id);
                     
-                    Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().eq("t0.product_id", productMerchantDetail.getProductMerchant().id).eq("t0.is_deleted", false).eq("t0.merchant_id", ownMerchant.id).order("t0.id");
+                    Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().eq("t0.product_id", productMerchantDetail.getProductMerchant().id).eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
                     List<ProductAddOn> dataAddOn = ProductAddOnRepository.getDataForAddOn(queryProductAddOn);
                     List<ProductMerchantAssignResponse.ProductAddOn> responsesProductAddOn = new ArrayList<>();
                     

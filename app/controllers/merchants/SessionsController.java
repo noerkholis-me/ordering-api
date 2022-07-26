@@ -80,17 +80,31 @@ public class SessionsController extends BaseController {
             Boolean userType = Boolean.FALSE;
 
             if (email.matches(CommonFunction.emailRegex)) {
-                userMerchant = UserMerchantRepository.login(email, password);
+                userMerchant = UserMerchantRepository.findByEmail(email);
                 if (userMerchant == null) {
-                    member = Merchant.login(email, password);
-                    userType = Boolean.TRUE;
+                    member = Merchant.findByEmail(email, false);
+                    if (member != null) {
+                        if(!Merchant.isPasswordValid(member.password, password)){
+                            response.setBaseResponse(0, 0, 0, "Email atau password yang anda masukkan salah!", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        userType = Boolean.TRUE;
+                    }
+                } else {
+                    if(!UserMerchantRepository.isPasswordValid(userMerchant.getPassword(), password)){
+                        response.setBaseResponse(0, 0, 0, "Email atau password yang anda masukkan salah!", null);
+                        return badRequest(Json.toJson(response));
+                    }
                 }
+            } else {
+                response.setBaseResponse(0, 0, 0, "Email yang anda masukkan tidak valid!", null);
+                return badRequest(Json.toJson(response));
             }
 
             if (member != null || userMerchant != null) {
                 if (userType == Boolean.TRUE) {
                     if (!Merchant.STATUS_APPROVED.equals(member.status)) {
-                        response.setBaseResponse(0, 0, 0, "Your account hasn't been approved, please contact our support", null);
+                        response.setBaseResponse(0, 0, 0, "Akun Anda belum disetujui, harap hubungi dukungan kami", null);
                         return badRequest(Json.toJson(response));
                     }
                     if (member.isActive){
@@ -121,7 +135,7 @@ public class SessionsController extends BaseController {
                         response.setBaseResponse(0, 0, 0, error, null);
                         return badRequest(Json.toJson(response));
                     }else{
-                        response.setBaseResponse(0, 0, 0, "Your account hasn't actived, please check and verify from your email", null);
+                        response.setBaseResponse(0, 0, 0, "Akun Anda belum diaktifkan, silakan periksa dan verifikasi dari email anda.", null);
                         return badRequest(Json.toJson(response));
                     }
                 } else {
@@ -133,7 +147,7 @@ public class SessionsController extends BaseController {
                                 response.setBaseResponse(0, 0, 0, "Akun anda tidak memiliki akses ke perangkat kasir, Silahkan hubungi administrator.", null);
                                 return forbidden(Json.toJson(response));
                             } else if (log == null) {
-                                response.setBaseResponse(0, 0, 0, inputParameter, null);
+                                response.setBaseResponse(0, 0, 0, "User tidak terdaftar", null);
                                 return badRequest(Json.toJson(response));
                             }
                             // modify session response for merchant can be reusable for property
@@ -164,17 +178,18 @@ public class SessionsController extends BaseController {
                             response.setBaseResponse(1, 0, 1, success, session);
                             return ok(Json.toJson(response));
                         } catch (Exception e) {
+                            response.setBaseResponse(0, 0, 0, e.getMessage(), null);
                             // TODO Auto-generated catch block
                             e.printStackTrace();
+                            return internalServerError(Json.toJson(response));
                         }
-                        response.setBaseResponse(0, 0, 0, error, null);
                     }else{
-                        response.setBaseResponse(0, 0, 0, "Your account hasn't actived, please check and verify from your email", null);
+                        response.setBaseResponse(0, 0, 0, "Akun Anda belum diaktifkan, silakan periksa dan verifikasi dari email anda.", null);
                     }
                     return badRequest(Json.toJson(response));
                 }
             }
-            response.setBaseResponse(0, 0, 0, "Wrong username or password", null);
+            response.setBaseResponse(0, 0, 0, "User tidak terdaftar", null);
             return badRequest(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
@@ -528,7 +543,7 @@ public class SessionsController extends BaseController {
                 }
 
             }
-            response.setBaseResponse(0, 0, 0, notFound, null);
+            response.setBaseResponse(0, 0, 0, "Email tidak terdaftar", null);
             return notFound(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
