@@ -351,7 +351,7 @@ public class LoyaltyPointController extends BaseController {
                     lmResponse.setPhone(memberData.phone);
                     lmResponse.setIsHaveLoyaltyPoint(memberData.loyaltyPoint.compareTo(new BigDecimal(0)) > 0);
                     lmResponse.setLoyaltyPoint(Helper.convertCurrencyIDR(memberData.loyaltyPoint));
-                    response.setBaseResponse(1, 0, 1, "Data Member berhasil di tampilkan", lmResponse);
+                    response.setBaseResponse(1, 0, 1, memberData.loyaltyPoint != BigDecimal.ZERO ? "Loyalty Point Member: Rp. " + lmResponse.getLoyaltyPoint() : "Tidak ada point", memberData.loyaltyPoint != BigDecimal.ZERO ? lmResponse : null);
                     return ok(Json.toJson(response));
                 } else if(request.getPhoneNumber().isEmpty() || request.getEmail().isEmpty()) {
                     response.setBaseResponse(0, 0, 0, "Nomor telepon / email diperlukan", null);

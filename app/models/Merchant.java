@@ -179,6 +179,43 @@ public class Merchant extends BaseModel{
     @JsonProperty("paid_hokeba")
     public Double paidHokeba;
 
+    // FOR ADDITIONAL FEATURE
+    @Column(name = "is_pos")
+    @JsonProperty("is_pos")
+    public boolean isPos;
+
+    // CASH TYPE
+    @Column(name = "is_cash")
+    @JsonProperty("is_cash")
+    public boolean isCash;
+    @Column(name = "type_cash")
+    @JsonProperty("type_cash")
+    public String typeCash;
+
+    // DEBIT / CREDIT TYPE
+    @Column(name = "is_debit_credit")
+    @JsonProperty("is_debit_credit")
+    public boolean isDebitCredit;
+    @Column(name = "type_debit_credit")
+    @JsonProperty("type_debit_credit")
+    public String typeDebitCredit;
+
+    // QRIS TYPE
+    @Column(name = "is_qris")
+    @JsonProperty("is_qris")
+    public boolean isQris;
+    @Column(name = "type_qris")
+    @JsonProperty("type_qris")
+    public String typeQris;
+
+    @Column(name = "is_kiosk")
+    @JsonProperty("is_kiosk")
+    public boolean isKiosk;
+
+    @Column(name = "is_mobile_qr")
+    @JsonProperty("is_mobile_qr")
+    public boolean isMobileQr;
+
     @javax.persistence.Transient
     @JsonProperty("code")
     public String getCode(){
