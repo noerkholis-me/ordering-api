@@ -324,7 +324,7 @@ public class ProductStoreController extends BaseController {
                     ProductResponseStore responseProduct = new ProductResponseStore();
                     Query<ProductStore> queryPS = ProductStoreRepository.find.where()
                             .eq("t0.product_id", productMerchants.id).eq("t0.is_deleted", false)
-                            .eq("t0.merchant_id", ownMerchant.id).order("t0.id");
+                            .eq("merchant", ownMerchant).order("t0.id");
                     List<ProductStore> dataPS = ProductStoreRepository.getDataProductStore(queryPS);
                     List<ProductResponseStore.ProductStore> responsesProductStore = new ArrayList<>();
                     responseProduct.setProductId(productMerchants.id);

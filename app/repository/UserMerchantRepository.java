@@ -38,6 +38,7 @@ public class UserMerchantRepository extends Model {
 	public static UserMerchant findByEmail(String email) {
 		return find.where()
 				.eq("email", email)
+				.eq("isDeleted", false)
 				.eq("isActive", Boolean.TRUE)
 				.findUnique();
 	}
@@ -132,6 +133,11 @@ public class UserMerchantRepository extends Model {
 		UserMerchant member = find.where().and(Expr.eq("email", email), Expr.eq("password", encPassword))
 				.eq("isDeleted", false).setMaxRows(1).findUnique();
 		return member;
+	}
+
+	public static boolean isPasswordValid(String encPassword, String password) {
+		String encPassword2 = Encryption.EncryptAESCBCPCKS5Padding(password);
+		return encPassword.equals(encPassword2);
 	}
 
 }

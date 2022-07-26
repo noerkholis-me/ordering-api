@@ -712,7 +712,7 @@ public class SubCategoryMerchantController extends BaseController {
             if (ownMerchant != null) {
                 Transaction trx = Ebean.beginTransaction();
                 try {
-                    Query<SubsCategoryMerchant> query  = SubsCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.merchant_id", ownMerchant).order("t0.id asc");
+                    Query<SubsCategoryMerchant> query  = SubsCategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("merchant", ownMerchant).order("t0.id asc");
                     List<SubsCategoryMerchant> subsCategoryMerchant = SubsCategoryMerchantRepository.getDataSubsCategory(query, sort, filter, offset, limit);
                     List<SubsCategoryMerchantResponse> subsCategoryMerchantList = new ArrayList<>();
 
