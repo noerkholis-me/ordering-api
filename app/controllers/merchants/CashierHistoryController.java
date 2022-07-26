@@ -493,4 +493,43 @@ public class CashierHistoryController extends BaseController {
             return unauthorized(Json.toJson(response));
         }
     }
+
+    public static Result getSessionCashier(Long storeId) {
+        UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
+        if (userMerchant == null) {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        } else {
+            try {
+                Store store = Store.findById(storeId);
+                if (store == null) {
+                    response.setBaseResponse(0, 0, 0, "store tidak ditemukan", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                Optional<CashierHistoryMerchant> cashierHistoryMerchant = CashierHistoryMerchantRepository.findByUserActiveCashierAndStoreIdOpen(userMerchant.id, storeId);
+                if (!cashierHistoryMerchant.isPresent()) {
+                    response.setBaseResponse(0, 0, 0, "cashier history tidak ditemukan", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                SessionCashierResponse sessionCashierResponse = new SessionCashierResponse();
+                sessionCashierResponse.setIsOpen(Boolean.TRUE);
+                sessionCashierResponse.setStartTotalAmount(cashierHistoryMerchant.get().getStartTotalAmount());
+                sessionCashierResponse.setEndTotalAmount(cashierHistoryMerchant.get().getEndTotalAmount());
+
+                response.setBaseResponse(1, 0, 0, success, sessionCashierResponse);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.setBaseResponse(0, 0, 0, error, null);
+                return internalServerError(Json.toJson(response));
+            }
+        }
+    }
+
+
+
+
+
 }

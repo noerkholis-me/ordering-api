@@ -38,6 +38,18 @@ public class CashierHistoryMerchantRepository extends Model {
         );
     }
 
+    public static Optional<CashierHistoryMerchant> findByUserActiveCashierAndStoreIdOpen(Long userMerchantId, Long storeId) {
+        return Optional.ofNullable(
+                find.where()
+                        .eq("isActive", true)
+                        .eq("userMerchant.id", userMerchantId)
+                        .eq("store.id", storeId)
+                        .isNull("endTime")
+                        .setMaxRows(1)
+                        .findUnique()
+        );
+    }
+
     public static Query<CashierHistoryMerchant> findAllCashierHistoryByStoreId(Long storeId) {
         return Ebean.find(CashierHistoryMerchant.class)
                 .where().eq("store.id", storeId)

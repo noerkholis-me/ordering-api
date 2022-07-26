@@ -30,7 +30,7 @@ public class DashboardPOSController extends BaseController {
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         } else {
-            Optional<CashierHistoryMerchant> cashierHistoryMerchant = CashierHistoryMerchantRepository.findByUserActiveCashier(userMerchant.id, storeId);
+            Optional<CashierHistoryMerchant> cashierHistoryMerchant = CashierHistoryMerchantRepository.findByUserActiveCashierAndStoreIdOpen(userMerchant.id, storeId);
             if (!cashierHistoryMerchant.isPresent()) {
                 response.setBaseResponse(0, 0, 0, inputParameter, null);
                 return badRequest(Json.toJson(response));
@@ -50,7 +50,7 @@ public class DashboardPOSController extends BaseController {
             responses.put("total_amount_open_cash", totalOpenCash.intValue());
 
             response.setBaseResponse(1, 0, 0, success, responses);
-            return unauthorized(Json.toJson(response));
+            return ok(Json.toJson(response));
         }
     }
 

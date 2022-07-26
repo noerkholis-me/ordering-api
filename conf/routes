@@ -594,3 +594,6 @@ GET         /pos/:storeId/get-total-cash                        controllers.dash
 GET         /pos/:storeId/get-order-information                       controllers.dashboard.DashboardPOSController.getOrderInformation(storeId: Long)
 GET         /pos/category-list                             controllers.minipos.ProductController.listCategoryMiniPOS()
 GET         /pos/product-list                             controllers.minipos.ProductController.listProductMiniPos(offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "")
+
+GET         /pos/:storeId/session-cashier                   controllers.merchants.CashierHistoryController.getSessionCashier(storeId: Long)
+
