@@ -28,10 +28,10 @@ public class UserMerchantSessionResponse {
     private String birthDate;
     @JsonProperty("is_active")
     private String isActive;
-    @JsonProperty("is_open")
-    private Boolean isOpen;
     @JsonProperty("role")
     private RoleMerchant role;
+    @JsonProperty("is_open")
+    private Boolean isOpen;
     @JsonProperty("store_access")
     private StoreAccessResponse storeAccess;
 
