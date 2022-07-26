@@ -467,6 +467,7 @@ DELETE    /merchant/tables/:id                     controllers.merchants.TableMe
 POST    /merchant/appsetting                       controllers.settings.AppSettingsController.createAppSetting()
 PUT    /merchant/appsetting/:id/update                        controllers.settings.AppSettingsController.updateAppSetting(id: Long)
 GET     /merchant/setting/getsetting                       controllers.settings.AppSettingsController.getAppSetting(merchant_id: Long ?= 0)
+GET     /merchant/appsetting/get-detail-app-setting controllers.settings.AppSettingsController.getApplicationSetting()
 
 #PUPOINT
 POST    /merchant/pickuppoint                       controllers.pickuppoint.PickUpPointController.createPickUpPoint()

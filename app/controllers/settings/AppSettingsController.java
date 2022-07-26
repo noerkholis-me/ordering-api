@@ -198,4 +198,61 @@ public class AppSettingsController extends BaseController {
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
     }
+
+    public static Result getApplicationSetting() {
+        Merchant merchant = checkMerchantAccessAuthorization();
+        if (merchant == null) {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        } else {
+            try {
+                AppSettings appSettings = AppSettingRepository.findByMerchantId(merchant.id);
+                if (appSettings == null) {
+                    response.setBaseResponse(0, 0, 0, inputParameter + " app setting tidak ditemukan.", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                SettingApplicationResponse settingApps = new SettingApplicationResponse();
+                settingApps.setId(appSettings.id);
+                settingApps.setMerchantId(merchant.id);
+                settingApps.setMerchantName(merchant.name);
+                settingApps.setAppSettingKioskResponse(new AppSettingKioskResponse(
+                        appSettings.getPrimaryColorKiosk(),
+                        appSettings.getSecondaryColorKiosk(),
+                        appSettings.getAppLogoKiosk(),
+                        appSettings.getFaviconKiosk()
+                ));
+                settingApps.setAppSettingPaymentTypeResponse(
+                        new AppSettingPaymentTypeResponse(
+                                merchant.isCash(),
+                                merchant.getTypeCash(),
+                                merchant.isDebitCredit(),
+                                merchant.getTypeDebitCredit(),
+                                merchant.isQris(),
+                                merchant.getTypeQris()
+                        )
+                );
+                settingApps.setAppSettingMobileQrResponse(
+                        new AppSettingMobileQrResponse(
+                                appSettings.getPrimaryColor(),
+                                appSettings.getSecondaryColor(),
+                                appSettings.getAppLogo(),
+                                appSettings.getFavicon(),
+                                appSettings.getThreshold()
+                        )
+                );
+
+                response.setBaseResponse(1, 0, 1, success + " menampilkan data", settingApps);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                response.setBaseResponse(0, 0, 0, error, null);
+                return internalServerError(Json.toJson(response));
+            }
+        }
+    }
+
+
+
+
+
 }
