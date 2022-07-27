@@ -16,10 +16,13 @@ import models.Store;
 import models.UserMerchant;
 import models.appsettings.AppSettings;
 import models.merchant.CashierHistoryMerchant;
+import models.transaction.Order;
+import models.transaction.OrderPayment;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.AppSettingRepository;
+import repository.OrderPaymentRepository;
 import repository.OrderRepository;
 import repository.UserMerchantRepository;
 import repository.cashierhistory.CashierHistoryMerchantRepository;
@@ -522,6 +525,59 @@ public class CashierHistoryController extends BaseController {
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 e.printStackTrace();
+                response.setBaseResponse(0, 0, 0, error, null);
+                return internalServerError(Json.toJson(response));
+            }
+        }
+    }
+
+    public static Result getAmountCashier(Long storeId) {
+        UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
+        if (userMerchant == null) {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        } else {
+            try {
+
+                AmountCashierResponse amountCashierResponse = new AmountCashierResponse();
+
+                Store store = Store.findById(storeId);
+                if (store == null) {
+                    amountCashierResponse.setDate(new Date());
+                    amountCashierResponse.setTotalAmountOpeningPos(BigDecimal.ZERO);
+                    amountCashierResponse.setTotalAmountBySystem(BigDecimal.ZERO);
+                    response.setBaseResponse(0, 0, 0, "store tidak ditemukan", amountCashierResponse);
+                    return ok(Json.toJson(response));
+                }
+
+                Optional<CashierHistoryMerchant> cashierHistoryMerchant = CashierHistoryMerchantRepository.findByUserActiveCashierAndStoreIdOpen(userMerchant.id, storeId);
+                if (!cashierHistoryMerchant.isPresent()) {
+                    amountCashierResponse.setDate(new Date());
+                    amountCashierResponse.setTotalAmountOpeningPos(BigDecimal.ZERO);
+                    amountCashierResponse.setTotalAmountBySystem(BigDecimal.ZERO);
+                    response.setBaseResponse(0, 0, 0, "cashier history tidak ditemukan", amountCashierResponse);
+                    return ok(Json.toJson(response));
+                }
+
+                BigDecimal totalAmountClosingBySystem = BigDecimal.ZERO;
+                Query<Order> orderQuery = OrderRepository.findAllOrderByUserMerchantIdAndStoreId(userMerchant.id, storeId);
+                List<Order> orders = OrderRepository.findOrdersByToday(orderQuery, cashierHistoryMerchant.get().getStartTime());
+                for (Order order : orders) {
+                    Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderIdAndStatus(order.id, "PAID");
+                    if (orderPayment.isPresent()) {
+                        totalAmountClosingBySystem = totalAmountClosingBySystem.add(cashierHistoryMerchant.get().getStartTotalAmount()).add(orderPayment.get().getTotalAmount());
+                    }
+                    continue;
+                }
+
+                amountCashierResponse.setDate(cashierHistoryMerchant.get().getStartTime());
+                amountCashierResponse.setTotalAmountOpeningPos(cashierHistoryMerchant.get().getStartTotalAmount());
+                amountCashierResponse.setTotalAmountBySystem(totalAmountClosingBySystem);
+
+                response.setBaseResponse(1, 0, 0, success, amountCashierResponse);
+                return ok(Json.toJson(response));
+            } catch (Exception ex) {
+                ex.printStackTrace();
                 response.setBaseResponse(0, 0, 0, error, null);
                 return internalServerError(Json.toJson(response));
             }
