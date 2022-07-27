@@ -232,7 +232,7 @@ public class UpdateProfileController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result updateUserMerchantData(Long userMerchantId) {
+    public static Result updateUserMerchantData(Long userMerchantId, String deviceType) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
             Transaction trx = Ebean.beginTransaction();
@@ -280,7 +280,7 @@ public class UpdateProfileController extends BaseController {
                     Thread thread = new Thread(() -> {
                         try {
                             MailConfig.sendmail(request.getEmail(), MailConfig.subjectActivation,
-                                    MailConfig.renderVerificationAccount(forActivation, getUserMerchantData.fullName));
+                                    MailConfig.renderVerificationAccountUser(forActivation, getUserMerchantData.fullName, deviceType != null && deviceType != "" ? deviceType : ""));
 
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -313,7 +313,7 @@ public class UpdateProfileController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result verifyUserMerchantEmail(String activationCode) {
+    public static Result verifyUserMerchantEmail(String activationCode, String deviceType) {
         Transaction trx = Ebean.beginTransaction();
         try {
 
@@ -332,6 +332,9 @@ public class UpdateProfileController extends BaseController {
                 getUserMerchantData.setActivationCode("");
                 getUserMerchantData.update();
                 trx.commit();
+                if(deviceType.equalsIgnoreCase("MINIPOS")){
+                    return redirect(Helper.POS_URL + "/activation?success=1");
+                }
                 return redirect(Helper.MERCHANT_URL + "/activation?success=1");
             } else if (getMerchantData != null) {
                 getMerchantData.isActive = Boolean.TRUE;
@@ -412,11 +415,11 @@ public class UpdateProfileController extends BaseController {
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
     }
-    public static Result updateUserProfile() {
+    public static Result updateUserProfile(String deviceType) {
         MerchantLog merchantLog = checkUserAccessAuthorization();
         if(merchantLog != null) {
             if (merchantLog.userMerchant != null && merchantLog.userMerchant.id != null && merchantLog.userMerchant.id > 0) {
-                return updateUserMerchantData(merchantLog.userMerchant.id);
+                return updateUserMerchantData(merchantLog.userMerchant.id, deviceType);
             } else if (merchantLog.merchant != null) {
                 return updateMerchantData();
             }
