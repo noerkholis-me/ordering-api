@@ -30,14 +30,17 @@ public class DashboardPOSController extends BaseController {
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         } else {
-            Optional<CashierHistoryMerchant> cashierHistoryMerchant = CashierHistoryMerchantRepository.findByUserActiveCashier(userMerchant.id, storeId);
+            Map<String, Integer> responses = new HashMap<>();
+            Optional<CashierHistoryMerchant> cashierHistoryMerchant = CashierHistoryMerchantRepository.findByUserActiveCashierAndStoreIdOpen(userMerchant.id, storeId);
             if (!cashierHistoryMerchant.isPresent()) {
-                response.setBaseResponse(0, 0, 0, inputParameter, null);
-                return badRequest(Json.toJson(response));
+                responses.put("total_amount_open_cash", 0);
+                response.setBaseResponse(0, 0, 0, inputParameter + " cashier history tidak ditemukan", responses);
+                return ok(Json.toJson(response));
             }
+
             BigDecimal totalOpenCash = BigDecimal.ZERO;
             Query<Order> orderQuery = OrderRepository.findAllOrderByStoreId(storeId);
-            List<Order> orders = OrderRepository.findOrders(orderQuery, 0, 0);
+            List<Order> orders = OrderRepository.findOrdersByToday(orderQuery, cashierHistoryMerchant.get().getStartTime());
             for (Order order : orders) {
                 Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderIdAndStatusAndPaymentChannel(order.id, "PAID");
                 if (orderPayment.isPresent()) {
@@ -46,11 +49,10 @@ public class DashboardPOSController extends BaseController {
                 continue;
             }
 
-            Map<String, Integer> responses = new HashMap<>();
             responses.put("total_amount_open_cash", totalOpenCash.intValue());
 
             response.setBaseResponse(1, 0, 0, success, responses);
-            return unauthorized(Json.toJson(response));
+            return ok(Json.toJson(response));
         }
     }
 

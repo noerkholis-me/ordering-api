@@ -288,8 +288,10 @@ DELETE 	/merchants/pickup/delete/:id				controllers.merchants.PickUpPointControl
 
 POST    /merchant/users/add                         controllers.merchants.UserMerchantController.createUser()
 PUT    /merchant/users/edit/:id                         controllers.merchants.UserMerchantController.editUser(id: Long)
+PATCH   /merchant/users/update-password             controllers.merchants.SessionsController.updatePassword()
 
 POST    /users/createpassword/:activationcode/updatepassword     controllers.merchants.UserMerchantController.createNewPassword(activationcode: String)
+
 
 
 
@@ -594,3 +596,7 @@ GET         /pos/:storeId/get-total-cash                        controllers.dash
 GET         /pos/:storeId/get-order-information                       controllers.dashboard.DashboardPOSController.getOrderInformation(storeId: Long)
 GET         /pos/category-list                             controllers.minipos.ProductController.listCategoryMiniPOS()
 GET         /pos/product-list                             controllers.minipos.ProductController.listProductMiniPos(offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "")
+
+GET         /pos/:storeId/session-cashier                   controllers.merchants.CashierHistoryController.getSessionCashier(storeId: Long)
+GET         /pos/:storeId/get-total-amount-cashier          controllers.merchants.CashierHistoryController.getAmountCashier(storeId : Long)
+
