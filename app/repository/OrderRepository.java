@@ -58,6 +58,24 @@ public class OrderRepository extends Model {
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
+    public static List<Order> findOrdersByToday(Query<Order> reqQuery, Date today) {
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String todayString = simpleDateFormat.format(today);
+
+        Query<Order> query = reqQuery;
+        query = query.orderBy("t0.created_at desc");
+
+        ExpressionList<Order> exp = query.where();
+        exp.raw("t0.order_date between '" + todayString.concat(" 00:00:00.000") + "'" + " and " + "'" + todayString.concat(" 23:59:59.000") + "'");
+
+
+        query = exp.query();
+        query = query.setMaxRows(0);
+
+        return query.findPagingList(0).getPage(0).getList();
+    }
+
     public static List<OrderDetail> findDataOrderDetail(Long orderId, String productType) {
         String queryRaw = "t0.product_id in (select pmid.product_merchant_id from product_merchant_detail pmid where pmid.product_type = '"
                 + productType + "')";
@@ -110,6 +128,16 @@ public class OrderRepository extends Model {
         return Ebean.find(Order.class)
                 .fetch("store")
                 .where()
+                .eq("store.id", storeId)
+                .query();
+    }
+
+    public static Query<Order> findAllOrderByUserMerchantIdAndStoreId(Long userMerchantId, Long storeId) {
+        return Ebean.find(Order.class)
+                .fetch("userMerchant")
+                .fetch("store")
+                .where()
+                .eq("userMerchant.id", userMerchantId)
                 .eq("store.id", storeId)
                 .query();
     }
