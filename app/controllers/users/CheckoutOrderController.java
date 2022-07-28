@@ -272,6 +272,8 @@ public class CheckoutOrderController extends BaseController {
 
                 // CHECK USAGE PAYMENT
                 MerchantPayment mPayment = MerchantPayment.findPayment.where().eq("merchant", store.merchant).eq("t0.device", orderRequest.getDeviceType()).eq("paymentMethod.paymentCode", orderRequest.getPaymentDetailResponse().getPaymentChannel()).findUnique();
+                System.out.print("Payload Merchant Payment: ");
+                System.out.println(Json.toJson(mPayment));
                 if(mPayment == null){
                     response.setBaseResponse(0, 0, 0, "Tipe pembayaran tidak ditemukan", null);
                     return notFound(Json.toJson(response));
