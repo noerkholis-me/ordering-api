@@ -127,6 +127,7 @@ public class OrderRepository extends Model {
     public static Query<Order> findAllOrderByStoreId(Long storeId) {
         return Ebean.find(Order.class)
                 .fetch("store")
+                .fetch("member")
                 .where()
                 .eq("store.id", storeId)
                 .query();
@@ -201,6 +202,31 @@ public class OrderRepository extends Model {
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
+    public static List<Order> findAllOrderByStatusAndCustomerNameAndOrderNumber(Query<Order> reqQuery, int offset, int limit, String status, String customerName, String orderNumber) {
+        Query<Order> query = reqQuery;
+        query.orderBy("t0.order_date desc");
+
+        ExpressionList<Order> exp = query.where();
+
+        if (!status.equalsIgnoreCase("")) {
+            exp = exp.eq("t0.status", status);
+        }
+
+        if (!orderNumber.equalsIgnoreCase("")) {
+            exp = exp.ilike("t0.order_number", "%" + orderNumber + "%");
+        }
+
+        if (!customerName.equalsIgnoreCase("")) {
+            exp = exp.ilike("t1.full_name", "%" + customerName + "%");
+        }
+
+        query = exp.query();
+        if (limit != 0) {
+            query = query.setMaxRows(limit);
+        }
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
     public static List<OrderDetail> findOrderDetailByOrderId(Long orderId) {
         return findDetail.where().eq("order.id", orderId).findList();
     }
@@ -231,6 +257,14 @@ public class OrderRepository extends Model {
         if (!statusOrder.equalsIgnoreCase("") && !statusOrder.isEmpty()) {
             exp = exp.eq("t0.status", statusOrder);
         }
+        query = exp.query();
+        return query.findPagingList(0).getPage(0).getList().size();
+    }
+
+    public static Integer getTotalOrder(Query<Order> reqQuery) {
+        Query<Order> query = reqQuery;
+        ExpressionList<Order> exp = query.where();
+
         query = exp.query();
         return query.findPagingList(0).getPage(0).getList().size();
     }
