@@ -124,12 +124,12 @@ public class PaymentController extends BaseController {
             if(ownMerchant.isPos){
                 PaymentListResponsePOS paylistPOS = new PaymentListResponsePOS();
                 paylistPOS.setMerchantId(ownMerchant.id);
-                paylistPOS.setIsCash(ownMerchant.isCash);
-                paylistPOS.setTypeCash(ownMerchant.isCash ? ownMerchant.typeCash : null);
-                paylistPOS.setIsDebitCredit(ownMerchant.isDebitCredit);
-                paylistPOS.setTypeDebitCredit(ownMerchant.isDebitCredit ? ownMerchant.typeDebitCredit : null);
-                paylistPOS.setIsQris(ownMerchant.isQris);
-                paylistPOS.setTypeQris(ownMerchant.isQris ? ownMerchant.typeQris : null);
+                // paylistPOS.setIsCash(ownMerchant.isCash);
+                // paylistPOS.setTypeCash(ownMerchant.isCash ? ownMerchant.typeCash : null);
+                // paylistPOS.setIsDebitCredit(ownMerchant.isDebitCredit);
+                // paylistPOS.setTypeDebitCredit(ownMerchant.isDebitCredit ? ownMerchant.typeDebitCredit : null);
+                // paylistPOS.setIsQris(ownMerchant.isQris);
+                // paylistPOS.setTypeQris(ownMerchant.isQris ? ownMerchant.typeQris : null);
                 response.setBaseResponse(0, 0, 0, "Sukses menampilkan type pembayaran", paylistPOS);
                 return ok(Json.toJson(response));
             }

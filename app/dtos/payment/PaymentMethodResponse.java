@@ -25,6 +25,8 @@ public class PaymentMethodResponse {
     private BigDecimal paymentFeePrice;
     @JsonProperty("payment_fee_percentage")
     private Double paymentFeePercentage;
+    @JsonProperty("type_payment")
+    private String typePayment;
     @JsonProperty("is_available")
     private Boolean isAvailable;
     @JsonProperty("is_active")
