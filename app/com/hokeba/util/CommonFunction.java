@@ -125,7 +125,7 @@ public static final String passwordRegex = "^.{8,}$";
 					+ "and have at least 3 variations from uppercase, lowercase, number, or symbol";
 		}
 		if (!confPassword.equals(password)) {
-			return "Password didn't match confirm password";
+			return "Password tidak sama. Mohon ulangi kembali.";
 		}
 		return null;
 	}
