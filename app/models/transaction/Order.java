@@ -22,6 +22,8 @@ public class Order extends BaseModel {
 
     public static final String NEW_ORDER = "NEW_ORDER";
     public static final String CANCELLED = "CANCELLED";
+    public static final String PENDING = "PENDING";
+    public static final String COMPLETE = "COMPLETE";
 
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedTimestamp

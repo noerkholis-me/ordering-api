@@ -489,7 +489,7 @@ public class SessionsController extends BaseController {
                     String forgotPasswordCode = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
                     String redirect = Constant.getInstance().getMerchantUrl() + "/password-recovery" + "/" + forgotPasswordCode;
                     try {
-                        member.resetToken = Encryption.EncryptAESCBCPCKS5Padding(member.email+now);
+                        member.resetToken = forgotPasswordCode;
                         member.resetTime = now;
                         member.update();
                     } catch (Exception e) {
@@ -516,18 +516,15 @@ public class SessionsController extends BaseController {
                         System.out.println("is cashier true");
                         String forgotPasswordCodePos = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
                         redirect = Constant.getInstance().getPosUrl() + "/password-recovery" + "/" + forgotPasswordCodePos;
-                    } else {
-                        String forgotPasswordCode = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
-                        redirect = Constant.getInstance().getMerchantUrl() + "/password-recovery" + "/" + forgotPasswordCode;
+                        try {
+                            userMerchant.setResetToken(forgotPasswordCodePos);
+                            userMerchant.setResetTime(now);
+                            userMerchant.update();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
 
-                    try {
-                        userMerchant.setResetToken(Encryption.EncryptAESCBCPCKS5Padding(userMerchant.email + "-" + String.valueOf(now)));
-                        userMerchant.setResetTime(now);
-                        userMerchant.update();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
                     String finalRedirect = redirect;
                     UserMerchant finalUserMerchant = userMerchant;
                     Thread thread = new Thread(() -> {

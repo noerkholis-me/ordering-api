@@ -509,7 +509,7 @@ GET         /merchant/product/type/list                 controllers.product.Prod
 POST        /merchant/product/type/create               controllers.product.ProductAddOnTypeController.createProductType()
 
 #PAYMENT METHOD
-GET         /master/paymentmethod                       controllers.masters.PaymentMethodController.getPaymentMethod()
+GET         /master/paymentmethod                       controllers.masters.PaymentMethodController.getPaymentMethod(device:String ?= "", merchant_id:Long ?= 0)
 GET         /master/check-availble-bank                 controllers.payment.PaymentController.checkAvailableBank()
 
 # PAYMENT
@@ -554,12 +554,12 @@ GET         /merchant/orders/list                 controllers.order.OrderMerchan
 # UPDATE PROFILE
 PUT         /merchant/update/profile              controllers.users.UpdateProfileController.updateMerchantData()
 PUT         /merchant/update/password              controllers.users.UpdateProfileController.updatePasswordMerchantData()
-PUT         /users/merchant/update/:id_user/profile        controllers.users.UpdateProfileController.updateUserMerchantData(id_user: Long)
+PUT         /users/merchant/update/:id_user/profile        controllers.users.UpdateProfileController.updateUserMerchantData(id_user: Long, device: String ?= "")
 PUT         /users/merchant/update/:id_user/password        controllers.users.UpdateProfileController.updatePasswordUserMerchantData(id_user: Long)
-PUT         /users/merchant/update/profile        controllers.users.UpdateProfileController.updateUserProfile()
+PUT         /users/merchant/update/profile        controllers.users.UpdateProfileController.updateUserProfile(device: String ?= "")
 
 # REDIRECT AND RESEND
-GET         /re/account-activation                  controllers.users.UpdateProfileController.verifyUserMerchantEmail(token: String ?= "")
+GET         /re/account-activation                  controllers.users.UpdateProfileController.verifyUserMerchantEmail(token: String ?= "", device: String ?= "")
 POST         /resend/account-activation                  controllers.users.ResendEmailVerification.resendEmailVerificationUserMerchant(email: String ?= "")
 
 # DASHBOARD
@@ -589,7 +589,6 @@ GET        /pos/close-pos/print                                 controllers.merc
 GET        /pos/close-pos/report                                  controllers.merchants.CashierHistoryController.closePOSReport(offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0, session_code:String ?= "", start_date:String ?= "", end_date:String ?= "")
 GET        /pos/close-pos/report/download                                  controllers.merchants.CashierHistoryController.downloadClosePOSReport(offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0, session_code:String ?= "", start_date:String ?= "", end_date:String ?= "")
 GET         /merchant/cashier-history                      controllers.merchants.CashierHistoryController.getAllCashierHistory(limit:Int ?= 10, offset:Int ?= 0, store_id:Long ?= 0)
-GET         /pos/payment/list                                   controllers.payment.PaymentController.checkPaymentMethod()
 
 # Dashboard Mini POS
 GET         /pos/:storeId/get-total-cash                        controllers.dashboard.DashboardPOSController.getTotalCashPos(storeId: Long)
@@ -599,4 +598,8 @@ GET         /pos/product-list                             controllers.minipos.Pr
 
 GET         /pos/:storeId/session-cashier                   controllers.merchants.CashierHistoryController.getSessionCashier(storeId: Long)
 GET         /pos/:storeId/get-total-amount-cashier          controllers.merchants.CashierHistoryController.getAmountCashier(storeId : Long)
+
+GET         /pos/get-order-list                             controllers.order.OrderPosController.getOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, customer_name: String ?= "", order_number: String ?= "")
+GET         /pos/:orderNumber/get-order-detail                           controllers.order.OrderPosController.getOrderDetail(orderNumber: String)
+GET         /pos/:orderNumber/print-invoice-paid            controllers.order.OrderPosController.printInvoicePaid(orderNumber : String, reference_number : String ?= "")
 
