@@ -185,36 +185,6 @@ public class Merchant extends BaseModel{
     @Getter @Setter
     public boolean isPos;
 
-    // CASH TYPE
-    @Column(name = "is_cash")
-    @JsonProperty("is_cash")
-    @Getter @Setter
-    public boolean isCash;
-    @Column(name = "type_cash")
-    @JsonProperty("type_cash")
-    @Getter @Setter
-    public String typeCash;
-
-    // DEBIT / CREDIT TYPE
-    @Column(name = "is_debit_credit")
-    @JsonProperty("is_debit_credit")
-    @Getter @Setter
-    public boolean isDebitCredit;
-    @Column(name = "type_debit_credit")
-    @JsonProperty("type_debit_credit")
-    @Getter @Setter
-    public String typeDebitCredit;
-
-    // QRIS TYPE
-    @Column(name = "is_qris")
-    @JsonProperty("is_qris")
-    @Getter @Setter
-    public boolean isQris;
-    @Column(name = "type_qris")
-    @JsonProperty("type_qris")
-    @Getter @Setter
-    public String typeQris;
-
     @Column(name = "is_kiosk")
     @JsonProperty("is_kiosk")
     @Getter @Setter

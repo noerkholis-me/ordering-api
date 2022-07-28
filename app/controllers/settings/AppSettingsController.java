@@ -224,12 +224,12 @@ public class AppSettingsController extends BaseController {
                 ));
                 settingApps.setAppSettingPaymentTypeResponse(
                         new AppSettingPaymentTypeResponse(
-                                merchant.isCash(),
-                                merchant.getTypeCash(),
-                                merchant.isDebitCredit(),
-                                merchant.getTypeDebitCredit(),
-                                merchant.isQris(),
-                                merchant.getTypeQris()
+                                // merchant.isCash(),
+                                // merchant.getTypeCash(),
+                                // merchant.isDebitCredit(),
+                                // merchant.getTypeDebitCredit(),
+                                // merchant.isQris(),
+                                // merchant.getTypeQris()
                         )
                 );
                 settingApps.setAppSettingMobileQrResponse(
