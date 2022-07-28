@@ -17,7 +17,7 @@ alter table merchant_payment add constraint fk_merchant_payment_merchant_id fore
 create index idx_m_pay_merchant_id on merchant_payment (merchant_id);
 alter table merchant_payment drop constraint if exists fk_merchant_payment_method_id;
 alter table merchant_payment add constraint fk_merchant_payment_method_id foreign key (payment_method_id) references payment_method (id);
-create index idx_m_pay_payment_method_id on payment_method (payment_method_id);
+create index idx_m_pay_payment_method_id on merchant_payment (payment_method_id);
 
 
 # --- !Downs
