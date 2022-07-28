@@ -600,3 +600,7 @@ GET         /pos/product-list                             controllers.minipos.Pr
 GET         /pos/:storeId/session-cashier                   controllers.merchants.CashierHistoryController.getSessionCashier(storeId: Long)
 GET         /pos/:storeId/get-total-amount-cashier          controllers.merchants.CashierHistoryController.getAmountCashier(storeId : Long)
 
+GET         /pos/get-order-list                             controllers.order.OrderPosController.getOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, customer_name: String ?= "", order_number: String ?= "")
+GET         /pos/:orderNumber/get-order-detail                           controllers.order.OrderPosController.getOrderDetail(orderNumber: String)
+GET         /pos/:orderNumber/print-invoice-paid            controllers.order.OrderPosController.printInvoicePaid(orderNumber : String, reference_number : String ?= "")
+
