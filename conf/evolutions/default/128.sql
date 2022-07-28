@@ -21,7 +21,6 @@ create index idx_m_pay_payment_method_id on payment_method (payment_method_id);
 
 
 # --- !Downs
-DROP TABLE if exists merchant_payment cascade;
 
 ALTER TABLE merchant DROP COLUMN if exists is_cash;
 ALTER TABLE merchant DROP COLUMN if exists is_debit_credit;
