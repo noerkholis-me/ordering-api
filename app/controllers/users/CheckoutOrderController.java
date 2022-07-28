@@ -11,8 +11,7 @@ import controllers.BaseController;
 import dtos.order.*;
 import dtos.payment.*;
 import models.*;
-import models.merchant.ProductMerchant;
-import models.merchant.TableMerchant;
+import models.merchant.*;
 import models.productaddon.ProductAddOn;
 import models.pupoint.PickUpPointMerchant;
 import models.transaction.*;
@@ -271,10 +270,17 @@ public class CheckoutOrderController extends BaseController {
                 order.setTotalPrice(orderRequest.getTotalPrice());
                 order.update();
 
+                // CHECK USAGE PAYMENT
+                MerchantPayment mPayment = MerchantPayment.findPayment.where().eq("merchant", store.merchant).eq("t0.device", orderRequest.getDeviceType()).eq("paymentMethod.paymentCode", orderRequest.getPaymentDetailResponse().getPaymentChannel()).findUnique();
+                if(mPayment == null){
+                    response.setBaseResponse(0, 0, 0, "Tipe pembayaran tidak ditemukan", null);
+                    return notFound(Json.toJson(response));
+                }
+                
                 OrderPayment orderPayment = new OrderPayment();
                 orderPayment.setOrder(order);
                 orderPayment.setInvoiceNo(OrderPayment.generateInvoiceCode());
-                orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
+                orderPayment.setStatus(mPayment.typePayment.equalsIgnoreCase("DIRECT_PAYMENT") ? PaymentStatus.PAID.getStatus() : PaymentStatus.PENDING.getStatus());
                 orderPayment.setPaymentType(orderRequest.getPaymentDetailResponse().getPaymentType());
                 orderPayment.setPaymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel());
                 orderPayment.setPaymentDate(new Date());
@@ -288,42 +294,106 @@ public class CheckoutOrderController extends BaseController {
                 orderPayment.setTotalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount());
                 orderPayment.save();
 
-                // do initiate payment
-                InitiatePaymentRequest request = new InitiatePaymentRequest();
-                request.setOrderNumber(orderNumber);
-                request.setDeviceType(orderRequest.getDeviceType());
-                if (member == null) {
-                    request.setCustomerName("GENERAL_CUSTOMER");
+                if(mPayment.typePayment.equalsIgnoreCase("PAYMENT_GATEWAY")){
+                    // do initiate payment
+                    InitiatePaymentRequest request = new InitiatePaymentRequest();
+                    request.setOrderNumber(orderNumber);
+                    request.setDeviceType(orderRequest.getDeviceType());
+                    if (member == null) {
+                        request.setCustomerName("GENERAL_CUSTOMER");
+                    } else {
+                        request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL_CUSTOMER");
+                        request.setCustomerEmail(member.email);
+                        request.setCustomerPhoneNumber(member.phone);
+                    }
+
+                    // please
+                    PaymentServiceRequest paymentServiceRequest = PaymentServiceRequest.builder()
+                            .paymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel())
+                            .paymentType(orderRequest.getPaymentDetailResponse().getPaymentType())
+                            .bankCode(orderRequest.getPaymentDetailResponse().getBankCode())
+                            .totalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount())
+                            .build();
+                    request.setPaymentServiceRequest(paymentServiceRequest);
+                    request.setProductOrderDetails(productOrderDetails);
+                    request.setStoreCode(store.storeCode);
+
+                    ServiceResponse serviceResponse = PaymentService.getInstance().initiatePayment(request);
+
+                    if (serviceResponse.getCode() == 408) {
+                        txn.rollback();
+                        ObjectNode result = Json.newObject();
+                        result.put("error_messages", Json.toJson(new String[]{"Request timeout, please try again later"}));
+                        response.setBaseResponse(1, offset, 1, timeOut, result);
+                        return badRequest(Json.toJson(response));
+                    } else if (serviceResponse.getCode() == 400) {
+                        txn.rollback();
+                        response.setBaseResponse(1, offset, 1, inputParameter, serviceResponse.getData());
+                        return badRequest(Json.toJson(response));
+                    } else {
+                        // update payment status
+                        order.setStatus(OrderStatus.NEW_ORDER.getStatus());
+                        order.setOrderQueue(createQueue(store.id));
+                        order.update();
+
+                        orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
+                        orderPayment.update();
+
+                        String object = objectMapper.writeValueAsString(serviceResponse.getData());
+                        JSONObject jsonObject = new JSONObject(object);
+                        String initiate = jsonObject.getJSONObject("data").toString();
+                        InitiatePaymentResponse initiatePaymentResponse = objectMapper.readValue(initiate, InitiatePaymentResponse.class);
+
+                        PaymentDetail payDetail = new PaymentDetail();
+                        payDetail.setOrderNumber(order.getOrderNumber());
+                        payDetail.setPaymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel());
+                        payDetail.setCreationTime(initiatePaymentResponse.getCreationTime());
+                        payDetail.setStatus(initiatePaymentResponse.getStatus());
+                        if (orderRequest.getPaymentDetailResponse().getPaymentChannel().equalsIgnoreCase("qr_code")) {
+                            payDetail.setQrCode(initiatePaymentResponse.getMetadata().getQrCode());
+                        } else if (orderRequest.getPaymentDetailResponse().getPaymentChannel().equalsIgnoreCase("virtual_account")){
+                            payDetail.setAccountNumber(initiatePaymentResponse.getMetadata().getAccountNumber());
+                        }
+                        payDetail.setReferenceId(initiatePaymentResponse.getMetadata().getReferenceId());
+                        payDetail.setTotalAmount(initiatePaymentResponse.getTotalAmount());
+                        payDetail.setOrderPayment(orderPayment);
+                        payDetail.save();
+
+                        txn.commit();
+
+                        OrderTransactionResponse orderTransactionResponse = new OrderTransactionResponse();
+                        orderTransactionResponse.setOrderNumber(order.getOrderNumber());
+                        orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
+                        orderTransactionResponse.setTotalAmount(initiatePaymentResponse.getTotalAmount());
+                        orderTransactionResponse.setQueueNumber(order.getOrderQueue());
+                        orderTransactionResponse.setMetadata(initiatePaymentResponse.getMetadata());
+
+                        response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
+                        return ok(Json.toJson(response));
+                    }
                 } else {
-                    request.setCustomerName(member.fullName);
-                    request.setCustomerEmail(member.email);
-                    request.setCustomerPhoneNumber(member.phone);
-                }
+                    InitiatePaymentRequest request = new InitiatePaymentRequest();
+                    request.setOrderNumber(orderNumber);
+                    request.setDeviceType(orderRequest.getDeviceType());
+                    if (member == null) {
+                        request.setCustomerName("GENERAL_CUSTOMER");
+                    } else {
+                        request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL_CUSTOMER");
+                        request.setCustomerEmail(member.email);
+                        request.setCustomerPhoneNumber(member.phone);
+                    }
 
-                // please
-                PaymentServiceRequest paymentServiceRequest = PaymentServiceRequest.builder()
-                        .paymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel())
-                        .paymentType(orderRequest.getPaymentDetailResponse().getPaymentType())
-                        .bankCode(orderRequest.getPaymentDetailResponse().getBankCode())
-                        .totalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount())
-                        .build();
-                request.setPaymentServiceRequest(paymentServiceRequest);
-                request.setProductOrderDetails(productOrderDetails);
-                request.setStoreCode(store.storeCode);
+                    // please
+                    PaymentServiceRequest paymentServiceRequest = PaymentServiceRequest.builder()
+                            .paymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel())
+                            .paymentType(orderRequest.getPaymentDetailResponse().getPaymentType())
+                            .bankCode(null)
+                            .totalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount())
+                            .build();
+                    request.setPaymentServiceRequest(paymentServiceRequest);
+                    request.setProductOrderDetails(productOrderDetails);
+                    request.setStoreCode(store.storeCode);
 
-                ServiceResponse serviceResponse = PaymentService.getInstance().initiatePayment(request);
-
-                if (serviceResponse.getCode() == 408) {
-                    txn.rollback();
-                    ObjectNode result = Json.newObject();
-                    result.put("error_messages", Json.toJson(new String[]{"Request timeout, please try again later"}));
-                    response.setBaseResponse(1, offset, 1, timeOut, result);
-                    return badRequest(Json.toJson(response));
-                } else if (serviceResponse.getCode() == 400) {
-                    txn.rollback();
-                    response.setBaseResponse(1, offset, 1, inputParameter, serviceResponse.getData());
-                    return badRequest(Json.toJson(response));
-                } else {
                     // update payment status
                     order.setStatus(OrderStatus.NEW_ORDER.getStatus());
                     order.setOrderQueue(createQueue(store.id));
@@ -332,23 +402,13 @@ public class CheckoutOrderController extends BaseController {
                     orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
                     orderPayment.update();
 
-                    String object = objectMapper.writeValueAsString(serviceResponse.getData());
-                    JSONObject jsonObject = new JSONObject(object);
-                    String initiate = jsonObject.getJSONObject("data").toString();
-                    InitiatePaymentResponse initiatePaymentResponse = objectMapper.readValue(initiate, InitiatePaymentResponse.class);
-
                     PaymentDetail payDetail = new PaymentDetail();
                     payDetail.setOrderNumber(order.getOrderNumber());
                     payDetail.setPaymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel());
-                    payDetail.setCreationTime(initiatePaymentResponse.getCreationTime());
-                    payDetail.setStatus(initiatePaymentResponse.getStatus());
-                    if (orderRequest.getPaymentDetailResponse().getPaymentChannel().equalsIgnoreCase("qr_code")) {
-                        payDetail.setQrCode(initiatePaymentResponse.getMetadata().getQrCode());
-                    } else if (orderRequest.getPaymentDetailResponse().getPaymentChannel().equalsIgnoreCase("virtual_account")){
-                        payDetail.setAccountNumber(initiatePaymentResponse.getMetadata().getAccountNumber());
-                    }
-                    payDetail.setReferenceId(initiatePaymentResponse.getMetadata().getReferenceId());
-                    payDetail.setTotalAmount(initiatePaymentResponse.getTotalAmount());
+                    payDetail.setCreationTime(new Date());
+                    payDetail.setStatus(mPayment.typePayment.equalsIgnoreCase("DIRECT_PAYMENT") ? PaymentStatus.PAID.getStatus() : PaymentStatus.PENDING.getStatus());
+                    payDetail.setReferenceId(null);
+                    payDetail.setTotalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount());
                     payDetail.setOrderPayment(orderPayment);
                     payDetail.save();
 
@@ -357,9 +417,9 @@ public class CheckoutOrderController extends BaseController {
                     OrderTransactionResponse orderTransactionResponse = new OrderTransactionResponse();
                     orderTransactionResponse.setOrderNumber(order.getOrderNumber());
                     orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
-                    orderTransactionResponse.setTotalAmount(initiatePaymentResponse.getTotalAmount());
+                    orderTransactionResponse.setTotalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount());
                     orderTransactionResponse.setQueueNumber(order.getOrderQueue());
-                    orderTransactionResponse.setMetadata(initiatePaymentResponse.getMetadata());
+                    orderTransactionResponse.setMetadata(null);
 
                     response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
                     return ok(Json.toJson(response));
