@@ -374,6 +374,7 @@ public class CheckoutOrderController extends BaseController {
                         return ok(Json.toJson(response));
                     }
                 } else {
+                    System.out.println("PENDING / DIRECT");
                     InitiatePaymentRequest request = new InitiatePaymentRequest();
                     request.setOrderNumber(orderNumber);
                     request.setDeviceType(orderRequest.getDeviceType());
