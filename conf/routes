@@ -596,7 +596,7 @@ GET         /pos/:storeId/get-order-information                       controller
 GET         /pos/category-list                             controllers.minipos.ProductController.listCategoryMiniPOS()
 GET         /pos/product-list                             controllers.minipos.ProductController.listProductMiniPos(offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "")
 
-GET         /pos/:storeId/session-cashier                   controllers.merchants.CashierHistoryController.getSessionCashier()
+GET         /pos/session-cashier                   controllers.merchants.CashierHistoryController.getSessionCashier()
 GET         /pos/:storeId/get-total-amount-cashier          controllers.merchants.CashierHistoryController.getAmountCashier(storeId : Long)
 
 GET         /pos/get-order-list                             controllers.order.OrderPosController.getOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, customer_name: String ?= "", order_number: String ?= "")
