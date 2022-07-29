@@ -16,15 +16,14 @@ import models.Store;
 import models.UserMerchant;
 import models.appsettings.AppSettings;
 import models.merchant.CashierHistoryMerchant;
+import models.store.StoreAccess;
+import models.store.StoreAccessDetail;
 import models.transaction.Order;
 import models.transaction.OrderPayment;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
-import repository.AppSettingRepository;
-import repository.OrderPaymentRepository;
-import repository.OrderRepository;
-import repository.UserMerchantRepository;
+import repository.*;
 import repository.cashierhistory.CashierHistoryMerchantRepository;
 import service.DownloadCashierReport;
 
@@ -514,6 +513,13 @@ public class CashierHistoryController extends BaseController {
                 }
 
                 SessionCashierResponse sessionCashierResponse = new SessionCashierResponse();
+                StoreAccess storeAccess = StoreAccessRepository.findById(userMerchant.id);
+                if (storeAccess != null) {
+                    StoreAccessDetail storeAccessDetail = StoreAccessDetail.find.where().eq("storeAccess", storeAccess).setMaxRows(1).findUnique();
+                    sessionCashierResponse.setStoreId(storeAccessDetail.getStore().id);
+                }
+
+
                 sessionCashierResponse.setIsOpen(Boolean.TRUE);
                 sessionCashierResponse.setStartTotalAmount(cashierHistoryMerchant.get().getStartTotalAmount());
                 sessionCashierResponse.setEndTotalAmount(cashierHistoryMerchant.get().getEndTotalAmount());

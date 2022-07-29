@@ -26,6 +26,7 @@ public class OrderDetailPosResponse {
     @JsonProperty("customer_phone")
     private String customerPhone;
 
+    @JsonProperty("product_detail")
     private List<ProductDetailPosResponse> productDetailPosResponses;
 
     // ================ total ======================= //

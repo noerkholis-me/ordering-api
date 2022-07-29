@@ -27,4 +27,7 @@ public class StoreAccessDetail extends BaseModel {
     @JoinColumn(name="store_id", referencedColumnName = "id")
     @Getter @Setter
     public Store store;
+
+    public static final Finder<Long, StoreAccessDetail> find = new Finder<>(Long.class, StoreAccessDetail.class);
+
 }

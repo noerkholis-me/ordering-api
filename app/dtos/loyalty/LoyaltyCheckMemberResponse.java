@@ -26,5 +26,5 @@ public class LoyaltyCheckMemberResponse {
     @JsonProperty("is_have_loyalty_point")
     public Boolean isHaveLoyaltyPoint;
     @JsonProperty("loyalty_point")
-    public String loyaltyPoint;
+    public Integer loyaltyPoint;
 }

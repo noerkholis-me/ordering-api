@@ -67,9 +67,6 @@ public class CheckoutOrderController extends BaseController {
                 Member member = null;
                 if (orderRequest.getCustomerEmail() != null && orderRequest.getCustomerEmail().equalsIgnoreCase("")) {
                     member = Member.find.where().eq("t0.email", orderRequest.getCustomerEmail()).eq("merchant", store.merchant).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
-                }
-
-                if(member == null){
                     if (orderRequest.getCustomerPhoneNumber() != null && !orderRequest.getCustomerPhoneNumber().equalsIgnoreCase("")) {
                         member = Member.find.where().eq("t0.phone", orderRequest.getCustomerPhoneNumber()).eq("t0.is_deleted", false).findUnique();
                     }
@@ -154,42 +151,44 @@ public class CheckoutOrderController extends BaseController {
                         orderDetail.save();
 
                         // ADD FOR LOYALTY
-                        listDataOrder.setSubsCategoryId(productMerchant.getSubsCategoryMerchant().id);
-                        listDataOrder.setSubsCategoryName(productMerchant.getSubsCategoryMerchant().getSubscategoryName());
-                        listDataOrder.setProductName(productMerchant.getProductName());
-                        listDataOrder.setProductPrice(productOrderDetail.getProductPrice());
-                        listDataOrder.setSubTotal(productOrderDetail.getSubTotal());
+                        SubsCategoryMerchant subsCategoryMerchant = productMerchant.getSubsCategoryMerchant();
+                        if (subsCategoryMerchant != null) {
+                            listDataOrder.setSubsCategoryId(subsCategoryMerchant.id);
+                            listDataOrder.setSubsCategoryName(subsCategoryMerchant.getSubscategoryName());
+                            listDataOrder.setProductName(productMerchant.getProductName());
+                            listDataOrder.setProductPrice(productOrderDetail.getProductPrice());
+                            listDataOrder.setSubTotal(productOrderDetail.getSubTotal());
 
-                        if (productOrderDetail.getProductOrderAddOns().size() != 0 || !productOrderDetail.getProductOrderAddOns().isEmpty()) {
-                            for (ProductOrderAddOn productOrderAddOn : productOrderDetail.getProductOrderAddOns()) {
-                                // create product add on
-                                ProductAddOn productAddOn = ProductAddOnRepository.findByProductAssignIdAndProductId(productOrderAddOn.getProductAssignId(), productOrderAddOn.getProductId());
-                                if (productAddOn != null) {
-                                    ProductMerchant addOn = ProductMerchantRepository.findById(productAddOn.getProductAssignId());
-                                    if (addOn != null) {
-                                        OrderForLoyaltyData listDataForLoyalty = new OrderForLoyaltyData();
-                                        OrderDetailAddOn orderDetailAddOn = new OrderDetailAddOn();
-                                        orderDetailAddOn.setOrderDetail(orderDetail);
-                                        orderDetailAddOn.setProductAddOn(productAddOn);
-                                        orderDetailAddOn.setQuantity(productOrderAddOn.getProductQty());
-                                        orderDetailAddOn.setNotes(productOrderAddOn.getNotes());
-                                        orderDetailAddOn.setProductPrice(productOrderAddOn.getProductPrice());
-                                        orderDetailAddOn.setProductName(addOn.getProductName());
-                                        orderDetailAddOn.setProductAssignId(productAddOn.getProductAssignId());
-                                        orderDetailAddOn.setSubTotal(productOrderAddOn.getSubTotal());
-                                        orderDetailAddOn.save();
-                                        listDataForLoyalty.setSubsCategoryId(addOn.getSubsCategoryMerchant().id);
-                                        listDataForLoyalty.setSubsCategoryName(addOn.getSubsCategoryMerchant().getSubscategoryName());
-                                        listDataForLoyalty.setProductName(addOn.getProductName());
-                                        listDataForLoyalty.setProductPrice(productOrderAddOn.getProductPrice());
-                                        listDataForLoyalty.setSubTotal(productOrderAddOn.getSubTotal());
-                                        listOrderData.add(listDataForLoyalty);
+                            if (productOrderDetail.getProductOrderAddOns().size() != 0 || !productOrderDetail.getProductOrderAddOns().isEmpty()) {
+                                for (ProductOrderAddOn productOrderAddOn : productOrderDetail.getProductOrderAddOns()) {
+                                    // create product add on
+                                    ProductAddOn productAddOn = ProductAddOnRepository.findByProductAssignIdAndProductId(productOrderAddOn.getProductAssignId(), productOrderAddOn.getProductId());
+                                    if (productAddOn != null) {
+                                        ProductMerchant addOn = ProductMerchantRepository.findById(productAddOn.getProductAssignId());
+                                        if (addOn != null) {
+                                            OrderForLoyaltyData listDataForLoyalty = new OrderForLoyaltyData();
+                                            OrderDetailAddOn orderDetailAddOn = new OrderDetailAddOn();
+                                            orderDetailAddOn.setOrderDetail(orderDetail);
+                                            orderDetailAddOn.setProductAddOn(productAddOn);
+                                            orderDetailAddOn.setQuantity(productOrderAddOn.getProductQty());
+                                            orderDetailAddOn.setNotes(productOrderAddOn.getNotes());
+                                            orderDetailAddOn.setProductPrice(productOrderAddOn.getProductPrice());
+                                            orderDetailAddOn.setProductName(addOn.getProductName());
+                                            orderDetailAddOn.setProductAssignId(productAddOn.getProductAssignId());
+                                            orderDetailAddOn.setSubTotal(productOrderAddOn.getSubTotal());
+                                            orderDetailAddOn.save();
+                                            listDataForLoyalty.setSubsCategoryId(addOn.getSubsCategoryMerchant().id);
+                                            listDataForLoyalty.setSubsCategoryName(addOn.getSubsCategoryMerchant().getSubscategoryName());
+                                            listDataForLoyalty.setProductName(addOn.getProductName());
+                                            listDataForLoyalty.setProductPrice(productOrderAddOn.getProductPrice());
+                                            listDataForLoyalty.setSubTotal(productOrderAddOn.getSubTotal());
+                                            listOrderData.add(listDataForLoyalty);
+                                        }
                                     }
                                 }
                             }
+                            listOrderData.add(listDataOrder);
                         }
-                        listOrderData.add(listDataOrder);
-                        
                     }
                 }
                 List<LoyaltyPointMerchant> lpMerchant = LoyaltyPointMerchantRepository.find.where().eq("merchant", store.merchant).eq("t0.is_deleted", false).findList();
@@ -368,6 +367,8 @@ public class CheckoutOrderController extends BaseController {
                         orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
                         orderTransactionResponse.setTotalAmount(initiatePaymentResponse.getTotalAmount());
                         orderTransactionResponse.setQueueNumber(order.getOrderQueue());
+                        orderTransactionResponse.setStatus(order.getStatus());
+                        orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
                         orderTransactionResponse.setMetadata(initiatePaymentResponse.getMetadata());
 
                         response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
@@ -422,6 +423,8 @@ public class CheckoutOrderController extends BaseController {
                     orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
                     orderTransactionResponse.setTotalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount());
                     orderTransactionResponse.setQueueNumber(order.getOrderQueue());
+                    orderTransactionResponse.setStatus(order.getStatus());
+                    orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
                     orderTransactionResponse.setMetadata(null);
 
                     response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);

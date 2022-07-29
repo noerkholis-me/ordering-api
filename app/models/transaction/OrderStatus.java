@@ -6,6 +6,7 @@ public enum OrderStatus {
     READY_TO_PICKUP,
     DELIVERY,
     CLOSED,
+    PENDING,
     CANCELED;
 
     private String status;
