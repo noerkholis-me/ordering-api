@@ -497,23 +497,20 @@ public class CashierHistoryController extends BaseController {
         }
     }
 
-    public static Result getSessionCashier(Long storeId) {
+    public static Result getSessionCashier() {
         UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
         if (userMerchant == null) {
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         } else {
             try {
-                Store store = Store.findById(storeId);
-                if (store == null) {
-                    response.setBaseResponse(0, 0, 0, "store tidak ditemukan", null);
-                    return badRequest(Json.toJson(response));
-                }
 
-                Optional<CashierHistoryMerchant> cashierHistoryMerchant = CashierHistoryMerchantRepository.findByUserActiveCashierAndStoreIdOpen(userMerchant.id, storeId);
+                Optional<CashierHistoryMerchant> cashierHistoryMerchant = CashierHistoryMerchantRepository.findByUserActiveCashierAndOpen(userMerchant.id);
                 if (!cashierHistoryMerchant.isPresent()) {
-                    response.setBaseResponse(0, 0, 0, "cashier history tidak ditemukan", null);
-                    return badRequest(Json.toJson(response));
+                    Map<String, Boolean> responseMap = new HashMap<>();
+                    responseMap.put("is_open", Boolean.FALSE);
+                    response.setBaseResponse(0, 0, 0, "cashier history tidak ditemukan", responseMap);
+                    return ok(Json.toJson(response));
                 }
 
                 SessionCashierResponse sessionCashierResponse = new SessionCashierResponse();
