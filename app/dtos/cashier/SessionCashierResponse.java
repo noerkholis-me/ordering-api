@@ -18,6 +18,9 @@ public class SessionCashierResponse {
     @JsonProperty("is_open")
     private Boolean isOpen;
 
+    @JsonProperty("store_id")
+    private Long storeId;
+
     @JsonProperty("start_total_amount")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal startTotalAmount;
