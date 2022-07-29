@@ -22,7 +22,10 @@ public class ProductDetailPosResponse {
     @JsonProperty("product_price")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal productPrice;
+    @JsonProperty("image_url")
+    private String imageUrl;
 
+    @JsonProperty("product_add_on")
     private List<ProductAddOnPosResponse> productAddOnPosResponses;
 
     @AllArgsConstructor
@@ -35,6 +38,8 @@ public class ProductDetailPosResponse {
         @JsonProperty("product_price")
         @JsonSerialize(using = BigDecimalSerialize.class)
         private BigDecimal productPrice;
+        @JsonProperty("image_url")
+        private String imageUrl;
     }
 
 

@@ -12,10 +12,7 @@ import models.Store;
 import models.UserMerchant;
 import models.appsettings.AppSettings;
 import models.merchant.FeeSettingMerchant;
-import models.transaction.Order;
-import models.transaction.OrderDetail;
-import models.transaction.OrderDetailAddOn;
-import models.transaction.OrderPayment;
+import models.transaction.*;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
@@ -52,7 +49,7 @@ public class OrderPosController extends BaseController {
             }
 
             Query<Order> orderQuery = OrderRepository.findAllOrderByStoreId(store.id);
-            List<Order> orders = OrderRepository.findAllOrderByStatusAndCustomerNameAndOrderNumber(orderQuery, offset, limit, "PENDING", customerName, orderNumber);
+            List<Order> orders = OrderRepository.findAllOrderByStatusAndCustomerNameAndOrderNumber(orderQuery, offset, limit, OrderStatus.NEW_ORDER.getStatus(), customerName, orderNumber);
             Integer totalData = OrderRepository.getTotalOrder(orderQuery);
 
             if (orders.isEmpty() || orders == null) {
@@ -116,6 +113,7 @@ public class OrderPosController extends BaseController {
                 productDetailPosResponse.setProductName(orderDetail.getProductName());
                 productDetailPosResponse.setProductPrice(orderDetail.getProductPrice());
                 productDetailPosResponse.setQty(orderDetail.getQuantity());
+                productDetailPosResponse.setImageUrl("");
 
                 List<OrderDetailAddOn> orderDetailAddOns = orderDetail.getOrderDetailAddOns();
                 List<ProductDetailPosResponse.ProductAddOnPosResponse> productAddOnPosResponses = new ArrayList<>();
@@ -127,6 +125,7 @@ public class OrderPosController extends BaseController {
                         productAddOnPosResponse.setProductName(orderDetailAddOn.getProductName());
                         productAddOnPosResponse.setProductPrice(orderDetailAddOn.getProductPrice());
                         productAddOnPosResponse.setQty(orderDetailAddOn.getQuantity());
+                        productAddOnPosResponse.setImageUrl("");
                         productAddOnPosResponses.add(productAddOnPosResponse);
                     }
                 }
