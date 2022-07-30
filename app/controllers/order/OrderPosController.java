@@ -179,7 +179,7 @@ public class OrderPosController extends BaseController {
                     invoicePrintResponse.setImageStoreUrl(sandboxImage);
                 }
 
-                invoicePrintResponse.setImageStoreUrl(appSettings.getAppLogo());
+                invoicePrintResponse.setImageStoreUrl(appSettings.getAppLogo() != null && appSettings.getAppLogo() != "" ? appSettings.getAppLogo() : null);
 
                 invoicePrintResponse.setStoreName(store.storeName);
                 invoicePrintResponse.setStoreAddress(store.storeAddress);
