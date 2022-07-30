@@ -5,6 +5,7 @@ import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import models.merchant.CashierHistoryMerchant;
 import play.db.ebean.Model;
+import models.*;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -130,6 +131,25 @@ public class CashierHistoryMerchantRepository extends Model {
                 .eq("userMerchant.id", userMerchantId)
                 .query();
     }
+
+    // BY MERCHANT
+    public static Query<CashierHistoryMerchant> findAllCashierReportByMerchant(Merchant merchant) {
+        return Ebean.find(CashierHistoryMerchant.class)
+                .where()
+                .eq("store.merchant", merchant)
+                .query();
+    }
+
+    public static Query<CashierHistoryMerchant> findAllCashierReportByMerchant(Query<CashierHistoryMerchant> query, Long storeId, Merchant merchant) {
+        if(query == null){
+            query = Ebean.find(CashierHistoryMerchant.class);
+        }
+        return query
+                .where().eq("store.id", storeId)
+                .eq("store.merchant", merchant)
+                .query();
+    }
+
     public static List<CashierHistoryMerchant> findAllCashierReport(Query<CashierHistoryMerchant> reqQuery, int offset, int limit) {
         Query<CashierHistoryMerchant> query = reqQuery;
         query.orderBy("t0.created_at desc");

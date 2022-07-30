@@ -587,8 +587,71 @@ public class CashierHistoryController extends BaseController {
         }
     }
 
-
-
+    public static Result closePOSReportMerchant(int offset, int limit, Long storeId, String sessionCode, String startDate, String endDate) {
+        Merchant ownUser = checkMerchantAccessAuthorization();
+        if (ownUser != null) {
+            try {
+                System.out.println("user merchant id >>> ");
+                System.out.println(Json.toJson(ownUser));
+                Query<CashierHistoryMerchant> query = CashierHistoryMerchantRepository.findAllCashierReportByMerchant(ownUser);
+                List<CashierHistoryMerchant> cashierHistoryMerchant = new ArrayList<>();
+                Store store = null;
+                if (storeId != null && storeId != 0L) {
+                    store = Store.findById(storeId);
+                    if (store == null) {
+                        response.setBaseResponse(0, 0, 0, "store tidak ditemukan", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    query = CashierHistoryMerchantRepository.findAllCashierReportByMerchant(query, storeId, ownUser);
+                }
+                if(startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+                    query = CashierHistoryMerchantRepository.findAllCashierReportByDate(query, startDate, endDate);
+                }
+                if(sessionCode != null && !sessionCode.isEmpty()) {
+                    query =  query.where().ilike("sessionCode", "%" + sessionCode + "%").query();
+                }
+                if (query != null) {
+                    cashierHistoryMerchant = CashierHistoryMerchantRepository.findAllCashierReport(query, offset, limit);
+                }
+                List<CashierReportResponse> cashierReportResponseList = new ArrayList<>();
+                for (CashierHistoryMerchant cashierHistoryMerchant1 : cashierHistoryMerchant) {
+                    CashierReportResponse cashierReportResponse = new CashierReportResponse();
+                    BigDecimal closingSystem = new BigDecimal(
+                            cashierHistoryMerchant1.getEndTotalAmount() != null ? cashierHistoryMerchant1.getEndTotalAmount().toString() : "0");
+                    BigDecimal closingCashier = new BigDecimal(cashierHistoryMerchant1.getEndTotalAmountCash() != null ?
+                            cashierHistoryMerchant1.getEndTotalAmountCash().toString() : "0");
+                    cashierReportResponse.setId(cashierHistoryMerchant1.id);
+                    cashierReportResponse.setCashierName(cashierHistoryMerchant1.getUserMerchant().getFullName());
+                    if(cashierHistoryMerchant1.getStore() != null && !cashierHistoryMerchant1.getStore().storeName.isEmpty()){
+                        cashierReportResponse.setStoreName(cashierHistoryMerchant1.getStore().storeName);
+                    } else if(cashierHistoryMerchant1.getStore() != null && cashierHistoryMerchant1.getStore().id != null){
+                        store = Store.findById(cashierHistoryMerchant1.getStore().id);
+                        cashierReportResponse.setStoreName(store.storeName);
+                    } else if(store != null){
+                        cashierReportResponse.setStoreName(store.storeName);
+                    }
+                    cashierReportResponse.setStartTime(cashierHistoryMerchant1.getStartTime());
+                    cashierReportResponse.setEndTime(cashierHistoryMerchant1.getEndTime());
+                    cashierReportResponse.setSessionCode(cashierHistoryMerchant1.getSessionCode());
+                    cashierReportResponse.setInitialCash(Helper.convertCurrencyIDR(cashierHistoryMerchant1.getStartTotalAmount()));
+                    cashierReportResponse.setClosingCashSystem(Helper.convertCurrencyIDR(closingSystem));
+                    cashierReportResponse.setClosingCashCashier(Helper.convertCurrencyIDR(closingCashier));
+                    cashierReportResponse.setMarginCash(Helper.convertCurrencyIDR(closingSystem.subtract(closingCashier)));
+                    cashierReportResponse.setNotes(cashierHistoryMerchant1.getNotes());
+                    cashierReportResponseList.add(cashierReportResponse);
+                }
+                response.setBaseResponse(cashierReportResponseList.size(), offset, limit, success + " menampilkan data penutupan kasir", cashierReportResponseList);
+                return ok(Json.toJson(response));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                response.setBaseResponse(0, 0, 0, ex.getMessage(), null);
+                return internalServerError(Json.toJson(response));
+            }
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+    }
 
 
 }
