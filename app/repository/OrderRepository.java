@@ -221,6 +221,11 @@ public class OrderRepository extends Model {
             exp = exp.ilike("t1.full_name", "%" + customerName + "%");
         }
 
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String todayString = simpleDateFormat.format(new Date());
+
+        exp.raw("t0.order_date between '" + todayString.concat(" 00:00:00.000") + "'" + " and " + "'" + todayString.concat(" 23:59:59.000") + "'");
+
         query = exp.query();
         if (limit != 0) {
             query = query.setMaxRows(limit);
