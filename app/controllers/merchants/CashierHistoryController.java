@@ -204,8 +204,17 @@ public class CashierHistoryController extends BaseController {
                         continue;
                     }
 
+                    System.out.print("End total amount: ");
+                    System.out.println(Json.toJson(endTotalAmount));
+                    System.out.print("Total Cash system: ");
+                    System.out.println(Json.toJson(cashierClosePosRequest.getCloseTotalAmountCash()));
+                    System.out.println("======================");
+                    System.out.println(endTotalAmount.compareTo(cashierClosePosRequest.getCloseTotalAmountCash()));
+                    System.out.println(endTotalAmount.compareTo(cashierClosePosRequest.getCloseTotalAmountCash()) > 0 &&
+                            (cashierClosePosRequest.getNotes() == null || cashierClosePosRequest.getNotes().isEmpty()));
+
                     if(endTotalAmount.compareTo(cashierClosePosRequest.getCloseTotalAmountCash()) > 0 &&
-                            cashierClosePosRequest.getNotes() == null || cashierClosePosRequest.getNotes().isEmpty()){
+                            (cashierClosePosRequest.getNotes() == null || cashierClosePosRequest.getNotes().isEmpty())){
                         response.setBaseResponse(0, 0, 0,
                                 "Terdapat selisih antara penutupan kasir sistem dengan closing yang anda masukkan, Silahkan masukkan Catatan!", null);
                         return badRequest(Json.toJson(response));
