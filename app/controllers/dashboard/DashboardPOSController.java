@@ -70,7 +70,7 @@ public class DashboardPOSController extends BaseController {
         } else {
             Map<String, Integer> responses = new HashMap<>();
 
-            Query<Order> orderQuery = OrderRepository.findAllOrderByStoreId(storeId);
+            Query<Order> orderQuery = OrderRepository.findAllOrderByStoreIdNow(storeId);
 
             Integer totalOrder = OrderRepository.getTotalOrder(orderQuery, "");
             responses.put("total_order", totalOrder);

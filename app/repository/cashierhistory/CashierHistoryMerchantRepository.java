@@ -16,7 +16,7 @@ import java.util.Optional;
 
 public class CashierHistoryMerchantRepository extends Model {
 
-    private static final Finder<Long, CashierHistoryMerchant> find = new Finder<>(Long.class, CashierHistoryMerchant.class);
+    public static final Finder<Long, CashierHistoryMerchant> find = new Finder<>(Long.class, CashierHistoryMerchant.class);
 
     public static Optional<CashierHistoryMerchant> findByUserActiveCashier(Long userMerchantId, Long storeId) {
         return Optional.ofNullable(
@@ -54,6 +54,9 @@ public class CashierHistoryMerchantRepository extends Model {
     public static Query<CashierHistoryMerchant> findAllCashierHistoryByStoreId(Long storeId) {
         return Ebean.find(CashierHistoryMerchant.class)
                 .where().eq("store.id", storeId)
+                .eq("end_time", null)
+                .eq("end_total_amount", null)
+                .eq("end_total_amount_cash", null)
                 .query();
     }
 

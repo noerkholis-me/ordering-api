@@ -133,6 +133,18 @@ public class OrderRepository extends Model {
                 .query();
     }
 
+    public static Query<Order> findAllOrderByStoreIdNow(Long storeId) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String todayString = simpleDateFormat.format(new Date());
+        return Ebean.find(Order.class)
+                .fetch("store")
+                .fetch("member")
+                .where()
+                .eq("store.id", storeId)
+                .raw("t0.order_date between '" + todayString.concat(" 00:00:00.000") + "'" + " and " + "'" + todayString.concat(" 23:59:59.000") + "'")
+                .query();
+    }
+
     public static Query<Order> findAllOrderByUserMerchantIdAndStoreId(Long userMerchantId, Long storeId) {
         return Ebean.find(Order.class)
                 .fetch("userMerchant")
