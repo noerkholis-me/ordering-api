@@ -530,6 +530,8 @@ public class OrderMerchantController extends BaseController {
                 invoicePrintResponse.setPaymentFeeCustomer(orderPayment.getPaymentFeeCustomer());
                 invoicePrintResponse.setTotal(getOrder.getTotalPrice());
                 invoicePrintResponse.setOrderQueue(getOrder.getOrderQueue());
+                invoicePrintResponse.setPaymentStatus(orderPayment.getStatus());
+                invoicePrintResponse.setReferenceNumber("-");
 
                 response.setBaseResponse(1, offset, limit, success + " success showing data invoice.",
                         invoicePrintResponse);

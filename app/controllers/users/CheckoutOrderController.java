@@ -49,8 +49,8 @@ public class CheckoutOrderController extends BaseController {
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     public static Result checkoutOrder() {
-        int authority = checkAccessAuthorization("all");
-        if (authority == 200 || authority == 203) {
+        // int authority = checkAccessAuthorization("all");
+        // if (authority == 200 || authority == 203) {
             JsonNode jsonNode = request().body().asJson();
             Transaction txn = Ebean.beginTransaction();
             try {
@@ -58,6 +58,7 @@ public class CheckoutOrderController extends BaseController {
 
                 // request order
                 OrderTransaction orderRequest = objectMapper.readValue(jsonNode.toString(), OrderTransaction.class);
+                Order order = new Order();
                 Store store = Store.findByStoreCode(orderRequest.getStoreCode());
                 if (store == null) {
                     response.setBaseResponse(0, 0, 0, "Store code is not null", null);
@@ -69,6 +70,19 @@ public class CheckoutOrderController extends BaseController {
                     member = Member.find.where().eq("t0.email", orderRequest.getCustomerEmail()).eq("merchant", store.merchant).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
                     if (orderRequest.getCustomerPhoneNumber() != null && !orderRequest.getCustomerPhoneNumber().equalsIgnoreCase("")) {
                         member = Member.find.where().eq("t0.phone", orderRequest.getCustomerPhoneNumber()).eq("t0.is_deleted", false).findUnique();
+                    }
+                    if(member == null){
+                        Member memberData = new Member();
+                        memberData.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
+                        memberData.email = orderRequest.getCustomerEmail() != null && orderRequest.getCustomerEmail() != "" ? orderRequest.getCustomerEmail() : null;
+                        memberData.phone = orderRequest.getCustomerPhoneNumber() != null && orderRequest.getCustomerPhoneNumber() != "" ? orderRequest.getCustomerPhoneNumber() : null;
+                        memberData.save();
+                        order.setMember(memberData);
+                    }
+                    if(member != null) {
+                        member.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
+                        member.update();
+                        order.setMember(member);
                     }
                 }
 
@@ -85,17 +99,17 @@ public class CheckoutOrderController extends BaseController {
                 }
 
                 // new oders
-                Order order = new Order();
                 String orderNumber = Order.generateOrderNumber();
                 order.setOrderDate(new Date());
                 order.setOrderNumber(orderNumber);
                 order.setOrderType(orderRequest.getOrderType());
                 order.setStatus(OrderStatus.NEW_ORDER.getStatus());
                 order.setStore(store);
-                order.setMember(member);
                 if (orderRequest.getDeviceType().equalsIgnoreCase("MINIPOS")) {
+                    System.out.println("Out");
                     UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
                     if(userMerchant != null){
+                        System.out.println("in");
                         order.setUserMerchant(userMerchant);
                     }
                 }
@@ -439,13 +453,13 @@ public class CheckoutOrderController extends BaseController {
             } finally {
                 txn.end();
             }
-        } else if (authority == 403) {
-            response.setBaseResponse(0, 0, 0, forbidden, null);
-            return forbidden(Json.toJson(response));
-        } else {
-            response.setBaseResponse(0, 0, 0, unauthorized, null);
-            return unauthorized(Json.toJson(response));
-        }
+        // } else if (authority == 403) {
+        //     response.setBaseResponse(0, 0, 0, forbidden, null);
+        //     return forbidden(Json.toJson(response));
+        // } else {
+        //     response.setBaseResponse(0, 0, 0, unauthorized, null);
+        //     return unauthorized(Json.toJson(response));
+        // }
         response.setBaseResponse(0, 0, 0, error, null);
         return ok(Json.toJson(response));
     }

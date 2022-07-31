@@ -244,6 +244,8 @@ public class OrderPosController extends BaseController {
                     orderPayment.setStatus(OrderPayment.PAID);
                     orderPayment.update();
 
+                    trx.commit();
+
                     invoicePrintResponse.setPaymentStatus(orderPayment.getStatus());
                     response.setBaseResponse(1, offset, 1, success + " success showing data invoice.",
                             invoicePrintResponse);

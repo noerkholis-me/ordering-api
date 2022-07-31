@@ -118,6 +118,8 @@ public class CashierHistoryController extends BaseController {
                         return badRequest(Json.toJson(response));
                     }
                     query = CashierHistoryMerchantRepository.findAllCashierHistoryByStoreId(storeId);
+                } else {
+                    query = CashierHistoryMerchantRepository.find.where().eq("store.merchant", merchant).eq("end_time", null).eq("end_total_amount", null).eq("end_total_amount_cash", null).order("created_at desc");
                 }
                 List<CashierHistoryMerchant> cashierHistoryMerchants = CashierHistoryMerchantRepository.findAllCashierHistory(query, offset, limit);
                 Integer totalData = CashierHistoryMerchantRepository.getTotalData(query);
@@ -523,10 +525,10 @@ public class CashierHistoryController extends BaseController {
                 }
 
                 SessionCashierResponse sessionCashierResponse = new SessionCashierResponse();
-                StoreAccess storeAccess = StoreAccessRepository.findById(userMerchant.id);
-                if (storeAccess != null) {
-                    StoreAccessDetail storeAccessDetail = StoreAccessDetail.find.where().eq("storeAccess", storeAccess).setMaxRows(1).findUnique();
-                    sessionCashierResponse.setStoreId(storeAccessDetail.getStore().id);
+                CashierHistoryMerchant cHM = CashierHistoryMerchant.find.where().eq("userMerchant", userMerchant).eq("end_time", null).eq("t0.end_total_amount", null).setMaxRows(1).findUnique();
+                if (cHM != null) {
+                    // StoreAccessDetail storeAccessDetail = StoreAccessDetail.find.where().eq("storeAccess", storeAccess).eq("t0.store_id", storeId).setMaxRows(1).findUnique();
+                    sessionCashierResponse.setStoreId(cHM.getStore().id);
                 }
 
 
