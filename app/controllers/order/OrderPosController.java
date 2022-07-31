@@ -8,6 +8,7 @@ import com.hokeba.util.Constant;
 import controllers.BaseController;
 import dtos.order.*;
 import models.Member;
+import models.merchant.ProductMerchantDetail;
 import models.Store;
 import models.UserMerchant;
 import models.appsettings.AppSettings;
@@ -20,6 +21,7 @@ import repository.AppSettingRepository;
 import repository.FeeSettingMerchantRepository;
 import repository.OrderPaymentRepository;
 import repository.OrderRepository;
+import repository.ProductMerchantDetailRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,11 +116,12 @@ public class OrderPosController extends BaseController {
             List<OrderDetail> orderDetails = getOrder.getOrderDetails();
             List<ProductDetailPosResponse> productDetailPosResponses = new ArrayList<>();
             for (OrderDetail orderDetail : orderDetails) {
+                ProductMerchantDetail pMD = ProductMerchantDetailRepository.findByProduct(orderDetail.getProductMerchant());
                 ProductDetailPosResponse productDetailPosResponse = new ProductDetailPosResponse();
                 productDetailPosResponse.setProductName(orderDetail.getProductName());
                 productDetailPosResponse.setProductPrice(orderDetail.getProductPrice());
                 productDetailPosResponse.setQty(orderDetail.getQuantity());
-                productDetailPosResponse.setImageUrl("");
+                productDetailPosResponse.setImageUrl(pMD.getProductImageMain());
 
                 List<OrderDetailAddOn> orderDetailAddOns = orderDetail.getOrderDetailAddOns();
                 List<ProductDetailPosResponse.ProductAddOnPosResponse> productAddOnPosResponses = new ArrayList<>();
