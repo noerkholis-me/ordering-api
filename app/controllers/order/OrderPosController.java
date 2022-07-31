@@ -18,6 +18,7 @@ import play.libs.Json;
 import play.mvc.Result;
 import repository.AppSettingRepository;
 import repository.FeeSettingMerchantRepository;
+import repository.OrderPaymentRepository;
 import repository.OrderRepository;
 
 import java.util.ArrayList;
@@ -48,7 +49,7 @@ public class OrderPosController extends BaseController {
                 return badRequest(Json.toJson(response));
             }
 
-            Query<Order> orderQuery = OrderRepository.findAllOrderByStoreId(store.id);
+            Query<Order> orderQuery = OrderRepository.findAllOrderByUserMerchantIdAndStoreId(userMerchant.id, store.id);
             List<Order> orders = OrderRepository.findAllOrderByStatusAndCustomerNameAndOrderNumber(orderQuery, offset, limit, OrderStatus.NEW_ORDER.getStatus(), customerName, orderNumber);
             Integer totalData = OrderRepository.getTotalOrder(orderQuery);
 
@@ -59,19 +60,23 @@ public class OrderPosController extends BaseController {
 
             List<OrderListPosResponse> orderListPosResponses = new ArrayList<>();
             for (Order order : orders) {
-                OrderListPosResponse orderResponse = new OrderListPosResponse();
-                Member member = order.getMember();
-                if (member == null) {
-                    orderResponse.setCustomerName("-");
-                } else {
-                    orderResponse.setCustomerName(member.fullName);
+                Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderIdAndStatusAndPaymentChannel(order.id, OrderPayment.PENDING);
+                if (orderPayment.isPresent()) {
+                    OrderListPosResponse orderResponse = new OrderListPosResponse();
+                    Member member = order.getMember();
+                    if (member == null) {
+                        orderResponse.setCustomerName("-");
+                    } else {
+                        orderResponse.setCustomerName(member.fullName);
+                    }
+
+                    orderResponse.setOrderId(order.id);
+                    orderResponse.setOrderNumber(order.getOrderNumber());
+                    orderResponse.setOrderDate(order.getOrderDate());
+
+                    orderListPosResponses.add(orderResponse);
                 }
-
-                orderResponse.setOrderId(order.id);
-                orderResponse.setOrderNumber(order.getOrderNumber());
-                orderResponse.setOrderDate(order.getOrderDate());
-
-                orderListPosResponses.add(orderResponse);
+                continue;
             }
 
             response.setBaseResponse(totalData, offset, limit, success + " menampilkan data order", orderListPosResponses);

@@ -18,10 +18,18 @@ public class OrderPaymentRepository extends Model {
     }
 
     public static Optional<OrderPayment> findByOrderIdAndStatusAndPaymentChannel(Long orderId, String status) {
-        String query = "t0.payment_channel in (select payment_code from payment_method pm where pm.payment_code = 'edc' or pm.payment_code = 'cash')";
+        String query = "t0.payment_channel in (select payment_code from payment_method pm where pm.payment_code = 'debit_credit' or pm.payment_code = 'cash')";
         return Optional.ofNullable(find.where()
                 .eq("order_id", orderId)
                 .eq("status", status)
+                .raw(query)
+                .findUnique());
+    }
+
+    public static Optional<OrderPayment> findByOrderIdAndStatusAndPaymentChannelWithOr(Long orderId) {
+        String query = "t0.status in ('PAID','PENDING') and t0.payment_channel in (select payment_code from payment_method pm where pm.payment_code = 'debit_credit' or pm.payment_code = 'cash')";
+        return Optional.ofNullable(find.where()
+                .eq("order_id", orderId)
                 .raw(query)
                 .findUnique());
     }

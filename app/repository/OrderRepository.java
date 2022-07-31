@@ -137,6 +137,7 @@ public class OrderRepository extends Model {
         return Ebean.find(Order.class)
                 .fetch("userMerchant")
                 .fetch("store")
+                .fetch("member")
                 .where()
                 .eq("userMerchant.id", userMerchantId)
                 .eq("store.id", storeId)
