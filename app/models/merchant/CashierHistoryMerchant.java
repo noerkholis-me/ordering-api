@@ -55,7 +55,7 @@ public class CashierHistoryMerchant extends BaseModel {
     @JoinColumn(name = "store_id", referencedColumnName = "id")
     public Store store;
 
-    private static final Finder<Long, CashierHistoryMerchant> find = new Finder<>(Long.class, CashierHistoryMerchant.class);
+    public static final Finder<Long, CashierHistoryMerchant> find = new Finder<>(Long.class, CashierHistoryMerchant.class);
 
     public static String generateSessionCode(Long userMerchantId, Long storeId){
         Optional<CashierHistoryMerchant> cashier = find.where()
