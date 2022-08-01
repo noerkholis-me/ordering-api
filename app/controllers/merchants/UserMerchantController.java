@@ -358,7 +358,7 @@ public class UserMerchantController extends BaseController {
     public static Result listUsers(String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<UserMerchant> query = UserMerchantRepository.find.where().eq("isDeleted", false).eq("role.merchant", ownMerchant).order("id");
+            Query<UserMerchant> query = UserMerchantRepository.find.where().eq("t0.is_deleted", false).eq("role.merchant", ownMerchant).order("id");
             try {
                 List<UserMerchantResponse> responses = new ArrayList<>();
                 List<UserMerchant> totalData = UserMerchantRepository.getTotalData(query);

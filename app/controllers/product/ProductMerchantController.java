@@ -46,25 +46,25 @@ public class ProductMerchantController extends BaseController {
                 try {
                     ProductMerchant newProductMerchant = new ProductMerchant();
                     CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(
-                            productRequest.getCategoryId(), ownMerchant.id);
+                            productRequest.getCategoryId(), ownMerchant);
                     if (categoryMerchant == null) {
                         response.setBaseResponse(0, 0, 0, " Category not found.", null);
                         return badRequest(Json.toJson(response));
                     }
                     SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(
-                            productRequest.getSubCategoryId(), ownMerchant.id);
+                            productRequest.getSubCategoryId(), ownMerchant);
                     if (subCategoryMerchant == null) {
                         response.setBaseResponse(0, 0, 0, " Sub Category not found.", null);
                         return badRequest(Json.toJson(response));
                     }
                     SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(
-                            productRequest.getSubsCategoryId(), ownMerchant.id);
+                            productRequest.getSubsCategoryId(), ownMerchant);
                     if (subsCategoryMerchant == null) {
                         response.setBaseResponse(0, 0, 0, " Subs Category not found.", null);
                         return badRequest(Json.toJson(response));
                     }
                     BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(
-                            productRequest.getBrandId(), ownMerchant.id);
+                            productRequest.getBrandId(), ownMerchant);
                     if (brandMerchant == null) {
                         response.setBaseResponse(0, 0, 0, " Brand not found.", null);
                         return badRequest(Json.toJson(response));
@@ -126,25 +126,25 @@ public class ProductMerchantController extends BaseController {
                 Transaction trx = Ebean.beginTransaction();
                 try {
                     CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(
-                            productRequest.getCategoryId(), ownMerchant.id);
+                            productRequest.getCategoryId(), ownMerchant);
                     if (categoryMerchant == null) {
                         response.setBaseResponse(0, 0, 0, " Category not found.", null);
                         return badRequest(Json.toJson(response));
                     }
                     SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(
-                            productRequest.getSubCategoryId(), ownMerchant.id);
+                            productRequest.getSubCategoryId(), ownMerchant);
                     if (subCategoryMerchant == null) {
                         response.setBaseResponse(0, 0, 0, " Sub Category not found.", null);
                         return badRequest(Json.toJson(response));
                     }
                     SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(
-                            productRequest.getSubsCategoryId(), ownMerchant.id);
+                            productRequest.getSubsCategoryId(), ownMerchant);
                     if (subsCategoryMerchant == null) {
                         response.setBaseResponse(0, 0, 0, " Subs Category not found.", null);
                         return badRequest(Json.toJson(response));
                     }
                     BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(
-                            productRequest.getBrandId(), ownMerchant.id);
+                            productRequest.getBrandId(), ownMerchant);
                     if (brandMerchant == null) {
                         response.setBaseResponse(0, 0, 0, " Brand not found.", null);
                         return badRequest(Json.toJson(response));
@@ -284,7 +284,7 @@ public class ProductMerchantController extends BaseController {
         productResponse.setIsActive(productMerchant.getIsActive());
         productResponse.setMerchantId(productMerchant.getMerchant().id);
         // ================================================================ //
-        CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getCategoryMerchant().id, productMerchant.getMerchant().id);
+        CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getCategoryMerchant().id, productMerchant.getMerchant());
         if (categoryMerchant != null) {
             ProductResponse.CategoryResponse categoryResponse = ProductResponse.CategoryResponse.builder()
                     .id(categoryMerchant.id)
@@ -292,7 +292,7 @@ public class ProductMerchantController extends BaseController {
                     .build();
             productResponse.setCategory(categoryResponse);
         }
-        SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubCategoryMerchant().id, productMerchant.getMerchant().id);
+        SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubCategoryMerchant().id, productMerchant.getMerchant());
         if (subCategoryMerchant != null) {
             ProductResponse.SubCategoryResponse subCategoryResponse = ProductResponse.SubCategoryResponse.builder()
                     .id(subCategoryMerchant.id)
@@ -300,7 +300,7 @@ public class ProductMerchantController extends BaseController {
                     .build();
             productResponse.setSubCategory(subCategoryResponse);
         }
-        SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubsCategoryMerchant().id, productMerchant.getMerchant().id);
+        SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubsCategoryMerchant().id, productMerchant.getMerchant());
         if (subCategoryMerchant != null) {
             ProductResponse.SubsCategoryResponse subsCategoryResponse = ProductResponse.SubsCategoryResponse.builder()
                     .id(subsCategoryMerchant.id)
@@ -308,7 +308,7 @@ public class ProductMerchantController extends BaseController {
                     .build();
             productResponse.setSubsCategory(subsCategoryResponse);
         }
-        BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(productMerchant.getBrandMerchant().id, productMerchant.getMerchant().id);
+        BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(productMerchant.getBrandMerchant().id, productMerchant.getMerchant());
         if (brandMerchant != null) {
             ProductResponse.BrandResponse brandResponse = ProductResponse.BrandResponse.builder()
                     .id(brandMerchant.id)
@@ -420,7 +420,7 @@ public class ProductMerchantController extends BaseController {
                                 .build();
                     productResponse.setProductDetail(productDetailResponse);
 
-                    CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getCategoryMerchant().id, productMerchant.getMerchant().id);
+                    CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getCategoryMerchant().id, productMerchant.getMerchant());
                     if (categoryMerchant != null) {
                         ProductResponse.CategoryResponse categoryResponse = ProductResponse.CategoryResponse.builder()
                                 .id(categoryMerchant.id)
@@ -428,7 +428,7 @@ public class ProductMerchantController extends BaseController {
                                 .build();
                         productResponse.setCategory(categoryResponse);
                     }
-                    SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubCategoryMerchant().id, productMerchant.getMerchant().id);
+                    SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubCategoryMerchant().id, productMerchant.getMerchant());
                     if (subCategoryMerchant != null) {
                         ProductResponse.SubCategoryResponse subCategoryResponse = ProductResponse.SubCategoryResponse.builder()
                                 .id(subCategoryMerchant.id)
@@ -436,7 +436,7 @@ public class ProductMerchantController extends BaseController {
                                 .build();
                         productResponse.setSubCategory(subCategoryResponse);
                     }
-                    SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubsCategoryMerchant().id, productMerchant.getMerchant().id);
+                    SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubsCategoryMerchant().id, productMerchant.getMerchant());
                     if (subCategoryMerchant != null) {
                         ProductResponse.SubsCategoryResponse subsCategoryResponse = ProductResponse.SubsCategoryResponse.builder()
                                 .id(subsCategoryMerchant.id)
@@ -444,7 +444,7 @@ public class ProductMerchantController extends BaseController {
                                 .build();
                         productResponse.setSubsCategory(subsCategoryResponse);
                     }
-                    BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(productMerchant.getBrandMerchant().id, productMerchant.getMerchant().id);
+                    BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(productMerchant.getBrandMerchant().id, productMerchant.getMerchant());
                     if (brandMerchant != null) {
                         ProductResponse.BrandResponse brandResponse = ProductResponse.BrandResponse.builder()
                                 .id(brandMerchant.id)
@@ -493,7 +493,7 @@ public class ProductMerchantController extends BaseController {
 
                     ProductResponse productResponse = new ProductResponse();
 
-                    ProductStore productStore = ProductStoreRepository.findForCust(productId, storeId, merchantId);
+                    ProductStore productStore = ProductStoreRepository.findForCust(productId, storeId, productMerchantDetail.getProductMerchant().getMerchant());
                 
                     ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(productMerchantDetail.getProductMerchant().id, merchantId);
                     productResponse.setProductId(productMerchant.id);
@@ -516,7 +516,7 @@ public class ProductMerchantController extends BaseController {
                                 .build();
                     productResponse.setProductDetail(productDetailResponse);
 
-                    CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getCategoryMerchant().id, productMerchant.getMerchant().id);
+                    CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getCategoryMerchant().id, productMerchant.getMerchant());
                     if (categoryMerchant != null) {
                         ProductResponse.CategoryResponse categoryResponse = ProductResponse.CategoryResponse.builder()
                                 .id(categoryMerchant.id)
@@ -524,7 +524,7 @@ public class ProductMerchantController extends BaseController {
                                 .build();
                         productResponse.setCategory(categoryResponse);
                     }
-                    SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubCategoryMerchant().id, productMerchant.getMerchant().id);
+                    SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubCategoryMerchant().id, productMerchant.getMerchant());
                     if (subCategoryMerchant != null) {
                         ProductResponse.SubCategoryResponse subCategoryResponse = ProductResponse.SubCategoryResponse.builder()
                                 .id(subCategoryMerchant.id)
@@ -532,7 +532,7 @@ public class ProductMerchantController extends BaseController {
                                 .build();
                         productResponse.setSubCategory(subCategoryResponse);
                     }
-                    SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubsCategoryMerchant().id, productMerchant.getMerchant().id);
+                    SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubsCategoryMerchant().id, productMerchant.getMerchant());
                     if (subCategoryMerchant != null) {
                         ProductResponse.SubsCategoryResponse subsCategoryResponse = ProductResponse.SubsCategoryResponse.builder()
                                 .id(subsCategoryMerchant.id)
@@ -540,7 +540,7 @@ public class ProductMerchantController extends BaseController {
                                 .build();
                         productResponse.setSubsCategory(subsCategoryResponse);
                     }
-                    BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(productMerchant.getBrandMerchant().id, productMerchant.getMerchant().id);
+                    BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(productMerchant.getBrandMerchant().id, productMerchant.getMerchant());
                     if (brandMerchant != null) {
                         ProductResponse.BrandResponse brandResponse = ProductResponse.BrandResponse.builder()
                                 .id(brandMerchant.id)
@@ -602,7 +602,7 @@ public class ProductMerchantController extends BaseController {
                     
                 for(ProductAddOn dataProductAddOn : dataAddOn) {
 
-                    ProductStore productStore = ProductStoreRepository.findForCust(dataProductAddOn.getProductAssignId(), storeId, merchantId);
+                    ProductStore productStore = ProductStoreRepository.findForCust(dataProductAddOn.getProductAssignId(), storeId, productMerchant.getMerchant());
                     ProductMerchantDetail forDetail = ProductMerchantDetailRepository.findDetailAdditionalProduct(dataProductAddOn.getProductAssignId(), merchantId);
                     ProductMerchant productMerchantAssign = ProductMerchantRepository.findByIdProductRecommend(dataProductAddOn.getProductAssignId(), merchantId);
                     
@@ -671,6 +671,59 @@ public class ProductMerchantController extends BaseController {
         return badRequest(Json.toJson(response));
     }
 
+    public static Result posProductAdditional(Long productId, Long storeId){
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            List<ProductAddOnType>dataAddOnType = ProductAddOnTypeRepository.findByMerchantId(ownMerchant);
+            try {                    
+                List<MiniPosAdditionalResponse> responsesTypeProductAddOn = new ArrayList<>();
+                for(ProductAddOnType dataProductAddOnType : dataAddOnType) {
+                    MiniPosAdditionalResponse responseTypeProductAddOn = new MiniPosAdditionalResponse();
+                    responseTypeProductAddOn.setProductType(dataProductAddOnType.getProductType());
+                    Query<ProductAddOn> queryProductAddOn = ProductAddOnRepository.find.where().eq("t0.product_type",dataProductAddOnType.getProductType()).eq("t0.product_id", productId).eq("merchant", ownMerchant).order("t0.product_type asc");
+                    List<ProductAddOn> dataAddOn = ProductAddOnRepository.getDataForAddOn(queryProductAddOn);
+                    List<MiniPosAdditionalResponse.ProductAddOn> responsesProductAddOn = new ArrayList<>();
+                    for(ProductAddOn dataProductAddOn : dataAddOn) {
+                        ProductStore productStore = ProductStoreRepository.findForCust(dataProductAddOn.getProductAssignId(), storeId, ownMerchant);
+                        ProductMerchantDetail forDetail = ProductMerchantDetailRepository.findDetailAdditionalProduct(dataProductAddOn.getProductAssignId(), dataProductAddOn.getMerchant().id);
+                        ProductMerchant productMerchantAssign = ProductMerchantRepository.findByIdProductRecommend(dataProductAddOn.getProductAssignId(), dataProductAddOn.getMerchant().id);
+                                            
+                        MiniPosAdditionalResponse.ProductAddOn responseAddOn = new MiniPosAdditionalResponse.ProductAddOn();
+                        responseAddOn.setProductId(dataProductAddOn.getProductMerchant().id);
+                        responseAddOn.setProductAssignId(dataProductAddOn.getProductAssignId());
+                        responseAddOn.setProductName(productMerchantAssign.getProductName());
+                        if (productStore != null) {
+                            responseAddOn.setProductPrice(productStore.getStorePrice());
+                            responseAddOn.setDiscountType(productStore.getDiscountType());
+                            responseAddOn.setDiscount(productStore.getDiscount());
+                            responseAddOn.setProductPriceAfterDiscount(productStore.getFinalPrice());
+                        } else {
+                            responseAddOn.setProductPrice(forDetail.getProductPrice());
+                            responseAddOn.setDiscountType(forDetail.getDiscountType());
+                            responseAddOn.setDiscount(forDetail.getDiscount());
+                            responseAddOn.setProductPriceAfterDiscount(forDetail.getProductPriceAfterDiscount());
+                        }
+                        responseAddOn.setProductImageMain(forDetail.getProductImageMain());
+                        responseAddOn.setProductImage1(forDetail.getProductImage1());
+                        responseAddOn.setProductImage2(forDetail.getProductImage2());
+                        responseAddOn.setProductImage3(forDetail.getProductImage3());
+                        responseAddOn.setProductImage4(forDetail.getProductImage4());
+                        responsesProductAddOn.add(responseAddOn);
+                    }
+                    responseTypeProductAddOn.setProductAddOn(responsesProductAddOn != null ? responsesProductAddOn : null);
+                    responsesTypeProductAddOn.add(responseTypeProductAddOn);
+                }
+                response.setBaseResponse(1, 0, 1, "Berhasil menampilkan data", responsesTypeProductAddOn);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                Logger.error("Error", e);
+            }
+            response.setBaseResponse(0, 0, 0, error, null);
+            return badRequest(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, "Merchant tidak ditemukan", null);
+        return badRequest(Json.toJson(response));
+    }
     // FOR HOME CUSTOMER
     public static Result productListKiosk(Long brandId, Long merchantId, Long storeId, Long categoryId) {
         if (brandId != null) {
@@ -685,7 +738,7 @@ public class ProductMerchantController extends BaseController {
                 for(ProductMerchantDetail productMerchantDetail : dataProductDetail){
                     ProductKiosKResponse productResponseKiosK = new ProductKiosKResponse();
                     ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(productMerchantDetail.getProductMerchant().id, merchantId);
-                    ProductStore productStore = ProductStoreRepository.findForCust(productMerchant.id, storeId, merchantId);
+                    ProductStore productStore = ProductStoreRepository.findForCust(productMerchant.id, storeId, productMerchant.getMerchant());
                     productResponseKiosK.setProductId(productMerchant.id);
                     productResponseKiosK.setProductName(productMerchant.getProductName());
                     productResponseKiosK.setProductType(productMerchantDetail.getProductType());

@@ -101,7 +101,7 @@ public class MailConfig {
 
     public static String renderMailForgotPasswordMerchantTemplate(String resetToken, String name, String url) {
         return views.html.ForgotPasswordEmail
-                .render(name, url + "/" + resetToken, Constant.getInstance().getImageUrl())
+                .render(name, url, Constant.getInstance().getImageUrl())
                 .toString();
 
     }
@@ -158,6 +158,23 @@ public class MailConfig {
 		Merchant dt = new Merchant();
 		Form<Merchant> formData = Form.form(Merchant.class).fill(dt);
 		String url = Helper.API_URL + "/re/account-activation?token=" + activationCode;
+
+		try {
+			String html = views.html.verificationEmailChange.render(fullName, url, Constant.getInstance().getImageUrl()).toString();
+			return html;
+		} catch (Exception ignored) {
+
+		}
+		return "";
+	}
+
+	public static String renderVerificationAccountUser(String activationCode, String fullName, String deviceType) {
+		Merchant dt = new Merchant();
+		Form<Merchant> formData = Form.form(Merchant.class).fill(dt);
+		String url = Helper.API_URL + "/re/account-activation?token=" + activationCode;
+		if(deviceType != null && deviceType != ""){
+			url = url+"&device=" + deviceType;
+		}
 
 		try {
 			String html = views.html.verificationEmailChange.render(fullName, url, Constant.getInstance().getImageUrl()).toString();

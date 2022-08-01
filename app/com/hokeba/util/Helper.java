@@ -8,12 +8,15 @@ import play.Play;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Base64;
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 //import org.apache.commons.mail.DefaultAuthenticator;
 //import org.apache.commons.mail.HtmlEmail;
@@ -35,6 +38,7 @@ public class Helper {
     public final static String API_URL = Play.application().configuration().getString("whizliz.api.url");
     public final static String MERCHANT_URL = Play.application().configuration().getString("whizliz.merchant.url");
     public final static String BACKEND_URL = Play.application().configuration().getString("whizliz.cms.url");
+    public final static String POS_URL = Play.application().configuration().getString("sandbox.pos.url");
     
     /*public static void email(String to, String name, String htmlMsg, String subject) throws Exception {
         // Create the email message
@@ -254,6 +258,48 @@ public class Helper {
             return null;
         }
     }
+    public static boolean isValidEmailAddress(String email) {
+        String ePattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\])|(([a-zA-Z\\-0-9]+\\.)+[a-zA-Z]{2,}))$";
+        java.util.regex.Pattern p = java.util.regex.Pattern.compile(ePattern);
+        java.util.regex.Matcher m = p.matcher(email);
+        return m.matches();
+    }
+    //convert BigDecimal to Currency IDR
+    public static String convertCurrencyIDR(BigDecimal value) {
+        NumberFormat formatter = NumberFormat.getIntegerInstance(new Locale("id", "ID"));
+        return formatter.format(value != null ? value : new BigDecimal(0) );
+    }
 
-
+    // is valid phone number with country code +62
+    public static boolean isValidPhoneNumber(String phoneNumber) {
+        String regex = "^[0-9]{10,15}$";
+        //String regex2 = "^(?:\\+?[0-9]){6,14}[0-9]$";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(phoneNumber);
+        return matcher.matches();
+    }
+    // get first name
+    public static String getFirstName(String name) {
+        String[] names = name.split(" ");
+        if(names.length > 1) {
+            return names[0];
+        } else {
+            return name;
+        }
+    }
+    // get last name
+    public static String getLastName(String fullName) {
+        List<String> nameList = Arrays.stream(fullName.split(" ")).collect(Collectors.toList());
+        final int[] nameIndex = {0};
+        return nameList.stream().map(s-> {
+            nameIndex[0]++;
+            if(nameIndex[0] != 1 && nameIndex[0] < nameList.size()){
+                return s.concat(" ");
+            } else if(nameIndex[0] == nameList.size()){
+                return s;
+            } else {
+                return "";
+            }
+        }).collect(Collectors.joining());
+    }
 }

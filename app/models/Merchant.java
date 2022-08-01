@@ -179,6 +179,22 @@ public class Merchant extends BaseModel{
     @JsonProperty("paid_hokeba")
     public Double paidHokeba;
 
+    // FOR ADDITIONAL FEATURE
+    @Column(name = "is_pos")
+    @JsonProperty("is_pos")
+    @Getter @Setter
+    public boolean isPos;
+
+    @Column(name = "is_kiosk")
+    @JsonProperty("is_kiosk")
+    @Getter @Setter
+    public boolean isKiosk;
+
+    @Column(name = "is_mobile_qr")
+    @JsonProperty("is_mobile_qr")
+    @Getter @Setter
+    public boolean isMobileQr;
+
     @javax.persistence.Transient
     @JsonProperty("code")
     public String getCode(){
@@ -569,6 +585,11 @@ public class Merchant extends BaseModel{
         Merchant member = Merchant.find.where().and(Expr.eq("email", email), Expr.eq("password", encPassword))
                 .eq("ownMerchant", false).setMaxRows(1).findUnique();
         return member;
+    }
+
+    public static boolean isPasswordValid(String encPassword, String password){
+        String encPassword2 = Encryption.EncryptAESCBCPCKS5Padding(password);
+        return encPassword.equals(encPassword2);
     }
 
     public String changePassword(String oldPass, String newPass, String conPass)

@@ -1,10 +1,12 @@
 package models;
 
+import com.avaje.ebean.Query;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hokeba.util.Constant;
 import com.hokeba.util.Encryption;
 import org.joda.time.DateTime;
+import repository.RoleMerchantRepository;
 
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
@@ -30,6 +32,7 @@ public class MerchantLog extends BaseModel {
     public static final String DEV_TYPE_WEB = "WEB";
     public static final String DEV_TYPE_IOS = "IOS";
     public static final String DEV_TYPE_ANDROID = "ANDROID";
+    public static final String DEV_TYPE_MINI_POS = "MINIPOS";
 
     @JsonProperty("member_type")
     public String memberType;
@@ -73,9 +76,25 @@ public class MerchantLog extends BaseModel {
         MerchantLog log = new MerchantLog();
         try {
             if (deviceType.equalsIgnoreCase(DEV_TYPE_ANDROID) || deviceType.equalsIgnoreCase(DEV_TYPE_IOS)) {
-                log.expiredDate = new DateTime(new Date()).plusHours(1).toDate();
+                log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
             } else if (deviceType.equalsIgnoreCase(DEV_TYPE_WEB)) {
-                log.expiredDate = new DateTime(new Date()).plusHours(1).toDate();
+                log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
+            } else if (deviceType.equalsIgnoreCase(DEV_TYPE_MINI_POS)) {
+                if(userType){
+                    List<RoleMerchant> roleMerchant = RoleMerchantRepository.findByMerchantId(member);
+                    if(!roleMerchant.isEmpty() && roleMerchant.stream().findFirst().get().isCashier()) {
+                        log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
+                    } else {
+                        return null;
+                    }
+                } else {
+                    RoleMerchant roleMerchant = RoleMerchantRepository.find.where().eq("id", userMerchant.getRole().id).findUnique();
+                    if(roleMerchant != null && roleMerchant.isCashier()) {
+                        log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
+                    } else {
+                        return null;
+                    }
+                }
             } else {
                 return null;
             }
@@ -114,7 +133,7 @@ public class MerchantLog extends BaseModel {
     }
 
     public static boolean logoutMerchant(String token) {
-        MerchantLog log = MerchantLog.find.where().eq("token", token).eq("is_active", true).eq("member_type", "merchant")
+        MerchantLog log = MerchantLog.find.where().eq("token", token).eq("is_active", true)
                 .setMaxRows(1).findUnique();
         if (log != null) {
             log.isActive = false;
@@ -134,12 +153,13 @@ public class MerchantLog extends BaseModel {
         String keyWeb = Constant.getInstance().getApiKeyWeb();
         String keyIos = Constant.getInstance().getApiKeyIOS();
         String keyAndroid = Constant.getInstance().getApiKeyAndroid();
+        String keyMiniPos = Constant.getInstance().getApiKeyMiniPos();
 
         Date today = new Date();
         if (log != null && ((log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_WEB) && apiKey.equalsIgnoreCase(keyWeb))
                 || (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_IOS) && apiKey.equalsIgnoreCase(keyIos))
-                || (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_ANDROID)
-                && apiKey.equalsIgnoreCase(keyAndroid)))) {
+                || (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_ANDROID) && apiKey.equalsIgnoreCase(keyAndroid))
+                || (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_MINI_POS) && (apiKey.equalsIgnoreCase(keyMiniPos) || apiKey.equalsIgnoreCase(keyWeb))))) {
             if (today.before(log.expiredDate)) {
                 return log;
             } else {

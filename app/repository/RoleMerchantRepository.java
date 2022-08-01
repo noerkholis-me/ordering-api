@@ -18,6 +18,13 @@ public class RoleMerchantRepository extends Model {
             .eq("isDeleted", Boolean.FALSE)
             .findUnique();
     }
+	public static List<RoleMerchant> findByMerchantId(Merchant merchant) {
+		return find.where()
+			.eq("merchant", merchant)
+			.eq("isActive", Boolean.TRUE)
+			.eq("isDeleted", Boolean.FALSE)
+			.findList();
+	}
 
     public static List<RoleMerchant> getDataRole(Query<RoleMerchant> reqQuery, String sort, String filter, int offset, int limit)
 			throws IOException {

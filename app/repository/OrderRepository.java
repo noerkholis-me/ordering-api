@@ -8,6 +8,11 @@ import models.transaction.*;
 import models.*;
 import play.db.ebean.Model;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,7 +44,7 @@ public class OrderRepository extends Model {
         return query.findPagingList(0).getPage(0).getList();
     }
 
-    public static List<Order> findOrderByStatus(Query<Order> reqQuery, int offset, int limit) {
+    public static List<Order> findOrders(Query<Order> reqQuery, int offset, int limit) {
         Query<Order> query = reqQuery;
         query = query.orderBy("t0.created_at desc");
 
@@ -51,6 +56,42 @@ public class OrderRepository extends Model {
             query = query.setMaxRows(limit);
         }
         return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static List<Order> findOrdersByToday(Query<Order> reqQuery, Date today) {
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String todayString = simpleDateFormat.format(today);
+
+        Query<Order> query = reqQuery;
+        query = query.orderBy("t0.created_at desc");
+
+        ExpressionList<Order> exp = query.where();
+        exp.raw("t0.order_date between '" + todayString.concat(" 00:00:00.000") + "'" + " and " + "'" + todayString.concat(" 23:59:59.000") + "'");
+
+
+        query = exp.query();
+        query = query.setMaxRows(0);
+
+        return query.findPagingList(0).getPage(0).getList();
+    }
+
+    public static List<Order> findOrdersByRangeToday(Query<Order> reqQuery, Date startDate, Date endDate) {
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.sss");
+        String startDateString = simpleDateFormat.format(startDate);
+        String endDateString = simpleDateFormat.format(endDate);
+
+        Query<Order> query = reqQuery;
+        query = query.orderBy("t0.created_at desc");
+
+        ExpressionList<Order> exp = query.where();
+        exp.raw("t0.order_date between '" + startDateString + "'" + " and " + "'" + endDateString + "'");
+
+        query = exp.query();
+        query = query.setMaxRows(0);
+
+        return query.findPagingList(0).getPage(0).getList();
     }
 
     public static List<OrderDetail> findDataOrderDetail(Long orderId, String productType) {
@@ -104,7 +145,31 @@ public class OrderRepository extends Model {
     public static Query<Order> findAllOrderByStoreId(Long storeId) {
         return Ebean.find(Order.class)
                 .fetch("store")
+                .fetch("member")
                 .where()
+                .eq("store.id", storeId)
+                .query();
+    }
+
+    public static Query<Order> findAllOrderByStoreIdNow(Long storeId) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String todayString = simpleDateFormat.format(new Date());
+        return Ebean.find(Order.class)
+                .fetch("store")
+                .fetch("member")
+                .where()
+                .eq("store.id", storeId)
+                .raw("t0.order_date between '" + todayString.concat(" 00:00:00.000") + "'" + " and " + "'" + todayString.concat(" 23:59:59.000") + "'")
+                .query();
+    }
+
+    public static Query<Order> findAllOrderByUserMerchantIdAndStoreId(Long userMerchantId, Long storeId) {
+        return Ebean.find(Order.class)
+                .fetch("userMerchant")
+                .fetch("store")
+                .fetch("member")
+                .where()
+                .eq("userMerchant.id", userMerchantId)
                 .eq("store.id", storeId)
                 .query();
     }
@@ -168,8 +233,85 @@ public class OrderRepository extends Model {
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
+    public static List<Order> findAllOrderByStatusAndCustomerNameAndOrderNumber(Query<Order> reqQuery, int offset, int limit, String status, String customerName, String orderNumber) {
+        Query<Order> query = reqQuery;
+        query.orderBy("t0.order_date desc");
+
+        ExpressionList<Order> exp = query.where();
+
+        if (!status.equalsIgnoreCase("")) {
+            exp = exp.eq("t0.status", status);
+        }
+
+        if (!orderNumber.equalsIgnoreCase("")) {
+            exp = exp.ilike("t0.order_number", "%" + orderNumber + "%");
+        }
+
+        if (!customerName.equalsIgnoreCase("")) {
+            exp = exp.ilike("t1.full_name", "%" + customerName + "%");
+        }
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String todayString = simpleDateFormat.format(new Date());
+
+        exp.raw("t0.order_date between '" + todayString.concat(" 00:00:00.000") + "'" + " and " + "'" + todayString.concat(" 23:59:59.000") + "'");
+
+        query = exp.query();
+        if (limit != 0) {
+            query = query.setMaxRows(limit);
+        }
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
     public static List<OrderDetail> findOrderDetailByOrderId(Long orderId) {
         return findDetail.where().eq("order.id", orderId).findList();
     }
+
+    public static List<Order> findOrderByUserMerchant(UserMerchant userMerchant){
+        return find.where().eq("user_merchant", userMerchant).findList();
+    }
+
+    public static BigDecimal getTotalClosingCashier(Long userMerchantId, Date startDate, Date endDate, Long storeId) {
+        Timestamp startTimestamp = new Timestamp(startDate.getTime());
+        Timestamp endTimestamp = new Timestamp(endDate.getTime());
+        List<Order> orderList = find.where()
+                .raw("t0.store_id = "+storeId
+                        +" and t0.user_merchant_id = " + userMerchantId
+                        + " and t0.status = 'PAID' and t0.order_date between '" + startTimestamp + "' and '" + endTimestamp + "'")
+                .findList();
+        BigDecimal total = new BigDecimal(0);
+        for(Order order : orderList){
+            total = total.add(order.getTotalPrice());
+        }
+        return total;
+    }
+
+    public static Integer getTotalOrder(Query<Order> reqQuery, String statusOrder, Date startDate, Date endDate) {
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.sss");
+        String startDateString = simpleDateFormat.format(startDate);
+        String endDateString = simpleDateFormat.format(endDate);
+
+        Query<Order> query = reqQuery;
+        ExpressionList<Order> exp = query.where();
+
+        if (!statusOrder.equalsIgnoreCase("") && !statusOrder.isEmpty()) {
+            exp = exp.eq("t0.status", statusOrder);
+        }
+
+        exp.raw("t0.order_date between '" + startDateString + "'" + " and " + "'" + endDateString + "'");
+
+        query = exp.query();
+        return query.findPagingList(0).getPage(0).getList().size();
+    }
+
+    public static Integer getTotalOrder(Query<Order> reqQuery) {
+        Query<Order> query = reqQuery;
+        ExpressionList<Order> exp = query.where();
+
+        query = exp.query();
+        return query.findPagingList(0).getPage(0).getList().size();
+    }
+
 
 }

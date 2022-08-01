@@ -16,6 +16,7 @@ public class Constant {
     private String apiKeyWeb = null;
     private String apiKeyIOS = null;
     private String apiKeyAndroid = null;
+    private String apiKeyMiniPos = null;
     private String catalogPath = null;
     
     //odoo
@@ -33,6 +34,7 @@ public class Constant {
     private String odooPassword = null;
     private String ckeditorImageUrl = null;
     public static final String defaultCurrency = "IDR";
+    private String posUrl = null;
 
     public static Constant getInstance() {
         if (instance == null) {
@@ -102,6 +104,13 @@ public class Constant {
             apiKeyAndroid = Play.application().configuration().getString("whizliz.api_key.android");
         }
         return apiKeyAndroid;
+    }
+
+    public String getApiKeyMiniPos() {
+        if (apiKeyMiniPos == null){
+            apiKeyMiniPos = Play.application().configuration().getString("whizliz.api_key.mini_pos");
+        }
+        return apiKeyMiniPos;
     }
 
     public String getImageUrl() {
@@ -187,4 +196,12 @@ public class Constant {
         }
         return ckeditorImageUrl;
     }
+
+    public String getPosUrl() {
+        if (posUrl == null){
+            posUrl = Play.application().configuration().getString("sandbox.pos.url");
+        }
+        return posUrl;
+    }
+
 }
