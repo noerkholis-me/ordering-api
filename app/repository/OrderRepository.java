@@ -286,13 +286,21 @@ public class OrderRepository extends Model {
         return total;
     }
 
-    public static Integer getTotalOrder(Query<Order> reqQuery, String statusOrder) {
+    public static Integer getTotalOrder(Query<Order> reqQuery, String statusOrder, Date startDate, Date endDate) {
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.sss");
+        String startDateString = simpleDateFormat.format(startDate);
+        String endDateString = simpleDateFormat.format(endDate);
+
         Query<Order> query = reqQuery;
         ExpressionList<Order> exp = query.where();
 
         if (!statusOrder.equalsIgnoreCase("") && !statusOrder.isEmpty()) {
             exp = exp.eq("t0.status", statusOrder);
         }
+
+        exp.raw("t0.order_date between '" + startDateString + "'" + " and " + "'" + endDateString + "'");
+
         query = exp.query();
         return query.findPagingList(0).getPage(0).getList().size();
     }

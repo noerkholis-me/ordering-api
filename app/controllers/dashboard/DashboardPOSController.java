@@ -74,19 +74,21 @@ public class DashboardPOSController extends BaseController {
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         } else {
+
+            Optional<CashierHistoryMerchant> cashierHistoryMerchant = CashierHistoryMerchantRepository.findByUserActiveCashierAndStoreIdOpen(userMerchant.id, storeId);
+            if (!cashierHistoryMerchant.isPresent()) {
+                response.setBaseResponse(0, 0, 0, inputParameter + " cashier history tidak ditemukan", null);
+                return ok(Json.toJson(response));
+            }
+
             Map<String, Integer> responses = new HashMap<>();
 
-            Query<Order> orderQuery = OrderRepository.findAllOrderByStoreIdNow(storeId);
+            Query<Order> orderQuery = OrderRepository.findAllOrderByUserMerchantIdAndStoreId(userMerchant.id, storeId);
 
-            Optional<CashierHistoryMerchant> lastSessionCashier = CashierHistoryMerchantRepository.findByUserActiveCashierAndStoreIdOpen(userMerchant.id, storeId);
-            if(!lastSessionCashier.isPresent()){
-                response.setBaseResponse(0, 0, 0, "Kode sesi tidak ditemukan", null);
-                return badRequest(Json.toJson(response));
-            }
-            CashierHistoryMerchant cashierHistoryMerchant = lastSessionCashier.get();
-            List<Order> orders = OrderRepository.findOrdersByRangeToday(orderQuery, cashierHistoryMerchant.getStartTime(), new Date());
-            Integer totalOrder = orders.size();
+            Integer totalOrder = OrderRepository.getTotalOrder(orderQuery, "", cashierHistoryMerchant.get().getStartTime(), new Date());
             responses.put("total_order", totalOrder);
+
+            List<Order> orders = OrderRepository.findOrdersByRangeToday(orderQuery, cashierHistoryMerchant.get().getStartTime(), new Date());
             Integer totalOrderWaitingPayment = 0;
             for (Order order : orders) {
                 Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderIdAndStatus(order.id, "PENDING");
@@ -106,7 +108,7 @@ public class DashboardPOSController extends BaseController {
             }
             responses.put("total_order_paid", totalOrderPaid);
 
-            Integer totalOrderCancelled = OrderRepository.getTotalOrder(orderQuery, "CANCELLED");
+            Integer totalOrderCancelled = OrderRepository.getTotalOrder(orderQuery, "CANCELLED", cashierHistoryMerchant.get().getStartTime(), new Date());
             responses.put("total_order_cancelled", totalOrderCancelled);
 
             response.setBaseResponse(1, 0, 0, success, responses);
