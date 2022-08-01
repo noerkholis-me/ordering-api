@@ -241,7 +241,7 @@ public class OrderPosController extends BaseController {
                 }
                 Transaction trx = Ebean.beginTransaction();
                 try {
-                    getOrder.setStatus(Order.COMPLETE);
+                    getOrder.setStatus(Order.NEW_ORDER);
                     getOrder.update();
 
                     orderPayment.setStatus(OrderPayment.PAID);
