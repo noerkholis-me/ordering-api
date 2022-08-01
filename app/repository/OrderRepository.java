@@ -76,6 +76,24 @@ public class OrderRepository extends Model {
         return query.findPagingList(0).getPage(0).getList();
     }
 
+    public static List<Order> findOrdersByRangeToday(Query<Order> reqQuery, Date startDate, Date endDate) {
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.sss");
+        String startDateString = simpleDateFormat.format(startDate);
+        String endDateString = simpleDateFormat.format(endDate);
+
+        Query<Order> query = reqQuery;
+        query = query.orderBy("t0.created_at desc");
+
+        ExpressionList<Order> exp = query.where();
+        exp.raw("t0.order_date between '" + startDateString + "'" + " and " + "'" + endDateString + "'");
+
+        query = exp.query();
+        query = query.setMaxRows(0);
+
+        return query.findPagingList(0).getPage(0).getList();
+    }
+
     public static List<OrderDetail> findDataOrderDetail(Long orderId, String productType) {
         String queryRaw = "t0.product_id in (select pmid.product_merchant_id from product_merchant_detail pmid where pmid.product_type = '"
                 + productType + "')";

@@ -420,7 +420,12 @@ public class CheckoutOrderController extends BaseController {
                     order.setOrderQueue(createQueue(store.id));
                     order.update();
 
-                    orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
+                    if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
+                        orderPayment.setStatus(PaymentStatus.PAID.getStatus());
+                    } else {
+                        orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
+                    }
+
                     orderPayment.update();
 
                     PaymentDetail payDetail = new PaymentDetail();
