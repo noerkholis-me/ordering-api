@@ -78,11 +78,15 @@ public class DashboardPOSController extends BaseController {
 
             Query<Order> orderQuery = OrderRepository.findAllOrderByStoreIdNow(storeId);
 
-            Integer totalOrder = OrderRepository.getTotalOrder(orderQuery, "");
+            Optional<CashierHistoryMerchant> lastSessionCashier = CashierHistoryMerchantRepository.findByUserActiveCashierAndStoreIdOpen(userMerchant.id, storeId);
+            if(!lastSessionCashier.isPresent()){
+                response.setBaseResponse(0, 0, 0, "Kode sesi tidak ditemukan", null);
+                return badRequest(Json.toJson(response));
+            }
+            CashierHistoryMerchant cashierHistoryMerchant = lastSessionCashier.get();
+            List<Order> orders = OrderRepository.findOrdersByRangeToday(orderQuery, cashierHistoryMerchant.getStartTime(), new Date());
+            Integer totalOrder = orders.size();
             responses.put("total_order", totalOrder);
-
-
-            List<Order> orders = OrderRepository.findOrdersByToday(orderQuery, new Date());
             Integer totalOrderWaitingPayment = 0;
             for (Order order : orders) {
                 Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderIdAndStatus(order.id, "PENDING");
