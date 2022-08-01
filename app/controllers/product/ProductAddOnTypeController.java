@@ -201,7 +201,7 @@ public class ProductAddOnTypeController extends BaseController {
     public static Result listProductTipe(String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<ProductAddOnType> query = ProductAddOnTypeRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", ownMerchant.id).order("t0.id");
+            Query<ProductAddOnType> query = ProductAddOnTypeRepository.find.where().eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
             try {
                 List<ProductAddOnTypeResponse> responses = new ArrayList<>();
                 List<ProductAddOnType> totalData = ProductAddOnTypeRepository.getTotalDataPage(query);

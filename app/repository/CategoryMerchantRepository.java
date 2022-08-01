@@ -16,12 +16,12 @@ public class CategoryMerchantRepository extends Model {
 
     public static Finder<Long, CategoryMerchant> find = new Finder<>(Long.class, CategoryMerchant.class);
 
-    public static CategoryMerchant findByIdAndMerchantId(Long id, Long merchantId) {
+    public static CategoryMerchant findByIdAndMerchantId(Long id, Merchant merchant) {
         try {
 			return find.where()
-				.eq("id", id)
-				.eq("merchant_id", merchantId)
-				.eq("is_deleted", Boolean.FALSE)
+				.eq("t0.id", id)
+				.eq("merchant", merchant)
+				.eq("t0.is_deleted", Boolean.FALSE)
 				.findUnique();
 		} catch (PersistenceException e) {
 			e.printStackTrace();

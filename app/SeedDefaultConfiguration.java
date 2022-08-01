@@ -58,7 +58,7 @@ public class SeedDefaultConfiguration {
 		RoleMerchant roleMerchant = RoleMerchant.find.where().eq("name", "Admin").eq("merchant", newMerchant)
 				.findUnique();
 		if (roleMerchant == null) {
-			roleMerchant = new RoleMerchant("Admin", "admin", "Administrator", true, newMerchant);
+			roleMerchant = new RoleMerchant("Admin", "admin", "Administrator", true, false, newMerchant);
 			roleMerchant.setMerchant(newMerchant);
 			roleMerchant.save();
 		}

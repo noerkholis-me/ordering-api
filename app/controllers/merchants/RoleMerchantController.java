@@ -54,6 +54,7 @@ public class RoleMerchantController extends BaseController {
                         newRoleMerchant.setDescription(request.getDescription());
                         newRoleMerchant.setKey(request.getName().toLowerCase().replace(' ', '_'));
                         newRoleMerchant.setMerchant(ownMerchant);
+                        newRoleMerchant.setCashier(request.getIsCashier());
                         newRoleMerchant.setActive(Boolean.TRUE);
                         newRoleMerchant.save();
                         // ============================ start to set role feature ============================ //
@@ -107,6 +108,8 @@ public class RoleMerchantController extends BaseController {
             return "Name must not null or empty";
         if (request.getDescription() == null)
             return "Description must not null or empty.";
+        if (request.getIsCashier() == null)
+            return "Is Cashier must not null or empty.";
 
         return null;
     }
@@ -129,11 +132,16 @@ public class RoleMerchantController extends BaseController {
                         featureAssignResponses = toFeaturesResponse(roleMerchantFeatures);
                     }
                     response.setId(data.id);
-                    response.setName(data.getName());
+                    if(data.isCashier()){
+                        response.setName(data.getName()+" (POS)");
+                    } else {
+                        response.setName(data.getName());
+                    }
                     response.setDescription(data.getDescription());
                     response.setKey(data.getKey());
                     response.setMerchantId(data.getMerchant().id);
                     response.setFeatures(featureAssignResponses);
+                    response.setIsCashier(data.isCashier());
                     responses.add(response);
                 }
                 response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size() , offset, limit, success + " showing data", responses);
@@ -194,6 +202,7 @@ public class RoleMerchantController extends BaseController {
                         roleMerchant.setKey(request.getName().toLowerCase().replace(' ', '_'));
                         roleMerchant.setMerchant(ownMerchant);
                         roleMerchant.setActive(Boolean.TRUE);
+                        roleMerchant.setCashier(request.getIsCashier());
                         // ============================ start to set role feature ============================ //
                         if (request.getFeatures() != null) {
                             for (FeatureAssignRequest featureAssignRequest : request.getFeatures()) {
@@ -302,6 +311,7 @@ public class RoleMerchantController extends BaseController {
                     roleMerchantResponse.setName(roleMerchant.getName());
                     roleMerchantResponse.setDescription(roleMerchant.getDescription());
                     roleMerchantResponse.setKey(roleMerchant.getKey());
+                    roleMerchantResponse.setIsCashier(roleMerchant.isCashier());
                     roleMerchantResponse.setMerchantId(roleMerchant.getMerchant().id);
                     roleMerchantResponse.setFeatures(featureAssignResponses);
 

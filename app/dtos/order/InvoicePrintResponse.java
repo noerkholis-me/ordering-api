@@ -1,6 +1,7 @@
 package dtos.order;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
@@ -63,6 +64,14 @@ public class InvoicePrintResponse {
 
     @JsonProperty("order_queue")
     private Integer orderQueue;
+
+    @JsonProperty("payment_status")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String paymentStatus;
+
+    @JsonProperty("reference_number")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String referenceNumber;
 
 
 

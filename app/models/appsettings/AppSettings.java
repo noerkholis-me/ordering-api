@@ -12,40 +12,39 @@ import models.*;
 import javax.persistence.*;
 
 @Entity
+@Getter @Setter
 public class AppSettings extends BaseModel {
     private static final long serialVersionUID = 1L;
 
-    @Getter
-    @JsonProperty("id")
-    public Long id;
-
-    @Getter @Setter
-    @JsonProperty("merchant_name")
     public String merchantName;
 
-    @Getter @Setter
-    @JsonProperty("primary_color")
     public String primaryColor;
 
-    @Getter @Setter
-    @JsonProperty("secondary_color")
+
     public String secondaryColor;
 
-    @Getter @Setter
-    @JsonProperty("app_logo")
     public String appLogo;
-
-    @Getter @Setter
-    @JsonProperty("favicon")
     public String favicon;
 
-    @Getter @Setter
     @JsonProperty("threshold")
     public Integer threshold;
+
+    // ============ kiosk ============ //
+
+    @Column(name = "primary_color_kiosk")
+    public String primaryColorKiosk;
+
+    @Column(name = "secondary_color_kiosk")
+    public String secondaryColorKiosk;
+
+    @Column(name = "app_logo_kiosk")
+    public String appLogoKiosk;
+
+    @Column(name = "favicon_kiosk")
+    public String faviconKiosk;
 
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="merchant_id", referencedColumnName = "id")
-    @Getter @Setter
     public Merchant merchant;
 }

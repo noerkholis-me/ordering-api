@@ -132,6 +132,30 @@ public class BaseController extends Controller {
         return null;
     }
 
+    public static UserMerchant checkUserMerchantAccessAuthorization(){
+        if(request().headers().get(API_KEY)!=null && request().headers().get(TOKEN)!=null){
+            String apiKey     = request().headers().get(API_KEY)[0];
+            String token      = request().headers().get(TOKEN)[0];
+            MerchantLog target = MerchantLog.isMerchantAuthorized(token, apiKey);
+            if (target.userMerchant != null) {
+                return target.userMerchant;
+            }
+        }
+        return null;
+    }
+
+    public static MerchantLog checkUserAccessAuthorization(){
+        if(request().headers().get(API_KEY)!=null && request().headers().get(TOKEN)!=null){
+            String apiKey     = request().headers().get(API_KEY)[0];
+            String token      = request().headers().get(TOKEN)[0];
+            MerchantLog target = MerchantLog.isMerchantAuthorized(token, apiKey);
+            if (target != null) {
+                return target;
+            }
+        }
+        return null;
+    }
+
     // TODO masih lambat (3 query)
 //    public static boolean canAccessFeature(UserCms user, String feature){
 //        int a = UserCms.find.fetch("role").fetch("role.features").where().eq("id", user.id)

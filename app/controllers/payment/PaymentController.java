@@ -6,7 +6,9 @@ import com.hokeba.http.response.global.ServiceResponse;
 import controllers.BaseController;
 import dtos.payment.OrderPaymentResponse;
 import dtos.payment.ShowQrCodeResponse;
+import dtos.payment.PaymentListResponsePOS;
 import models.Member;
+import models.Merchant;
 import models.transaction.Order;
 import models.transaction.OrderPayment;
 import models.transaction.PaymentDetail;
@@ -114,6 +116,28 @@ public class PaymentController extends BaseController {
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         }
+    }
+
+    public static Result checkPaymentMethod() {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if(ownMerchant != null) {
+            if(ownMerchant.isPos){
+                PaymentListResponsePOS paylistPOS = new PaymentListResponsePOS();
+                paylistPOS.setMerchantId(ownMerchant.id);
+                // paylistPOS.setIsCash(ownMerchant.isCash);
+                // paylistPOS.setTypeCash(ownMerchant.isCash ? ownMerchant.typeCash : null);
+                // paylistPOS.setIsDebitCredit(ownMerchant.isDebitCredit);
+                // paylistPOS.setTypeDebitCredit(ownMerchant.isDebitCredit ? ownMerchant.typeDebitCredit : null);
+                // paylistPOS.setIsQris(ownMerchant.isQris);
+                // paylistPOS.setTypeQris(ownMerchant.isQris ? ownMerchant.typeQris : null);
+                response.setBaseResponse(0, 0, 0, "Sukses menampilkan type pembayaran", paylistPOS);
+                return ok(Json.toJson(response));
+            }
+            response.setBaseResponse(0, 0, 0, "Anda tidak mengaktifkan fitur POS", null);
+            return unauthorized(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
     }
 
 }
