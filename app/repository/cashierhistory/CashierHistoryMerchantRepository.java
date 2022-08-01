@@ -51,6 +51,22 @@ public class CashierHistoryMerchantRepository extends Model {
         );
     }
 
+    public static Optional<CashierHistoryMerchant> findByUserActiveCashierAndStoreIdAndLastOpen(Long userMerchantId, Long storeId, Date startTimeOpen) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.sss");
+        String startTime = simpleDateFormat.format(startTimeOpen);
+        String endTime = simpleDateFormat.format(new Date());
+        final String SQL = "t0.start_time between '" + startTime + "'" + " and " + "'" + endTime + "'";
+        return Optional.ofNullable(
+                find.where()
+                        .eq("isActive", false)
+                        .eq("userMerchant.id", userMerchantId)
+                        .eq("store.id", storeId)
+                        .raw(SQL)
+                        .setMaxRows(1)
+                        .findUnique()
+        );
+    }
+
     public static Query<CashierHistoryMerchant> findAllCashierHistoryByStoreId(Long storeId) {
         return Ebean.find(CashierHistoryMerchant.class)
                 .where().eq("store.id", storeId)

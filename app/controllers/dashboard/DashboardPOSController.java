@@ -24,6 +24,11 @@ public class DashboardPOSController extends BaseController {
     private static BaseResponse response = new BaseResponse();
 
 
+    /**
+     * order vs opening cashier
+     * @param storeId
+     * @return
+     */
     public static Result getTotalCashPos(Long storeId) {
         UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
         if (userMerchant == null) {
@@ -40,7 +45,8 @@ public class DashboardPOSController extends BaseController {
 
             BigDecimal totalOpenCash = BigDecimal.ZERO;
             Query<Order> orderQuery = OrderRepository.findAllOrderByUserMerchantIdAndStoreId(userMerchant.id, storeId);
-            List<Order> orders = OrderRepository.findOrdersByToday(orderQuery, cashierHistoryMerchant.get().getStartTime());
+
+            List<Order> orders = OrderRepository.findOrdersByRangeToday(orderQuery, cashierHistoryMerchant.get().getStartTime(), new Date());
             for (Order order : orders) {
                 Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderIdAndStatusAndPaymentChannel(order.id, OrderPayment.PAID);
                 if (orderPayment.isPresent()) {
