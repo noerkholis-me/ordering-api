@@ -222,6 +222,7 @@ public class CashierHistoryController extends BaseController {
                     cashierHistoryMerchant.setEndTotalAmount(endTotalAmount);
                     cashierHistoryMerchant.setEndTotalAmountCash(cashierClosePosRequest.getCloseTotalAmountCash());
                     cashierHistoryMerchant.setNotes(cashierClosePosRequest.getNotes());
+                    cashierHistoryMerchant.setIsActive(Boolean.FALSE);
                     cashierHistoryMerchant.update();
                     trx.commit();
 
@@ -585,7 +586,7 @@ public class CashierHistoryController extends BaseController {
 
                 BigDecimal totalAmountClosingBySystem = BigDecimal.ZERO;
                 Query<Order> orderQuery = OrderRepository.findAllOrderByUserMerchantIdAndStoreId(userMerchant.id, storeId);
-                List<Order> orders = OrderRepository.findOrdersByToday(orderQuery, cashierHistoryMerchant.get().getStartTime());
+                List<Order> orders = OrderRepository.findOrdersByRangeToday(orderQuery, cashierHistoryMerchant.get().getStartTime(), new Date());
                 for (Order order : orders) {
                     Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderIdAndStatus(order.id, OrderPayment.PAID);
                     if (orderPayment.isPresent()) {
