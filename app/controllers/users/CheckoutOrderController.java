@@ -105,6 +105,7 @@ public class CheckoutOrderController extends BaseController {
                 order.setOrderType(orderRequest.getOrderType());
                 order.setStatus(OrderStatus.NEW_ORDER.getStatus());
                 order.setStore(store);
+                order.setDeviceType(orderRequest.getDeviceType());
                 if (orderRequest.getDeviceType().equalsIgnoreCase("MINIPOS")) {
                     System.out.println("Out");
                     UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
@@ -416,7 +417,7 @@ public class CheckoutOrderController extends BaseController {
                     request.setStoreCode(store.storeCode);
 
                     // update payment status
-                    order.setStatus(OrderStatus.NEW_ORDER.getStatus());
+                    order.setStatus(OrderStatus.PENDING.getStatus());
                     order.setOrderQueue(createQueue(store.id));
                     order.update();
 
