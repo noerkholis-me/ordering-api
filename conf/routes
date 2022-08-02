@@ -526,6 +526,7 @@ GET         /merchant/assign/store/:user_merchant_id/detail      controllers.sto
 #LOYALTY POINT
 POST         /merchant/loyalty/point/setting             controllers.loyalty.LoyaltyPointController.createLoyaltyPoint(subs_category_id: Long ?= 0)
 PUT          /merchant/loyalty/point/:id/setting         controllers.loyalty.LoyaltyPointController.updateLoyaltyPoint(id: Long, subs_category_id: Long ?= 0)
+DELETE       /merchant/loyalty/point/:id/delete/setting         controllers.loyalty.LoyaltyPointController.deleteLoyalty(id: Long)
 GET          /merchant/loyalty/point/list                controllers.loyalty.LoyaltyPointController.listLoyaltyPoint(offset:Int ?= 0, limit:Int ?= 10)
 
 #BANK ACCOUNT

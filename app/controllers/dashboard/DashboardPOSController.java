@@ -45,23 +45,19 @@ public class DashboardPOSController extends BaseController {
 
             BigDecimal totalOpenCash = BigDecimal.ZERO;
             Query<Order> orderQuery = OrderRepository.findAllOrderByUserMerchantIdAndStoreId(userMerchant.id, storeId);
-
             List<Order> orders = OrderRepository.findOrdersByRangeToday(orderQuery, cashierHistoryMerchant.get().getStartTime(), new Date());
+            BigDecimal totalAmountFromOrder = BigDecimal.ZERO;
             for (Order order : orders) {
                 Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderIdAndStatusAndPaymentChannel(order.id, OrderPayment.PAID);
                 if (orderPayment.isPresent()) {
-                    totalOpenCash = totalOpenCash.add(cashierHistoryMerchant.get().getStartTotalAmount()).add(orderPayment.get().getTotalAmount());
-                } else {
-                    totalOpenCash = cashierHistoryMerchant.get().getStartTotalAmount();
+                    totalAmountFromOrder = totalAmountFromOrder.add(orderPayment.get().getTotalAmount());
                 }
                 continue;
             }
 
-            if (orders.isEmpty() || orders == null) {
-                responses.put("total_amount_open_cash", cashierHistoryMerchant.get().getStartTotalAmount().intValue());
-            } else {
-                responses.put("total_amount_open_cash", totalOpenCash.intValue());
-            }
+            totalOpenCash = totalOpenCash.add(cashierHistoryMerchant.get().getStartTotalAmount()).add(totalAmountFromOrder);
+
+            responses.put("total_amount_open_cash", totalOpenCash.intValue());
 
             response.setBaseResponse(1, 0, 0, success, responses);
             return ok(Json.toJson(response));

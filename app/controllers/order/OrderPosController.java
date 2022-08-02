@@ -52,7 +52,7 @@ public class OrderPosController extends BaseController {
             }
 
             Query<Order> orderQuery = OrderRepository.findAllOrderByUserMerchantIdAndStoreId(userMerchant.id, store.id);
-            List<Order> orders = OrderRepository.findAllOrderByStatusAndCustomerNameAndOrderNumber(orderQuery, offset, limit, OrderStatus.NEW_ORDER.getStatus(), customerName, orderNumber);
+            List<Order> orders = OrderRepository.findAllOrderByStatusAndCustomerNameAndOrderNumber(orderQuery, offset, limit, OrderStatus.PENDING.getStatus(), customerName, orderNumber);
             Integer totalData = OrderRepository.getTotalOrder(orderQuery);
 
             if (orders.isEmpty() || orders == null) {
