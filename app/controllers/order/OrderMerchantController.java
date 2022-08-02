@@ -50,12 +50,13 @@ public class OrderMerchantController extends BaseController {
                 Query<Order> query = null;
                 // default query find by merchant id
                 // query = OrderRepository.findAllOrderByMerchantId(merchant);
-                if(!statusOrder.equalsIgnoreCase("CANCELED")){
-                    query = OrderRepository.find.where().eq("orderPayment.status", "PAID").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
-                } else {
+                if(statusOrder.equalsIgnoreCase("CANCELED")){
                     query = OrderRepository.find.where().eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
+                } else if (statusOrder.equalsIgnoreCase("PENDING")) {
+                    query = OrderRepository.find.where().eq("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
+                } else {
+                    query = OrderRepository.find.where().eq("orderPayment.status", "PAID").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                 }
-
                 // check store id --> mandatory
                 if (storeId != null && storeId != 0L) {
                     query = null;
@@ -64,10 +65,13 @@ public class OrderMerchantController extends BaseController {
                         response.setBaseResponse(0, 0, 0, "store id does not exists", null);
                         return badRequest(Json.toJson(response));
                     }
-                    if(!statusOrder.equalsIgnoreCase("CANCELED")){
-                        query = OrderRepository.find.where().eq("orderPayment.status", "PAID").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
-                    } else {
+                    if(statusOrder.equalsIgnoreCase("CANCELED")){
                         query = OrderRepository.find.where().eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
+                    } else if (statusOrder.equalsIgnoreCase("PENDING")) {
+                        query = OrderRepository.find.where().eq("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
+                    } else {
+                        query = OrderRepository.find.where().eq("orderPayment.status", "PAID").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
+
                     }
                 }
 

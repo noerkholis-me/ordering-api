@@ -398,9 +398,9 @@ public class CheckoutOrderController extends BaseController {
                     request.setOrderNumber(orderNumber);
                     request.setDeviceType(orderRequest.getDeviceType());
                     if (member == null) {
-                        request.setCustomerName("GENERAL_CUSTOMER");
+                        request.setCustomerName("GENERAL CUSTOMER");
                     } else {
-                        request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL_CUSTOMER");
+                        request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL CUSTOMER");
                         request.setCustomerEmail(member.email);
                         request.setCustomerPhoneNumber(member.phone);
                     }
