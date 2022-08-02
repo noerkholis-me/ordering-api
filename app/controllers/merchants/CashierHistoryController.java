@@ -664,6 +664,7 @@ public class CashierHistoryController extends BaseController {
                 if (query != null) {
                     cashierHistoryMerchant = CashierHistoryMerchantRepository.findAllCashierReport(query, offset, limit);
                 }
+                Integer totalData = CashierHistoryMerchantRepository.find.where().eq("store.merchant", ownUser).order("t0.id desc").findList().size();
                 List<CashierReportResponse> cashierReportResponseList = new ArrayList<>();
                 for (CashierHistoryMerchant cashierHistoryMerchant1 : cashierHistoryMerchant) {
                     CashierReportResponse cashierReportResponse = new CashierReportResponse();
@@ -691,7 +692,7 @@ public class CashierHistoryController extends BaseController {
                     cashierReportResponse.setNotes(cashierHistoryMerchant1.getNotes());
                     cashierReportResponseList.add(cashierReportResponse);
                 }
-                response.setBaseResponse(cashierReportResponseList.size(), offset, limit, success + " menampilkan data penutupan kasir", cashierReportResponseList);
+                response.setBaseResponse(totalData, offset, limit, success + " menampilkan data penutupan kasir", cashierReportResponseList);
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
                 ex.printStackTrace();
