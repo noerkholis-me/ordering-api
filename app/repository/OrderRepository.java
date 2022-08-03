@@ -181,6 +181,7 @@ public class OrderRepository extends Model {
                 .fetch("store")
                 .fetch("store.merchant")
                 .where()
+                .eq("orderPayment.status", "PAID")
                 .eq("store.merchant",
                         merchant)
                 .query();
@@ -193,6 +194,7 @@ public class OrderRepository extends Model {
                     .fetch("store.merchant")
                     .where()
                     .raw("t0.order_date between '" + startDate + "' and '" + endDate + "'")
+                    .eq("orderPayment.status", "PAID")
                     .eq("store.merchant",
                             merchant)
                     .query();
@@ -201,6 +203,7 @@ public class OrderRepository extends Model {
                     .fetch("store")
                     .fetch("store.merchant")
                     .where()
+                    .eq("orderPayment.status", "PAID")
                     .eq("store.merchant",
                             merchant)
                     .query();
