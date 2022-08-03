@@ -49,11 +49,10 @@ public class OrderMerchantController extends BaseController {
 
                 Query<Order> query = null;
                 // default query find by merchant id
-                // query = OrderRepository.findAllOrderByMerchantId(merchant);
                 if(statusOrder.equalsIgnoreCase("CANCELED")){
                     query = OrderRepository.find.where().eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                 } else if (statusOrder.equalsIgnoreCase("PENDING")) {
-                    query = OrderRepository.find.where().eq("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
+                    query = OrderRepository.find.where().eq("orderPayment.status", statusOrder).eq("store.merchant", merchant).order("t0.id desc");
                 } else {
                     query = OrderRepository.find.where().eq("orderPayment.status", "PAID").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                 }
@@ -68,17 +67,16 @@ public class OrderMerchantController extends BaseController {
                     if(statusOrder.equalsIgnoreCase("CANCELED")){
                         query = OrderRepository.find.where().eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
                     } else if (statusOrder.equalsIgnoreCase("PENDING")) {
-                        query = OrderRepository.find.where().eq("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
+                        query = OrderRepository.find.where().eq("orderPayment.status", statusOrder).eq("store", store).order("t0.id desc");
                     } else {
                         query = OrderRepository.find.where().eq("orderPayment.status", "PAID").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
 
                     }
                 }
 
-
                 List<OrderList> orderLists = new ArrayList<>();
                 List<Order> orders = query.findPagingList(limit).getPage(offset).getList();
-                Integer totalData = orders.size();
+                Integer totalData = query.findList().size();
                 System.out.println(orders.size());
                 if (orders.isEmpty() || orders.size() == 0) {
                     response.setBaseResponse(totalData, offset, limit, success + " Showing data order",
@@ -89,14 +87,12 @@ public class OrderMerchantController extends BaseController {
                 for (Order order : orders) {
                     OrderList orderRes = new OrderList();
                     // looping order
-                    // System.out.println(">>>>> order in : " + order.id);
                     Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderId(order.id);
                     if (!orderPayment.isPresent()) {
                         System.out.println(">>>>> order payment does not exists <<<<< ");
                         break;
                     }
                     OrderPayment getOrderPayment = orderPayment.get();
-                    // if (getOrderPayment.getStatus().equalsIgnoreCase("PAID") || statusOrder == "CANCELED") {
                         // System.out.println(">>>>> Order payment when paid <<<<<");
                         orderRes.setInvoiceNumber(getOrderPayment.getInvoiceNo());
                         orderRes.setOrderNumber(order.getOrderNumber());
@@ -105,15 +101,13 @@ public class OrderMerchantController extends BaseController {
                         Member member = null;
                         if (order.getMember() != null) {
                             member = Member.findByIdMember(order.getMember().id);
-                            orderRes.setCustomerName(member.fullName);
+                            orderRes.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL CUSTOMER (" + order.getStore().storeName + ")");
                         } else {
                             String customerName = "GENERAL CUSTOMER (" + order.getStore().storeName + ")";
                             orderRes.setCustomerName(customerName);
                         }
 
                         // get store
-                        // Store store = Store.findById(order.getStore().id);
-                        // String merchantName = store == null ? null : store.getMerchant().name;
                         orderRes.setMerchantName(order.getStore().getMerchant().name != null || order.getStore().getMerchant().name != "" ? order.getStore().getMerchant().name : null);
 
                         orderRes.setTotalAmount(order.getTotalPrice());
@@ -232,11 +226,11 @@ public class OrderMerchantController extends BaseController {
                         Member member = null;
                         if (order.getMember() != null) {
                             member = Member.findByIdMember(order.getMember().id);
+                            orderRes.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL CUSTOMER (" + order.getStore().storeName + ")");
+                        } else {
+                            String customerName = "GENERAL CUSTOMER (" + order.getStore().storeName + ")";
+                            orderRes.setCustomerName(customerName);
                         }
-                        String customerName = member == null || member.fullName.equalsIgnoreCase("")
-                                ? "GENERAL CUSTOMER (" + order.getStore().storeName + ")"
-                                : member.fullName;
-                        orderRes.setCustomerName(customerName);
 
                         // get store
                         store = Store.findById(order.getStore().id);
@@ -310,29 +304,52 @@ public class OrderMerchantController extends BaseController {
             try {
 
                 Query<Order> query = null;
-                // default query find by merchant id
-                if (startDate != null) {
-                    query = OrderRepository.findAllOrderReportWithFilter(merchant, startDate, endDate);
+                
+                if(statusOrder != null && statusOrder != ""){
+                    if(startDate != null && startDate != ""){
+                        query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
+                    } else {
+                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
+                    }
                 } else {
-                    query = OrderRepository.findAllOrderByMerchantId(merchant);
-                }
+                    if(startDate != null && startDate != ""){
+                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
+                    } else {
+                        query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
+                    }
 
+                }
                 // check store id --> mandatory
                 if (storeId != null && storeId != 0L) {
+                    query = null;
                     Store store = Store.findById(storeId);
                     if (store == null) {
                         response.setBaseResponse(0, 0, 0, "store id does not exists", null);
                         return badRequest(Json.toJson(response));
                     }
-                    query = OrderRepository.findAllOrderByStoreId(storeId);
+                    
+                    if(statusOrder != null && statusOrder != ""){
+                        if(startDate != null && startDate != ""){
+                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
+                        } else {
+                            query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
+                        } 
+                    } else {
+                        if(startDate != null && startDate != ""){
+                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
+                        } else {
+                            query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
+                        }
+                    }
                 }
 
-                Integer totalData = OrderRepository.getTotalData(query, statusOrder);
 
                 List<OrderList> orderLists = new ArrayList<>();
-                List<Order> orders = OrderRepository.findAllOrderWithFilter(query, offset, limit, statusOrder);
+                List<Order> orders = query.findPagingList(limit).getPage(offset).getList();
+                Integer totalData = query.findList().size();
+                System.out.println(orders.size());
                 if (orders.isEmpty() || orders.size() == 0) {
-                    response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction",
+                    response.setBaseResponse(totalData, offset, limit, success + " Showing data order",
                             orderLists);
                     return ok(Json.toJson(response));
                 }
@@ -347,10 +364,7 @@ public class OrderMerchantController extends BaseController {
                         break;
                     }
                     OrderPayment getOrderPayment = orderPayment.get();
-                    if (getOrderPayment.getStatus().equalsIgnoreCase("PAID")
-                            || getOrderPayment.getStatus().equalsIgnoreCase("CANCEL")
-                            || getOrderPayment.getStatus().equalsIgnoreCase("CANCELED")) {
-                        // System.out.println(">>>>> Order payment when paid <<<<<");
+                        System.out.println(">>>>> Order payment when paid <<<<<");
                         orderRes.setInvoiceNumber(getOrderPayment.getInvoiceNo());
                         orderRes.setOrderNumber(order.getOrderNumber());
 
@@ -358,11 +372,11 @@ public class OrderMerchantController extends BaseController {
                         Member member = null;
                         if (order.getMember() != null) {
                             member = Member.findByIdMember(order.getMember().id);
+                            orderRes.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL CUSTOMER (" + order.getStore().storeName + ")");
+                        } else {
+                            String customerName = "GENERAL CUSTOMER (" + order.getStore().storeName + ")";
+                            orderRes.setCustomerName(customerName);
                         }
-                        String customerName = member == null || member.fullName.equalsIgnoreCase("")
-                                ? "GENERAL CUSTOMER (" + order.getStore().storeName + ")"
-                                : member.fullName;
-                        orderRes.setCustomerName(customerName);
 
                         // get store
                         Store store = Store.findById(order.getStore().id);
@@ -384,7 +398,6 @@ public class OrderMerchantController extends BaseController {
 
                         // System.out.println(">>>>> loop order detail <<<<<");
                         for (OrderDetail orderDetail : orderDetails) {
-                            // System.out.println(">>>>> order detail in : " + orderDetail.id);
                             OrderList.ProductOrderDetail productDetail = new OrderList.ProductOrderDetail();
                             productDetail.setProductId(orderDetail.getProductMerchant().id);
                             productDetail.setProductName(orderDetail.getProductName());
@@ -395,7 +408,6 @@ public class OrderMerchantController extends BaseController {
                             // System.out.println(">>>>> loop order detail add on <<<<<<");
                             List<OrderList.ProductOrderDetail.ProductOrderDetailAddOn> productDetailAddOns = new ArrayList<>();
                             for (OrderDetailAddOn orderDetailAddOn : orderDetail.getOrderDetailAddOns()) {
-                                // System.out.println(">>>>> order detail add on in : " + orderDetailAddOn.id);
                                 OrderList.ProductOrderDetail.ProductOrderDetailAddOn productAddOn = new OrderList.ProductOrderDetail.ProductOrderDetailAddOn();
                                 productAddOn.setProductId(orderDetailAddOn.getProductAddOn().getProductAssignId());
                                 productAddOn.setProductName(orderDetailAddOn.getProductName());
@@ -410,7 +422,6 @@ public class OrderMerchantController extends BaseController {
                         orderRes.setProductOrderDetail(productOrderDetails);
                         orderLists.add(orderRes);
                     }
-                }
 
                 response.setBaseResponse(totalData, offset, limit, " Berhasil menampilkan data order report",
                         orderLists);
