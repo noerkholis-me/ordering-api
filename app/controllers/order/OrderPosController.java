@@ -126,6 +126,7 @@ public class OrderPosController extends BaseController {
                 List<OrderDetailAddOn> orderDetailAddOns = orderDetail.getOrderDetailAddOns();
                 List<ProductDetailPosResponse.ProductAddOnPosResponse> productAddOnPosResponses = new ArrayList<>();
                 for (OrderDetailAddOn orderDetailAddOn : orderDetailAddOns) {
+                    ProductMerchantDetail pMDAddon = ProductMerchantDetailRepository.findByProduct(orderDetailAddOn.getOrderDetail().getProductMerchant());
                     ProductDetailPosResponse.ProductAddOnPosResponse productAddOnPosResponse = new ProductDetailPosResponse.ProductAddOnPosResponse();
                     if (orderDetailAddOn == null) {
                         continue;
@@ -133,7 +134,7 @@ public class OrderPosController extends BaseController {
                         productAddOnPosResponse.setProductName(orderDetailAddOn.getProductName());
                         productAddOnPosResponse.setProductPrice(orderDetailAddOn.getProductPrice());
                         productAddOnPosResponse.setQty(orderDetailAddOn.getQuantity());
-                        productAddOnPosResponse.setImageUrl("");
+                        productAddOnPosResponse.setImageUrl(pMDAddon.getProductImageMain());
                         productAddOnPosResponses.add(productAddOnPosResponse);
                     }
                 }
