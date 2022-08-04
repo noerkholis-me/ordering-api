@@ -1,6 +1,7 @@
 package controllers.order;
 
 import com.avaje.ebean.Query;
+import com.avaje.ebean.Expr;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.util.Constant;
 import controllers.BaseController;
@@ -52,7 +53,7 @@ public class OrderMerchantController extends BaseController {
                 if(statusOrder.equalsIgnoreCase("CANCELED")){
                     query = OrderRepository.find.where().eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                 } else if (statusOrder.equalsIgnoreCase("PENDING")) {
-                    query = OrderRepository.find.where().eq("orderPayment.status", statusOrder).eq("store.merchant", merchant).order("t0.id desc");
+                    query = OrderRepository.find.where().or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).or(Expr.ne("t0.status", "CANCELLED"), Expr.ne("t0.status", "CANCELED")).eq("orderPayment.status", statusOrder).eq("store.merchant", merchant).order("t0.id desc");
                 } else {
                     query = OrderRepository.find.where().eq("orderPayment.status", "PAID").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                 }
@@ -67,7 +68,7 @@ public class OrderMerchantController extends BaseController {
                     if(statusOrder.equalsIgnoreCase("CANCELED")){
                         query = OrderRepository.find.where().eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
                     } else if (statusOrder.equalsIgnoreCase("PENDING")) {
-                        query = OrderRepository.find.where().eq("orderPayment.status", statusOrder).eq("store", store).order("t0.id desc");
+                        query = OrderRepository.find.where().or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).or(Expr.ne("t0.status", "CANCELLED"), Expr.ne("t0.status", "CANCELED")).eq("orderPayment.status", statusOrder).eq("store", store).order("t0.id desc");
                     } else {
                         query = OrderRepository.find.where().eq("orderPayment.status", "PAID").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
 
@@ -307,15 +308,15 @@ public class OrderMerchantController extends BaseController {
                 
                 if(statusOrder != null && statusOrder != ""){
                     if(startDate != null && startDate != ""){
-                        query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
+                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                     } else {
-                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
+                        query = OrderRepository.find.where().or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                     }
                 } else {
                     if(startDate != null && startDate != ""){
-                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
+                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
                     } else {
-                        query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
+                        query = OrderRepository.find.where().or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
                     }
 
                 }
@@ -330,15 +331,15 @@ public class OrderMerchantController extends BaseController {
                     
                     if(statusOrder != null && statusOrder != ""){
                         if(startDate != null && startDate != ""){
-                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
+                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
                         } else {
-                            query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
+                            query = OrderRepository.find.where().or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
                         } 
                     } else {
                         if(startDate != null && startDate != ""){
-                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
+                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
                         } else {
-                            query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
+                            query = OrderRepository.find.where().or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
                         }
                     }
                 }
@@ -443,28 +444,51 @@ public class OrderMerchantController extends BaseController {
 
                 Query<Order> query = null;
                 // default query find by merchant id
-                if (startDate != null) {
-                    query = OrderRepository.findAllOrderReportWithFilter(merchant, startDate, endDate);
+                if(statusOrder != null && statusOrder != ""){
+                    if(startDate != null && startDate != ""){
+                        query = OrderRepository.find.where().or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
+                    } else {
+                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
+                    }
                 } else {
-                    query = OrderRepository.findAllOrderByMerchantId(merchant);
-                }
+                    if(startDate != null && startDate != ""){
+                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
+                    } else {
+                        query = OrderRepository.find.where().or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
+                    }
 
+                }
                 // check store id --> mandatory
                 if (storeId != null && storeId != 0L) {
+                    query = null;
                     Store store = Store.findById(storeId);
                     if (store == null) {
                         response.setBaseResponse(0, 0, 0, "store id does not exists", null);
                         return badRequest(Json.toJson(response));
                     }
-                    query = OrderRepository.findAllOrderByStoreId(storeId);
+                    
+                    if(statusOrder != null && statusOrder != ""){
+                        if(startDate != null && startDate != ""){
+                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
+                        } else {
+                            query = OrderRepository.find.where().or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
+                        } 
+                    } else {
+                        if(startDate != null && startDate != ""){
+                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
+                        } else {
+                            query = OrderRepository.find.where().or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
+                        }
+                    }
                 }
 
-                Integer totalData = OrderRepository.getTotalData(query, statusOrder);
 
                 List<OrderList> orderLists = new ArrayList<>();
-                List<Order> orders = OrderRepository.findAllOrderWithFilter(query, offset, limit, statusOrder);
+                List<Order> orders = query.findPagingList(limit).getPage(offset).getList();
+                Integer totalData = query.findList().size();
+                System.out.println(orders.size());
                 if (orders.isEmpty() || orders.size() == 0) {
-                    response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction",
+                    response.setBaseResponse(totalData, offset, limit, success + " Showing data order",
                             orderLists);
                     return ok(Json.toJson(response));
                 }
@@ -504,13 +528,12 @@ public class OrderMerchantController extends BaseController {
                 InvoicePrintResponse invoicePrintResponse = new InvoicePrintResponse();
 
                 AppSettings appSettings = AppSettingRepository.findByMerchantId(store.getMerchant().id);
+                String sandboxImage = Constant.getInstance().getImageUrl().concat("/assets/images/logo-sandbox.png");
                 if (appSettings == null) {
-                    String sandboxImage = Constant.getInstance().getImageUrl()
-                            .concat("/assets/images/logo-sandbox.png");
                     invoicePrintResponse.setImageStoreUrl(sandboxImage);
                 }
 
-                invoicePrintResponse.setImageStoreUrl(appSettings.getAppLogo());
+                invoicePrintResponse.setImageStoreUrl(appSettings.getAppLogo() != null && appSettings.getAppLogo() != "" ? appSettings.getAppLogo() : sandboxImage);
 
                 invoicePrintResponse.setStoreName(store.storeName);
                 invoicePrintResponse.setStoreAddress(store.storeAddress);
