@@ -417,7 +417,7 @@ public class CheckoutOrderController extends BaseController {
                     request.setStoreCode(store.storeCode);
 
                     // update payment status
-                    order.setStatus(OrderStatus.PENDING.getStatus());
+                    order.setStatus(mPayment.typePayment.equalsIgnoreCase("DIRECT_PAYMENT") ? OrderStatus.NEW_ORDER.getStatus() : OrderStatus.PENDING.getStatus());
                     order.setOrderQueue(createQueue(store.id));
                     order.update();
 
@@ -516,18 +516,31 @@ public class CheckoutOrderController extends BaseController {
                 return order == null ? 1 : order.getOrderQueue() + 1;
             }
             
-            public static Result changeStatusFromMerchant() {
-                Merchant ownMerchant = checkMerchantAccessAuthorization();
-                if(ownMerchant != null) {
-                    try{
-                        JsonNode json = request().body().asJson();
-                        OrderStatusChanges statusRequest = objectMapper.readValue(json.toString(), OrderStatusChanges.class);
-                        Transaction trx = Ebean.beginTransaction();
-                        try{
-                            Optional<Order> orderData = OrderRepository.findByOrderNumber(statusRequest.getOrderNumber());
-                            if(orderData.isPresent()){
+    public static Result changeStatusFromMerchant() {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if(ownMerchant != null) {
+            try{
+                JsonNode json = request().body().asJson();
+                OrderStatusChanges statusRequest = objectMapper.readValue(json.toString(), OrderStatusChanges.class);
+                Transaction trx = Ebean.beginTransaction();
+                try{
+                    Optional<Order> orderData = OrderRepository.findByOrderNumber(statusRequest.getOrderNumber());
+                    if(orderData.isPresent()){
+                        if(orderData.get().getStatus() == "PENDING") {
+                            OrderPayment ordpayment = OrderPaymentRepository.find.where().eq("order", orderData).findUnique();
+                            if(ordpayment != null){
+                                ordpayment.setStatus("PAID");
+                                ordpayment.update();
+                            }
+                            PaymentDetail paydetails = PaymentDetail.find.where().eq("t0.order_number", statusRequest.getOrderNumber()).findUnique();
+                            if(paydetails != null){
+                                paydetails.setStatus("PAID");
+                                paydetails.update();
+                            }
+                        }
                         orderData.get().setStatus(statusRequest.getStatusOrder());
                         orderData.get().update();
+
                         
                         trx.commit();
                         response.setBaseResponse(1, 0, 0, "Berhasil mengubah status Nomor Order " + orderData.get().getOrderNumber(), orderData.get().getOrderNumber());
