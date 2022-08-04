@@ -222,14 +222,16 @@ public class OrderPosController extends BaseController {
                 invoicePrintResponse.setSubTotal(getOrder.getSubTotal());
                 invoicePrintResponse.setTaxPrice(orderPayment.getTaxPrice());
 
-                Optional<FeeSettingMerchant> feeSetting = FeeSettingMerchantRepository
-                        .findByLatestFeeSetting(store.getMerchant().id);
-                if (!feeSetting.isPresent()) {
-                    invoicePrintResponse.setTaxPercentage(feeSetting.get().getTax());
-                    invoicePrintResponse.setServicePercentage(feeSetting.get().getService());
-                }
-                invoicePrintResponse.setTaxPercentage(11D);
-                invoicePrintResponse.setServicePercentage(0D);
+//                Optional<FeeSettingMerchant> feeSetting = FeeSettingMerchantRepository
+//                        .findByLatestFeeSetting(store.getMerchant().id);
+//                if (!feeSetting.isPresent()) {
+//                    invoicePrintResponse.setTaxPercentage(feeSetting.get().getTax());
+//                    invoicePrintResponse.setServicePercentage(feeSetting.get().getService());
+//                }
+//                invoicePrintResponse.setTaxPercentage(11D);
+//                invoicePrintResponse.setServicePercentage(0D);
+                invoicePrintResponse.setTaxPercentage(orderPayment.getTaxPercentage());
+                invoicePrintResponse.setServicePercentage(orderPayment.getServicePercentage());
 
                 invoicePrintResponse.setPaymentFeeOwner(orderPayment.getPaymentFeeOwner());
                 invoicePrintResponse.setPaymentFeeCustomer(orderPayment.getPaymentFeeCustomer());
