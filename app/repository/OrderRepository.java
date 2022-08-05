@@ -4,6 +4,7 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Expr;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
+import models.internal.DeviceType;
 import models.transaction.*;
 import models.*;
 import play.db.ebean.Model;
@@ -86,6 +87,7 @@ public class OrderRepository extends Model {
         query = query.orderBy("t0.created_at desc");
 
         ExpressionList<Order> exp = query.where();
+        exp = exp.eq("t0.device_type", DeviceType.MINIPOS.getDevice());
         exp.raw("t0.order_date between '" + startDateString + "'" + " and " + "'" + endDateString + "'");
 
         query = exp.query();
@@ -179,6 +181,7 @@ public class OrderRepository extends Model {
                 .fetch("store")
                 .fetch("store.merchant")
                 .where()
+                .eq("orderPayment.status", "PAID")
                 .eq("store.merchant",
                         merchant)
                 .query();
@@ -191,6 +194,7 @@ public class OrderRepository extends Model {
                     .fetch("store.merchant")
                     .where()
                     .raw("t0.order_date between '" + startDate + "' and '" + endDate + "'")
+                    .eq("orderPayment.status", "PAID")
                     .eq("store.merchant",
                             merchant)
                     .query();
@@ -199,6 +203,7 @@ public class OrderRepository extends Model {
                     .fetch("store")
                     .fetch("store.merchant")
                     .where()
+                    .eq("orderPayment.status", "PAID")
                     .eq("store.merchant",
                             merchant)
                     .query();
@@ -250,6 +255,8 @@ public class OrderRepository extends Model {
         if (!customerName.equalsIgnoreCase("")) {
             exp = exp.ilike("t1.full_name", "%" + customerName + "%");
         }
+
+        exp = exp.eq("t0.device_type", DeviceType.MINIPOS.getDevice());
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String todayString = simpleDateFormat.format(new Date());

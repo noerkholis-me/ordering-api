@@ -20,6 +20,7 @@ import models.store.StoreAccess;
 import models.store.StoreAccessDetail;
 import models.transaction.Order;
 import models.transaction.OrderPayment;
+import models.transaction.OrderStatus;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
@@ -196,13 +197,27 @@ public class CashierHistoryController extends BaseController {
                     BigDecimal endTotalAmount = BigDecimal.ZERO;
                     Query<Order> orderQuery = OrderRepository.findAllOrderByUserMerchantIdAndStoreId(userMerchant.id, store.id);
                     List<Order> orders = OrderRepository.findOrdersByRangeToday(orderQuery, cashierHistoryMerchant.getStartTime(), new Date());
+                    BigDecimal endTotalFromOrder = BigDecimal.ZERO;
+                    String orderPendingMessage = "";
                     for (Order order : orders) {
-                        Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderIdAndStatusAndPaymentChannelWithOr(order.id);
-                        if (orderPayment.isPresent()) {
-                            endTotalAmount = endTotalAmount.add(cashierHistoryMerchant.getStartTotalAmount()).add(orderPayment.get().getTotalAmount());
+                        if (order.getStatus().equalsIgnoreCase(OrderStatus.PENDING.getStatus())) {
+                            orderPendingMessage += "Sesi tidak bisa berakhir karena masih ada order yang belum bayar";
+                            break;
+                        } else {
+                            Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderIdAndStatusAndPaymentChannel(order.id, OrderPayment.PAID);
+                            if (orderPayment.isPresent()) {
+                                endTotalFromOrder = endTotalFromOrder.add(orderPayment.get().getTotalAmount());
+                            }
+                            continue;
                         }
-                        continue;
                     }
+
+                    if (!orderPendingMessage.equalsIgnoreCase("")) {
+                        response.setBaseResponse(0, 0, 0, orderPendingMessage, null);
+                        return badRequest(Json.toJson(response));
+                    }
+
+                    endTotalAmount = endTotalAmount.add(endTotalFromOrder);
 
                     // BigDecimal totalAmountClosingBySystem = BigDecimal.ZERO;
                     // Query<Order> orderQuery = OrderRepository.findAllOrderByUserMerchantIdAndStoreId(userMerchant.id, storeId);
@@ -458,11 +473,11 @@ public class CashierHistoryController extends BaseController {
     }
 
     public static Result downloadClosePOSReport(int offset, int limit, Long storeId, String sessionCode, String startDate, String endDate) {
-        UserMerchant ownUser = checkUserMerchantAccessAuthorization();
+        Merchant ownUser = checkMerchantAccessAuthorization();
         if (ownUser != null) {
             try {
-                System.out.println("user merchant id >>> " + ownUser.id);
-                Query<CashierHistoryMerchant> query = CashierHistoryMerchantRepository.findAllCashierReportByUserMerchantId(ownUser.id);
+                System.out.println("merchant id >>> " + ownUser);
+                Query<CashierHistoryMerchant> query = CashierHistoryMerchantRepository.find.where().eq("store.merchant", ownUser).query();
                 List<CashierHistoryMerchant> cashierHistoryMerchant = new ArrayList<>();
                 Store store = null;
                 if (storeId != null && storeId != 0L) {
@@ -471,7 +486,7 @@ public class CashierHistoryController extends BaseController {
                         response.setBaseResponse(0, 0, 0, "store tidak ditemukan", null);
                         return badRequest(Json.toJson(response));
                     }
-                    query = CashierHistoryMerchantRepository.findAllCashierReportByUserMerchant(query, storeId, ownUser.id);
+                    query = CashierHistoryMerchantRepository.findAllCashierReportByMerchantAndStore(query, storeId, ownUser);
                 }
                 if(startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
                     query = CashierHistoryMerchantRepository.findAllCashierReportByDate(query, startDate, endDate);
@@ -514,9 +529,11 @@ public class CashierHistoryController extends BaseController {
                     return ok(Json.toJson(response));
                 }
                 File downloadCashierReport = DownloadCashierReport.downloadCashierClosingReport(cashierReportResponseList);
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("ddMMyyyy");
+                String filename = "Closing_"+simpleDateFormat.format(new Date()).toString()+".xlsx";
                 assert downloadCashierReport != null;
                 response().setContentType("application/vnd.ms-excel");
-                response().setHeader("Content-disposition", "attachment; filename=" + downloadCashierReport.getName());
+                response().setHeader("Content-disposition", "attachment; filename=" + filename);
                 return ok(downloadCashierReport);
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -598,22 +615,20 @@ public class CashierHistoryController extends BaseController {
                 BigDecimal totalAmountClosingBySystem = BigDecimal.ZERO;
                 Query<Order> orderQuery = OrderRepository.findAllOrderByUserMerchantIdAndStoreId(userMerchant.id, storeId);
                 List<Order> orders = OrderRepository.findOrdersByRangeToday(orderQuery, cashierHistoryMerchant.get().getStartTime(), new Date());
+                BigDecimal totalAmountFromOrder = BigDecimal.ZERO;
                 for (Order order : orders) {
                     Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderIdAndStatus(order.id, OrderPayment.PAID);
                     if (orderPayment.isPresent()) {
-                        totalAmountClosingBySystem = totalAmountClosingBySystem.add(cashierHistoryMerchant.get().getStartTotalAmount()).add(orderPayment.get().getTotalAmount());
+                        totalAmountFromOrder = totalAmountFromOrder.add(orderPayment.get().getTotalAmount());
                     }
                     continue;
                 }
 
+                totalAmountClosingBySystem = cashierHistoryMerchant.get().getStartTotalAmount().add(totalAmountFromOrder);
+
                 amountCashierResponse.setDate(cashierHistoryMerchant.get().getStartTime());
                 amountCashierResponse.setTotalAmountOpeningPos(cashierHistoryMerchant.get().getStartTotalAmount());
-                if (orders.isEmpty() || orders == null) {
-                    amountCashierResponse.setTotalAmountBySystem(cashierHistoryMerchant.get().getStartTotalAmount());
-                } else {
-                    amountCashierResponse.setTotalAmountBySystem(totalAmountClosingBySystem);
-                }
-
+                amountCashierResponse.setTotalAmountBySystem(totalAmountClosingBySystem);
 
                 response.setBaseResponse(1, 0, 0, success, amountCashierResponse);
                 return ok(Json.toJson(response));
@@ -651,6 +666,7 @@ public class CashierHistoryController extends BaseController {
                 if (query != null) {
                     cashierHistoryMerchant = CashierHistoryMerchantRepository.findAllCashierReport(query, offset, limit);
                 }
+                Integer totalData = CashierHistoryMerchantRepository.find.where().eq("store.merchant", ownUser).order("t0.id desc").findList().size();
                 List<CashierReportResponse> cashierReportResponseList = new ArrayList<>();
                 for (CashierHistoryMerchant cashierHistoryMerchant1 : cashierHistoryMerchant) {
                     CashierReportResponse cashierReportResponse = new CashierReportResponse();
@@ -678,7 +694,7 @@ public class CashierHistoryController extends BaseController {
                     cashierReportResponse.setNotes(cashierHistoryMerchant1.getNotes());
                     cashierReportResponseList.add(cashierReportResponse);
                 }
-                response.setBaseResponse(cashierReportResponseList.size(), offset, limit, success + " menampilkan data penutupan kasir", cashierReportResponseList);
+                response.setBaseResponse(totalData, offset, limit, success + " menampilkan data penutupan kasir", cashierReportResponseList);
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
                 ex.printStackTrace();

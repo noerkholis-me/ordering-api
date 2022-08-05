@@ -105,6 +105,7 @@ public class CheckoutOrderController extends BaseController {
                 order.setOrderType(orderRequest.getOrderType());
                 order.setStatus(OrderStatus.NEW_ORDER.getStatus());
                 order.setStore(store);
+                order.setDeviceType(orderRequest.getDeviceType());
                 if (orderRequest.getDeviceType().equalsIgnoreCase("MINIPOS")) {
                     System.out.println("Out");
                     UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
@@ -397,9 +398,9 @@ public class CheckoutOrderController extends BaseController {
                     request.setOrderNumber(orderNumber);
                     request.setDeviceType(orderRequest.getDeviceType());
                     if (member == null) {
-                        request.setCustomerName("GENERAL_CUSTOMER");
+                        request.setCustomerName("GENERAL CUSTOMER");
                     } else {
-                        request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL_CUSTOMER");
+                        request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL CUSTOMER");
                         request.setCustomerEmail(member.email);
                         request.setCustomerPhoneNumber(member.phone);
                     }
@@ -416,7 +417,7 @@ public class CheckoutOrderController extends BaseController {
                     request.setStoreCode(store.storeCode);
 
                     // update payment status
-                    order.setStatus(OrderStatus.NEW_ORDER.getStatus());
+                    order.setStatus(mPayment.typePayment.equalsIgnoreCase("DIRECT_PAYMENT") ? OrderStatus.NEW_ORDER.getStatus() : OrderStatus.PENDING.getStatus());
                     order.setOrderQueue(createQueue(store.id));
                     order.update();
 
@@ -515,18 +516,33 @@ public class CheckoutOrderController extends BaseController {
                 return order == null ? 1 : order.getOrderQueue() + 1;
             }
             
-            public static Result changeStatusFromMerchant() {
-                Merchant ownMerchant = checkMerchantAccessAuthorization();
-                if(ownMerchant != null) {
-                    try{
-                        JsonNode json = request().body().asJson();
-                        OrderStatusChanges statusRequest = objectMapper.readValue(json.toString(), OrderStatusChanges.class);
-                        Transaction trx = Ebean.beginTransaction();
-                        try{
-                            Optional<Order> orderData = OrderRepository.findByOrderNumber(statusRequest.getOrderNumber());
-                            if(orderData.isPresent()){
+    public static Result changeStatusFromMerchant() {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if(ownMerchant != null) {
+            try{
+                JsonNode json = request().body().asJson();
+                OrderStatusChanges statusRequest = objectMapper.readValue(json.toString(), OrderStatusChanges.class);
+                Transaction trx = Ebean.beginTransaction();
+                try{
+                    Optional<Order> orderData = OrderRepository.findByOrderNumber(statusRequest.getOrderNumber());
+                    if(orderData.isPresent()){
+                        Order orders = OrderRepository.find.where().eq("t0.order_number", statusRequest.getOrderNumber()).findUnique();
+                        if(orders != null && orders.getStatus().equalsIgnoreCase("PENDING")) {
+                            System.out.println("Checkout change status");
+                            OrderPayment ordpayment = OrderPaymentRepository.find.where().eq("order", orders).findUnique();
+                            if(ordpayment != null){
+                                ordpayment.setStatus("PAID");
+                                ordpayment.update();
+                            }
+                            PaymentDetail paydetails = PaymentDetail.find.where().eq("t0.order_number", statusRequest.getOrderNumber()).findUnique();
+                            if(paydetails != null){
+                                paydetails.setStatus("PAID");
+                                paydetails.update();
+                            }
+                        }
                         orderData.get().setStatus(statusRequest.getStatusOrder());
                         orderData.get().update();
+
                         
                         trx.commit();
                         response.setBaseResponse(1, 0, 0, "Berhasil mengubah status Nomor Order " + orderData.get().getOrderNumber(), orderData.get().getOrderNumber());
