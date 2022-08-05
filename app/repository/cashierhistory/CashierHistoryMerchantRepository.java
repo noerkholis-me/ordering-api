@@ -144,6 +144,15 @@ public class CashierHistoryMerchantRepository extends Model {
                 .eq("userMerchant.id", userMerchantId)
                 .query();
     }
+    public static Query<CashierHistoryMerchant> findAllCashierReportByMerchantAndStore(Query<CashierHistoryMerchant> query, Long storeId, Merchant merchant) {
+        if(query == null){
+            query = Ebean.find(CashierHistoryMerchant.class);
+        }
+        return query
+                .where().eq("store.id", storeId)
+                .eq("store.merchant", merchant)
+                .query();
+    }
     public static Query<CashierHistoryMerchant> findAllCashierReportByUserMerchantId(Long userMerchantId) {
         return Ebean.find(CashierHistoryMerchant.class)
                 .where()
