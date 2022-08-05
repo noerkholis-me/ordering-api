@@ -526,8 +526,10 @@ public class CheckoutOrderController extends BaseController {
                 try{
                     Optional<Order> orderData = OrderRepository.findByOrderNumber(statusRequest.getOrderNumber());
                     if(orderData.isPresent()){
-                        if(orderData.get().getStatus() == "PENDING") {
-                            OrderPayment ordpayment = OrderPaymentRepository.find.where().eq("order", orderData).findUnique();
+                        Order orders = OrderRepository.find.where().eq("t0.order_number", statusRequest.getOrderNumber()).findUnique();
+                        if(orders != null && orders.getStatus().equalsIgnoreCase("PENDING")) {
+                            System.out.println("Checkout change status");
+                            OrderPayment ordpayment = OrderPaymentRepository.find.where().eq("order", orders).findUnique();
                             if(ordpayment != null){
                                 ordpayment.setStatus("PAID");
                                 ordpayment.update();
