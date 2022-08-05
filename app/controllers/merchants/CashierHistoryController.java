@@ -473,11 +473,11 @@ public class CashierHistoryController extends BaseController {
     }
 
     public static Result downloadClosePOSReport(int offset, int limit, Long storeId, String sessionCode, String startDate, String endDate) {
-        UserMerchant ownUser = checkUserMerchantAccessAuthorization();
+        Merchant ownUser = checkMerchantAccessAuthorization();
         if (ownUser != null) {
             try {
-                System.out.println("user merchant id >>> " + ownUser.id);
-                Query<CashierHistoryMerchant> query = CashierHistoryMerchantRepository.findAllCashierReportByUserMerchantId(ownUser.id);
+                System.out.println("merchant id >>> " + ownUser);
+                Query<CashierHistoryMerchant> query = CashierHistoryMerchantRepository.find.where().eq("store.merchant", ownUser).query();
                 List<CashierHistoryMerchant> cashierHistoryMerchant = new ArrayList<>();
                 Store store = null;
                 if (storeId != null && storeId != 0L) {
@@ -486,7 +486,7 @@ public class CashierHistoryController extends BaseController {
                         response.setBaseResponse(0, 0, 0, "store tidak ditemukan", null);
                         return badRequest(Json.toJson(response));
                     }
-                    query = CashierHistoryMerchantRepository.findAllCashierReportByUserMerchant(query, storeId, ownUser.id);
+                    query = CashierHistoryMerchantRepository.findAllCashierReportByMerchantAndStore(query, storeId, ownUser);
                 }
                 if(startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
                     query = CashierHistoryMerchantRepository.findAllCashierReportByDate(query, startDate, endDate);
@@ -529,9 +529,11 @@ public class CashierHistoryController extends BaseController {
                     return ok(Json.toJson(response));
                 }
                 File downloadCashierReport = DownloadCashierReport.downloadCashierClosingReport(cashierReportResponseList);
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("ddMMyyyy");
+                String filename = "Closing_"+simpleDateFormat.format(new Date()).toString()+".xlsx";
                 assert downloadCashierReport != null;
                 response().setContentType("application/vnd.ms-excel");
-                response().setHeader("Content-disposition", "attachment; filename=" + downloadCashierReport.getName());
+                response().setHeader("Content-disposition", "attachment; filename=" + filename);
                 return ok(downloadCashierReport);
             } catch (Exception ex) {
                 ex.printStackTrace();
