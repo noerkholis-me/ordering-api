@@ -582,9 +582,17 @@ public class CheckoutOrderController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
 
-                order.get().setStatus(Order.CANCELLED);
+                Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderId(order.get().id);
+                if (!orderPayment.isPresent()) {
+                    response.setBaseResponse(0, 0, 0, "order payment tidak ditemukan", null);
+                    return badRequest(Json.toJson(response));
+                }
 
+                order.get().setStatus(Order.CANCELLED);
                 order.get().update();
+
+                orderPayment.get().setStatus(OrderPayment.CANCELLED);
+                orderPayment.get().update();
 
                 trx.commit();
 
