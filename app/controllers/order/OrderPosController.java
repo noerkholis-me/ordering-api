@@ -52,7 +52,7 @@ public class OrderPosController extends BaseController {
             }
 
             Query<Order> orderQuery = OrderRepository.findAllOrderByUserMerchantIdAndStoreId(userMerchant.id, store.id);
-            List<Order> orders = OrderRepository.findAllOrderByStatusAndCustomerNameAndOrderNumber(orderQuery, offset, limit, OrderStatus.NEW_ORDER.getStatus(), customerName, orderNumber);
+            List<Order> orders = OrderRepository.findAllOrderByStatusAndCustomerNameAndOrderNumber(orderQuery, offset, limit, OrderStatus.PENDING.getStatus(), customerName, orderNumber);
             Integer totalData = OrderRepository.getTotalOrder(orderQuery);
 
             if (orders.isEmpty() || orders == null) {
@@ -126,6 +126,7 @@ public class OrderPosController extends BaseController {
                 List<OrderDetailAddOn> orderDetailAddOns = orderDetail.getOrderDetailAddOns();
                 List<ProductDetailPosResponse.ProductAddOnPosResponse> productAddOnPosResponses = new ArrayList<>();
                 for (OrderDetailAddOn orderDetailAddOn : orderDetailAddOns) {
+                    ProductMerchantDetail pMDAddon = ProductMerchantDetailRepository.findByProduct(orderDetailAddOn.getOrderDetail().getProductMerchant());
                     ProductDetailPosResponse.ProductAddOnPosResponse productAddOnPosResponse = new ProductDetailPosResponse.ProductAddOnPosResponse();
                     if (orderDetailAddOn == null) {
                         continue;
@@ -133,7 +134,7 @@ public class OrderPosController extends BaseController {
                         productAddOnPosResponse.setProductName(orderDetailAddOn.getProductName());
                         productAddOnPosResponse.setProductPrice(orderDetailAddOn.getProductPrice());
                         productAddOnPosResponse.setQty(orderDetailAddOn.getQuantity());
-                        productAddOnPosResponse.setImageUrl("");
+                        productAddOnPosResponse.setImageUrl(pMDAddon.getProductImageMain());
                         productAddOnPosResponses.add(productAddOnPosResponse);
                     }
                 }
@@ -221,14 +222,16 @@ public class OrderPosController extends BaseController {
                 invoicePrintResponse.setSubTotal(getOrder.getSubTotal());
                 invoicePrintResponse.setTaxPrice(orderPayment.getTaxPrice());
 
-                Optional<FeeSettingMerchant> feeSetting = FeeSettingMerchantRepository
-                        .findByLatestFeeSetting(store.getMerchant().id);
-                if (!feeSetting.isPresent()) {
-                    invoicePrintResponse.setTaxPercentage(feeSetting.get().getTax());
-                    invoicePrintResponse.setServicePercentage(feeSetting.get().getService());
-                }
-                invoicePrintResponse.setTaxPercentage(11D);
-                invoicePrintResponse.setServicePercentage(0D);
+//                Optional<FeeSettingMerchant> feeSetting = FeeSettingMerchantRepository
+//                        .findByLatestFeeSetting(store.getMerchant().id);
+//                if (!feeSetting.isPresent()) {
+//                    invoicePrintResponse.setTaxPercentage(feeSetting.get().getTax());
+//                    invoicePrintResponse.setServicePercentage(feeSetting.get().getService());
+//                }
+//                invoicePrintResponse.setTaxPercentage(11D);
+//                invoicePrintResponse.setServicePercentage(0D);
+                invoicePrintResponse.setTaxPercentage(orderPayment.getTaxPercentage());
+                invoicePrintResponse.setServicePercentage(orderPayment.getServicePercentage());
 
                 invoicePrintResponse.setPaymentFeeOwner(orderPayment.getPaymentFeeOwner());
                 invoicePrintResponse.setPaymentFeeCustomer(orderPayment.getPaymentFeeCustomer());

@@ -88,6 +88,9 @@ public class Order extends BaseModel {
     @Column(name = "total_loyalty_usage")
     private BigDecimal totalLoyaltyUsage;
 
+    @Column(name = "device_type")
+    private String deviceType;
+
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "user_merchant_id", referencedColumnName = "id")
     private UserMerchant userMerchant;
