@@ -48,4 +48,9 @@ public class MerchantPayment extends BaseModel {
     public static List<MerchantPayment> findByDevice(String device, Long merchantId) {
         return findPayment.where().eq("t0.merchant_id", merchantId).eq("t0.device", device).eq("t0.is_active", true).eq("t0.is_deleted", false).order("t0.id asc").findList();
     }
+
+    public static List<MerchantPayment> findByMerchantId(Long merchantId) {
+        return findPayment.where().eq("t0.merchant_id", merchantId).eq("t0.is_active", true).eq("t0.is_deleted", false).order("t0.id asc").findList();
+    }
+
 }
