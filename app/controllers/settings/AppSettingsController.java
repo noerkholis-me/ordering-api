@@ -207,53 +207,32 @@ public class AppSettingsController extends BaseController {
             }
             try {
                 if (appSetting != null) {
-                    String url = Constant.getInstance().getImageUrl();
-                    // main list
-                    List<MerchantPayment> merchantPayments = MerchantPayment.findByMerchantId(appSetting.getMerchant().id);
                     if (deviceType.equalsIgnoreCase(DeviceType.KIOSK.getDevice())) {
-                        AppSettingKioskResponse appSettingKioskResponse = new AppSettingKioskResponse();
-                        String imageGuideKiosk = url.concat("assets/images/kiosk-setting-legend.png");
+                        AppSettingResponse appSettingResponse = new AppSettingResponse();
+                        appSettingResponse.setId(appSetting.id);
+                        appSettingResponse.setMerchantId(appSetting.getMerchant().id);
+                        appSettingResponse.setMerchantName(appSetting.getKioskName());
+                        appSettingResponse.setPrimaryColor(appSetting.getPrimaryColorKiosk());
+                        appSettingResponse.setSecondaryColor(appSetting.getSecondaryColorKiosk());
+                        appSettingResponse.setAppLogo(appSetting.getAppLogoKiosk());
+                        appSettingResponse.setFavicon(appSetting.getFaviconKiosk());
+                        appSettingResponse.setThreshold(0);
+                        appSettingResponse.setIsDeleted(appSetting.isDeleted);
 
-                        // filter list
-                        List<MerchantPayment> merchantKioskPayments = merchantPayments.stream().filter(mp -> mp.getDevice().equalsIgnoreCase(DeviceType.KIOSK.getDevice())).collect(Collectors.toList());
-                        AppSettingPaymentTypeResponse paymentSettingKiosk = new AppSettingPaymentTypeResponse();
-                        for (MerchantPayment merchantPayment : merchantKioskPayments) {
-                            PaymentMethod paymentMethod = merchantPayment.getPaymentMethod();
-                            PaymentMethodConfig paymentMethodConfig = PaymentMethodConfig.convertToPaymentMethodConfig(paymentMethod.getPaymentCode());
-                            constructPaymentType(paymentSettingKiosk, paymentMethodConfig, merchantPayment);
-                        }
-
-                        appSettingKioskResponse.setKioskName(appSetting.getKioskName());
-                        appSettingKioskResponse.setPrimaryColor(appSetting.getPrimaryColorKiosk());
-                        appSettingKioskResponse.setSecondaryColor(appSetting.getSecondaryColorKiosk());
-                        appSettingKioskResponse.setAppLogo(appSetting.getAppLogoKiosk());
-                        appSettingKioskResponse.setFavicon(appSetting.getFaviconKiosk());
-                        appSettingKioskResponse.setImageGuide(imageGuideKiosk);
-                        appSettingKioskResponse.setAppSettingPaymentTypeResponse(paymentSettingKiosk);
-
-                        response.setBaseResponse(1, 0, 1, success + " menampilkan data", appSettingKioskResponse);
+                        response.setBaseResponse(1, 0, 1, success + " menampilkan data", appSettingResponse);
                         return ok(Json.toJson(response));
                     } else if (deviceType.equalsIgnoreCase(DeviceType.MOBILEQR.getDevice())) {
-                        AppSettingMobileQrResponse appSettingMobileQrResponse = new AppSettingMobileQrResponse();
-                        // filter list
-                        List<MerchantPayment> merchantMobileQrPayments = merchantPayments.stream().filter(mp -> mp.getDevice().equalsIgnoreCase(DeviceType.MOBILEQR.getDevice())).collect(Collectors.toList());
-                        AppSettingPaymentTypeResponse paymentSettingMobileQr = new AppSettingPaymentTypeResponse();
-                        for (MerchantPayment merchantPayment : merchantMobileQrPayments) {
-                            PaymentMethod paymentMethod = merchantPayment.getPaymentMethod();
-                            PaymentMethodConfig paymentMethodConfig = PaymentMethodConfig.convertToPaymentMethodConfig(paymentMethod.getPaymentCode());
-                            constructPaymentType(paymentSettingMobileQr, paymentMethodConfig, merchantPayment);
-                        }
-                        String imageGuideMobileQr = url.concat("assets/images/mobile-qr-legend.png");
-                        appSettingMobileQrResponse.setMobileQrName(appSetting.getMobileQrName());
-                        appSettingMobileQrResponse.setPrimaryColor(appSetting.getPrimaryColor());
-                        appSettingMobileQrResponse.setSecondaryColor(appSetting.getSecondaryColor());
-                        appSettingMobileQrResponse.setAppLogo(appSetting.getAppLogo());
-                        appSettingMobileQrResponse.setFavicon(appSetting.getFavicon());
-                        appSettingMobileQrResponse.setThreshold(appSetting.getThreshold());
-                        appSettingMobileQrResponse.setImageGuide(imageGuideMobileQr);
-                        appSettingMobileQrResponse.setAppSettingPaymentTypeResponse(paymentSettingMobileQr);
-
-                        response.setBaseResponse(1, 0, 1, success + " menampilkan data", appSettingMobileQrResponse);
+                        AppSettingResponse appSettingResponse = new AppSettingResponse();
+                        appSettingResponse.setId(appSetting.id);
+                        appSettingResponse.setMerchantId(appSetting.getMerchant().id);
+                        appSettingResponse.setMerchantName(appSetting.getMobileQrName());
+                        appSettingResponse.setPrimaryColor(appSetting.getPrimaryColor());
+                        appSettingResponse.setSecondaryColor(appSetting.getSecondaryColor());
+                        appSettingResponse.setAppLogo(appSetting.getAppLogo());
+                        appSettingResponse.setFavicon(appSetting.getAppLogo());
+                        appSettingResponse.setThreshold(appSetting.getThreshold());
+                        appSettingResponse.setIsDeleted(appSetting.isDeleted);
+                        response.setBaseResponse(1, 0, 1, success + " menampilkan data", appSettingResponse);
                         return ok(Json.toJson(response));
                     } else {
                         response.setBaseResponse(1, 0, 1, inputParameter + " device type tidak sesuai", null);
