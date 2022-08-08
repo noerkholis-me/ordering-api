@@ -29,6 +29,8 @@ public class AppSettings extends BaseModel {
     @JsonProperty("threshold")
     public Integer threshold;
 
+    public String mobileQrName;
+
     // ============ kiosk ============ //
 
     @Column(name = "primary_color_kiosk")
@@ -42,6 +44,9 @@ public class AppSettings extends BaseModel {
 
     @Column(name = "favicon_kiosk")
     public String faviconKiosk;
+
+    @Column(name = "kiosk_name")
+    public String kioskName;
 
     @JsonIgnore
     @ManyToOne
