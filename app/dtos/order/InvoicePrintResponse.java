@@ -73,6 +73,9 @@ public class InvoicePrintResponse {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String referenceNumber;
 
+    @JsonProperty("customer_name")
+    private String customerName;
+
 
 
 

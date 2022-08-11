@@ -46,6 +46,12 @@ public class Order extends BaseModel {
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Member member;
 
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "member_name")
+    private String memberName;
+
     private String status;
 
     @Column(name = "approved_by")
