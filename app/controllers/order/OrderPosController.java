@@ -242,6 +242,7 @@ public class OrderPosController extends BaseController {
                 } else {
                     invoicePrintResponse.setReferenceNumber(referenceNumber);
                 }
+                invoicePrintResponse.setCustomerName(getOrder.getMemberName());
                 Transaction trx = Ebean.beginTransaction();
                 try {
                     getOrder.setStatus(Order.NEW_ORDER);

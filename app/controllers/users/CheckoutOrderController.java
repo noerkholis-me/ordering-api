@@ -11,6 +11,8 @@ import controllers.BaseController;
 import dtos.order.*;
 import dtos.payment.*;
 import models.*;
+import models.internal.DeviceType;
+import models.internal.PaymentMethodConfig;
 import models.merchant.*;
 import models.productaddon.ProductAddOn;
 import models.pupoint.PickUpPointMerchant;
@@ -66,23 +68,27 @@ public class CheckoutOrderController extends BaseController {
                 }
 
                 Member member = null;
+                Member memberData = new Member();
                 if (orderRequest.getCustomerEmail() != null && orderRequest.getCustomerEmail().equalsIgnoreCase("")) {
                     member = Member.find.where().eq("t0.email", orderRequest.getCustomerEmail()).eq("merchant", store.merchant).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
                     if (orderRequest.getCustomerPhoneNumber() != null && !orderRequest.getCustomerPhoneNumber().equalsIgnoreCase("")) {
                         member = Member.find.where().eq("t0.phone", orderRequest.getCustomerPhoneNumber()).eq("t0.is_deleted", false).findUnique();
                     }
                     if(member == null){
-                        Member memberData = new Member();
                         memberData.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
                         memberData.email = orderRequest.getCustomerEmail() != null && orderRequest.getCustomerEmail() != "" ? orderRequest.getCustomerEmail() : null;
                         memberData.phone = orderRequest.getCustomerPhoneNumber() != null && orderRequest.getCustomerPhoneNumber() != "" ? orderRequest.getCustomerPhoneNumber() : null;
                         memberData.save();
                         order.setMember(memberData);
+                        order.setPhoneNumber(memberData.phone);
+                        order.setMemberName(memberData.fullName);
                     }
                     if(member != null) {
                         member.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
                         member.update();
                         order.setMember(member);
+                        order.setPhoneNumber(member.phone);
+                        order.setMemberName(member.fullName);
                     }
                 }
 
@@ -319,7 +325,7 @@ public class CheckoutOrderController extends BaseController {
                     request.setOrderNumber(orderNumber);
                     request.setDeviceType(orderRequest.getDeviceType());
                     if (member == null) {
-                        request.setCustomerName("GENERAL CUSTOMER");
+                        request.setCustomerName(memberData.fullName != null && memberData.fullName != "" ? memberData.fullName : "GENERAL CUSTOMER");
                     } else {
                         request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL CUSTOMER");
                         request.setCustomerEmail(member.email);
@@ -398,7 +404,7 @@ public class CheckoutOrderController extends BaseController {
                     request.setOrderNumber(orderNumber);
                     request.setDeviceType(orderRequest.getDeviceType());
                     if (member == null) {
-                        request.setCustomerName("GENERAL CUSTOMER");
+                        request.setCustomerName(memberData.fullName != null && memberData.fullName != "" ? memberData.fullName : "GENERAL CUSTOMER");
                     } else {
                         request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL CUSTOMER");
                         request.setCustomerEmail(member.email);
@@ -588,11 +594,19 @@ public class CheckoutOrderController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
 
-                order.get().setStatus(Order.CANCELLED);
-                order.get().update();
+                PaymentDetail paymentDetail = orderPayment.get().getPaymentDetail();
+                if (paymentDetail == null) {
+                    response.setBaseResponse(0, 0, 0, "payment detail tidak ditemukan", null);
+                    return badRequest(Json.toJson(response));
+                }
+                paymentDetail.setStatus(PaymentDetail.INACTIVE);
+                paymentDetail.update();
 
                 orderPayment.get().setStatus(OrderPayment.CANCELLED);
                 orderPayment.get().update();
+
+                order.get().setStatus(Order.CANCELLED);
+                order.get().update();
 
                 trx.commit();
 

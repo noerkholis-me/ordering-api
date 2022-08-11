@@ -14,6 +14,10 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = false)
 public class PaymentDetail extends BaseModel {
 
+    public static final String ACTIVE = "ACTIVE";
+    public static final String INACTIVE = "INACTIVE";
+    public static final String EXPIRED = "EXPIRED";
+
     @Column(name = "order_number")
     private String orderNumber;
 
