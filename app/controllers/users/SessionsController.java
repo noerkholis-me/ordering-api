@@ -1749,7 +1749,11 @@ public class SessionsController extends BaseController {
 				return badRequest(Json.toJson(response));
 			}
 
-			response.setBaseResponse(0, 0, 0, success, Boolean.TRUE);
+			Map<String, Object> responses = new HashMap<>();
+			responses.put("member_id", Integer.valueOf(Math.toIntExact(member.id)));
+			responses.put("status", Boolean.TRUE);
+
+			response.setBaseResponse(0, 0, 0, success, responses);
 			return ok(Json.toJson(response));
 		} else if (authority == 403) {
 			response.setBaseResponse(0, 0, 0, forbidden, null);

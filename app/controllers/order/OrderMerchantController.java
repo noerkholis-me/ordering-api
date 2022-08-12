@@ -606,7 +606,7 @@ public class OrderMerchantController extends BaseController {
                 return badRequest(Json.toJson(response));
             }
             Query<Order> orderQuery = OrderRepository.findAllOrderByStoreIdNow(storeId);
-            List<Order> orders = OrderRepository.findOrders(orderQuery, 0, 5);
+            List<Order> orders = OrderRepository.findOrdersQueue(orderQuery, 0, 5);
             List<OrderQueueResponse> orderQueueResponses = new ArrayList<>();
             for (Order order : orders) {
                 OrderQueueResponse orderQueueResponse = new OrderQueueResponse();
@@ -617,6 +617,42 @@ public class OrderMerchantController extends BaseController {
                 orderQueueResponses.add(orderQueueResponse);
             }
             response.setBaseResponse(orders.size(), 0, 5, success + " menampilkan list queue order", orderQueueResponses);
+            return ok(Json.toJson(response));
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+    }
+
+    public static Result orderListCustomer(Long memberId, Long storeId, int offset, int limit) {
+        int authority = checkAccessAuthorization("all");
+        if (authority == 200 || authority == 203) {
+            if (memberId == null || memberId == 0L) {
+                response.setBaseResponse(0, 0, 0, "customer id tidak boleh null atau kosong", null);
+                return badRequest(Json.toJson(response));
+            }
+            if (storeId == null || storeId == 0L) {
+                response.setBaseResponse(0, 0, 0, "store id tidak boleh null atau kosong", null);
+                return badRequest(Json.toJson(response));
+            }
+            Query<Order> orderQuery = OrderRepository.findAllOrderByMemberIdAndStoreId(memberId, storeId);
+            List<Order> orders = OrderRepository.findOrdersCustomer(orderQuery, offset, limit);
+            List<OrderCustomerResponse> orderCustomerResponses = new ArrayList<>();
+            for (Order order : orders) {
+                OrderCustomerResponse orderCustomerResponse = new OrderCustomerResponse();
+                orderCustomerResponse.setOrderNumber(order.getOrderNumber());
+                orderCustomerResponse.setStoreName(order.getStore().storeName);
+                orderCustomerResponse.setOrderDate(order.getOrderDate());
+                orderCustomerResponse.setTotalPrice(order.getTotalPrice());
+                orderCustomerResponse.setOrderStatus(order.getStatus());
+                orderCustomerResponse.setPaymentStatus(order.getOrderPayment().getStatus());
+                orderCustomerResponses.add(orderCustomerResponse);
+            }
+
+            response.setBaseResponse(orders.size(), offset, limit, success, orderCustomerResponses);
             return ok(Json.toJson(response));
         } else if (authority == 403) {
             response.setBaseResponse(0, 0, 0, forbidden, null);
