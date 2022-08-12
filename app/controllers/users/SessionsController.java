@@ -36,13 +36,7 @@ import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
-import models.ConfigSettings;
-import models.LoyaltyPoint;
-import models.Member;
-import models.MemberReferral;
-import models.Merchant;
-import models.SalesOrderSeller;
-import models.MemberLog;
+import models.*;
 import play.Logger;
 import play.Play;
 import play.libs.Json;
@@ -1725,11 +1719,17 @@ public class SessionsController extends BaseController {
 		}
 	}
 
-	public static Result checkCustomer(String email, Long merchantId) {
+	public static Result checkCustomer(String email, Long storeId) {
 		int authority = checkAccessAuthorization("all");
 		if (authority == 200 || authority == 203) {
-			if (merchantId == null || merchantId == 0L) {
-				response.setBaseResponse(0, 0, 0, "merchant id tidak boleh null atau nol", Boolean.FALSE);
+			if (storeId == null || storeId == 0L) {
+				response.setBaseResponse(0, 0, 0, "store id tidak boleh null atau nol", Boolean.FALSE);
+				return badRequest(Json.toJson(response));
+			}
+
+			Store store = Store.findById(storeId);
+			if (store == null) {
+				response.setBaseResponse(0, 0, 0, "store id tidak ditemukan", Boolean.FALSE);
 				return badRequest(Json.toJson(response));
 			}
 
@@ -1743,7 +1743,7 @@ public class SessionsController extends BaseController {
 				return badRequest(Json.toJson(response));
 			}
 
-			Member member = Member.findByEmailAndMerchantId(email, merchantId);
+			Member member = Member.findByEmailAndMerchantId(email, store.getMerchant().id);
 			if (member == null) {
 				response.setBaseResponse(0, 0, 0, "customer tidak terdaftar", Boolean.FALSE);
 				return badRequest(Json.toJson(response));
