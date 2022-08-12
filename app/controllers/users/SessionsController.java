@@ -36,13 +36,7 @@ import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
-import models.ConfigSettings;
-import models.LoyaltyPoint;
-import models.Member;
-import models.MemberReferral;
-import models.Merchant;
-import models.SalesOrderSeller;
-import models.MemberLog;
+import models.*;
 import play.Logger;
 import play.Play;
 import play.libs.Json;
@@ -1724,5 +1718,48 @@ public class SessionsController extends BaseController {
 			MailchimpService.getInstance().AddOrUpdateCustomer(request);
 		}
 	}
+
+	public static Result checkCustomer(String email, Long storeId) {
+		int authority = checkAccessAuthorization("all");
+		if (authority == 200 || authority == 203) {
+			if (storeId == null || storeId == 0L) {
+				response.setBaseResponse(0, 0, 0, "store id tidak boleh null atau nol", Boolean.FALSE);
+				return badRequest(Json.toJson(response));
+			}
+
+			Store store = Store.findById(storeId);
+			if (store == null) {
+				response.setBaseResponse(0, 0, 0, "store id tidak ditemukan", Boolean.FALSE);
+				return badRequest(Json.toJson(response));
+			}
+
+			if (email == null || email.equalsIgnoreCase("")) {
+				response.setBaseResponse(0, 0, 0, "email tidak boleh null atau kosong", Boolean.FALSE);
+				return badRequest(Json.toJson(response));
+			}
+
+			if (!email.matches(CommonFunction.emailRegex)) {
+				response.setBaseResponse(0, 0, 0, "format email tidak sesuai", Boolean.FALSE);
+				return badRequest(Json.toJson(response));
+			}
+
+			Member member = Member.findByEmailAndMerchantId(email, store.getMerchant().id);
+			if (member == null) {
+				response.setBaseResponse(0, 0, 0, "customer tidak terdaftar", Boolean.FALSE);
+				return badRequest(Json.toJson(response));
+			}
+
+			response.setBaseResponse(0, 0, 0, success, Boolean.TRUE);
+			return ok(Json.toJson(response));
+		} else if (authority == 403) {
+			response.setBaseResponse(0, 0, 0, forbidden, null);
+			return forbidden(Json.toJson(response));
+		} else {
+			response.setBaseResponse(0, 0, 0, unauthorized, null);
+			return unauthorized(Json.toJson(response));
+		}
+	}
+
+
 
 }
