@@ -45,13 +45,23 @@ public class OrderRepository extends Model {
         return query.findPagingList(0).getPage(0).getList();
     }
 
-    public static List<Order> findOrders(Query<Order> reqQuery, int offset, int limit) {
+    public static List<Order> findOrdersQueue(Query<Order> reqQuery, int offset, int limit) {
         Query<Order> query = reqQuery;
-        query = query.orderBy("t0.created_at desc");
+        query = query.orderBy("t0.order_queue asc");
 
         ExpressionList<Order> exp = query.where();
-        // exp = exp.disjunction();
-        // exp = exp.ilike("t0.updated_by", "%" + filter + "%");
+        query = exp.query();
+        if (limit != 0) {
+            query = query.setMaxRows(limit);
+        }
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static List<Order> findOrdersCustomer(Query<Order> reqQuery, int offset, int limit) {
+        Query<Order> query = reqQuery;
+        query = query.orderBy("t0.order_date desc");
+
+        ExpressionList<Order> exp = query.where();
         query = exp.query();
         if (limit != 0) {
             query = query.setMaxRows(limit);
@@ -172,6 +182,16 @@ public class OrderRepository extends Model {
                 .fetch("member")
                 .where()
                 .eq("userMerchant.id", userMerchantId)
+                .eq("store.id", storeId)
+                .query();
+    }
+
+    public static Query<Order> findAllOrderByMemberIdAndStoreId(Long memberId, Long storeId) {
+        return Ebean.find(Order.class)
+                .fetch("store")
+                .fetch("member")
+                .where()
+                .eq("member.id", memberId)
                 .eq("store.id", storeId)
                 .query();
     }

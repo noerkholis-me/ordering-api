@@ -743,6 +743,10 @@ public class Member extends BaseModel {
         return find.where().eq("email", email).findUnique();
     }
 
+    public static Member findByEmailAndMerchantId(String email, Long merchantId) {
+        return find.where().eq("email", email).eq("merchant_id", merchantId).findUnique();
+    }
+
     public Boolean getNewsLetter() {
         return newsLetter == null ? true : newsLetter;
     }

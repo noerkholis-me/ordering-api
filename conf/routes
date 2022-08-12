@@ -605,3 +605,7 @@ GET         /pos/get-order-list                             controllers.order.Or
 GET         /pos/:orderNumber/get-order-detail                           controllers.order.OrderPosController.getOrderDetail(orderNumber: String)
 GET         /pos/:orderNumber/print-invoice-paid            controllers.order.OrderPosController.printInvoicePaid(orderNumber : String, reference_number : String ?= "")
 
+GET         /users/:storeId/order-queue                     controllers.order.OrderMerchantController.listQueueOrder(storeId : Long)
+GET         /users/:storeId/check-customer                    controllers.users.SessionsController.checkCustomer(email: String ?= "", storeId: Long)
+GET         /users/:memberId/order-customer/:storeId/store        controllers.order.OrderMerchantController.orderListCustomer(memberId: Long, storeId: Long, offset: Int ?= 0, limit: Int ?= 10)
+
