@@ -606,4 +606,5 @@ GET         /pos/:orderNumber/get-order-detail                           control
 GET         /pos/:orderNumber/print-invoice-paid            controllers.order.OrderPosController.printInvoicePaid(orderNumber : String, reference_number : String ?= "")
 
 GET         /users/:storeId/order-queue                     controllers.order.OrderMerchantController.listQueueOrder(storeId : Long)
+GET         /users/:merchantId/check-customer                    controllers.users.SessionsController.checkCustomer(email: String ?= "", merchantId: Long)
 

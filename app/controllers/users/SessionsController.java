@@ -1725,4 +1725,41 @@ public class SessionsController extends BaseController {
 		}
 	}
 
+	public static Result checkCustomer(String email, Long merchantId) {
+		int authority = checkAccessAuthorization("all");
+		if (authority == 200 || authority == 203) {
+			if (merchantId == null || merchantId == 0L) {
+				response.setBaseResponse(0, 0, 0, "merchant id tidak boleh null atau nol", Boolean.FALSE);
+				return badRequest(Json.toJson(response));
+			}
+
+			if (email == null || email.equalsIgnoreCase("")) {
+				response.setBaseResponse(0, 0, 0, "email tidak boleh null atau kosong", Boolean.FALSE);
+				return badRequest(Json.toJson(response));
+			}
+
+			if (!email.matches(CommonFunction.emailRegex)) {
+				response.setBaseResponse(0, 0, 0, "format email tidak sesuai", Boolean.FALSE);
+				return badRequest(Json.toJson(response));
+			}
+
+			Member member = Member.findByEmailAndMerchantId(email, merchantId);
+			if (member == null) {
+				response.setBaseResponse(0, 0, 0, "customer tidak terdaftar", Boolean.FALSE);
+				return badRequest(Json.toJson(response));
+			}
+
+			response.setBaseResponse(0, 0, 0, success, Boolean.TRUE);
+			return ok(Json.toJson(response));
+		} else if (authority == 403) {
+			response.setBaseResponse(0, 0, 0, forbidden, null);
+			return forbidden(Json.toJson(response));
+		} else {
+			response.setBaseResponse(0, 0, 0, unauthorized, null);
+			return unauthorized(Json.toJson(response));
+		}
+	}
+
+
+
 }
