@@ -51,6 +51,7 @@ public class OrderRepository extends Model {
 
         ExpressionList<Order> exp = query.where();
         query = exp.query();
+        exp.raw("t0.status in ('PROCESS', 'READY_TO_PICKUP', 'DELIVERY')");
         if (limit != 0) {
             query = query.setMaxRows(limit);
         }

@@ -12,10 +12,7 @@ import models.Store;
 import models.appsettings.AppSettings;
 import models.internal.FeeSetting;
 import models.merchant.FeeSettingMerchant;
-import models.transaction.Order;
-import models.transaction.OrderDetail;
-import models.transaction.OrderDetailAddOn;
-import models.transaction.OrderPayment;
+import models.transaction.*;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
@@ -37,6 +34,9 @@ import service.DownloadOrderReport;
 public class OrderMerchantController extends BaseController {
 
     private final static Logger.ALogger LOGGER = Logger.of(OrderMerchantController.class);
+    private static final String PREPARING = "PREPARING";
+    private static final String ON_COOKING = "ON COOKING";
+    private static final String SERVING = "SERVING";
 
     private static BaseResponse response = new BaseResponse();
 
@@ -613,7 +613,8 @@ public class OrderMerchantController extends BaseController {
                 orderQueueResponse.setOrderQueue(order.getOrderQueue());
                 orderQueueResponse.setCustomerName(order.getMemberName());
                 orderQueueResponse.setOrderHour(order.getOrderDate());
-                orderQueueResponse.setStatus(order.getStatus());
+                OrderStatus orderStatus = OrderStatus.convertToOrderStatus(order.getStatus());
+                orderQueueResponse.setStatus(convertOrderStatus(orderStatus));
                 orderQueueResponses.add(orderQueueResponse);
             }
             response.setBaseResponse(orders.size(), 0, 5, success + " menampilkan list queue order", orderQueueResponses);
@@ -661,6 +662,24 @@ public class OrderMerchantController extends BaseController {
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         }
+    }
+
+    private static String convertOrderStatus(OrderStatus orderStatus) {
+        String status = null;
+        switch (orderStatus) {
+            case PROCESS:
+                status = PREPARING;
+                break;
+            case READY_TO_PICKUP:
+                status = ON_COOKING;
+                break;
+            case DELIVERY:
+                status = SERVING;
+                break;
+            default:
+                break;
+        }
+        return status;
     }
 
 }
