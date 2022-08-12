@@ -47,11 +47,9 @@ public class OrderRepository extends Model {
 
     public static List<Order> findOrders(Query<Order> reqQuery, int offset, int limit) {
         Query<Order> query = reqQuery;
-        query = query.orderBy("t0.created_at desc");
+        query = query.orderBy("t0.order_queue asc");
 
         ExpressionList<Order> exp = query.where();
-        // exp = exp.disjunction();
-        // exp = exp.ilike("t0.updated_by", "%" + filter + "%");
         query = exp.query();
         if (limit != 0) {
             query = query.setMaxRows(limit);
