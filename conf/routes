@@ -607,4 +607,5 @@ GET         /pos/:orderNumber/print-invoice-paid            controllers.order.Or
 
 GET         /users/:storeId/order-queue                     controllers.order.OrderMerchantController.listQueueOrder(storeId : Long)
 GET         /users/:storeId/check-customer                    controllers.users.SessionsController.checkCustomer(email: String ?= "", storeId: Long)
+GET         /users/:memberId/order-customer/:storeId/store        controllers.order.OrderMerchantController.orderListCustomer(memberId: Long, storeId: Long, offset: Int ?= 0, limit: Int ?= 10)
 
