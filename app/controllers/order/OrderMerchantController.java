@@ -6,6 +6,8 @@ import com.hokeba.api.BaseResponse;
 import com.hokeba.util.Constant;
 import controllers.BaseController;
 import dtos.order.*;
+import repository.BrandMerchantRepository;
+import models.BrandMerchant;
 import models.Member;
 import models.Merchant;
 import models.Store;
@@ -680,6 +682,92 @@ public class OrderMerchantController extends BaseController {
                 break;
         }
         return status;
+    }
+
+    public static Result successOrder(String orderNumber) {
+        int authority = checkAccessAuthorization("all");
+        if (authority == 200 || authority == 203) {
+            try {
+                if (orderNumber.equalsIgnoreCase("") || orderNumber == null) {
+                    response.setBaseResponse(0, 0, 0, "order number cannot be null or empty.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                Optional<Order> order = OrderRepository.findByOrderNumber(orderNumber);
+                if (!order.isPresent()) {
+                    response.setBaseResponse(0, 0, 0, "order number does not exists.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                Order getOrder = order.get();
+
+                Store store = getOrder.getStore();
+
+                PaymentInformationResponse paymentInformation = new PaymentInformationResponse();
+
+                OrderPayment orderPayment = getOrder.getOrderPayment();
+                paymentInformation.setInvoiceNumber(orderPayment.getInvoiceNo());
+                paymentInformation.setOrderNumber(getOrder.getOrderNumber());
+                paymentInformation.setOrderType(getOrder.getOrderType());
+                paymentInformation.setOrderDate(getOrder.getOrderDate());
+                paymentInformation.setOrderTime(getOrder.getOrderDate());
+
+                List<OrderDetail> orderDetails = getOrder.getOrderDetails();
+
+                List<BrandMerchant> brandMerchantData = BrandMerchantRepository.find.where().eq("merchant", getOrder.getStore().getMerchant()).eq("t0.is_active", Boolean.TRUE).eq("t0.is_deleted", Boolean.FALSE).findList();
+                List<PaymentInformationResponse.BrandData> brandDatas = new ArrayList<>();
+                for(BrandMerchant bMerchant: brandMerchantData) {
+                    List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
+                    List<OrderDetail> orderDataDetailByBrand = OrderDetail.find.where().eq("order", getOrder).eq("productMerchant.brandMerchant", bMerchant).findList();
+                    if(orderDataDetailByBrand.size() != 0){
+                        PaymentInformationResponse.BrandData brandData = new PaymentInformationResponse.BrandData();
+                        brandData.setBrandName(bMerchant.getBrandName());
+                        for (OrderDetail orderDetail : orderDataDetailByBrand) {
+                            OrderDetailResponse orderDetailResponse = new OrderDetailResponse();
+                            orderDetailResponse.setProductName(orderDetail.getProductName());
+                            orderDetailResponse.setQty(orderDetail.getQuantity());
+                            orderDetailResponse.setTotal(orderDetail.getSubTotal());
+                            List<OrderDetailAddOnResponse> orderDetailAddOns = new ArrayList<>();
+                            List<OrderDetailAddOn> orderDetailAddOnList = orderDetail.getOrderDetailAddOns();
+                            for (OrderDetailAddOn orderDetailAddOn : orderDetailAddOnList) {
+                                OrderDetailAddOnResponse orderDetailAddOnResponse = new OrderDetailAddOnResponse();
+                                orderDetailAddOnResponse.setProductName(orderDetailAddOn.getProductName());
+                                orderDetailAddOns.add(orderDetailAddOnResponse);
+                            }
+                            orderDetailResponse.setOrderDetailAddOns(orderDetailAddOns);
+                            orderDetailResponses.add(orderDetailResponse);
+                        }
+                        brandData.setOrderDetails(orderDetailResponses);
+                        brandDatas.add(brandData);
+                    }
+                }
+
+                paymentInformation.setBrandData(brandDatas);
+                paymentInformation.setSubTotal(getOrder.getSubTotal());
+                paymentInformation.setTaxPrice(orderPayment.getTaxPrice());
+                paymentInformation.setTaxPercentage(orderPayment.getTaxPercentage());
+                paymentInformation.setServicePercentage(orderPayment.getServicePercentage());
+
+                paymentInformation.setPaymentFeeOwner(orderPayment.getPaymentFeeOwner());
+                paymentInformation.setPaymentFeeCustomer(orderPayment.getPaymentFeeCustomer());
+                paymentInformation.setTotal(getOrder.getTotalPrice());
+                paymentInformation.setOrderQueue(getOrder.getOrderQueue());
+                paymentInformation.setPaymentStatus(orderPayment.getStatus());
+                paymentInformation.setCustomerName(getOrder.getMemberName());
+
+                response.setBaseResponse(1, offset, limit, "Pembayaran Berhasil",
+                        paymentInformation);
+                return ok(Json.toJson(response));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                response.setBaseResponse(0, 0, 0, error, null);
+                return unauthorized(Json.toJson(response));
+            }
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
     }
 
 }
