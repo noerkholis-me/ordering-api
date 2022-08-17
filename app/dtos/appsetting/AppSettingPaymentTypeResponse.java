@@ -28,4 +28,10 @@ public class AppSettingPaymentTypeResponse {
     @JsonProperty("type_qris")
     private String typeQris;
 
+    @JsonProperty("is_virtual_account")
+    private Boolean isVirtualAccount;
+
+    @JsonProperty("type_virtual_account")
+    private String typeVirtualAccount;
+
 }

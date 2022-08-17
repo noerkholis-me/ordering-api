@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import utils.BigDecimalSerialize;
 
 import java.math.BigDecimal;
@@ -16,16 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class InvoicePrintResponse {
-
-    @JsonProperty("image_store_url")
-    private String imageStoreUrl;
-    @JsonProperty("store_name")
-    private String storeName;
-    @JsonProperty("store_address")
-    private String storeAddress;
-    @JsonProperty("store_phone_number")
-    private String storePhoneNumber;
+public class PaymentInformationResponse {
 
     @JsonProperty("invoice_number")
     private String invoiceNumber;
@@ -39,8 +28,19 @@ public class InvoicePrintResponse {
     @JsonProperty("order_time")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss", timezone = "Asia/Jakarta")
     private Date orderTime;
-    @JsonProperty("order_detail")
-    private List<OrderDetailResponse> orderDetails;
+    @JsonProperty("brand")
+    private List<BrandData> brandData;
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Getter
+    @Setter
+    @Builder
+    public static class BrandData {
+        @JsonProperty("brand_name")
+        private String brandName;
+        @JsonProperty("order_detail")
+        private List<OrderDetailResponse> orderDetails;
+    }
 
     @JsonProperty("sub_total")
     @JsonSerialize(using = BigDecimalSerialize.class)
@@ -69,14 +69,7 @@ public class InvoicePrintResponse {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String paymentStatus;
 
-    @JsonProperty("reference_number")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private String referenceNumber;
-
     @JsonProperty("customer_name")
     private String customerName;
-
-
-
 
 }

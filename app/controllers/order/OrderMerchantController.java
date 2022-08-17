@@ -5,20 +5,16 @@ import com.avaje.ebean.Expr;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.util.Constant;
 import controllers.BaseController;
-import dtos.order.InvoicePrintResponse;
-import dtos.order.OrderDetailAddOnResponse;
-import dtos.order.OrderDetailResponse;
-import dtos.order.OrderList;
+import dtos.order.*;
+import repository.BrandMerchantRepository;
+import models.BrandMerchant;
 import models.Member;
 import models.Merchant;
 import models.Store;
 import models.appsettings.AppSettings;
 import models.internal.FeeSetting;
 import models.merchant.FeeSettingMerchant;
-import models.transaction.Order;
-import models.transaction.OrderDetail;
-import models.transaction.OrderDetailAddOn;
-import models.transaction.OrderPayment;
+import models.transaction.*;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
@@ -40,6 +36,9 @@ import service.DownloadOrderReport;
 public class OrderMerchantController extends BaseController {
 
     private final static Logger.ALogger LOGGER = Logger.of(OrderMerchantController.class);
+    private static final String PREPARING = "PREPARING";
+    private static final String ON_COOKING = "ON COOKING";
+    private static final String SERVING = "SERVING";
 
     private static BaseResponse response = new BaseResponse();
 
@@ -582,9 +581,180 @@ public class OrderMerchantController extends BaseController {
                 invoicePrintResponse.setOrderQueue(getOrder.getOrderQueue());
                 invoicePrintResponse.setPaymentStatus(orderPayment.getStatus());
                 invoicePrintResponse.setReferenceNumber("-");
+                invoicePrintResponse.setCustomerName(getOrder.getMemberName());
 
                 response.setBaseResponse(1, offset, limit, success + " success showing data invoice.",
                         invoicePrintResponse);
+                return ok(Json.toJson(response));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                response.setBaseResponse(0, 0, 0, error, null);
+                return unauthorized(Json.toJson(response));
+            }
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+    }
+
+    public static Result listQueueOrder(Long storeId) {
+        int authority = checkAccessAuthorization("all");
+        if (authority == 200 || authority == 203) {
+            if (storeId == null || storeId == 0L) {
+                response.setBaseResponse(0, 0, 0, "store id tidak boleh null atau kosong", null);
+                return badRequest(Json.toJson(response));
+            }
+            Query<Order> orderQuery = OrderRepository.findAllOrderByStoreIdNow(storeId);
+            List<Order> orders = OrderRepository.findOrdersQueue(orderQuery, 0, 5);
+            List<OrderQueueResponse> orderQueueResponses = new ArrayList<>();
+            for (Order order : orders) {
+                OrderQueueResponse orderQueueResponse = new OrderQueueResponse();
+                orderQueueResponse.setOrderQueue(order.getOrderQueue());
+                orderQueueResponse.setCustomerName(order.getMemberName());
+                orderQueueResponse.setOrderHour(order.getOrderDate());
+                OrderStatus orderStatus = OrderStatus.convertToOrderStatus(order.getStatus());
+                orderQueueResponse.setStatus(convertOrderStatus(orderStatus));
+                orderQueueResponses.add(orderQueueResponse);
+            }
+            response.setBaseResponse(orders.size(), 0, 5, success + " menampilkan list queue order", orderQueueResponses);
+            return ok(Json.toJson(response));
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+    }
+
+    public static Result orderListCustomer(Long memberId, Long storeId, int offset, int limit) {
+        int authority = checkAccessAuthorization("all");
+        if (authority == 200 || authority == 203) {
+            if (memberId == null || memberId == 0L) {
+                response.setBaseResponse(0, 0, 0, "customer id tidak boleh null atau kosong", null);
+                return badRequest(Json.toJson(response));
+            }
+            if (storeId == null || storeId == 0L) {
+                response.setBaseResponse(0, 0, 0, "store id tidak boleh null atau kosong", null);
+                return badRequest(Json.toJson(response));
+            }
+            Query<Order> orderQuery = OrderRepository.findAllOrderByMemberIdAndStoreId(memberId, storeId);
+            List<Order> orders = OrderRepository.findOrdersCustomer(orderQuery, offset, limit);
+            List<OrderCustomerResponse> orderCustomerResponses = new ArrayList<>();
+            for (Order order : orders) {
+                OrderCustomerResponse orderCustomerResponse = new OrderCustomerResponse();
+                orderCustomerResponse.setOrderNumber(order.getOrderNumber());
+                orderCustomerResponse.setStoreName(order.getStore().storeName);
+                orderCustomerResponse.setOrderDate(order.getOrderDate());
+                orderCustomerResponse.setTotalPrice(order.getTotalPrice());
+                orderCustomerResponse.setOrderStatus(order.getStatus());
+                orderCustomerResponse.setPaymentStatus(order.getOrderPayment().getStatus());
+                orderCustomerResponses.add(orderCustomerResponse);
+            }
+
+            response.setBaseResponse(orders.size(), offset, limit, success, orderCustomerResponses);
+            return ok(Json.toJson(response));
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+    }
+
+    private static String convertOrderStatus(OrderStatus orderStatus) {
+        String status = null;
+        switch (orderStatus) {
+            case PROCESS:
+                status = PREPARING;
+                break;
+            case READY_TO_PICKUP:
+                status = ON_COOKING;
+                break;
+            case DELIVERY:
+                status = SERVING;
+                break;
+            default:
+                break;
+        }
+        return status;
+    }
+
+    public static Result successOrder(String orderNumber) {
+        int authority = checkAccessAuthorization("all");
+        if (authority == 200 || authority == 203) {
+            try {
+                if (orderNumber.equalsIgnoreCase("") || orderNumber == null) {
+                    response.setBaseResponse(0, 0, 0, "order number cannot be null or empty.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                Optional<Order> order = OrderRepository.findByOrderNumber(orderNumber);
+                if (!order.isPresent()) {
+                    response.setBaseResponse(0, 0, 0, "order number does not exists.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                Order getOrder = order.get();
+
+                Store store = getOrder.getStore();
+
+                PaymentInformationResponse paymentInformation = new PaymentInformationResponse();
+
+                OrderPayment orderPayment = getOrder.getOrderPayment();
+                paymentInformation.setInvoiceNumber(orderPayment.getInvoiceNo());
+                paymentInformation.setOrderNumber(getOrder.getOrderNumber());
+                paymentInformation.setOrderType(getOrder.getOrderType());
+                paymentInformation.setOrderDate(getOrder.getOrderDate());
+                paymentInformation.setOrderTime(getOrder.getOrderDate());
+
+                List<OrderDetail> orderDetails = getOrder.getOrderDetails();
+
+                List<BrandMerchant> brandMerchantData = BrandMerchantRepository.find.where().eq("merchant", getOrder.getStore().getMerchant()).eq("t0.is_active", Boolean.TRUE).eq("t0.is_deleted", Boolean.FALSE).findList();
+                List<PaymentInformationResponse.BrandData> brandDatas = new ArrayList<>();
+                for(BrandMerchant bMerchant: brandMerchantData) {
+                    List<OrderDetailResponse> orderDetailResponses = new ArrayList<>();
+                    List<OrderDetail> orderDataDetailByBrand = OrderDetail.find.where().eq("order", getOrder).eq("productMerchant.brandMerchant", bMerchant).findList();
+                    if(orderDataDetailByBrand.size() != 0){
+                        PaymentInformationResponse.BrandData brandData = new PaymentInformationResponse.BrandData();
+                        brandData.setBrandName(bMerchant.getBrandName());
+                        for (OrderDetail orderDetail : orderDataDetailByBrand) {
+                            OrderDetailResponse orderDetailResponse = new OrderDetailResponse();
+                            orderDetailResponse.setProductName(orderDetail.getProductName());
+                            orderDetailResponse.setQty(orderDetail.getQuantity());
+                            orderDetailResponse.setTotal(orderDetail.getSubTotal());
+                            List<OrderDetailAddOnResponse> orderDetailAddOns = new ArrayList<>();
+                            List<OrderDetailAddOn> orderDetailAddOnList = orderDetail.getOrderDetailAddOns();
+                            for (OrderDetailAddOn orderDetailAddOn : orderDetailAddOnList) {
+                                OrderDetailAddOnResponse orderDetailAddOnResponse = new OrderDetailAddOnResponse();
+                                orderDetailAddOnResponse.setProductName(orderDetailAddOn.getProductName());
+                                orderDetailAddOns.add(orderDetailAddOnResponse);
+                            }
+                            orderDetailResponse.setOrderDetailAddOns(orderDetailAddOns);
+                            orderDetailResponses.add(orderDetailResponse);
+                        }
+                        brandData.setOrderDetails(orderDetailResponses);
+                        brandDatas.add(brandData);
+                    }
+                }
+
+                paymentInformation.setBrandData(brandDatas);
+                paymentInformation.setSubTotal(getOrder.getSubTotal());
+                paymentInformation.setTaxPrice(orderPayment.getTaxPrice());
+                paymentInformation.setTaxPercentage(orderPayment.getTaxPercentage());
+                paymentInformation.setServicePercentage(orderPayment.getServicePercentage());
+
+                paymentInformation.setPaymentFeeOwner(orderPayment.getPaymentFeeOwner());
+                paymentInformation.setPaymentFeeCustomer(orderPayment.getPaymentFeeCustomer());
+                paymentInformation.setTotal(getOrder.getTotalPrice());
+                paymentInformation.setOrderQueue(getOrder.getOrderQueue());
+                paymentInformation.setPaymentStatus(orderPayment.getStatus());
+                paymentInformation.setCustomerName(getOrder.getMemberName());
+
+                response.setBaseResponse(1, offset, limit, "Pembayaran Berhasil",
+                        paymentInformation);
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
                 ex.printStackTrace();

@@ -152,7 +152,7 @@ public class Store extends BaseModel{
     // }
 
     public static Store findById(Long id) {
-        return find.where().eq("id", id).findUnique();
+        return find.where().eq("id", id).eq("isActive", true).findUnique();
     }
 
     public static Store findByStoreCode(String storeCode) {

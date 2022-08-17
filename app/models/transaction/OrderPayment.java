@@ -19,6 +19,7 @@ public class OrderPayment extends BaseModel {
     public static final String PENDING = "PENDING";
     public static final String PAID = "PAID";
     public static final String UNPAID = "UNPAID";
+    public static final String CANCELLED = "CANCELLED";
 
     @Column(unique = true, name = "invoice_no")
     private String invoiceNo;

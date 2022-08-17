@@ -468,7 +468,7 @@ DELETE    /merchant/tables/:id                     controllers.merchants.TableMe
 #APP SETTING
 POST    /merchant/appsetting                       controllers.settings.AppSettingsController.createAppSetting()
 PUT    /merchant/appsetting/:id/update                        controllers.settings.AppSettingsController.updateAppSetting(id: Long)
-GET     /merchant/setting/getsetting                       controllers.settings.AppSettingsController.getAppSetting(merchant_id: Long ?= 0)
+GET     /merchant/setting/getsetting                       controllers.settings.AppSettingsController.getAppSetting(merchant_id: Long ?= 0, device_type:String ?= "")
 GET     /merchant/appsetting/get-detail-app-setting controllers.settings.AppSettingsController.getApplicationSetting()
 
 #PUPOINT
@@ -551,7 +551,7 @@ GET         /merchant/finance/transaction/active-balance                 control
 
 # ORDER LIST
 GET         /merchant/orders/list                 controllers.order.OrderMerchantController.getOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="")
-
+GET         /orders/success                       controllers.order.OrderMerchantController.successOrder(order_number:String ?= "")
 # UPDATE PROFILE
 PUT         /merchant/update/profile              controllers.users.UpdateProfileController.updateMerchantData()
 PUT         /merchant/update/password              controllers.users.UpdateProfileController.updatePasswordMerchantData()
@@ -604,4 +604,8 @@ GET         /pos/:storeId/get-total-amount-cashier          controllers.merchant
 GET         /pos/get-order-list                             controllers.order.OrderPosController.getOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, customer_name: String ?= "", order_number: String ?= "")
 GET         /pos/:orderNumber/get-order-detail                           controllers.order.OrderPosController.getOrderDetail(orderNumber: String)
 GET         /pos/:orderNumber/print-invoice-paid            controllers.order.OrderPosController.printInvoicePaid(orderNumber : String, reference_number : String ?= "")
+
+GET         /users/:storeId/order-queue                     controllers.order.OrderMerchantController.listQueueOrder(storeId : Long)
+GET         /users/:storeId/check-customer                    controllers.users.SessionsController.checkCustomer(email: String ?= "", storeId: Long)
+GET         /users/:memberId/order-customer/:storeId/store        controllers.order.OrderMerchantController.orderListCustomer(memberId: Long, storeId: Long, offset: Int ?= 0, limit: Int ?= 10)
 
