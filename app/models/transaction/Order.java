@@ -1,9 +1,12 @@
 package models.transaction;
 
 import com.avaje.ebean.annotation.CreatedTimestamp;
+import com.hokeba.util.CommonFunction;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import models.*;
+import models.internal.PaymentMethod;
+import models.internal.PaymentMethodConfig;
 import models.merchant.TableMerchant;
 import models.pupoint.PickUpPointMerchant;
 
@@ -124,5 +127,34 @@ public class Order extends BaseModel {
         return code;
     }
 
+    public String getTanggal(){
+        return CommonFunction.getDate(this.orderDate);
+    }
+
+    public String getStatusOrder() {
+        return this.status;
+    }
+
+    public String getNoInvoice() {
+        return this.orderPayment.getInvoiceNo();
+    }
+
+    public String getNoTransaksi() {
+        return this.orderNumber;
+    }
+
+    public String getTotalBayar() {
+        return String.valueOf(this.totalPrice);
+    }
+
+    public String getJenisTransaksi() {
+        String paymentType = this.orderPayment.getPaymentType();
+        PaymentMethod paymentMethod = PaymentMethod.find.where().eq("paymentCode", paymentType).findUnique();
+        return paymentMethod.getPaymentName();
+    }
+
+    public List<OrderDetail> getProductDetail() {
+        return this.orderDetails;
+    }
 
 }
