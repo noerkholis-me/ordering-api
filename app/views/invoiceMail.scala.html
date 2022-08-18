@@ -1,0 +1,143 @@
+@import models.transaction.Order
+@(urlLogo: String, urlLogoEmail: String, order: Order)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sandbox Invoice</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+    <style>
+        body {
+            font-family: "Roboto", sans-serif;
+            font-size: 15px;
+        }
+        .container {
+            position: relative;
+            width: 634px;
+            margin: auto;
+            left: 0px;
+            top: 0px;
+            padding: 56px 65px;
+            background: #F4F4F4;
+        }
+        .line-top {
+            position: absolute;
+            width: 100%;
+            height: 9px;
+            left: 0px;
+            top: 0px;
+            background: #B92362;
+        }
+        .line-bottom {
+            position: absolute;
+            width: 100%;
+            height: 9px;
+            left: 0px;
+            bottom: 0px;
+            background: #B92362;
+        }
+        .logo {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+        .contact-container {
+            display: flex;
+            justify-content: space-evenly;
+        }
+        .contact {
+            display: flex;
+            padding: 10px;
+            align-items: center;
+        }
+        .contact-logo {
+            position: relative;
+            width: 25px;
+            height: 25.12px;
+            margin-right: 10px;
+        }
+        .product-item {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="line-top"></div>
+        <br>
+        <img src="@urlLogo" class="logo">
+        <div>
+            <p>Hi...</p>
+            <p>Anda baru saja melakukan transaksi dengan menggunakan fasilitas Sandbox berikut ini adalah detail transaksi Anda.</p>
+        </div>
+        <div>
+            <table>
+                <tr></tr>
+                <tr>
+                    <td style="width: 60%">Status</td>
+                    <td>@order.getStatusOrder()</td>
+                </tr>
+                <tr>
+                    <td>No. Invoice</td>
+                    <td>@order.getNoInvoice()</td>
+                </tr>
+                <tr>
+                    <td>Tanggal Transaksi</td>
+                    <td>@order.getTanggal()</td>
+                </tr>
+                <tr>
+                    <td>Jenis Transaksi</td>
+                    <td>@order.getJenisTransaksi()</td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: top">Item</td>
+                    <td>
+                        <ul class="product-item">
+                            @for(o <- order.getProductDetail()){
+                                <li class="product-item">
+                                    @o.getNamaProduk()
+                                </li>
+                            }
+                        </ul>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Total Bayar</td>
+                    <td>Rp. @order.getTotalBayar(),-</td>
+                </tr>
+                <tr>
+                    <td>No. Transaksi</td>
+                    <td>@order.getNoTransaksi()</td>
+                </tr>
+            </table>
+        </div>
+        <div>
+            <p>Mohon simpan email ini sebagai tanda bukti transaksi anda</p>
+        </div>
+        <div>
+            <p>Hormat Kami</p>
+            <br>
+            <p>Sandbox</p>
+        </div>
+        <br>
+        <div>
+            <p>
+                Email ini dibuat secara otomatis. Mohon untuk tidak mengirimkan balasan ke alamat email ini. Untuk pertanyaan dan informasi pertanyaan lainnya silahkan hubungi kontak dibawah ini.
+            </p>
+        </div>
+        <br>
+        <div class="contact-container">
+            <div class="contact">
+                <img src="@urlLogoEmail" class="contact-logo" />
+                <p>Email <br> sandbox&#64;wgshub.com</p>
+            </div>
+        </div>
+        <br>
+        <div class="line-bottom"></div>
+    </div>
+</body>
+</html>

@@ -9,6 +9,8 @@ import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.Properties;
+
+import models.transaction.Order;
 import play.data.Form;
 
 public class MailConfig {
@@ -21,6 +23,7 @@ public class MailConfig {
 	public static String subjectForgotPassword = "[Sandbox] Forgot Password Verification";
 	public static final String subjectActivation = "[Sandbox] Email Activation";
 	public static final String subjectConfirmOrder = "[Sandbox] Order Confirmation";
+	public static final String subjectInvoice = "[Sandbox] Invoice";
 
 	// Using send grid api
 	public static boolean sendmail2(String recipients, String subject, String contentTemplate) {
@@ -83,6 +86,11 @@ public class MailConfig {
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	public static String renderMailInvoiceTemplate(String url, String urlEmailLogo, Order order) {
+		return views.html.invoiceMail.render(url, urlEmailLogo, order)
+				.toString();
 	}
 
     public static String renderMailForgotPasswordTemplate(Member member, String url) {

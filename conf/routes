@@ -609,3 +609,4 @@ GET         /users/:storeId/order-queue                     controllers.order.Or
 GET         /users/:storeId/check-customer                    controllers.users.SessionsController.checkCustomer(email: String ?= "", storeId: Long)
 GET         /users/:memberId/order-customer/:storeId/store        controllers.order.OrderMerchantController.orderListCustomer(memberId: Long, storeId: Long, offset: Int ?= 0, limit: Int ?= 10)
 
+POST        /users/send-invoice                                  controllers.payment.PaymentController.sendMailInvoice()

@@ -49,4 +49,12 @@ public class OrderDetail extends BaseModel {
 
     public static Finder<Long, OrderDetail> find = new Finder<>(Long.class, OrderDetail.class);
 
+    public String getNamaProduk() {
+        return this.productName;
+    }
+
+    public List<OrderDetailAddOn> getProductDetailAddOn() {
+        return this.orderDetailAddOns;
+    }
+
 }
