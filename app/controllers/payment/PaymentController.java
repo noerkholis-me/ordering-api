@@ -1,5 +1,6 @@
 package controllers.payment;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.http.response.global.ServiceResponse;
@@ -16,6 +17,7 @@ import play.libs.Json;
 import play.mvc.Result;
 import repository.OrderPaymentRepository;
 import repository.OrderRepository;
+import service.InvoiceMailService;
 import service.PaymentService;
 
 import javax.swing.text.html.Option;
@@ -138,6 +140,21 @@ public class PaymentController extends BaseController {
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
+    }
+
+    public static Result sendMailInvoice() {
+
+        JsonNode json = request().body().asJson();
+        String orderNumber = json.get("order_number").asText();
+        if (orderNumber == null) {
+            response.setBaseResponse(0, 0, 0, "order number tidak boleh kosong", null);
+            return badRequest(Json.toJson(response));
+        }
+
+        InvoiceMailService.handleCallbackAndSendEmail(orderNumber);
+
+        response.setBaseResponse(0, 0, 0, success, "SENT");
+        return ok(Json.toJson(response));
     }
 
 }
