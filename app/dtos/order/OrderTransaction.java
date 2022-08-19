@@ -1,10 +1,12 @@
 package dtos.order;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import utils.BigDecimalSerialize;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -28,8 +30,10 @@ public class OrderTransaction {
     @JsonProperty("customer_phone_number")
     private String customerPhoneNumber;
     @JsonProperty("sub_total")
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal subTotal;
     @JsonProperty("total_price")
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal totalPrice;
     @JsonProperty("product_order_detail")
     private List<ProductOrderDetail> productOrderDetail;
@@ -44,6 +48,7 @@ public class OrderTransaction {
     @JsonProperty("use_loyalty")
     private Boolean useLoyalty;
     @JsonProperty("loyalty_usage")
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal loyaltyUsage;
 
 }
