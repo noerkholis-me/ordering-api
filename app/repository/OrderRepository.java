@@ -34,6 +34,10 @@ public class OrderRepository extends Model {
         return Optional.ofNullable(find.where().eq("orderNumber", orderNumber).findUnique());
     }
 
+    public static Optional<Order> findByOrderNumberandStatus(String status, String orderNumber) {
+        return Optional.ofNullable(find.where().eq("orderNumber", orderNumber).eq("status", status).findUnique());
+    }
+
     public static List<Order> findOrderDataByUser(Long userId) {
         Query<Order> query = find.where().eq("user_id", userId).order("t0.created_at desc");
         query = query.orderBy("t0.created_at desc");
