@@ -22,6 +22,8 @@ public class PaymentInformationResponse {
     private String orderNumber;
     @JsonProperty("order_type")
     private String orderType;
+    @JsonProperty("order_status")
+    private String orderStatus;
     @JsonProperty("order_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "Asia/Jakarta")
     private Date orderDate;

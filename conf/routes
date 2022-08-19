@@ -551,7 +551,7 @@ GET         /merchant/finance/transaction/active-balance                 control
 
 # ORDER LIST
 GET         /merchant/orders/list                 controllers.order.OrderMerchantController.getOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="")
-GET         /orders/success                       controllers.order.OrderMerchantController.successOrder(order_number:String ?= "")
+GET         /orders/:status                       controllers.order.OrderMerchantController.statusOrderMQ(status:String, order_number:String ?= "")
 # UPDATE PROFILE
 PUT         /merchant/update/profile              controllers.users.UpdateProfileController.updateMerchantData()
 PUT         /merchant/update/password              controllers.users.UpdateProfileController.updatePasswordMerchantData()

@@ -684,7 +684,7 @@ public class OrderMerchantController extends BaseController {
         return status;
     }
 
-    public static Result successOrder(String orderNumber) {
+    public static Result statusOrderMQ(String status, String orderNumber) {
         int authority = checkAccessAuthorization("all");
         if (authority == 200 || authority == 203) {
             try {
@@ -692,7 +692,7 @@ public class OrderMerchantController extends BaseController {
                     response.setBaseResponse(0, 0, 0, "order number cannot be null or empty.", null);
                     return badRequest(Json.toJson(response));
                 }
-                Optional<Order> order = OrderRepository.findByOrderNumber(orderNumber);
+                Optional<Order> order = OrderRepository.findByOrderNumberandStatus(status, orderNumber);
                 if (!order.isPresent()) {
                     response.setBaseResponse(0, 0, 0, "order number does not exists.", null);
                     return badRequest(Json.toJson(response));
@@ -707,6 +707,12 @@ public class OrderMerchantController extends BaseController {
                 paymentInformation.setInvoiceNumber(orderPayment.getInvoiceNo());
                 paymentInformation.setOrderNumber(getOrder.getOrderNumber());
                 paymentInformation.setOrderType(getOrder.getOrderType());
+                if(getOrder.getStatus().equalsIgnoreCase("PENDING") || getOrder.getStatus().equalsIgnoreCase("COMPLETE")) {
+                    paymentInformation.setOrderStatus(getOrder.getStatus());
+                } else {
+                    OrderStatus orderStatus = OrderStatus.convertToOrderStatus(getOrder.getStatus());
+                    paymentInformation.setOrderStatus(convertOrderStatus(orderStatus));
+                }
                 paymentInformation.setOrderDate(getOrder.getOrderDate());
                 paymentInformation.setOrderTime(getOrder.getOrderDate());
 
@@ -753,7 +759,37 @@ public class OrderMerchantController extends BaseController {
                 paymentInformation.setPaymentStatus(orderPayment.getStatus());
                 paymentInformation.setCustomerName(getOrder.getMemberName());
 
-                response.setBaseResponse(1, offset, limit, "Pembayaran Berhasil",
+                String messageStatus = "";
+                switch(getOrder.getStatus()) {
+                    case "PENDING":
+                        messageStatus = "Orderan Sedang Menunggu Pembayaran";
+                        break;
+                    case "NEW_ORDER":
+                        messageStatus = "Orderan Anda Terkonfirmasi";
+                        break;
+                    case "PROCESS":
+                        messageStatus = "Orderan Anda Sedang Dimasak";
+                        break;
+                    case "READY_TO_PICKUP":
+                        messageStatus = "Orderan Anda Siap Diambil!";
+                        break;
+                    case "DELIVERY":
+                        messageStatus = "Orderan Anda Sedang Dikirimkan";
+                        break;
+                    case "CLOSED":
+                        messageStatus = "Orderan Anda Selesai";
+                        break;
+                    case "COMPLETE":
+                        messageStatus = "Orderan Anda Selesai";
+                        break;
+                    case "CANCELED":
+                        messageStatus = "Orderan Anda Dibatalkan";
+                        break;
+                    default:
+                        messageStatus = "Orderan Anda Menunggu Pembayaran";
+                    }
+
+                response.setBaseResponse(1, offset, limit, messageStatus,
                         paymentInformation);
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
