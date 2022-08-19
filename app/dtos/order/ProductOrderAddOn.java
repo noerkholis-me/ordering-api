@@ -26,6 +26,7 @@ public class ProductOrderAddOn {
     @JsonProperty("product_qty")
     private Integer productQty;
     @JsonProperty("sub_total")
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal subTotal;
     @JsonProperty("notes")
     private String notes;
