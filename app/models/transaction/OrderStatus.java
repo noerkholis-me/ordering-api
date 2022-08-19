@@ -6,6 +6,7 @@ public enum OrderStatus {
     READY_TO_PICKUP,
     DELIVERY,
     CLOSED,
+    COMPLETE,
     PENDING,
     CANCELED;
 
@@ -32,6 +33,8 @@ public enum OrderStatus {
             return OrderStatus.DELIVERY;
         } else if (status.equalsIgnoreCase("CLOSED")) {
             return OrderStatus.CLOSED;
+        }  else if (status.equalsIgnoreCase("COMPLETE")) {
+            return OrderStatus.COMPLETE;
         } else if (status.equalsIgnoreCase("PENDING")) {
             return OrderStatus.PENDING;
         } else if (status.equalsIgnoreCase("CANCELED")) {
