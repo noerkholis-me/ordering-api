@@ -1,10 +1,12 @@
 package dtos.order;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import utils.BigDecimalSerialize;
 
 import java.math.BigDecimal;
 
@@ -25,16 +27,21 @@ public class PaymentDetailResponse {
     @JsonProperty("service_percentage")
     private Double servicePercentage;
     @JsonProperty("tax_price")
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal taxPrice;
     @JsonProperty("service_price")
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal servicePrice;
     @JsonProperty("payment_fee_type")
     private String paymentFeeType;
     @JsonProperty("payment_fee_customer")
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal paymentFeeCustomer;
     @JsonProperty("payment_fee_owner")
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal paymentFeeOwner;
     @JsonProperty("total_amount")
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal totalAmount;
 
 
