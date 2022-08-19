@@ -684,7 +684,7 @@ public class OrderMerchantController extends BaseController {
         return status;
     }
 
-    public static Result statusOrderMQ(String status, String orderNumber) {
+    public static Result statusOrderMQ(String orderNumber) {
         int authority = checkAccessAuthorization("all");
         if (authority == 200 || authority == 203) {
             try {
@@ -692,7 +692,7 @@ public class OrderMerchantController extends BaseController {
                     response.setBaseResponse(0, 0, 0, "order number cannot be null or empty.", null);
                     return badRequest(Json.toJson(response));
                 }
-                Optional<Order> order = OrderRepository.findByOrderNumberandStatus(status, orderNumber);
+                Optional<Order> order = OrderRepository.findByOrderNumber(orderNumber);
                 if (!order.isPresent()) {
                     response.setBaseResponse(0, 0, 0, "order number does not exists.", null);
                     return badRequest(Json.toJson(response));
