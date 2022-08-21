@@ -7,21 +7,26 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
 import controllers.BaseController;
+import dtos.table.DisplayTableResponse;
 import dtos.table.TableMerchantRequest;
 import dtos.table.TableMerchantResponse;
 import models.Merchant;
 import models.Store;
 import models.merchant.TableMerchant;
 import models.merchant.TableType;
+import models.transaction.Order;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import repository.OrderRepository;
 import repository.TableMerchantRepository;
 import repository.TableTypeRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.*;
 
 public class TableMerchantController extends BaseController {
 
@@ -209,6 +214,48 @@ public class TableMerchantController extends BaseController {
         tableMerchantResponse.setStoreResponse(storeRes);
         tableMerchantResponse.setTableTypeResponse(tableTypeRes);
         return tableMerchantResponse;
+    }
+
+    public static Result getDisplayTable(Long storeId) {
+        int authority = checkAccessAuthorization("all");
+        if (authority == 200 || authority == 203) {
+            Store store = Store.findById(storeId);
+            if (store == null) {
+                response.setBaseResponse(0, 0, 0, "toko tidak ditemukan", null);
+                return badRequest(Json.toJson(response));
+            }
+//            List<TableMerchant> tableMerchants = TableMerchantRepository.findTableMerchantByStoreId(storeId);
+//            List<DisplayTableResponse> displayTableResponses = new ArrayList<>();
+//
+//            Query<Order> orderQuery = OrderRepository.findAllOrderByStoreIdNow(storeId);
+//            List<Order> orders = OrderRepository.findOrdersByToday(orderQuery, new Date());
+//
+//            for (TableMerchant tableMerchant : tableMerchants) {
+//                for (Order order : orders) {
+//                    DisplayTableResponse displayTableResponse = new DisplayTableResponse();
+//                    displayTableResponse.setId(tableMerchant.id);
+//                    displayTableResponse.setTableType(tableMerchant.getTableType().getName());
+//                    displayTableResponse.setTableName(tableMerchant.getName());
+//                    displayTableResponse.setMinimumTableCount(tableMerchant.getTableType().getMinimumTableCount());
+//                    displayTableResponse.setMaximumTableCount(tableMerchant.getTableType().getMaximumTableCount());
+//                    if (tableMerchant.equals(order.getTableMerchant())) {
+//                        displayTableResponse.setIsAvailable(Boolean.FALSE);
+//                    } else {
+//                        displayTableResponse.setIsAvailable(Boolean.TRUE);
+//                    }
+//                    displayTableResponses.add(displayTableResponse);
+//                }
+//            }
+
+            response.setBaseResponse(0, 0, 0, success, null);
+            return ok(Json.toJson(response));
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
     }
 
 }

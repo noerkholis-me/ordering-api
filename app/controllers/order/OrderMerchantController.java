@@ -600,7 +600,7 @@ public class OrderMerchantController extends BaseController {
         }
     }
 
-    public static Result listQueueOrder(Long storeId) {
+    public static Result listQueueOrder(Long storeId, int offset, int limit) {
         int authority = checkAccessAuthorization("all");
         if (authority == 200 || authority == 203) {
             if (storeId == null || storeId == 0L) {
@@ -608,7 +608,7 @@ public class OrderMerchantController extends BaseController {
                 return badRequest(Json.toJson(response));
             }
             Query<Order> orderQuery = OrderRepository.findAllOrderByStoreIdNow(storeId);
-            List<Order> orders = OrderRepository.findOrdersQueue(orderQuery, 0, 5);
+            List<Order> orders = OrderRepository.findOrdersQueue(orderQuery, offset, limit);
             List<OrderQueueResponse> orderQueueResponses = new ArrayList<>();
             for (Order order : orders) {
                 OrderQueueResponse orderQueueResponse = new OrderQueueResponse();

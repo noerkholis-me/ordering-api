@@ -91,6 +91,9 @@ public class Order extends BaseModel {
     @JoinColumn(name = "table_id", referencedColumnName = "id")
     private TableMerchant tableMerchant;
 
+    @javax.persistence.Transient
+    public Long table_id;
+
     @Column(name = "table_name")
     private String tableName;
     
@@ -156,5 +159,6 @@ public class Order extends BaseModel {
     public List<OrderDetail> getProductDetail() {
         return this.orderDetails;
     }
+
 
 }
