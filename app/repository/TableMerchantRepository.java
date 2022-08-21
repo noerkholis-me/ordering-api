@@ -1,8 +1,10 @@
 package repository;
 
+import com.avaje.ebean.Ebean;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import models.merchant.TableMerchant;
+import models.transaction.Order;
 import play.db.ebean.Model;
 
 import java.util.List;
@@ -61,6 +63,15 @@ public class TableMerchantRepository extends Model {
             query = query.setMaxRows(limit);
         }
         return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static List<TableMerchant> findTableMerchantByStoreId(Long storeId) {
+        return Ebean.find(TableMerchant.class)
+                .fetch("store")
+                .where()
+                .eq("store.id", storeId)
+                .eq("isActive", true)
+                .query().findList();
     }
 
 }

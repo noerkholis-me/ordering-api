@@ -61,12 +61,8 @@ public class StoreController extends BaseController {
                         logger.error("Error while creating store", e);
                         e.printStackTrace();
                         trx.rollback();
-                        response.setBaseResponse(0, 0, 0, error, null);
-                        return internalServerError(Json.toJson(response));
                     } finally {
                         trx.end();
-                        response.setBaseResponse(0, 0, 0, error, null);
-                        return internalServerError(Json.toJson(response));
                     }
                 }
             } catch (Exception e) {
@@ -110,12 +106,8 @@ public class StoreController extends BaseController {
                         logger.error("Error while updating store", e);
                         e.printStackTrace();
                         trx.rollback();
-                        response.setBaseResponse(0, 0, 0, error, null);
-                        return internalServerError(Json.toJson(response));
                     } finally {
                         trx.end();
-                        response.setBaseResponse(0, 0, 0, error, null);
-                        return internalServerError(Json.toJson(response));
                     }
                 }
             } catch (Exception e) {
