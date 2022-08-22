@@ -69,7 +69,7 @@ public class CheckoutOrderController extends BaseController {
 
                 Member member = null;
                 Member memberData = new Member();
-                if (orderRequest.getCustomerEmail() != null && orderRequest.getCustomerEmail().equalsIgnoreCase("")) {
+                if (orderRequest.getCustomerEmail() != null && !orderRequest.getCustomerEmail().equalsIgnoreCase("")) {
                     member = Member.find.where().eq("t0.email", orderRequest.getCustomerEmail()).eq("merchant", store.merchant).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
                     if (orderRequest.getCustomerPhoneNumber() != null && !orderRequest.getCustomerPhoneNumber().equalsIgnoreCase("")) {
                         member = Member.find.where().eq("t0.phone", orderRequest.getCustomerPhoneNumber()).eq("t0.is_deleted", false).findUnique();
@@ -144,6 +144,8 @@ public class CheckoutOrderController extends BaseController {
                             response.setBaseResponse(0, 0, 0, "Table not found", null);
                             return badRequest(Json.toJson(response));
                         }
+                        tableMerchant.get().setIsAvailable(Boolean.FALSE);
+                        tableMerchant.get().update();
                     }
                     order.setTableMerchant(tableMerchant != null ? tableMerchant.get() : null);
                     order.setTableName(tableMerchant != null ? tableMerchant.get().getName() : null);
