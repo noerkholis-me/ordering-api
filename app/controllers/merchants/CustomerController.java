@@ -41,7 +41,7 @@ public class CustomerController extends BaseController {
                     CustomerResponse customerResponse = new CustomerResponse();
                     customerResponse.setId(member.id);
                     customerResponse.setEmail(member.email);
-                    customerResponse.setName(member.fullName);
+                    customerResponse.setName(member.fullName != null && member.fullName != "" ? member.fullName : member.firstName + " " + member.lastName);
                     customerResponse.setPhone(member.phone);
                     customerResponse.setRegisterDate(member.createdAt);
                     customerResponse.setLastPurchase(member.lastPurchase);
