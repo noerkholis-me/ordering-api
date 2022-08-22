@@ -23,6 +23,16 @@ public class TableMerchantRepository extends Model {
                         .findUnique());
     }
 
+    public static Optional<TableMerchant> findByIdAndAvailable(Long id) {
+        return Optional.ofNullable(
+                find.where()
+                        .eq("id", id)
+                        .eq("isActive", true)
+                        .eq("isDeleted", false)
+                        .eq("isAvailable", true)
+                        .findUnique());
+    }
+
     public static List<TableMerchant> findAllTables() {
         return find.where()
                 .eq("isDeleted", false)
