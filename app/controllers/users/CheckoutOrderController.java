@@ -139,9 +139,9 @@ public class CheckoutOrderController extends BaseController {
                 } else if (orderRequest.getOrderType().equalsIgnoreCase("DINEIN")) {
                     Optional<TableMerchant> tableMerchant = null;
                     if(orderRequest.getTableId() != null && orderRequest.getTableId() != 0){
-                        tableMerchant = TableMerchantRepository.findById(orderRequest.getTableId());
+                        tableMerchant = TableMerchantRepository.findByIdAndAvailable(orderRequest.getTableId());
                         if (!tableMerchant.isPresent()) {
-                            response.setBaseResponse(0, 0, 0, "Table not found", null);
+                            response.setBaseResponse(0, 0, 0, "Table not found or table is not available", null);
                             return badRequest(Json.toJson(response));
                         }
                         tableMerchant.get().setIsAvailable(Boolean.FALSE);
