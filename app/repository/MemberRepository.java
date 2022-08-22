@@ -79,7 +79,11 @@ public class MemberRepository extends Model {
             }
             exp = exp.eq("t0.is_active", isActive);
         }
+        exp = exp.disjunction();
         exp = exp.ilike("t0.full_name", "%" + keyword + "%");
+        exp = exp.ilike("t0.first_name", "%" + keyword + "%");
+        exp = exp.ilike("t0.last_name", "%" + keyword + "%");
+        exp = exp.endJunction();
         query = exp.query();
         if (limit != 0) {
             query = query.setMaxRows(limit);
