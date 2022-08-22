@@ -18,6 +18,7 @@ public class TableMerchantRepository extends Model {
         return Optional.ofNullable(
                 find.where()
                         .eq("id", id)
+                        .eq("isActive", true)
                         .eq("isDeleted", false)
                         .findUnique());
     }

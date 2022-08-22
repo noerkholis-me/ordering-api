@@ -19,6 +19,9 @@ public class TableMerchant extends BaseModel {
     @Column(name = "is_active")
     private Boolean isActive;
 
+    @Column(name = "is_available")
+    private Boolean isAvailable;
+
     // ===================================================== //
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "store_id", referencedColumnName = "id")

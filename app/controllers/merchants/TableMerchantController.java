@@ -185,6 +185,7 @@ public class TableMerchantController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
                 tableMerchant.get().isDeleted = Boolean.TRUE;
+                tableMerchant.get().setIsActive(Boolean.FALSE);
                 tableMerchant.get().update();
                 response.setBaseResponse(1, 0, 1, success + " Delete data table", tableMerchant.get().id);
                 return ok(Json.toJson(response));
@@ -216,6 +217,33 @@ public class TableMerchantController extends BaseController {
         return tableMerchantResponse;
     }
 
+    public static Result changeAvailabilityTable(Long tableId) {
+        Merchant merchant = checkMerchantAccessAuthorization();
+        if (merchant == null) {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        } else {
+            JsonNode json = request().body().asJson();
+            Boolean isAvailable = json.get("is_available").asBoolean();
+            try {
+                Optional<TableMerchant> tableMerchant = TableMerchantRepository.findById(tableId);
+                if (!tableMerchant.isPresent()) {
+                    response.setBaseResponse(0, 0, 0, "meja tidak ditemukan.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                tableMerchant.get().setIsAvailable(isAvailable);
+                tableMerchant.get().update();
+
+                response.setBaseResponse(0, 0, 0, "berhasil mengubah ketersediaan meja", tableMerchant.get().id);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.setBaseResponse(0, 0, 0, error, null);
+                return internalServerError(Json.toJson(response));
+            }
+        }
+    }
+
     public static Result getDisplayTable(Long storeId) {
         int authority = checkAccessAuthorization("all");
         if (authority == 200 || authority == 203) {
@@ -224,30 +252,21 @@ public class TableMerchantController extends BaseController {
                 response.setBaseResponse(0, 0, 0, "toko tidak ditemukan", null);
                 return badRequest(Json.toJson(response));
             }
-//            List<TableMerchant> tableMerchants = TableMerchantRepository.findTableMerchantByStoreId(storeId);
-//            List<DisplayTableResponse> displayTableResponses = new ArrayList<>();
-//
-//            Query<Order> orderQuery = OrderRepository.findAllOrderByStoreIdNow(storeId);
-//            List<Order> orders = OrderRepository.findOrdersByToday(orderQuery, new Date());
-//
-//            for (TableMerchant tableMerchant : tableMerchants) {
-//                for (Order order : orders) {
-//                    DisplayTableResponse displayTableResponse = new DisplayTableResponse();
-//                    displayTableResponse.setId(tableMerchant.id);
-//                    displayTableResponse.setTableType(tableMerchant.getTableType().getName());
-//                    displayTableResponse.setTableName(tableMerchant.getName());
-//                    displayTableResponse.setMinimumTableCount(tableMerchant.getTableType().getMinimumTableCount());
-//                    displayTableResponse.setMaximumTableCount(tableMerchant.getTableType().getMaximumTableCount());
-//                    if (tableMerchant.equals(order.getTableMerchant())) {
-//                        displayTableResponse.setIsAvailable(Boolean.FALSE);
-//                    } else {
-//                        displayTableResponse.setIsAvailable(Boolean.TRUE);
-//                    }
-//                    displayTableResponses.add(displayTableResponse);
-//                }
-//            }
+            List<TableMerchant> tableMerchants = TableMerchantRepository.findTableMerchantByStoreId(storeId);
+            List<DisplayTableResponse> displayTableResponses = new ArrayList<>();
 
-            response.setBaseResponse(0, 0, 0, success, null);
+            for (TableMerchant tableMerchant : tableMerchants) {
+                DisplayTableResponse displayTableResponse = new DisplayTableResponse();
+                displayTableResponse.setId(tableMerchant.id);
+                displayTableResponse.setTableType(tableMerchant.getTableType().getName());
+                displayTableResponse.setTableName(tableMerchant.getName());
+                displayTableResponse.setMinimumTableCount(tableMerchant.getTableType().getMinimumTableCount());
+                displayTableResponse.setMaximumTableCount(tableMerchant.getTableType().getMaximumTableCount());
+                displayTableResponse.setIsAvailable(tableMerchant.getIsAvailable());
+                displayTableResponses.add(displayTableResponse);
+            }
+
+            response.setBaseResponse(displayTableResponses.size(), 0, 0, success, displayTableResponses);
             return ok(Json.toJson(response));
         } else if (authority == 403) {
             response.setBaseResponse(0, 0, 0, forbidden, null);
