@@ -565,23 +565,22 @@ public class OrderMerchantController extends BaseController {
                 invoicePrintResponse.setOrderDetails(orderDetailResponses);
                 invoicePrintResponse.setSubTotal(getOrder.getSubTotal());
                 invoicePrintResponse.setTaxPrice(orderPayment.getTaxPrice());
-
-//                Optional<FeeSettingMerchant> feeSetting = FeeSettingMerchantRepository
-//                        .findByLatestFeeSetting(store.getMerchant().id);
-//                if (!feeSetting.isPresent()) {
-//                    invoicePrintResponse.setTaxPercentage(feeSetting.get().getTax());
-//                    invoicePrintResponse.setServicePercentage(feeSetting.get().getService());
-//                }
                 invoicePrintResponse.setTaxPercentage(orderPayment.getTaxPercentage());
                 invoicePrintResponse.setServicePercentage(orderPayment.getServicePercentage());
+                invoicePrintResponse.setServiceFee(orderPayment.getServicePrice());
 
+                invoicePrintResponse.setPaymentFeeType(orderPayment.getPaymentFeeType());
                 invoicePrintResponse.setPaymentFeeOwner(orderPayment.getPaymentFeeOwner());
                 invoicePrintResponse.setPaymentFeeCustomer(orderPayment.getPaymentFeeCustomer());
                 invoicePrintResponse.setTotal(getOrder.getTotalPrice());
                 invoicePrintResponse.setOrderQueue(getOrder.getOrderQueue());
                 invoicePrintResponse.setPaymentStatus(orderPayment.getStatus());
                 invoicePrintResponse.setReferenceNumber("-");
-                invoicePrintResponse.setCustomerName(getOrder.getMemberName());
+                if (getOrder.getMember() != null) {
+                    invoicePrintResponse.setCustomerName(getOrder.getMember().fullName != null ? getOrder.getMember().fullName : getOrder.getMember().firstName + " " + getOrder.getMember().lastName);
+                } else {
+                    invoicePrintResponse.setCustomerName("GENERAL CUSTOMER" + getOrder.getStore().storeName);
+                }
 
                 response.setBaseResponse(1, offset, limit, success + " success showing data invoice.",
                         invoicePrintResponse);
@@ -751,13 +750,19 @@ public class OrderMerchantController extends BaseController {
                 paymentInformation.setTaxPrice(orderPayment.getTaxPrice());
                 paymentInformation.setTaxPercentage(orderPayment.getTaxPercentage());
                 paymentInformation.setServicePercentage(orderPayment.getServicePercentage());
+                paymentInformation.setServiceFee(orderPayment.getServicePrice());
 
+                paymentInformation.setPaymentFeeType(orderPayment.getPaymentFeeType());
                 paymentInformation.setPaymentFeeOwner(orderPayment.getPaymentFeeOwner());
                 paymentInformation.setPaymentFeeCustomer(orderPayment.getPaymentFeeCustomer());
                 paymentInformation.setTotal(getOrder.getTotalPrice());
                 paymentInformation.setOrderQueue(getOrder.getOrderQueue());
                 paymentInformation.setPaymentStatus(orderPayment.getStatus());
-                paymentInformation.setCustomerName(getOrder.getMemberName());
+                if (getOrder.getMember() != null) {
+                    paymentInformation.setCustomerName(getOrder.getMember().fullName != null ? getOrder.getMember().fullName : getOrder.getMember().firstName + " " + getOrder.getMember().lastName);
+                } else {
+                    paymentInformation.setCustomerName("GENERAL CUSTOMER" + getOrder.getStore().storeName);
+                }
 
                 String messageStatus = "";
                 switch(getOrder.getStatus()) {

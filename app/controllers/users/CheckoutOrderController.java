@@ -81,14 +81,14 @@ public class CheckoutOrderController extends BaseController {
                         memberData.save();
                         order.setMember(memberData);
                         order.setPhoneNumber(memberData.phone);
-                        order.setMemberName(memberData.fullName);
+                        order.setMemberName(memberData.fullName != null ? memberData.fullName : memberData.firstName + " " + memberData.lastName);
                     }
                     if(member != null) {
                         member.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
                         member.update();
                         order.setMember(member);
                         order.setPhoneNumber(member.phone);
-                        order.setMemberName(member.fullName);
+                        order.setMemberName(memberData.fullName != null ? memberData.fullName : memberData.firstName + " " + memberData.lastName);
                     }
                 }
 
@@ -327,7 +327,11 @@ public class CheckoutOrderController extends BaseController {
                     if (member == null) {
                         request.setCustomerName(memberData.fullName != null && memberData.fullName != "" ? memberData.fullName : "GENERAL CUSTOMER");
                     } else {
-                        request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL CUSTOMER");
+                        if (member.fullName != null && member.fullName != "" || member.firstName != null && member.firstName != "" || member.lastName != null && member.lastName != "") {
+                            request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : member.firstName + " " + member.lastName);
+                        } else {
+                            request.setCustomerName("GENERAL CUSTOMER");
+                        }
                         request.setCustomerEmail(member.email);
                         request.setCustomerPhoneNumber(member.phone);
                     }
@@ -406,7 +410,11 @@ public class CheckoutOrderController extends BaseController {
                     if (member == null) {
                         request.setCustomerName(memberData.fullName != null && memberData.fullName != "" ? memberData.fullName : "GENERAL CUSTOMER");
                     } else {
-                        request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL CUSTOMER");
+                        if (member.fullName != null && member.fullName != "" || member.firstName != null && member.firstName != "" || member.lastName != null && member.lastName != "") {
+                            request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : member.firstName + " " + member.lastName);
+                        } else {
+                            request.setCustomerName("GENERAL CUSTOMER");
+                        }
                         request.setCustomerEmail(member.email);
                         request.setCustomerPhoneNumber(member.phone);
                     }
