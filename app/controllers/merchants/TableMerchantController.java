@@ -203,6 +203,7 @@ public class TableMerchantController extends BaseController {
         tableMerchantResponse.setId(tableMerchant.id);
         tableMerchantResponse.setName(tableMerchant.getName());
         tableMerchantResponse.setIsActive(tableMerchant.getIsActive());
+        tableMerchantResponse.setIsAvailable(tableMerchant.getIsAvailable());
 
         TableMerchantResponse.StoreRes storeRes = new TableMerchantResponse.StoreRes();
         storeRes.setId(tableMerchant.getStore().id);
