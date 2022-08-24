@@ -78,6 +78,7 @@ public class CheckoutOrderController extends BaseController {
                         memberData.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
                         memberData.email = orderRequest.getCustomerEmail() != null && orderRequest.getCustomerEmail() != "" ? orderRequest.getCustomerEmail() : null;
                         memberData.phone = orderRequest.getCustomerPhoneNumber() != null && orderRequest.getCustomerPhoneNumber() != "" ? orderRequest.getCustomerPhoneNumber() : null;
+                        memberData.setMerchant(store.getMerchant());
                         memberData.save();
                         order.setMember(memberData);
                         order.setPhoneNumber(memberData.phone);
