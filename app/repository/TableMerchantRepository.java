@@ -1,8 +1,10 @@
 package repository;
 
+import com.avaje.ebean.Ebean;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import models.merchant.TableMerchant;
+import models.transaction.Order;
 import play.db.ebean.Model;
 
 import java.util.List;
@@ -16,7 +18,18 @@ public class TableMerchantRepository extends Model {
         return Optional.ofNullable(
                 find.where()
                         .eq("id", id)
+                        .eq("isActive", true)
                         .eq("isDeleted", false)
+                        .findUnique());
+    }
+
+    public static Optional<TableMerchant> findByIdAndAvailable(Long id) {
+        return Optional.ofNullable(
+                find.where()
+                        .eq("id", id)
+                        .eq("isActive", true)
+                        .eq("isDeleted", false)
+                        .eq("isAvailable", true)
                         .findUnique());
     }
 
@@ -61,6 +74,15 @@ public class TableMerchantRepository extends Model {
             query = query.setMaxRows(limit);
         }
         return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static List<TableMerchant> findTableMerchantByStoreId(Long storeId) {
+        return Ebean.find(TableMerchant.class)
+                .fetch("store")
+                .where()
+                .eq("store.id", storeId)
+                .eq("isActive", true)
+                .query().findList();
     }
 
 }

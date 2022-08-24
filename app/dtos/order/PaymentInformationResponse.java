@@ -22,6 +22,8 @@ public class PaymentInformationResponse {
     private String orderNumber;
     @JsonProperty("order_type")
     private String orderType;
+    @JsonProperty("order_status")
+    private String orderStatus;
     @JsonProperty("order_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy", timezone = "Asia/Jakarta")
     private Date orderDate;
@@ -50,12 +52,17 @@ public class PaymentInformationResponse {
     private BigDecimal taxPrice;
     @JsonProperty("tax_percentage")
     private Double taxPercentage;
-    @JsonProperty("service")
-    @JsonSerialize(using = BigDecimalSerialize.class)
-    private BigDecimal paymentFeeOwner;
     @JsonProperty("service_percentage")
     private Double servicePercentage;
     @JsonProperty("service_fee")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal serviceFee;
+    @JsonProperty("payment_fee_type")
+    private String paymentFeeType;
+    @JsonProperty("payment_fee_owner")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal paymentFeeOwner;
+    @JsonProperty("payment_fee_customer")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal paymentFeeCustomer;
     @JsonProperty("total")

@@ -551,7 +551,7 @@ GET         /merchant/finance/transaction/active-balance                 control
 
 # ORDER LIST
 GET         /merchant/orders/list                 controllers.order.OrderMerchantController.getOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="")
-GET         /orders/success                       controllers.order.OrderMerchantController.successOrder(order_number:String ?= "")
+GET         /orders/status                       controllers.order.OrderMerchantController.statusOrderMQ(order_number:String ?= "")
 # UPDATE PROFILE
 PUT         /merchant/update/profile              controllers.users.UpdateProfileController.updateMerchantData()
 PUT         /merchant/update/password              controllers.users.UpdateProfileController.updatePasswordMerchantData()
@@ -605,7 +605,10 @@ GET         /pos/get-order-list                             controllers.order.Or
 GET         /pos/:orderNumber/get-order-detail                           controllers.order.OrderPosController.getOrderDetail(orderNumber: String)
 GET         /pos/:orderNumber/print-invoice-paid            controllers.order.OrderPosController.printInvoicePaid(orderNumber : String, reference_number : String ?= "")
 
-GET         /users/:storeId/order-queue                     controllers.order.OrderMerchantController.listQueueOrder(storeId : Long)
+GET         /users/:storeId/order-queue                     controllers.order.OrderMerchantController.listQueueOrder(storeId : Long, offset:Int ?= 0, limit:Int ?= 5)
 GET         /users/:storeId/check-customer                    controllers.users.SessionsController.checkCustomer(email: String ?= "", storeId: Long)
 GET         /users/:memberId/order-customer/:storeId/store        controllers.order.OrderMerchantController.orderListCustomer(memberId: Long, storeId: Long, offset: Int ?= 0, limit: Int ?= 10)
 
+POST        /users/send-invoice                                  controllers.payment.PaymentController.sendMailInvoice()
+GET         /users/:storeId/display-table                            controllers.merchants.TableMerchantController.getDisplayTable(storeId: Long)
+PUT         /merchant/:tableId/change-availability-table        controllers.merchants.TableMerchantController.changeAvailabilityTable(tableId: Long)

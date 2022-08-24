@@ -60,6 +60,15 @@ public class OrderPayment extends BaseModel {
     @Column(name = "payment_fee_owner")
     private BigDecimal paymentFeeOwner;
 
+    @Column(name = "mail_status_code")
+    private String mailStatusCode;
+
+    @Column(name = "mail_status")
+    private String mailStatus;
+
+    @Column(name = "mail_message")
+    private String mailMessage;
+
 
     // ============================================================ //
 

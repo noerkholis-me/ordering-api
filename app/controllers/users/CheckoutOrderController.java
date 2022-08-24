@@ -69,7 +69,7 @@ public class CheckoutOrderController extends BaseController {
 
                 Member member = null;
                 Member memberData = new Member();
-                if (orderRequest.getCustomerEmail() != null && orderRequest.getCustomerEmail().equalsIgnoreCase("")) {
+                if (orderRequest.getCustomerEmail() != null && !orderRequest.getCustomerEmail().equalsIgnoreCase("")) {
                     member = Member.find.where().eq("t0.email", orderRequest.getCustomerEmail()).eq("merchant", store.merchant).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
                     if (orderRequest.getCustomerPhoneNumber() != null && !orderRequest.getCustomerPhoneNumber().equalsIgnoreCase("")) {
                         member = Member.find.where().eq("t0.phone", orderRequest.getCustomerPhoneNumber()).eq("t0.is_deleted", false).findUnique();
@@ -78,17 +78,18 @@ public class CheckoutOrderController extends BaseController {
                         memberData.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
                         memberData.email = orderRequest.getCustomerEmail() != null && orderRequest.getCustomerEmail() != "" ? orderRequest.getCustomerEmail() : null;
                         memberData.phone = orderRequest.getCustomerPhoneNumber() != null && orderRequest.getCustomerPhoneNumber() != "" ? orderRequest.getCustomerPhoneNumber() : null;
+                        memberData.setMerchant(store.getMerchant());
                         memberData.save();
                         order.setMember(memberData);
                         order.setPhoneNumber(memberData.phone);
-                        order.setMemberName(memberData.fullName);
+                        order.setMemberName(memberData.fullName != null ? memberData.fullName : memberData.firstName + " " + memberData.lastName);
                     }
                     if(member != null) {
                         member.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
                         member.update();
                         order.setMember(member);
                         order.setPhoneNumber(member.phone);
-                        order.setMemberName(member.fullName);
+                        order.setMemberName(memberData.fullName != null ? memberData.fullName : memberData.firstName + " " + memberData.lastName);
                     }
                 }
 
@@ -139,11 +140,13 @@ public class CheckoutOrderController extends BaseController {
                 } else if (orderRequest.getOrderType().equalsIgnoreCase("DINEIN")) {
                     Optional<TableMerchant> tableMerchant = null;
                     if(orderRequest.getTableId() != null && orderRequest.getTableId() != 0){
-                        tableMerchant = TableMerchantRepository.findById(orderRequest.getTableId());
+                        tableMerchant = TableMerchantRepository.findByIdAndAvailable(orderRequest.getTableId());
                         if (!tableMerchant.isPresent()) {
-                            response.setBaseResponse(0, 0, 0, "Table not found", null);
+                            response.setBaseResponse(0, 0, 0, "Table not found or table is not available", null);
                             return badRequest(Json.toJson(response));
                         }
+                        tableMerchant.get().setIsAvailable(Boolean.FALSE);
+                        tableMerchant.get().update();
                     }
                     order.setTableMerchant(tableMerchant != null ? tableMerchant.get() : null);
                     order.setTableName(tableMerchant != null ? tableMerchant.get().getName() : null);
@@ -327,7 +330,11 @@ public class CheckoutOrderController extends BaseController {
                     if (member == null) {
                         request.setCustomerName(memberData.fullName != null && memberData.fullName != "" ? memberData.fullName : "GENERAL CUSTOMER");
                     } else {
-                        request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL CUSTOMER");
+                        if (member.fullName != null && member.fullName != "" || member.firstName != null && member.firstName != "" || member.lastName != null && member.lastName != "") {
+                            request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : member.firstName + " " + member.lastName);
+                        } else {
+                            request.setCustomerName("GENERAL CUSTOMER");
+                        }
                         request.setCustomerEmail(member.email);
                         request.setCustomerPhoneNumber(member.phone);
                     }
@@ -406,7 +413,11 @@ public class CheckoutOrderController extends BaseController {
                     if (member == null) {
                         request.setCustomerName(memberData.fullName != null && memberData.fullName != "" ? memberData.fullName : "GENERAL CUSTOMER");
                     } else {
-                        request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL CUSTOMER");
+                        if (member.fullName != null && member.fullName != "" || member.firstName != null && member.firstName != "" || member.lastName != null && member.lastName != "") {
+                            request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : member.firstName + " " + member.lastName);
+                        } else {
+                            request.setCustomerName("GENERAL CUSTOMER");
+                        }
                         request.setCustomerEmail(member.email);
                         request.setCustomerPhoneNumber(member.phone);
                     }

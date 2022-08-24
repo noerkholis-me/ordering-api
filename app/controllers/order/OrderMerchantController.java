@@ -565,23 +565,22 @@ public class OrderMerchantController extends BaseController {
                 invoicePrintResponse.setOrderDetails(orderDetailResponses);
                 invoicePrintResponse.setSubTotal(getOrder.getSubTotal());
                 invoicePrintResponse.setTaxPrice(orderPayment.getTaxPrice());
-
-//                Optional<FeeSettingMerchant> feeSetting = FeeSettingMerchantRepository
-//                        .findByLatestFeeSetting(store.getMerchant().id);
-//                if (!feeSetting.isPresent()) {
-//                    invoicePrintResponse.setTaxPercentage(feeSetting.get().getTax());
-//                    invoicePrintResponse.setServicePercentage(feeSetting.get().getService());
-//                }
                 invoicePrintResponse.setTaxPercentage(orderPayment.getTaxPercentage());
                 invoicePrintResponse.setServicePercentage(orderPayment.getServicePercentage());
+                invoicePrintResponse.setServiceFee(orderPayment.getServicePrice());
 
+                invoicePrintResponse.setPaymentFeeType(orderPayment.getPaymentFeeType());
                 invoicePrintResponse.setPaymentFeeOwner(orderPayment.getPaymentFeeOwner());
                 invoicePrintResponse.setPaymentFeeCustomer(orderPayment.getPaymentFeeCustomer());
                 invoicePrintResponse.setTotal(getOrder.getTotalPrice());
                 invoicePrintResponse.setOrderQueue(getOrder.getOrderQueue());
                 invoicePrintResponse.setPaymentStatus(orderPayment.getStatus());
                 invoicePrintResponse.setReferenceNumber("-");
-                invoicePrintResponse.setCustomerName(getOrder.getMemberName());
+                if (getOrder.getMember() != null) {
+                    invoicePrintResponse.setCustomerName(getOrder.getMember().fullName != null ? getOrder.getMember().fullName : getOrder.getMember().firstName + " " + getOrder.getMember().lastName);
+                } else {
+                    invoicePrintResponse.setCustomerName("GENERAL CUSTOMER" + getOrder.getStore().storeName);
+                }
 
                 response.setBaseResponse(1, offset, limit, success + " success showing data invoice.",
                         invoicePrintResponse);
@@ -600,7 +599,7 @@ public class OrderMerchantController extends BaseController {
         }
     }
 
-    public static Result listQueueOrder(Long storeId) {
+    public static Result listQueueOrder(Long storeId, int offset, int limit) {
         int authority = checkAccessAuthorization("all");
         if (authority == 200 || authority == 203) {
             if (storeId == null || storeId == 0L) {
@@ -608,7 +607,7 @@ public class OrderMerchantController extends BaseController {
                 return badRequest(Json.toJson(response));
             }
             Query<Order> orderQuery = OrderRepository.findAllOrderByStoreIdNow(storeId);
-            List<Order> orders = OrderRepository.findOrdersQueue(orderQuery, 0, 5);
+            List<Order> orders = OrderRepository.findOrdersQueue(orderQuery, offset, limit);
             List<OrderQueueResponse> orderQueueResponses = new ArrayList<>();
             for (Order order : orders) {
                 OrderQueueResponse orderQueueResponse = new OrderQueueResponse();
@@ -684,7 +683,7 @@ public class OrderMerchantController extends BaseController {
         return status;
     }
 
-    public static Result successOrder(String orderNumber) {
+    public static Result statusOrderMQ(String orderNumber) {
         int authority = checkAccessAuthorization("all");
         if (authority == 200 || authority == 203) {
             try {
@@ -707,6 +706,12 @@ public class OrderMerchantController extends BaseController {
                 paymentInformation.setInvoiceNumber(orderPayment.getInvoiceNo());
                 paymentInformation.setOrderNumber(getOrder.getOrderNumber());
                 paymentInformation.setOrderType(getOrder.getOrderType());
+                if(getOrder.getStatus().equalsIgnoreCase("PENDING") || getOrder.getStatus().equalsIgnoreCase("COMPLETE")) {
+                    paymentInformation.setOrderStatus(getOrder.getStatus());
+                } else {
+                    OrderStatus orderStatus = OrderStatus.convertToOrderStatus(getOrder.getStatus());
+                    paymentInformation.setOrderStatus(convertOrderStatus(orderStatus));
+                }
                 paymentInformation.setOrderDate(getOrder.getOrderDate());
                 paymentInformation.setOrderTime(getOrder.getOrderDate());
 
@@ -745,15 +750,51 @@ public class OrderMerchantController extends BaseController {
                 paymentInformation.setTaxPrice(orderPayment.getTaxPrice());
                 paymentInformation.setTaxPercentage(orderPayment.getTaxPercentage());
                 paymentInformation.setServicePercentage(orderPayment.getServicePercentage());
+                paymentInformation.setServiceFee(orderPayment.getServicePrice());
 
+                paymentInformation.setPaymentFeeType(orderPayment.getPaymentFeeType());
                 paymentInformation.setPaymentFeeOwner(orderPayment.getPaymentFeeOwner());
                 paymentInformation.setPaymentFeeCustomer(orderPayment.getPaymentFeeCustomer());
                 paymentInformation.setTotal(getOrder.getTotalPrice());
                 paymentInformation.setOrderQueue(getOrder.getOrderQueue());
                 paymentInformation.setPaymentStatus(orderPayment.getStatus());
-                paymentInformation.setCustomerName(getOrder.getMemberName());
+                if (getOrder.getMember() != null) {
+                    paymentInformation.setCustomerName(getOrder.getMember().fullName != null ? getOrder.getMember().fullName : getOrder.getMember().firstName + " " + getOrder.getMember().lastName);
+                } else {
+                    paymentInformation.setCustomerName("GENERAL CUSTOMER" + getOrder.getStore().storeName);
+                }
 
-                response.setBaseResponse(1, offset, limit, "Pembayaran Berhasil",
+                String messageStatus = "";
+                switch(getOrder.getStatus()) {
+                    case "PENDING":
+                        messageStatus = "Orderan Sedang Menunggu Pembayaran";
+                        break;
+                    case "NEW_ORDER":
+                        messageStatus = "Orderan Anda Terkonfirmasi";
+                        break;
+                    case "PROCESS":
+                        messageStatus = "Orderan Anda Sedang Dimasak";
+                        break;
+                    case "READY_TO_PICKUP":
+                        messageStatus = "Orderan Anda Siap Diambil!";
+                        break;
+                    case "DELIVERY":
+                        messageStatus = "Orderan Anda Sedang Dikirimkan";
+                        break;
+                    case "CLOSED":
+                        messageStatus = "Orderan Anda Selesai";
+                        break;
+                    case "COMPLETE":
+                        messageStatus = "Orderan Anda Selesai";
+                        break;
+                    case "CANCELED":
+                        messageStatus = "Orderan Anda Dibatalkan";
+                        break;
+                    default:
+                        messageStatus = "Orderan Anda Menunggu Pembayaran";
+                    }
+
+                response.setBaseResponse(1, offset, limit, messageStatus,
                         paymentInformation);
                 return ok(Json.toJson(response));
             } catch (Exception ex) {

@@ -1487,6 +1487,13 @@ public class SessionsController extends BaseController {
 				String googleId = json.has("google_id") ? json.findPath("google_id").asText() : "";
 				String fbId = json.has("fb_id") ? json.findPath("fb_id").asText() : "";
 				Boolean isActive = true;
+				Long merchantId = json.findPath("merchant_id").asLong();
+
+				Merchant merchant = Merchant.merchantGetId(merchantId);
+				if (merchant == null) {
+					response.setBaseResponse(0, 0, 0, "merchant tidak ditemukan", null);
+					return badRequest(Json.toJson(response));
+				}
 
 				// buat 1 field inputan refferal code
 				String input_referral_code = json.has("input_referral_code")
@@ -1515,6 +1522,7 @@ public class SessionsController extends BaseController {
 
 						Member newMember = new Member(email, phone, fullName);
 						newMember.password = Encryption.EncryptAESCBCPCKS5Padding(password);
+						newMember.setMerchant(merchant);
 						newMember.save();
 
 						// pengecekan ke table member refferal code tsb untuk menjadi id
