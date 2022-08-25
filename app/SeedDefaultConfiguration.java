@@ -254,6 +254,12 @@ public class SeedDefaultConfiguration {
 		features.add(
 				new Feature("Store Access", "storeaccessmerchant", "Users",
 						"Can view, create and edit store access data.", true, true));
+		features.add(
+				new Feature("Table Type", "tabletype", "Stores", "Can view, create and edit table type data.",
+						true, true));
+		features.add(
+				new Feature("Table Merchant", "tablemerchant", "Stores", "Can view, create and edit table type data.", true,
+						true));
 		// ============================ ROLE FEATURE
 		// ================================================ //
 		List<Feature> featureIsNotMerchant = features.stream()
