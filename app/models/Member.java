@@ -488,9 +488,9 @@ public class Member extends BaseModel {
     }
 
     public static String validation(String email, String phone, String fullName) {
-        if (email != null && !email.matches(CommonFunction.emailRegex)) {
-            return "Email format not valid.";
-        }
+//        if (email != null && !email.matches(CommonFunction.emailRegex)) {
+//            return "Email format not valid.";
+//        }
         String[] mails = email.split("@");
         Integer row = BlacklistEmail.find.where().eq("name", "@"+mails[1]).eq("is_deleted", false).findRowCount();
         if (row > 0){
