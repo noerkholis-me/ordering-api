@@ -491,11 +491,11 @@ public class Member extends BaseModel {
 //        if (email != null && !email.matches(CommonFunction.emailRegex)) {
 //            return "Email format not valid.";
 //        }
-        String[] mails = email.split("@");
-        Integer row = BlacklistEmail.find.where().eq("name", "@"+mails[1]).eq("is_deleted", false).findRowCount();
-        if (row > 0){
-            return "The email service provider that you are using can not be used in Whizliz Please use another email service provider.";
-        }
+//        String[] mails = email.split("@");
+//        Integer row = BlacklistEmail.find.where().eq("name", "@"+mails[1]).eq("is_deleted", false).findRowCount();
+//        if (row > 0){
+//            return "The email service provider that you are using can not be used in Whizliz Please use another email service provider.";
+//        }
         Member member = Member.find.where().eq("email", email).setMaxRows(1).findUnique();
         if (member != null) {
             return "The email is already registered.";

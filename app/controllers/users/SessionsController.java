@@ -1746,11 +1746,6 @@ public class SessionsController extends BaseController {
 				return badRequest(Json.toJson(response));
 			}
 
-			if (!email.matches(CommonFunction.emailRegex)) {
-				response.setBaseResponse(0, 0, 0, "format email tidak sesuai", Boolean.FALSE);
-				return badRequest(Json.toJson(response));
-			}
-
 			Member member = Member.findByEmailAndMerchantId(email, store.getMerchant().id);
 			if (member == null) {
 				response.setBaseResponse(0, 0, 0, "customer tidak terdaftar", Boolean.FALSE);
