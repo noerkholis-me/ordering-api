@@ -13,6 +13,8 @@ import java.math.BigDecimal;
 public class ProductRequest {
 
     // ======== Name and Category ========== //
+    @JsonProperty("no_sku")
+    private String noSKU;
     @JsonProperty("product_name")
     private String productName;
     @JsonProperty("category_id")

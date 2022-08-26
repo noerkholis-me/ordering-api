@@ -28,6 +28,8 @@ public class MiniPosAdditionalResponse implements Serializable {
             private Long productId;
             @JsonProperty("product_assign_id")
             private Long productAssignId;
+            @JsonProperty("no_sku")
+            private String noSKU;
             @JsonProperty("product_name")
             private String productName;
             @JsonProperty("product_price")
