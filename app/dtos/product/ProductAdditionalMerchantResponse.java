@@ -18,6 +18,9 @@ public class ProductAdditionalMerchantResponse {
 
     private Long id;
     
+    @JsonProperty("no_sku")
+    private String noSKU;
+
     @JsonProperty("product_name")
     private String productName;
 
