@@ -612,3 +612,8 @@ GET         /users/:memberId/order-customer/:storeId/store        controllers.or
 POST        /users/send-invoice                                  controllers.payment.PaymentController.sendMailInvoice()
 GET         /users/:storeId/display-table                            controllers.merchants.TableMerchantController.getDisplayTable(storeId: Long)
 PUT         /merchant/:tableId/change-availability-table        controllers.merchants.TableMerchantController.changeAvailabilityTable(tableId: Long)
+
+
+# Webhook
+GET         /external/:orderNumber/get-order-detail         controllers.webhook.OrderWebHookController.getOrderDetailWebhook(orderNumber: String)
+PUT         /external/update-status-order                   controllers.webhook.OrderWebHookController.updateOrderStatus()

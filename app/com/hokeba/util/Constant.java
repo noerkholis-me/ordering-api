@@ -17,6 +17,7 @@ public class Constant {
     private String apiKeyIOS = null;
     private String apiKeyAndroid = null;
     private String apiKeyMiniPos = null;
+    private String apiKeyWebhook = null;
     private String catalogPath = null;
     
     //odoo
@@ -202,6 +203,13 @@ public class Constant {
             posUrl = Play.application().configuration().getString("sandbox.pos.url");
         }
         return posUrl;
+    }
+
+    public String getApiKeyWebhook() {
+        if (apiKeyWebhook == null){
+            apiKeyWebhook = Play.application().configuration().getString("sandbox.api_key.webhook");
+        }
+        return apiKeyWebhook;
     }
 
 }
