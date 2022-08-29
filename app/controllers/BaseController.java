@@ -114,11 +114,14 @@ public class BaseController extends Controller {
             String keyWeb = Constant.getInstance().getApiKeyWeb();
             String keyIos = Constant.getInstance().getApiKeyIOS();
             String keyAndroid = Constant.getInstance().getApiKeyAndroid();
+            String keyWebhook = Constant.getInstance().getApiKeyWebhook();
             if(apiKey.equalsIgnoreCase(keyIos))
                 return Boolean.TRUE;
             else if(apiKey.equalsIgnoreCase(keyAndroid))
                 return Boolean.TRUE;
-            else return Boolean.TRUE;
+            else if(apiKey.equalsIgnoreCase(keyWebhook))
+                return Boolean.TRUE;
+            else return Boolean.FALSE;
         }
         return Boolean.FALSE;
     }

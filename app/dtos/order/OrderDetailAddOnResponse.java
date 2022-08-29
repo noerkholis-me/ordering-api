@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @Data
 public class OrderDetailAddOnResponse {
 
+    @JsonProperty("no_sku")
+    private String noSku;
     @JsonProperty("product_name")
     private String productName;
 
