@@ -81,6 +81,11 @@ public class InvoicePrintResponse {
     @JsonProperty("customer_name")
     private String customerName;
 
+    @JsonProperty("cashier_name")
+    private String cashierName;
+
+    @JsonProperty("order_qr_code")
+    private String orderQrCode;
 
 
 
