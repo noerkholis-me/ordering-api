@@ -1754,6 +1754,9 @@ public class SessionsController extends BaseController {
 
 			Map<String, Object> responses = new HashMap<>();
 			responses.put("member_id", Integer.valueOf(Math.toIntExact(member.id)));
+			responses.put("email", member.email);
+			responses.put("name", member.fullName);
+			responses.put("phone_number", member.phone);
 			responses.put("status", Boolean.TRUE);
 
 			response.setBaseResponse(0, 0, 0, success, responses);
