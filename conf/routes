@@ -617,3 +617,5 @@ PUT         /merchant/:tableId/change-availability-table        controllers.merc
 # Webhook
 GET         /external/:orderNumber/get-order-detail         controllers.webhook.OrderWebHookController.getOrderDetailWebhook(orderNumber: String)
 PUT         /external/update-status-order                   controllers.webhook.OrderWebHookController.updateOrderStatus()
+
+PUT         /users/update-profile-customer                  controllers.users.SessionsController.updateProfile()
