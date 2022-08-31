@@ -397,6 +397,7 @@ public class LoyaltyPointController extends BaseController {
                 
                 if(memberData != null){
                     Query<LoyaltyPointHistory> query = LoyaltyPointHistoryRepository.find.where().eq("member", memberData).order("t0.id desc");
+                    int totalData = LoyaltyPointHistoryRepository.getTotalData(query).size();
                     List<LoyaltyPointHistory> lpHistoryList = LoyaltyPointHistoryRepository.getListLoyaltyPointHistory(query, offset, limit);
                     if (lpHistoryList.size() > 0) {
                         for (LoyaltyPointHistory lpHistory : lpHistoryList) {
@@ -411,7 +412,7 @@ public class LoyaltyPointController extends BaseController {
                             lmhResponse.setExpiredDate(lpHistory.getExpiredDate());
                             lmhResponseList.add(lmhResponse);
                         }
-                        response.setBaseResponse(lpHistoryList.size(), offset, limit, "History point berhasil di tampilkan", lmhResponseList);
+                        response.setBaseResponse(totalData, offset, limit, "History point berhasil di tampilkan", lmhResponseList);
                         return ok(Json.toJson(response));
                     }
                     response.setBaseResponse(0, 0, 0, "History point tidak tersedia", null);
