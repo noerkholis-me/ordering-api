@@ -1767,6 +1767,67 @@ public class SessionsController extends BaseController {
 		}
 	}
 
+	public static Result updateProfile() {
+		int authority = checkAccessAuthorization("all");
+		if (authority == 200 || authority == 203) {
+			try {
+				JsonNode json = request().body().asJson();
+				Long merchantId = json.findPath("merchant_id").asLong();
+				String email = json.findPath("email").asText();
+				String name = json.findPath("name").asText();
+				String phoneNumber = json.findPath("phone_number").asText();
+
+				String validation = validateUpdateProfileRequest(phoneNumber, merchantId);
+				if (validation != null) {
+					response.setBaseResponse(0, 0, 0, validation, null);
+					return badRequest(Json.toJson(response));
+				}
+
+				Member member = Member.findByEmailAndMerchantId(email, merchantId);
+				if (member == null) {
+					response.setBaseResponse(0, 0, 0, "member tidak ditemukan.", null);
+					return badRequest(Json.toJson(response));
+				}
+
+				String[] names = name.split("\\s+");
+				if (names.length > 1) {
+					member.firstName = names[0];
+					member.lastName = names[1];
+				}
+				member.fullName = name;
+				member.email = email;
+				member.phone = phoneNumber;
+
+				member.update();
+
+				response.setBaseResponse(0, 0, 0, success + " update profile customer", member.id);
+				return ok(Json.toJson(response));
+			} catch (Exception e) {
+				response.setBaseResponse(0, 0, 0, error, null);
+				return internalServerError(Json.toJson(response));
+			}
+		} else if (authority == 403) {
+			response.setBaseResponse(0, 0, 0, forbidden, null);
+			return forbidden(Json.toJson(response));
+		} else {
+			response.setBaseResponse(0, 0, 0, unauthorized, null);
+			return unauthorized(Json.toJson(response));
+		}
+	}
+
+	private static String validateUpdateProfileRequest(String phoneNumber, Long merchantId) {
+		if (!phoneNumber.matches(CommonFunction.phoneRegex)){
+			return "Format nomor telepon tidak valid.";
+		}
+		if (!phoneNumber.isEmpty()) {
+			Member member = Member.findByPhoneAndMerchantId(phoneNumber, merchantId);
+			if (member != null) {
+				return "Nomor telepon sudah terpakai.";
+			}
+		}
+
+		return null;
+	}
 
 
 }
