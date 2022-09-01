@@ -266,10 +266,12 @@ public class LoyaltyPointController extends BaseController {
                 }
                 
                 if(memberData != null){
-                    lmResponse.setFullName(memberData.fullName);
+                    LoyaltyPointHistory lpHistory = LoyaltyPointHistoryRepository.find.where().eq("member", memberData).order("t0.id desc").setMaxRows(1).findUnique();
+                    lmResponse.setFullName(memberData.fullName != null && !memberData.fullName.isEmpty() ? memberData.fullName : "GENERAL CUSTOMER");
                     lmResponse.setEmail(memberData.email);
                     lmResponse.setPhone(memberData.phone);
                     lmResponse.setLoyaltyPoint(memberData.loyaltyPoint);
+                    lmResponse.setExpiredDate(lpHistory.getExpiredDate());
                     response.setBaseResponse(1, 0, 1, "Data loyalty berhasil di tampilkan", lmResponse);
                     return ok(Json.toJson(response));
                 } else {
@@ -373,7 +375,7 @@ public class LoyaltyPointController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
     
-    public static Result historyLoyaltyMember(String email, String phoneNumber, String storeCode, int offset, int limit) {
+    public static Result historyLoyaltyMember(String email, String phoneNumber, String storeCode, int offset, int limit, String type) {
         if (email != null || phoneNumber != null) {
             try {
                 Store store = Store.find.where().eq("t0.store_code", storeCode).findUnique();
@@ -396,7 +398,14 @@ public class LoyaltyPointController extends BaseController {
                 }
                 
                 if(memberData != null){
-                    Query<LoyaltyPointHistory> query = LoyaltyPointHistoryRepository.find.where().eq("member", memberData).order("t0.id desc");
+                    Query<LoyaltyPointHistory> query = null;
+                    if (type != null && !type.isEmpty()) {
+                        if (type.equalsIgnoreCase("Pendapatan")) {
+                            query = LoyaltyPointHistoryRepository.find.where().ne("t0.added", BigDecimal.ZERO).eq("member", memberData).order("t0.id desc");
+                        } else if (type.equalsIgnoreCase("Pengeluaran")) {
+                            query = LoyaltyPointHistoryRepository.find.where().ne("t0.used", BigDecimal.ZERO).eq("member", memberData).order("t0.id desc");
+                        }
+                    }
                     int totalData = LoyaltyPointHistoryRepository.getTotalData(query).size();
                     List<LoyaltyPointHistory> lpHistoryList = LoyaltyPointHistoryRepository.getListLoyaltyPointHistory(query, offset, limit);
                     if (lpHistoryList.size() > 0) {
