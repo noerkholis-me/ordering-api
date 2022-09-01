@@ -581,7 +581,7 @@ POST        /users/registration                 controllers.users.SessionsContro
 # GET LOYALTY FE
 GET         /member/loyalty/:storeCode/get/data            controllers.loyalty.LoyaltyPointController.useLoyalty(email:String ?= "", phonenumber:String ?= "", storeCode:String)
 POST         /member/loyalty/check           controllers.loyalty.LoyaltyPointController.checkMember()
-GET         /member/loyalty/:storeCode/history            controllers.loyalty.LoyaltyPointController.historyLoyaltyMember(email:String ?= "", phonenumber:String ?= "", storeCode:String, offset:Int ?= 0, limit:Int ?= 10)
+GET         /member/loyalty/:storeCode/history            controllers.loyalty.LoyaltyPointController.historyLoyaltyMember(email:String ?= "", phonenumber:String ?= "", storeCode:String, offset:Int ?= 0, limit:Int ?= 10, type:String ?= "")
 
 # ================================== Mini POS ========================================== #
 POST        /pos/open-pos                                  controllers.merchants.CashierHistoryController.openPos()

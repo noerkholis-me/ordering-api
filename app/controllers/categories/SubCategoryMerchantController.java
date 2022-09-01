@@ -50,10 +50,10 @@ public class SubCategoryMerchantController extends BaseController {
             try {
                 Http.MultipartFormData body = request().body().asMultipartFormData();
                 List<SubCategoryMerchant> totalData = SubCategoryMerchantRepository.getTotalSubCategory(query);
-                if(totalData.size() == 2) {
-                    response.setBaseResponse(0, 0, 0, error + " sub kategori sudah mencapai batas maksimum.", null);
-                    return badRequest(Json.toJson(response));
-                }
+                // if(totalData.size() == 2) {
+                //     response.setBaseResponse(0, 0, 0, error + " sub kategori sudah mencapai batas maksimum.", null);
+                //     return badRequest(Json.toJson(response));
+                // }
                 CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                 if(categoryMerchant == null) {
                     response.setBaseResponse(0, 0, 0, error + " kategori tidak ditemukan.", null);
@@ -455,10 +455,10 @@ public class SubCategoryMerchantController extends BaseController {
                 try {
                     Http.MultipartFormData body = request().body().asMultipartFormData();
                     List<SubsCategoryMerchant> totalData = SubsCategoryMerchantRepository.getTotalSubsCategory(query);
-                    if(totalData.size() == 2) {
-                        response.setBaseResponse(0, 0, 0, error + " sub kategori sudah mencapai batas maksimum.", null);
-                        return badRequest(Json.toJson(response));
-                    }
+                    // if(totalData.size() == 2) {
+                    //     response.setBaseResponse(0, 0, 0, error + " sub kategori sudah mencapai batas maksimum.", null);
+                    //     return badRequest(Json.toJson(response));
+                    // }
                     CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(catId, ownMerchant);
                     if(categoryMerchant == null) {
                         response.setBaseResponse(0, 0, 0, error + " sub kategori tidak ditemukan.", null);
