@@ -488,14 +488,14 @@ public class Member extends BaseModel {
     }
 
     public static String validation(String email, String phone, String fullName) {
-        if (email != null && !email.matches(CommonFunction.emailRegex)) {
-            return "Email format not valid.";
-        }
-        String[] mails = email.split("@");
-        Integer row = BlacklistEmail.find.where().eq("name", "@"+mails[1]).eq("is_deleted", false).findRowCount();
-        if (row > 0){
-            return "The email service provider that you are using can not be used in Whizliz Please use another email service provider.";
-        }
+//        if (email != null && !email.matches(CommonFunction.emailRegex)) {
+//            return "Email format not valid.";
+//        }
+//        String[] mails = email.split("@");
+//        Integer row = BlacklistEmail.find.where().eq("name", "@"+mails[1]).eq("is_deleted", false).findRowCount();
+//        if (row > 0){
+//            return "The email service provider that you are using can not be used in Whizliz Please use another email service provider.";
+//        }
         Member member = Member.find.where().eq("email", email).setMaxRows(1).findUnique();
         if (member != null) {
             return "The email is already registered.";
@@ -745,6 +745,10 @@ public class Member extends BaseModel {
 
     public static Member findByEmailAndMerchantId(String email, Long merchantId) {
         return find.where().eq("email", email).eq("merchant_id", merchantId).findUnique();
+    }
+
+    public static Member findByPhoneAndMerchantId(String phone, Long merchantId) {
+        return find.where().eq("phone", phone).eq("merchant_id", merchantId).findUnique();
     }
 
     public Boolean getNewsLetter() {

@@ -23,11 +23,9 @@ import repository.FeeSettingMerchantRepository;
 import repository.OrderPaymentRepository;
 import repository.OrderRepository;
 
-import java.util.ArrayList;
-import java.util.Date;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Optional;
 import java.io.File;
 import java.io.FileOutputStream;
 
@@ -552,11 +550,13 @@ public class OrderMerchantController extends BaseController {
                     orderDetailResponse.setProductName(orderDetail.getProductName());
                     orderDetailResponse.setQty(orderDetail.getQuantity());
                     orderDetailResponse.setTotal(orderDetail.getSubTotal());
+                    orderDetailResponse.setNoSku(orderDetail.getProductMerchant().getNoSKU());
                     List<OrderDetailAddOnResponse> orderDetailAddOns = new ArrayList<>();
                     List<OrderDetailAddOn> orderDetailAddOnList = orderDetail.getOrderDetailAddOns();
                     for (OrderDetailAddOn orderDetailAddOn : orderDetailAddOnList) {
                         OrderDetailAddOnResponse orderDetailAddOnResponse = new OrderDetailAddOnResponse();
                         orderDetailAddOnResponse.setProductName(orderDetailAddOn.getProductName());
+                        orderDetailAddOnResponse.setNoSku(orderDetailAddOn.getProductAddOn().getProductMerchant().getNoSKU());
                         orderDetailAddOns.add(orderDetailAddOnResponse);
                     }
                     orderDetailResponse.setOrderDetailAddOns(orderDetailAddOns);
@@ -581,6 +581,14 @@ public class OrderMerchantController extends BaseController {
                 } else {
                     invoicePrintResponse.setCustomerName("GENERAL CUSTOMER" + getOrder.getStore().storeName);
                 }
+
+                if (getOrder.getUserMerchant() != null) {
+                    invoicePrintResponse.setCashierName(getOrder.getUserMerchant().getFullName() != null ? getOrder.getUserMerchant().getFullName() : getOrder.getUserMerchant().getFirstName() + " " + getOrder.getUserMerchant().getLastName());
+                } else {
+                    invoicePrintResponse.setCashierName("Admin");
+                }
+
+                invoicePrintResponse.setOrderQrCode(Base64.getEncoder().encodeToString(getOrder.getOrderNumber().getBytes(StandardCharsets.UTF_8)));
 
                 response.setBaseResponse(1, offset, limit, success + " success showing data invoice.",
                         invoicePrintResponse);
@@ -706,7 +714,7 @@ public class OrderMerchantController extends BaseController {
                 paymentInformation.setInvoiceNumber(orderPayment.getInvoiceNo());
                 paymentInformation.setOrderNumber(getOrder.getOrderNumber());
                 paymentInformation.setOrderType(getOrder.getOrderType());
-                if(getOrder.getStatus().equalsIgnoreCase("PENDING") || getOrder.getStatus().equalsIgnoreCase("COMPLETE")) {
+                if(getOrder.getStatus().equalsIgnoreCase("PENDING") || getOrder.getStatus().equalsIgnoreCase("COMPLETE") || getOrder.getStatus().equalsIgnoreCase("NEW_ORDER")) {
                     paymentInformation.setOrderStatus(getOrder.getStatus());
                 } else {
                     OrderStatus orderStatus = OrderStatus.convertToOrderStatus(getOrder.getStatus());

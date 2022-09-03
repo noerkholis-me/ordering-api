@@ -280,6 +280,7 @@ public class ProductMerchantController extends BaseController {
     private static ProductResponse toResponse(ProductMerchant productMerchant) {
         ProductResponse productResponse = new ProductResponse();
         productResponse.setProductId(productMerchant.id);
+        productResponse.setNoSKU(productMerchant.getNoSKU());
         productResponse.setProductName(productMerchant.getProductName());
         productResponse.setIsActive(productMerchant.getIsActive());
         productResponse.setMerchantId(productMerchant.getMerchant().id);
@@ -358,6 +359,7 @@ public class ProductMerchantController extends BaseController {
     private static void constructProductEntityRequest(ProductMerchant newProductMerchant, Merchant merchant,
                                                       ProductRequest productRequest, CategoryMerchant categoryMerchant,
                                                       SubCategoryMerchant subCategoryMerchant, SubsCategoryMerchant subsCategoryMerchant, BrandMerchant brandMerchant) {
+        newProductMerchant.setNoSKU(productRequest.getNoSKU());
         newProductMerchant.setProductName(productRequest.getProductName());
         newProductMerchant.setIsActive(Boolean.TRUE);
         newProductMerchant.setCategoryMerchant(categoryMerchant);
@@ -401,6 +403,7 @@ public class ProductMerchantController extends BaseController {
                     ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(productMerchantDetail.getProductMerchant().id, merchantId);
                     
                     productResponse.setProductId(productMerchantDetail.getProductMerchant().id);
+                    productResponse.setNoSKU(productMerchant.getNoSKU());
                     productResponse.setProductName(productMerchant.getProductName());
                     productResponse.setIsActive(productMerchant.getIsActive());
                     productResponse.setMerchantId(productMerchant.getMerchant().id);
@@ -497,6 +500,7 @@ public class ProductMerchantController extends BaseController {
                 
                     ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(productMerchantDetail.getProductMerchant().id, merchantId);
                     productResponse.setProductId(productMerchant.id);
+                    productResponse.setNoSKU(productMerchant.getNoSKU());
                     productResponse.setProductName(productMerchant.getProductName());
                     productResponse.setIsActive(productMerchant.getIsActive());
                     productResponse.setMerchantId(productMerchant.getMerchant().id);
@@ -593,6 +597,7 @@ public class ProductMerchantController extends BaseController {
 
                 responseData.setId(productMerchant.id);
                 responseData.setProductId(productMerchant.id);
+                responseData.setNoSKU(productMerchant.getNoSKU());
                 responseData.setProductName(productMerchant.getProductName());
                 responseData.setMerchantId(productMerchant.getMerchant().id);
                     
@@ -654,6 +659,7 @@ public class ProductMerchantController extends BaseController {
                     ProductAdditionalMerchantResponse responseData = new ProductAdditionalMerchantResponse();
                     ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(detail.getProductMerchant().id, ownMerchant.id);
                     responseData.setId(productMerchant.id);
+                    responseData.setNoSKU(productMerchant.getNoSKU());
                     responseData.setProductName(productMerchant.getProductName());
                     responseData.setMerchantId(productMerchant.getMerchant().id);
                     responseDatas.add(responseData);
@@ -691,6 +697,7 @@ public class ProductMerchantController extends BaseController {
                         MiniPosAdditionalResponse.ProductAddOn responseAddOn = new MiniPosAdditionalResponse.ProductAddOn();
                         responseAddOn.setProductId(dataProductAddOn.getProductMerchant().id);
                         responseAddOn.setProductAssignId(dataProductAddOn.getProductAssignId());
+                        responseAddOn.setNoSKU(productMerchantAssign.getNoSKU());
                         responseAddOn.setProductName(productMerchantAssign.getProductName());
                         if (productStore != null) {
                             responseAddOn.setProductPrice(productStore.getStorePrice());
@@ -740,6 +747,7 @@ public class ProductMerchantController extends BaseController {
                     ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(productMerchantDetail.getProductMerchant().id, merchantId);
                     ProductStore productStore = ProductStoreRepository.findForCust(productMerchant.id, storeId, productMerchant.getMerchant());
                     productResponseKiosK.setProductId(productMerchant.id);
+                    productResponseKiosK.setNoSKU(productMerchant.getNoSKU());
                     productResponseKiosK.setProductName(productMerchant.getProductName());
                     productResponseKiosK.setProductType(productMerchantDetail.getProductType());
                     productResponseKiosK.setIsCustomizable(productMerchantDetail.getIsCustomizable());

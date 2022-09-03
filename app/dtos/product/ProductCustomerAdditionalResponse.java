@@ -21,6 +21,9 @@ public class ProductCustomerAdditionalResponse implements Serializable {
     @JsonProperty("product_id")
     private Long productId;
     
+    @JsonProperty("no_sku")
+    private String noSKU;
+
     @JsonProperty("product_name")
     private String productName;
 

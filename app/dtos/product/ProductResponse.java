@@ -20,6 +20,8 @@ public class ProductResponse implements Serializable {
     private Long productId;
 
     // ======== Name and Category ========== //
+     @JsonProperty("no_sku")
+    private String noSKU;
     @JsonProperty("product_name")
     private String productName;
     @JsonProperty("category")

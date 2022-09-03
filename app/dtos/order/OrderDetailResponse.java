@@ -22,6 +22,8 @@ public class OrderDetailResponse {
     @JsonProperty("total")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal total;
+    @JsonProperty("no_sku")
+    private String noSku;
     @JsonProperty("order_detail_add_on")
     private List<OrderDetailAddOnResponse> orderDetailAddOns;
 

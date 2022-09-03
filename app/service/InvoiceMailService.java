@@ -25,26 +25,23 @@ public class InvoiceMailService {
         return instance;
     }
 
-    public static void handleCallbackAndSendEmail(String request) {
+    public static void handleCallbackAndSendEmail(Order order) {
 
-        logger.info(">>> incoming requet :  " + request);
-        String orderNumber = request;
-        Optional<Order> order = OrderRepository.findByOrderNumber(orderNumber);
+        logger.info(">>> incoming requet...  ");
+        System.out.println("order >>> " + order.id);
 
-        System.out.println("order >>> " + order.get().id);
+        System.out.println("order member " + order.getMember().id);
 
-        System.out.println("order member " + order.get().getMember().id);
-
-        String email = order.get().getMember().email;
+        String email = order.getMember().email;
         System.out.println("email >>> " + email);
-        Store store = order.get().getStore();
+        Store store = order.getStore();
 
         String urlLogo = store.getMerchant().logo;
         String urlEmailLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/email.png";
 
         Thread thread = new Thread(() -> {
             try {
-                MailConfig.sendmail(email, MailConfig.subjectInvoice, MailConfig.renderMailInvoiceTemplate(urlLogo, urlEmailLogo, order.get()));
+                MailConfig.sendmail(email, MailConfig.subjectInvoice, MailConfig.renderMailInvoiceTemplate(urlLogo, urlEmailLogo, order));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -53,7 +50,7 @@ public class InvoiceMailService {
 
         Transaction trx = Ebean.beginTransaction();
         try {
-            OrderPayment orderPayment = OrderRepository.findDataOrderPayment(order.get().id);
+            OrderPayment orderPayment = OrderRepository.findDataOrderPayment(order.id);
             orderPayment.setMailStatusCode("200");
             orderPayment.setMailStatus("Success");
             orderPayment.setMailMessage("SENT");
