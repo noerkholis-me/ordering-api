@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.math.BigDecimal;
+import models.Merchant;
 /**
  * Created by hendriksaragih on 2/4/17.
  */
@@ -487,7 +488,7 @@ public class Member extends BaseModel {
         return null;
     }
 
-    public static String validation(String email, String phone, String fullName) {
+    public static String validation(String email, String phone, String fullName, Long merchantId) {
 //        if (email != null && !email.matches(CommonFunction.emailRegex)) {
 //            return "Email format not valid.";
 //        }
@@ -496,7 +497,7 @@ public class Member extends BaseModel {
 //        if (row > 0){
 //            return "The email service provider that you are using can not be used in Whizliz Please use another email service provider.";
 //        }
-        Member member = Member.find.where().eq("email", email).setMaxRows(1).findUnique();
+        Member member = Member.find.where().eq("email", email).eq("merchant_id", merchantId).setMaxRows(1).findUnique();
         if (member != null) {
             return "The email is already registered.";
         }
@@ -505,7 +506,7 @@ public class Member extends BaseModel {
             if (!phone.matches(CommonFunction.phoneRegex)){
                 return "Phone format not valid.";
             }
-            Member memberPhone = Member.find.where().eq("phone", phone).setMaxRows(1).findUnique();
+            Member memberPhone = Member.find.where().eq("phone", phone).eq("merchant_id", merchantId).setMaxRows(1).findUnique();
             if (memberPhone != null) {
                 return "The phone is already registered.";
             }
@@ -744,7 +745,7 @@ public class Member extends BaseModel {
     }
 
     public static Member findByEmailAndMerchantId(String email, Long merchantId) {
-        return find.where().eq("email", email).eq("merchant_id", merchantId).findUnique();
+        return find.where().eq("email", email).eq("merchant_id", merchantId).setMaxRows(1).findUnique();
     }
 
     public static Member findByPhoneAndMerchantId(String phone, Long merchantId) {

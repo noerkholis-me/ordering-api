@@ -1513,7 +1513,7 @@ public class SessionsController extends BaseController {
 					referral_code_new = generateReferralCode();
 				}
 
-				String validation = Member.validation(email, phone, fullName);
+				String validation = Member.validation(email, phone, fullName, merchantId);
 				if (validation == null) {
 					Transaction txn = Ebean.beginTransaction();
 					try {
