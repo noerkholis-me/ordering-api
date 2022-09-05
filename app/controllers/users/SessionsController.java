@@ -1819,9 +1819,6 @@ public class SessionsController extends BaseController {
 	}
 
 	private static String validateUpdateProfileRequest(String phoneNumber, Long merchantId) {
-		if (!phoneNumber.matches(CommonFunction.phoneRegex)){
-			return "Format nomor telepon tidak valid.";
-		}
 		if (!phoneNumber.isEmpty()) {
 			Member member = Member.findByPhoneAndMerchantId(phoneNumber, merchantId);
 			if (member != null) {
