@@ -95,7 +95,20 @@ public class StoreController extends BaseController {
                     }
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        constructEntity(ownMerchant, storeRequest, store, Boolean.TRUE);
+                        store.storeName = storeRequest.getStoreName();
+                        store.storePhone = storeRequest.getStorePhone();
+                        store.storeAddress = storeRequest.getAddress();
+                        store.isActive = Boolean.TRUE;
+                        store.shipperProvince = ShipperProvince.findById(storeRequest.getProvinceId());
+                        store.shipperCity = ShipperCity.findById(storeRequest.getCityId());
+                        store.shipperSuburb = ShipperSuburb.findById(storeRequest.getSuburbId());
+                        store.shipperArea = ShipperArea.findById(storeRequest.getAreaId());
+                        store.setStoreGmap(storeRequest.getGoogleMapsUrl());
+                        String [] finalLotLang = getLongitudeLatitude(store.storeGmap);
+                        store.storeLatitude = Double.parseDouble(finalLotLang[0]);
+                        store.storeLongitude = Double.parseDouble(finalLotLang[1]);
+                        store.setStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode));
+                        System.out.println(store.storeQrCode);
 
                         store.update();
                         trx.commit();
@@ -266,8 +279,8 @@ public class StoreController extends BaseController {
         store.storeLongitude = Double.parseDouble(finalLotLang[1]);
         if (isEdit == Boolean.FALSE) {
             store.storeCode = CommonFunction.generateRandomString(8);
-            store.storeQrCode = Constant.getInstance().getFrontEndUrl().concat(store.storeCode);
         }
+        store.storeQrCode = Constant.getInstance().getFrontEndUrl().concat(store.storeCode);
     }
 
     public static String [] getLongitudeLatitude(String paramGmap){

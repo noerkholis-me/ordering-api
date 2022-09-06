@@ -579,7 +579,7 @@ public class OrderMerchantController extends BaseController {
                 if (getOrder.getMember() != null) {
                     invoicePrintResponse.setCustomerName(getOrder.getMember().fullName != null ? getOrder.getMember().fullName : getOrder.getMember().firstName + " " + getOrder.getMember().lastName);
                 } else {
-                    invoicePrintResponse.setCustomerName("GENERAL CUSTOMER" + getOrder.getStore().storeName);
+                    invoicePrintResponse.setCustomerName("GENERAL CUSTOMER " + getOrder.getStore().storeName);
                 }
 
                 if (getOrder.getUserMerchant() != null) {
@@ -769,7 +769,7 @@ public class OrderMerchantController extends BaseController {
                 if (getOrder.getMember() != null) {
                     paymentInformation.setCustomerName(getOrder.getMember().fullName != null ? getOrder.getMember().fullName : getOrder.getMember().firstName + " " + getOrder.getMember().lastName);
                 } else {
-                    paymentInformation.setCustomerName("GENERAL CUSTOMER" + getOrder.getStore().storeName);
+                    paymentInformation.setCustomerName("GENERAL CUSTOMER " + getOrder.getStore().storeName);
                 }
 
                 String messageStatus = "";

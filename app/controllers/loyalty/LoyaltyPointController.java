@@ -349,6 +349,15 @@ public class LoyaltyPointController extends BaseController {
                 }
 
                 if(memberData != null){
+                    if (request.getFullName() != null && !request.getFullName().isEmpty()) {
+                        System.out.println("masuk?");
+                        Transaction trx = Ebean.beginTransaction();
+                        memberData.firstName = Helper.getFirstName(request.getFullName());
+                        memberData.lastName = Helper.getLastName(request.getFullName());
+                        memberData.fullName = request.getFullName();
+                        memberData.update();
+                        trx.commit();
+                    }
                     lmResponse.setMemberId(memberData.id);
                     lmResponse.setFirstName(memberData.firstName);
                     lmResponse.setLastName(memberData.lastName);
