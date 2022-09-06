@@ -105,7 +105,7 @@ public class OrderWebHookController extends BaseController {
             if (getOrder.getMember() != null) {
                 invoicePrintResponse.setCustomerName(getOrder.getMember().fullName != null ? getOrder.getMember().fullName : getOrder.getMember().firstName + " " + getOrder.getMember().lastName);
             } else {
-                invoicePrintResponse.setCustomerName("GENERAL CUSTOMER" + getOrder.getStore().storeName);
+                invoicePrintResponse.setCustomerName("GENERAL CUSTOMER " + getOrder.getStore().storeName);
             }
 
             if (getOrder.getUserMerchant() != null) {
