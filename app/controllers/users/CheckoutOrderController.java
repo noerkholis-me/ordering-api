@@ -402,6 +402,9 @@ public class CheckoutOrderController extends BaseController {
                         orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
                         orderTransactionResponse.setMetadata(initiatePaymentResponse.getMetadata());
 
+                        member.lastPurchase = new Date();
+                        member.update();
+
                         response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
                         return ok(Json.toJson(response));
                     }
@@ -466,6 +469,9 @@ public class CheckoutOrderController extends BaseController {
                     orderTransactionResponse.setStatus(order.getStatus());
                     orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
                     orderTransactionResponse.setMetadata(null);
+
+                    member.lastPurchase = new Date();
+                    member.update();
 
                     response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
                     return ok(Json.toJson(response));
