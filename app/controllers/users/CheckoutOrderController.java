@@ -223,7 +223,8 @@ public class CheckoutOrderController extends BaseController {
                 if(orderRequest.getUseLoyalty() == true && orderRequest.getLoyaltyUsage() != null){
                     member.loyaltyPoint = member.loyaltyPoint.subtract(orderRequest.getLoyaltyUsage());
                     member.update();
-                    if(member != null){
+                }
+                if(member != null){
                     BigDecimal loyaltyMine = member.loyaltyPoint;
                     BigDecimal loyaltyPointGet = BigDecimal.ZERO;
                         if(!lpMerchant.isEmpty()){
@@ -289,7 +290,6 @@ public class CheckoutOrderController extends BaseController {
                         lpHistory.setExpiredDate(date);
                         lpHistory.setMerchant(store.merchant);
                         lpHistory.save();
-                    }
                 }
 
                 order.setSubTotal(orderRequest.getSubTotal());
