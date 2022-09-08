@@ -36,6 +36,7 @@ public class Constant {
     private String ckeditorImageUrl = null;
     public static final String defaultCurrency = "IDR";
     private String posUrl = null;
+    private String webhookOrderDetailUrl = null;
 
     public static Constant getInstance() {
         if (instance == null) {
@@ -210,6 +211,13 @@ public class Constant {
             apiKeyWebhook = Play.application().configuration().getString("sandbox.api_key.webhook");
         }
         return apiKeyWebhook;
+    }
+
+    public String getWebhookOrderDetailUrl() {
+        if (webhookOrderDetailUrl == null) {
+            webhookOrderDetailUrl = Play.application().configuration().getString("sandbox.webhook.order.detail.url");
+        }
+        return webhookOrderDetailUrl;
     }
 
 }
