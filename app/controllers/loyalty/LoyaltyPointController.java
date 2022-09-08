@@ -271,7 +271,7 @@ public class LoyaltyPointController extends BaseController {
                     lmResponse.setEmail(memberData.email);
                     lmResponse.setPhone(memberData.phone);
                     lmResponse.setLoyaltyPoint(memberData.loyaltyPoint);
-                    lmResponse.setExpiredDate(lpHistory.getExpiredDate());
+                    lmResponse.setExpiredDate(lpHistory != null && lpHistory.getExpiredDate() != null ? lpHistory.getExpiredDate() : null);
                     response.setBaseResponse(1, 0, 1, "Data loyalty berhasil di tampilkan", lmResponse);
                     return ok(Json.toJson(response));
                 } else {
