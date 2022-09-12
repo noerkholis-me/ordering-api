@@ -324,7 +324,7 @@ public class LoyaltyPointController extends BaseController {
                     }
                 }
 
-                if(request.getEmail().isEmpty() && request.getPhoneNumber() != null && !request.getPhoneNumber().isEmpty()){
+                if((request.getEmail() == null && request.getEmail() == "") && (request.getPhoneNumber() != null && !request.getPhoneNumber().isEmpty())){
                     if(!Helper.isValidPhoneNumber(request.getPhoneNumber())){
                         response.setBaseResponse(0, 0, 0, "Nomor telepon tidak valid", null);
                         return badRequest(Json.toJson(response));

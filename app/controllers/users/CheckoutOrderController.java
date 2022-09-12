@@ -225,7 +225,7 @@ public class CheckoutOrderController extends BaseController {
                     member.update();
                 }
                 if(member != null){
-                    BigDecimal loyaltyMine = member.loyaltyPoint;
+                    BigDecimal loyaltyMine = member.loyaltyPoint != null ? member.loyaltyPoint : BigDecimal.ZERO;
                     BigDecimal loyaltyPointGet = BigDecimal.ZERO;
                         if(!lpMerchant.isEmpty()){
                             for(LoyaltyPointMerchant lPoint: lpMerchant){
@@ -263,7 +263,7 @@ public class CheckoutOrderController extends BaseController {
                                     System.out.print("Loyalty nya (max point): ");
                                     System.out.println(totalLoyalty);
                                     loyaltyPointGet = loyaltyPointGet.add(totalLoyalty);
-                                    member.loyaltyPoint = loyaltyMine.add(totalLoyalty);
+                                    member.loyaltyPoint = loyaltyMine != null ? loyaltyMine.add(totalLoyalty) : totalLoyalty;
                                     member.update();
                                 }
                             }
