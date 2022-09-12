@@ -588,7 +588,11 @@ public class OrderMerchantController extends BaseController {
                     invoicePrintResponse.setCashierName("Admin");
                 }
 
-                invoicePrintResponse.setOrderQrCode(Base64.getEncoder().encodeToString(getOrder.getOrderNumber().getBytes(StandardCharsets.UTF_8)));
+                String orderNumberEncode = Base64.getEncoder().encodeToString(getOrder.getOrderNumber().getBytes(StandardCharsets.UTF_8));
+                String webhookOrderDetailUrl = Constant.getInstance().getWebhookOrderDetailUrl();
+                String orderDetailUrl = webhookOrderDetailUrl.replace("{orderNumber}", orderNumberEncode);
+
+                invoicePrintResponse.setOrderQrCode(orderDetailUrl);
 
                 response.setBaseResponse(1, offset, limit, success + " success showing data invoice.",
                         invoicePrintResponse);
