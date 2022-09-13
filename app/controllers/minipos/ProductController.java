@@ -44,18 +44,20 @@ public class ProductController extends BaseController {
                     String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where subs_category_merchant_id = "+scm.id+" and pm.is_active = "+true+" and pm.is_deleted = "+false+")";
                     List<ProductMerchantDetail> pmdList = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").eq("productMerchant.merchant", ownMerchant).findPagingList(0).getPage(0).getList();
                     
-                    scmResponse.setId(scm.getId());
-                    scmResponse.setSubscategoryName(scm.getSubscategoryName());
-                    scmResponse.setImageWeb(scm.getImageWeb());
-                    scmResponse.setImageMobile(scm.getImageMobile());
-                    scmResponse.setIsActive(scm.isActive());
-                    scmResponse.setIsDeleted(scm.isDeleted());
-                    scmResponse.setImageMobile(scm.getImageMobile());
-                    scmResponse.setSequence(scm.getSequence());
-                    scmResponse.setCategoryId(scm.getCategoryMerchant().id);
-                    scmResponse.setSubCategoryId(scm.getSubCategoryMerchant().id);
-                    scmResponse.setMerchantId(scm.getMerchant().id);
-                    subsCategoryMerchantList.add(scmResponse);
+                    if(pmdList.size() != 0){
+                        scmResponse.setId(scm.getId());
+                        scmResponse.setSubscategoryName(scm.getSubscategoryName());
+                        scmResponse.setImageWeb(scm.getImageWeb());
+                        scmResponse.setImageMobile(scm.getImageMobile());
+                        scmResponse.setIsActive(scm.isActive());
+                        scmResponse.setIsDeleted(scm.isDeleted());
+                        scmResponse.setImageMobile(scm.getImageMobile());
+                        scmResponse.setSequence(scm.getSequence());
+                        scmResponse.setCategoryId(scm.getCategoryMerchant().id);
+                        scmResponse.setSubCategoryId(scm.getSubCategoryMerchant().id);
+                        scmResponse.setMerchantId(scm.getMerchant().id);
+                        subsCategoryMerchantList.add(scmResponse);
+                    }
                 }
 
                 response.setBaseResponse(subsCategoryMerchantList.size(), 0, 0, "Berhasil menampilkan kategori produk", subsCategoryMerchantList);
