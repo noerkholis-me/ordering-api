@@ -7,9 +7,11 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
 import dtos.merchant.MerchantResponse;
 import models.Merchant;
+import models.UserMerchant;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import repository.UserMerchantRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,21 +30,32 @@ public class MerchantController extends BaseController {
     public static Result listMerchantsByEmail() {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            List<Merchant> query = Merchant.find.where().eq("t0.is_deleted", false).eq("t0.email", ownMerchant.email).order("id").findList();
-            try {
+            List<Merchant> queryMerchant = Merchant.find.where().eq("t0.is_deleted", false).eq("t0.email", ownMerchant.email).order("id").findList();
                 List<MerchantResponse> responses = new ArrayList<>();
-                for (Merchant data : query) {
-                    MerchantResponse response = new MerchantResponse();
-                    response.setId(data.id);
-                    response.setFullName(data.fullName);
-                    response.setEmail(data.email);
-                    responses.add(response);
+                if (queryMerchant != null || !queryMerchant.isEmpty()) {
+                    for (Merchant data : queryMerchant) {
+                        MerchantResponse response = new MerchantResponse();
+                        response.setId(data.id);
+                        response.setFullName(data.fullName);
+                        response.setEmail(data.email);
+                        response.setUserType("merchant");
+                        responses.add(response);
+                    }
+                    response.setBaseResponse(queryMerchant.size() , 0, 0, success + " showing data", responses);
+                    return ok(Json.toJson(response));
+                } else {
+                    List<UserMerchant> queryUserMerchant = UserMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.email", ownMerchant.email).order("id").findList();
+                    for (UserMerchant data : queryUserMerchant) {
+                        MerchantResponse response = new MerchantResponse();
+                        response.setId(data.id);
+                        response.setFullName(data.fullName);
+                        response.setEmail(data.email);
+                        response.setUserType("user_merchant");
+                        responses.add(response);
+                    }
+                    response.setBaseResponse(queryUserMerchant.size() , 0, 0, success + " showing data", responses);
+                    return ok(Json.toJson(response));
                 }
-                response.setBaseResponse(query.size() , 0, 0, success + " showing data", responses);
-                return ok(Json.toJson(response));
-            } catch (Exception e) {
-                Logger.error("allDetail", e);
-            }
         } else if (ownMerchant == null) {
             response.setBaseResponse(0, 0, 0, forbidden, null);
             return forbidden(Json.toJson(response));

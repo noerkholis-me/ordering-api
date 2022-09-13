@@ -1,7 +1,11 @@
 package dtos.merchant;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,4 +20,6 @@ public class MerchantResponse {
     private String fullName;
     @JsonProperty("email")
     private String email;
+    @JsonProperty("user_type")
+    private String userType;
 }
