@@ -209,6 +209,11 @@ GET		/megamenubanner/:id							controllers.web.BannerMegaMenuController.detail(i
 
 ############################## FOR API MERCHANTS ######################################
 POST    /merchants/session/login              		controllers.merchants.SessionsController.signIn()
+######## enhance existing login to can handle multi merchant account #########
+POST    /merchants/session/login_v2/step_1          controllers.merchants.SessionsController.signInV2Step1()
+GET     /merchants/list              	            controllers.merchants.MerchantController.listMerchantsByEmail()
+POST    /merchants/session/login_v2/step_2          controllers.merchants.SessionsController.signInV2Step2()
+##############################################################################
 POST    /merchants/session/signup              		controllers.merchants.SessionsController.signUp()
 GET     /merchants/session/logout              		controllers.merchants.SessionsController.signOut()
 PATCH 	/merchants/session/activate					controllers.merchants.SessionsController.activate()
