@@ -220,7 +220,7 @@ public class SessionsController extends BaseController {
             + "", response = UserSession.class, httpMethod = "POST")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "login form", dataType = "temp.swaggermap.LoginForm", required = true, paramType = "body", value = "login form") })
-    public static Result signInV2() {
+    public static Result signInV2Step1() {
         JsonNode json = request().body().asJson();
 
         if (checkAccessAuthorization("guest") == 200 && json.has("email") && json.has("password")
@@ -274,6 +274,138 @@ public class SessionsController extends BaseController {
                         return badRequest(Json.toJson(response));
                     }
                     logger.info("user merchant : "+userMerchant);
+                }
+            } else {
+                response.setBaseResponse(0, 0, 0, "Email yang anda masukkan tidak valid!", null);
+                return badRequest(Json.toJson(response));
+            }
+
+            if (member != null || userMerchant != null) {
+                if (userType == Boolean.TRUE) {
+                    if (!Merchant.STATUS_APPROVED.equals(member.status)) {
+                        response.setBaseResponse(0, 0, 0, "Akun Anda belum disetujui, harap hubungi dukungan kami", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    if (member.isActive){
+                        try {
+                            MerchantLog log = MerchantLog.loginMerchant(deviceModel, deviceType, deviceId, member, userMerchant, userType);
+                            if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_MINI_POS)){
+                                response.setBaseResponse(0, 0, 0, "Akun anda tidak memiliki akses ke perangkat kasir, Silahkan hubungi administrator.", null);
+                                return forbidden(Json.toJson(response));
+                            } else if (log == null) {
+                                response.setBaseResponse(0, 0, 0, inputParameter, null);
+                                return badRequest(Json.toJson(response));
+                            }
+                            // modify session response for merchant can be reusable for property
+                            MerchantSessionResponse profileData = toMerchantSessionResponse(member);
+                            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                            ObjectMapper om = new ObjectMapper();
+                            om.addMixIn(Merchant.class, JsonMask.class);
+//                        HashMap<String, Boolean> features = member.checkPrivilegeList();
+                            List<FeatureAndPermissionSession> featureAndPermissionSessions = member.checkFeatureAndPermissions();
+                            UserSession session = new UserSession(log.token, df.format(log.expiredDate), log.memberType, Json.parse(om.writeValueAsString(profileData)), featureAndPermissionSessions);
+//                        session.setProfile_data(Json.parse(om.writeValueAsString(profileData)));
+                            response.setBaseResponse(1, 0, 1, success, session);
+                            return ok(Json.toJson(response));
+                        } catch (Exception e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                        response.setBaseResponse(0, 0, 0, error, null);
+                        return badRequest(Json.toJson(response));
+                    }else{
+                        response.setBaseResponse(0, 0, 0, "Akun Anda belum diaktifkan, silakan periksa dan verifikasi dari email anda.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                } else {
+                    assert userMerchant != null;
+                    if (userMerchant.isActive){
+                        try {
+                            MerchantLog log = MerchantLog.loginMerchant(deviceModel, deviceType, deviceId, member, userMerchant, userType);
+                            if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_MINI_POS)){
+                                response.setBaseResponse(0, 0, 0, "Akun anda tidak memiliki akses ke perangkat kasir, Silahkan hubungi administrator.", null);
+                                return forbidden(Json.toJson(response));
+                            } else if (log == null) {
+                                response.setBaseResponse(0, 0, 0, "User tidak terdaftar", null);
+                                return badRequest(Json.toJson(response));
+                            }
+                            // modify session response for merchant can be reusable for property
+                            UserMerchantSessionResponse profileData = toUserMerchantSessionResponse(userMerchant);
+
+                            if (profileData.getStoreAccess() == null) {
+                                response.setBaseResponse(0, 0, 0, "User belum mempunyai akses toko. Silahkan hubungi administrator.", null);
+                                return badRequest(Json.toJson(response));
+                            }
+
+                            if(profileData.getStoreAccess().getStoreData() == null || profileData.getStoreAccess().getStoreData().size() == 0){
+                                response.setBaseResponse(0, 0, 0, "User belum mempunyai akses toko. Silahkan hubungi administrator.", null);
+                                return badRequest(Json.toJson(response));
+                            }
+
+                            if (userMerchant.checkFeatureAndPermissions() == null) {
+                                response.setBaseResponse(0, 0, 0, "User belum mempunyai hak akses", null);
+                                return badRequest(Json.toJson(response));
+                            }
+
+                            List<FeatureAndPermissionSession> featureAndPermissionSessions = userMerchant.checkFeatureAndPermissions();
+
+                            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                            ObjectMapper om = new ObjectMapper();
+                            om.addMixIn(Merchant.class, JsonMask.class);
+
+                            UserSession session = new UserSession(log.token, df.format(log.expiredDate), log.memberType, Json.parse(om.writeValueAsString(profileData)), featureAndPermissionSessions);
+                            response.setBaseResponse(1, 0, 1, success, session);
+                            return ok(Json.toJson(response));
+                        } catch (Exception e) {
+                            response.setBaseResponse(0, 0, 0, e.getMessage(), null);
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                            return internalServerError(Json.toJson(response));
+                        }
+                    }else{
+                        response.setBaseResponse(0, 0, 0, "Akun Anda belum diaktifkan, silakan periksa dan verifikasi dari email anda.", null);
+                    }
+                    return badRequest(Json.toJson(response));
+                }
+            }
+            response.setBaseResponse(0, 0, 0, "User tidak terdaftar", null);
+            return badRequest(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+
+    }
+
+    @ApiOperation(value = "Sign in", notes = "Sign in.\n" + swaggerInfo
+            + "", response = UserSession.class, httpMethod = "POST")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "login form", dataType = "temp.swaggermap.LoginForm", required = true, paramType = "body", value = "login form") })
+    public static Result signInV2Step2() {
+        JsonNode json = request().body().asJson();
+
+        if (checkAccessAuthorization("guest") == 200 && json.has("email") && json.has("id")
+                && json.has("device_model") && json.has("device_id") && json.has("device_type")) {
+
+            String email = json.findPath("email").asText();
+            Long id = json.findPath("id").asLong();
+            String deviceModel = json.findPath("device_model").asText();
+            String deviceType = json.findPath("device_type").asText();
+            String deviceId = json.findPath("device_id").asText();
+            Merchant member = null;
+            UserMerchant userMerchant = null;
+
+            Boolean userType = Boolean.FALSE;
+
+            if (email.matches(CommonFunction.emailRegex)) {
+                userMerchant = UserMerchantRepository.findByIdAndEmail(id, email);
+                if (userMerchant == null) {
+                    member = Merchant.findByIdAndEmail(id, email, false);
+                    if (member != null) {
+                        userType = Boolean.TRUE;
+                    } else {
+                        response.setBaseResponse(0, 0, 0, "Email dan id yang anda masukkan tidak ditemukan!", null);
+                        return badRequest(Json.toJson(response));
+                    }
                 }
             } else {
                 response.setBaseResponse(0, 0, 0, "Email yang anda masukkan tidak valid!", null);

@@ -714,4 +714,8 @@ public class Merchant extends BaseModel{
         return Merchant.find.where().eq("t0.email", email).eq("t0.is_deleted", is_deleted).setMaxRows(1).findList();
     }
 
+    public static Merchant findByIdAndEmail(Long merchantId, String email, Boolean is_deleted) {
+        return Merchant.find.where().eq("t0.id", merchantId).eq("t0.email", email).eq("t0.is_deleted", is_deleted).setMaxRows(1).findUnique();
+    }
+
 }

@@ -43,6 +43,15 @@ public class UserMerchantRepository extends Model {
 				.findUnique();
 	}
 
+	public static UserMerchant findByIdAndEmail(Long userMerchantId, String email) {
+		return find.where()
+				.eq("id", userMerchantId)
+				.eq("email", email)
+				.eq("isDeleted", false)
+				.eq("isActive", Boolean.TRUE)
+				.findUnique();
+	}
+
 	public static List<UserMerchant> findByEmailList(String email) {
 		return find.where()
 				.eq("email", email)
