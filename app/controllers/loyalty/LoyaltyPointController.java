@@ -158,6 +158,10 @@ public class LoyaltyPointController extends BaseController {
             return "Cashback Value tidak boleh nol atau kosong";
         if (request.getMaxCashbackValue() == null)
             return "Max Cashback Value tidak boleh nol atau kosong";
+        if (request.getCashbackValue().compareTo(BigDecimal.ZERO) < 0)
+            return "Nilai Cashback tidak boleh kurang dari 0";
+        if (request.getMaxCashbackValue().compareTo(BigDecimal.ZERO) < 0)
+            return "Nilai Maximal Cashback tidak boleh kurang dari 0";
 
         return null;
     }
@@ -366,7 +370,7 @@ public class LoyaltyPointController extends BaseController {
                     lmResponse.setFullName(memberData.fullName);
                     lmResponse.setEmail(memberData.email);
                     lmResponse.setPhone(memberData.phone);
-                    lmResponse.setIsHaveLoyaltyPoint(memberData.loyaltyPoint.compareTo(new BigDecimal(0)) > 0);
+                    lmResponse.setIsHaveLoyaltyPoint(memberData.loyaltyPoint != null ? memberData.loyaltyPoint.compareTo(new BigDecimal(0)) > 0 : false);
                     lmResponse.setLoyaltyPoint(memberData.loyaltyPoint.intValue());
                     response.setBaseResponse(1, 0, 1, memberData.loyaltyPoint != BigDecimal.ZERO ? "Loyalty Point Member: Rp. " + lmResponse.getLoyaltyPoint() : "Tidak ada point", memberData.loyaltyPoint != BigDecimal.ZERO ? lmResponse : null);
                     return ok(Json.toJson(response));
