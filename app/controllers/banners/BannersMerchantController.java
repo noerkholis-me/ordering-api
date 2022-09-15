@@ -128,7 +128,7 @@ public class BannersMerchantController extends BaseController {
                     Banners dataBanner = BannersRepository.findByIdAndMerchantId(data.id, ownMerchant);
                     if (dataBanner != null) {
                         if (dataBanner.getDateTo().compareTo(new Date()) <= 0) {
-                            dataBanner.setIsActive(Boolean.FALSE);
+                            dataBanner.setActive(Boolean.FALSE);
                             dataBanner.update();
                         }
                     }
