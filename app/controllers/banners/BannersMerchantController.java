@@ -125,6 +125,13 @@ public class BannersMerchantController extends BaseController {
                 List<Banners> responseIndex = BannersRepository.getDataBanners(query, sort, filter, offset, limit);
                 for (Banners data : responseIndex) {
                     BannersResponse response = new BannersResponse();
+                    Banners dataBanner = BannersRepository.findByIdAndMerchantId(data.id, ownMerchant);
+                    if (dataBanner != null) {
+                        if (dataBanner.getDateTo().compareTo(new Date()) <= 0) {
+                            dataBanner.setIsActive(Boolean.FALSE);
+                            dataBanner.update();
+                        }
+                    }
                     response.setId(data.id);
                     response.setBannerName(data.getBannerName());
                     response.setBannerImageWeb(data.getBannerImageWeb());

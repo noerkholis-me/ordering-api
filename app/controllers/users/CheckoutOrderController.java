@@ -241,6 +241,7 @@ public class CheckoutOrderController extends BaseController {
                                 }
                                 // GET TOTAL LOYALTY
                                 if(lPoint.getCashbackType().equalsIgnoreCase("Percentage")){
+                                    loyaltyPointGet = BigDecimal.ZERO;
                                     totalLoyalty = subTotalPerCategory.multiply(lPoint.getCashbackValue());
                                     totalLoyalty = totalLoyalty.divide(new BigDecimal(100), 0, RoundingMode.DOWN);
                                     if(totalLoyalty.compareTo(lPoint.getMaxCashbackValue()) > 0){
@@ -259,6 +260,7 @@ public class CheckoutOrderController extends BaseController {
                                         member.update();
                                     }
                                 } else {
+                                    loyaltyPointGet = BigDecimal.ZERO;
                                     totalLoyalty = lPoint.getCashbackValue();
                                     System.out.print("Loyalty nya (max point): ");
                                     System.out.println(totalLoyalty);
