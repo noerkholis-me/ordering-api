@@ -34,6 +34,10 @@ public class FinanceTransactionController extends BaseController {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
             try {
+                if (startDate.compareTo(endDate) > 0) {
+                        response.setBaseResponse(0, 0, 0, "tanggal awal tidak boleh melebihi tanggal akhir", null);
+                        return badRequest(Json.toJson(response));
+                }
                 Query<FinanceTransaction> query = null;
                 // default query find by merchant id
                 query = FinanceTransactionRepository.findAllTransactionByMerchantId(ownMerchant.id);
@@ -73,7 +77,11 @@ public class FinanceTransactionController extends BaseController {
                                              int offset, int limit, String status) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            try {
+            try {                
+                if (startDate.compareTo(endDate) > 0) {
+                        response.setBaseResponse(0, 0, 0, "tanggal awal tidak boleh melebihi tanggal akhir", null);
+                        return badRequest(Json.toJson(response));
+                }
                 Query<FinanceTransaction> query = null;
                 // default query find by merchant id
                 query = FinanceTransactionRepository.findAllTransactionByMerchantId(ownMerchant.id);
