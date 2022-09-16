@@ -1,13 +1,12 @@
 package dtos.cashier;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 public class CashierClosePrintResponse extends CashierReportResponse {
     @JsonProperty("image_store_url")
     private String imageStoreUrl;

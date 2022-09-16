@@ -181,7 +181,7 @@ public class PickUpPointController extends BaseController {
     public static Result listPickupPoint(String filter, String sort, int offset, int limit, Long storeId) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<PickUpPointMerchant> query = PickUpPointRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", ownMerchant.id).order("t0.id");
+            Query<PickUpPointMerchant> query = PickUpPointRepository.find.where().eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
             try {
                 List<PickUpPointResponse> responses = new ArrayList<>();
                 List<PickUpPointMerchant> totalData = PickUpPointRepository.getTotalData(query);

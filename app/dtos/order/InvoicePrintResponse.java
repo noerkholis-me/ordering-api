@@ -1,6 +1,7 @@
 package dtos.order;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
@@ -49,12 +50,17 @@ public class InvoicePrintResponse {
     private BigDecimal taxPrice;
     @JsonProperty("tax_percentage")
     private Double taxPercentage;
-    @JsonProperty("service")
-    @JsonSerialize(using = BigDecimalSerialize.class)
-    private BigDecimal paymentFeeOwner;
     @JsonProperty("service_percentage")
     private Double servicePercentage;
     @JsonProperty("service_fee")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal serviceFee;
+    @JsonProperty("payment_fee_type")
+    private String paymentFeeType;
+    @JsonProperty("payment_fee_owner")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal paymentFeeOwner;
+    @JsonProperty("payment_fee_customer")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal paymentFeeCustomer;
     @JsonProperty("total")
@@ -63,6 +69,17 @@ public class InvoicePrintResponse {
 
     @JsonProperty("order_queue")
     private Integer orderQueue;
+
+    @JsonProperty("payment_status")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String paymentStatus;
+
+    @JsonProperty("reference_number")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String referenceNumber;
+
+    @JsonProperty("customer_name")
+    private String customerName;
 
 
 

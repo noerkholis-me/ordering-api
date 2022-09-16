@@ -487,9 +487,9 @@ public class SessionsController extends BaseController {
                     Long now = System.currentTimeMillis();
                     String merchantEmail = member.email;
                     String forgotPasswordCode = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
-                    String redirect = Constant.getInstance().getMerchantUrl() + "/reset-password" + "/" + forgotPasswordCode;
+                    String redirect = Constant.getInstance().getMerchantUrl() + "/password-recovery" + "/" + forgotPasswordCode;
                     try {
-                        member.resetToken = Encryption.EncryptAESCBCPCKS5Padding(member.email+now);
+                        member.resetToken = forgotPasswordCode;
                         member.resetTime = now;
                         member.update();
                     } catch (Exception e) {
@@ -515,19 +515,16 @@ public class SessionsController extends BaseController {
                     if(isCashier == Boolean.TRUE) {
                         System.out.println("is cashier true");
                         String forgotPasswordCodePos = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
-                        redirect = Constant.getInstance().getPosUrl() + "/reset-password" + "/" + forgotPasswordCodePos;
-                    } else {
-                        String forgotPasswordCode = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
-                        redirect = Constant.getInstance().getMerchantUrl() + "/reset-password" + "/" + forgotPasswordCode;
+                        redirect = Constant.getInstance().getPosUrl() + "/password-recovery" + "/" + forgotPasswordCodePos;
+                        try {
+                            userMerchant.setResetToken(forgotPasswordCodePos);
+                            userMerchant.setResetTime(now);
+                            userMerchant.update();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
 
-                    try {
-                        userMerchant.setResetToken(Encryption.EncryptAESCBCPCKS5Padding(userMerchant.email + "-" + String.valueOf(now)));
-                        userMerchant.setResetTime(now);
-                        userMerchant.update();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
                     String finalRedirect = redirect;
                     UserMerchant finalUserMerchant = userMerchant;
                     Thread thread = new Thread(() -> {
@@ -543,7 +540,7 @@ public class SessionsController extends BaseController {
                 }
 
             }
-            response.setBaseResponse(0, 0, 0, notFound, null);
+            response.setBaseResponse(0, 0, 0, "Email tidak terdaftar", null);
             return notFound(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
@@ -803,4 +800,46 @@ public class SessionsController extends BaseController {
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
     }
+
+    public static Result updatePassword() {
+        UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
+        if (userMerchant != null) {
+            JsonNode json = request().body().asJson();
+            String oldPass = json.findPath("old_password").asText();
+            String newPass = json.findPath("new_password").asText();
+            String confPass = json.findPath("confirm_password").asText();
+
+            String oldPassword = Encryption.DecryptAESCBCPCKS5Padding(userMerchant.getPassword());
+            if (!oldPass.equalsIgnoreCase(oldPassword)) {
+                response.setBaseResponse(0, 0, 0, "password lama tidak sesuai", null);
+                return badRequest(Json.toJson(response));
+            }
+
+            String check = CommonFunction.passwordValidation(newPass, confPass);
+            if (check != null) {
+                response.setBaseResponse(0, 0, 0, check, null);
+                return badRequest(Json.toJson(response));
+            }
+
+            try {
+                String encryptNewPassword = Encryption.EncryptAESCBCPCKS5Padding(newPass);
+                userMerchant.setPassword(encryptNewPassword);
+
+                userMerchant.update();
+
+                response.setBaseResponse(1, 0, 1, updated, true);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                e.printStackTrace();
+                response.setBaseResponse(0, 0, 0, error, null);
+                return internalServerError(Json.toJson(response));
+            }
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+    }
+
+
+
 }

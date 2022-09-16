@@ -67,6 +67,8 @@ public class StoreController extends BaseController {
                 }
             } catch (Exception e) {
                 Logger.info("Error: " + e.getMessage());
+                response.setBaseResponse(0, 0, 0, error, null);
+                return internalServerError(Json.toJson(response));
             }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
@@ -110,6 +112,8 @@ public class StoreController extends BaseController {
                 }
             } catch (Exception e) {
                 Logger.info("Error: " + e.getMessage());
+                response.setBaseResponse(0, 0, 0, error, null);
+                return internalServerError(Json.toJson(response));
             }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);

@@ -4,6 +4,7 @@ import com.hokeba.api.BaseResponse;
 import controllers.BaseController;
 import dtos.payment.PaymentMethodResponse;
 import models.internal.PaymentMethod;
+import models.merchant.MerchantPayment;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
@@ -17,25 +18,26 @@ public class PaymentMethodController extends BaseController {
     private final static Logger.ALogger logger = Logger.of(PaymentMethodController.class);
     private static BaseResponse baseResponse = new BaseResponse();
 
-    public static Result getPaymentMethod() {
+    public static Result getPaymentMethod(String device, Long merchantId) {
         int authority = checkAccessAuthorization("all");
         if (authority == 200 || authority == 203) {
             try {
-                List<PaymentMethod> paymentMethods = PaymentMethod.findAllPaymentMethod();
-                if (paymentMethods == null || paymentMethods.isEmpty()) {
-                    baseResponse.setBaseResponse(0, 0, 0, "payment method does not exists", null);
+                List<MerchantPayment> merchantPayments = MerchantPayment.findByDevice(device, merchantId);
+                if (merchantPayments == null || merchantPayments.isEmpty()) {
+                    baseResponse.setBaseResponse(0, 0, 0, "payment method tidak tersedia", null);
                     return badRequest(Json.toJson(baseResponse));
                 }
                 List<PaymentMethodResponse> paymentMethodResponses = new ArrayList<>();
-                for (PaymentMethod paymentMethod : paymentMethods) {
+                for (MerchantPayment merchantPayment : merchantPayments) {
                     PaymentMethodResponse paymentMethodResponse = new PaymentMethodResponse();
-                    paymentMethodResponse.setId(paymentMethod.id);
-                    paymentMethodResponse.setPaymentCode(paymentMethod.getPaymentCode());
-                    paymentMethodResponse.setPaymentName(paymentMethod.getPaymentName());
-                    paymentMethodResponse.setPaymentFeePrice(paymentMethod.getPaymentFeePrice());
-                    paymentMethodResponse.setPaymentFeePercentage(paymentMethod.getPaymentFeePercentage());
-                    paymentMethodResponse.setIsAvailable(paymentMethod.getIsAvailable());
-                    paymentMethodResponse.setIsActive(paymentMethod.getIsActive());
+                    paymentMethodResponse.setId(merchantPayment.getPaymentMethod().id);
+                    paymentMethodResponse.setPaymentCode(merchantPayment.getPaymentMethod().getPaymentCode());
+                    paymentMethodResponse.setPaymentName(merchantPayment.getPaymentMethod().getPaymentName());
+                    paymentMethodResponse.setPaymentFeePrice(merchantPayment.getPaymentMethod().getPaymentFeePrice());
+                    paymentMethodResponse.setPaymentFeePercentage(merchantPayment.getPaymentMethod().getPaymentFeePercentage());
+                    paymentMethodResponse.setTypePayment(merchantPayment.getTypePayment());
+                    paymentMethodResponse.setIsAvailable(merchantPayment.getPaymentMethod().getIsAvailable());
+                    paymentMethodResponse.setIsActive(merchantPayment.getPaymentMethod().getIsActive());
                     paymentMethodResponses.add(paymentMethodResponse);
                 }
 

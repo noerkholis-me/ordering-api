@@ -16,6 +16,11 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = false)
 public class OrderPayment extends BaseModel {
 
+    public static final String PENDING = "PENDING";
+    public static final String PAID = "PAID";
+    public static final String UNPAID = "UNPAID";
+    public static final String CANCELLED = "CANCELLED";
+
     @Column(unique = true, name = "invoice_no")
     private String invoiceNo;
 
@@ -54,6 +59,15 @@ public class OrderPayment extends BaseModel {
 
     @Column(name = "payment_fee_owner")
     private BigDecimal paymentFeeOwner;
+
+    @Column(name = "mail_status_code")
+    private String mailStatusCode;
+
+    @Column(name = "mail_status")
+    private String mailStatus;
+
+    @Column(name = "mail_message")
+    private String mailMessage;
 
 
     // ============================================================ //

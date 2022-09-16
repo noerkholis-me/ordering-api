@@ -179,6 +179,22 @@ public class Merchant extends BaseModel{
     @JsonProperty("paid_hokeba")
     public Double paidHokeba;
 
+    // FOR ADDITIONAL FEATURE
+    @Column(name = "is_pos")
+    @JsonProperty("is_pos")
+    @Getter @Setter
+    public boolean isPos;
+
+    @Column(name = "is_kiosk")
+    @JsonProperty("is_kiosk")
+    @Getter @Setter
+    public boolean isKiosk;
+
+    @Column(name = "is_mobile_qr")
+    @JsonProperty("is_mobile_qr")
+    @Getter @Setter
+    public boolean isMobileQr;
+
     @javax.persistence.Transient
     @JsonProperty("code")
     public String getCode(){

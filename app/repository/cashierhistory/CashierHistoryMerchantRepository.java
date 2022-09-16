@@ -5,6 +5,7 @@ import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import models.merchant.CashierHistoryMerchant;
 import play.db.ebean.Model;
+import models.*;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -15,7 +16,7 @@ import java.util.Optional;
 
 public class CashierHistoryMerchantRepository extends Model {
 
-    private static final Finder<Long, CashierHistoryMerchant> find = new Finder<>(Long.class, CashierHistoryMerchant.class);
+    public static final Finder<Long, CashierHistoryMerchant> find = new Finder<>(Long.class, CashierHistoryMerchant.class);
 
     public static Optional<CashierHistoryMerchant> findByUserActiveCashier(Long userMerchantId, Long storeId) {
         return Optional.ofNullable(
@@ -38,9 +39,40 @@ public class CashierHistoryMerchantRepository extends Model {
         );
     }
 
+    public static Optional<CashierHistoryMerchant> findByUserActiveCashierAndStoreIdOpen(Long userMerchantId, Long storeId) {
+        return Optional.ofNullable(
+                find.where()
+                        .eq("isActive", true)
+                        .eq("userMerchant.id", userMerchantId)
+                        .eq("store.id", storeId)
+                        .isNull("endTime")
+                        .setMaxRows(1)
+                        .findUnique()
+        );
+    }
+
+    public static Optional<CashierHistoryMerchant> findByUserActiveCashierAndStoreIdAndLastOpen(Long userMerchantId, Long storeId, Date startTimeOpen) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.sss");
+        String startTime = simpleDateFormat.format(startTimeOpen);
+        String endTime = simpleDateFormat.format(new Date());
+        final String SQL = "t0.start_time between '" + startTime + "'" + " and " + "'" + endTime + "'";
+        return Optional.ofNullable(
+                find.where()
+                        .eq("isActive", false)
+                        .eq("userMerchant.id", userMerchantId)
+                        .eq("store.id", storeId)
+                        .raw(SQL)
+                        .setMaxRows(1)
+                        .findUnique()
+        );
+    }
+
     public static Query<CashierHistoryMerchant> findAllCashierHistoryByStoreId(Long storeId) {
         return Ebean.find(CashierHistoryMerchant.class)
                 .where().eq("store.id", storeId)
+                .eq("end_time", null)
+                .eq("end_total_amount", null)
+                .eq("end_total_amount_cash", null)
                 .query();
     }
 
@@ -112,12 +144,40 @@ public class CashierHistoryMerchantRepository extends Model {
                 .eq("userMerchant.id", userMerchantId)
                 .query();
     }
+    public static Query<CashierHistoryMerchant> findAllCashierReportByMerchantAndStore(Query<CashierHistoryMerchant> query, Long storeId, Merchant merchant) {
+        if(query == null){
+            query = Ebean.find(CashierHistoryMerchant.class);
+        }
+        return query
+                .where().eq("store.id", storeId)
+                .eq("store.merchant", merchant)
+                .query();
+    }
     public static Query<CashierHistoryMerchant> findAllCashierReportByUserMerchantId(Long userMerchantId) {
         return Ebean.find(CashierHistoryMerchant.class)
                 .where()
                 .eq("userMerchant.id", userMerchantId)
                 .query();
     }
+
+    // BY MERCHANT
+    public static Query<CashierHistoryMerchant> findAllCashierReportByMerchant(Merchant merchant) {
+        return Ebean.find(CashierHistoryMerchant.class)
+                .where()
+                .eq("store.merchant", merchant)
+                .query();
+    }
+
+    public static Query<CashierHistoryMerchant> findAllCashierReportByMerchant(Query<CashierHistoryMerchant> query, Long storeId, Merchant merchant) {
+        if(query == null){
+            query = Ebean.find(CashierHistoryMerchant.class);
+        }
+        return query
+                .where().eq("store.id", storeId)
+                .eq("store.merchant", merchant)
+                .query();
+    }
+
     public static List<CashierHistoryMerchant> findAllCashierReport(Query<CashierHistoryMerchant> reqQuery, int offset, int limit) {
         Query<CashierHistoryMerchant> query = reqQuery;
         query.orderBy("t0.created_at desc");

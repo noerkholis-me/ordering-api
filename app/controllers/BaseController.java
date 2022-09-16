@@ -108,6 +108,21 @@ public class BaseController extends Controller {
         return null;
     }
 
+    public static Boolean checkInternalServiceKey() {
+        if (request().headers().get(API_KEY) != null){
+            String apiKey = request().headers().get(API_KEY)[0];
+            String keyWeb = Constant.getInstance().getApiKeyWeb();
+            String keyIos = Constant.getInstance().getApiKeyIOS();
+            String keyAndroid = Constant.getInstance().getApiKeyAndroid();
+            if(apiKey.equalsIgnoreCase(keyIos))
+                return Boolean.TRUE;
+            else if(apiKey.equalsIgnoreCase(keyAndroid))
+                return Boolean.TRUE;
+            else return Boolean.TRUE;
+        }
+        return Boolean.FALSE;
+    }
+
     public static UserCms checkUserCmsAccessAuthorization(){
         if(request().headers().get(API_KEY)!=null && request().headers().get(TOKEN)!=null){
             String apiKey     = request().headers().get(API_KEY)[0];

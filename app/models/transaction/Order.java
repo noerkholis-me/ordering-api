@@ -1,9 +1,12 @@
 package models.transaction;
 
 import com.avaje.ebean.annotation.CreatedTimestamp;
+import com.hokeba.util.CommonFunction;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import models.*;
+import models.internal.PaymentMethod;
+import models.internal.PaymentMethodConfig;
 import models.merchant.TableMerchant;
 import models.pupoint.PickUpPointMerchant;
 
@@ -22,6 +25,8 @@ public class Order extends BaseModel {
 
     public static final String NEW_ORDER = "NEW_ORDER";
     public static final String CANCELLED = "CANCELLED";
+    public static final String PENDING = "PENDING";
+    public static final String COMPLETE = "COMPLETE";
 
     @Temporal(TemporalType.TIMESTAMP)
     @CreatedTimestamp
@@ -43,6 +48,12 @@ public class Order extends BaseModel {
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Member member;
+
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "member_name")
+    private String memberName;
 
     private String status;
 
@@ -80,11 +91,17 @@ public class Order extends BaseModel {
     @JoinColumn(name = "table_id", referencedColumnName = "id")
     private TableMerchant tableMerchant;
 
+    @javax.persistence.Transient
+    public Long table_id;
+
     @Column(name = "table_name")
     private String tableName;
     
     @Column(name = "total_loyalty_usage")
     private BigDecimal totalLoyaltyUsage;
+
+    @Column(name = "device_type")
+    private String deviceType;
 
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "user_merchant_id", referencedColumnName = "id")
@@ -111,6 +128,36 @@ public class Order extends BaseModel {
         String code = "SBX";
         code += simpleDateFormat.format(new Date()) + seqNum;
         return code;
+    }
+
+    public String getTanggal(){
+        return CommonFunction.getDate(this.orderDate);
+    }
+
+    public String getStatusOrder() {
+        return this.status;
+    }
+
+    public String getNoInvoice() {
+        return this.orderPayment.getInvoiceNo();
+    }
+
+    public String getNoTransaksi() {
+        return this.orderNumber;
+    }
+
+    public String getTotalBayar() {
+        return String.valueOf(this.totalPrice);
+    }
+
+    public String getJenisTransaksi() {
+        String paymentType = this.orderPayment.getPaymentType();
+        PaymentMethod paymentMethod = PaymentMethod.find.where().eq("paymentCode", paymentType).findUnique();
+        return paymentMethod.getPaymentName();
+    }
+
+    public List<OrderDetail> getProductDetail() {
+        return this.orderDetails;
     }
 
 

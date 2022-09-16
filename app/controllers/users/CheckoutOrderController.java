@@ -11,8 +11,9 @@ import controllers.BaseController;
 import dtos.order.*;
 import dtos.payment.*;
 import models.*;
-import models.merchant.ProductMerchant;
-import models.merchant.TableMerchant;
+import models.internal.DeviceType;
+import models.internal.PaymentMethodConfig;
+import models.merchant.*;
 import models.productaddon.ProductAddOn;
 import models.pupoint.PickUpPointMerchant;
 import models.transaction.*;
@@ -50,8 +51,8 @@ public class CheckoutOrderController extends BaseController {
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     public static Result checkoutOrder() {
-        int authority = checkAccessAuthorization("all");
-        if (authority == 200 || authority == 203) {
+        // int authority = checkAccessAuthorization("all");
+        // if (authority == 200 || authority == 203) {
             JsonNode jsonNode = request().body().asJson();
             Transaction txn = Ebean.beginTransaction();
             try {
@@ -59,6 +60,7 @@ public class CheckoutOrderController extends BaseController {
 
                 // request order
                 OrderTransaction orderRequest = objectMapper.readValue(jsonNode.toString(), OrderTransaction.class);
+                Order order = new Order();
                 Store store = Store.findByStoreCode(orderRequest.getStoreCode());
                 if (store == null) {
                     response.setBaseResponse(0, 0, 0, "Store code is not null", null);
@@ -66,13 +68,28 @@ public class CheckoutOrderController extends BaseController {
                 }
 
                 Member member = null;
-                if (orderRequest.getCustomerEmail() != null && orderRequest.getCustomerEmail().equalsIgnoreCase("")) {
+                Member memberData = new Member();
+                if (orderRequest.getCustomerEmail() != null && !orderRequest.getCustomerEmail().equalsIgnoreCase("")) {
                     member = Member.find.where().eq("t0.email", orderRequest.getCustomerEmail()).eq("merchant", store.merchant).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
-                }
-
-                if(member == null){
                     if (orderRequest.getCustomerPhoneNumber() != null && !orderRequest.getCustomerPhoneNumber().equalsIgnoreCase("")) {
                         member = Member.find.where().eq("t0.phone", orderRequest.getCustomerPhoneNumber()).eq("t0.is_deleted", false).findUnique();
+                    }
+                    if(member == null){
+                        memberData.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
+                        memberData.email = orderRequest.getCustomerEmail() != null && orderRequest.getCustomerEmail() != "" ? orderRequest.getCustomerEmail() : null;
+                        memberData.phone = orderRequest.getCustomerPhoneNumber() != null && orderRequest.getCustomerPhoneNumber() != "" ? orderRequest.getCustomerPhoneNumber() : null;
+                        memberData.setMerchant(store.getMerchant());
+                        memberData.save();
+                        order.setMember(memberData);
+                        order.setPhoneNumber(memberData.phone);
+                        order.setMemberName(memberData.fullName != null ? memberData.fullName : memberData.firstName + " " + memberData.lastName);
+                    }
+                    if(member != null) {
+                        member.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
+                        member.update();
+                        order.setMember(member);
+                        order.setPhoneNumber(member.phone);
+                        order.setMemberName(memberData.fullName != null ? memberData.fullName : memberData.firstName + " " + memberData.lastName);
                     }
                 }
 
@@ -89,18 +106,22 @@ public class CheckoutOrderController extends BaseController {
                 }
 
                 // new oders
-                Order order = new Order();
                 String orderNumber = Order.generateOrderNumber();
                 order.setOrderDate(new Date());
                 order.setOrderNumber(orderNumber);
                 order.setOrderType(orderRequest.getOrderType());
                 order.setStatus(OrderStatus.NEW_ORDER.getStatus());
                 order.setStore(store);
-                order.setMember(member);
-                UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
-                if(userMerchant != null){
-                    order.setUserMerchant(userMerchant);
+                order.setDeviceType(orderRequest.getDeviceType());
+                if (orderRequest.getDeviceType().equalsIgnoreCase("MINIPOS")) {
+                    System.out.println("Out");
+                    UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
+                    if(userMerchant != null){
+                        System.out.println("in");
+                        order.setUserMerchant(userMerchant);
+                    }
                 }
+
                 // pickup point and table
                 if (orderRequest.getOrderType().equalsIgnoreCase("TAKEAWAY") && orderRequest.getDeviceType().equalsIgnoreCase("KIOSK")) {
                     // check pickup point
@@ -119,11 +140,13 @@ public class CheckoutOrderController extends BaseController {
                 } else if (orderRequest.getOrderType().equalsIgnoreCase("DINEIN")) {
                     Optional<TableMerchant> tableMerchant = null;
                     if(orderRequest.getTableId() != null && orderRequest.getTableId() != 0){
-                        tableMerchant = TableMerchantRepository.findById(orderRequest.getTableId());
+                        tableMerchant = TableMerchantRepository.findByIdAndAvailable(orderRequest.getTableId());
                         if (!tableMerchant.isPresent()) {
-                            response.setBaseResponse(0, 0, 0, "Table not found", null);
+                            response.setBaseResponse(0, 0, 0, "Table not found or table is not available", null);
                             return badRequest(Json.toJson(response));
                         }
+                        tableMerchant.get().setIsAvailable(Boolean.FALSE);
+                        tableMerchant.get().update();
                     }
                     order.setTableMerchant(tableMerchant != null ? tableMerchant.get() : null);
                     order.setTableName(tableMerchant != null ? tableMerchant.get().getName() : null);
@@ -155,42 +178,44 @@ public class CheckoutOrderController extends BaseController {
                         orderDetail.save();
 
                         // ADD FOR LOYALTY
-                        listDataOrder.setSubsCategoryId(productMerchant.getSubsCategoryMerchant().id);
-                        listDataOrder.setSubsCategoryName(productMerchant.getSubsCategoryMerchant().getSubscategoryName());
-                        listDataOrder.setProductName(productMerchant.getProductName());
-                        listDataOrder.setProductPrice(productOrderDetail.getProductPrice());
-                        listDataOrder.setSubTotal(productOrderDetail.getSubTotal());
+                        SubsCategoryMerchant subsCategoryMerchant = productMerchant.getSubsCategoryMerchant();
+                        if (subsCategoryMerchant != null) {
+                            listDataOrder.setSubsCategoryId(subsCategoryMerchant.id);
+                            listDataOrder.setSubsCategoryName(subsCategoryMerchant.getSubscategoryName());
+                            listDataOrder.setProductName(productMerchant.getProductName());
+                            listDataOrder.setProductPrice(productOrderDetail.getProductPrice());
+                            listDataOrder.setSubTotal(productOrderDetail.getSubTotal());
 
-                        if (productOrderDetail.getProductOrderAddOns().size() != 0 || !productOrderDetail.getProductOrderAddOns().isEmpty()) {
-                            for (ProductOrderAddOn productOrderAddOn : productOrderDetail.getProductOrderAddOns()) {
-                                // create product add on
-                                ProductAddOn productAddOn = ProductAddOnRepository.findByProductAssignIdAndProductId(productOrderAddOn.getProductAssignId(), productOrderAddOn.getProductId());
-                                if (productAddOn != null) {
-                                    ProductMerchant addOn = ProductMerchantRepository.findById(productAddOn.getProductAssignId());
-                                    if (addOn != null) {
-                                        OrderForLoyaltyData listDataForLoyalty = new OrderForLoyaltyData();
-                                        OrderDetailAddOn orderDetailAddOn = new OrderDetailAddOn();
-                                        orderDetailAddOn.setOrderDetail(orderDetail);
-                                        orderDetailAddOn.setProductAddOn(productAddOn);
-                                        orderDetailAddOn.setQuantity(productOrderAddOn.getProductQty());
-                                        orderDetailAddOn.setNotes(productOrderAddOn.getNotes());
-                                        orderDetailAddOn.setProductPrice(productOrderAddOn.getProductPrice());
-                                        orderDetailAddOn.setProductName(addOn.getProductName());
-                                        orderDetailAddOn.setProductAssignId(productAddOn.getProductAssignId());
-                                        orderDetailAddOn.setSubTotal(productOrderAddOn.getSubTotal());
-                                        orderDetailAddOn.save();
-                                        listDataForLoyalty.setSubsCategoryId(addOn.getSubsCategoryMerchant().id);
-                                        listDataForLoyalty.setSubsCategoryName(addOn.getSubsCategoryMerchant().getSubscategoryName());
-                                        listDataForLoyalty.setProductName(addOn.getProductName());
-                                        listDataForLoyalty.setProductPrice(productOrderAddOn.getProductPrice());
-                                        listDataForLoyalty.setSubTotal(productOrderAddOn.getSubTotal());
-                                        listOrderData.add(listDataForLoyalty);
+                            if (productOrderDetail.getProductOrderAddOns().size() != 0 || !productOrderDetail.getProductOrderAddOns().isEmpty()) {
+                                for (ProductOrderAddOn productOrderAddOn : productOrderDetail.getProductOrderAddOns()) {
+                                    // create product add on
+                                    ProductAddOn productAddOn = ProductAddOnRepository.findByProductAssignIdAndProductId(productOrderAddOn.getProductAssignId(), productOrderAddOn.getProductId());
+                                    if (productAddOn != null) {
+                                        ProductMerchant addOn = ProductMerchantRepository.findById(productAddOn.getProductAssignId());
+                                        if (addOn != null) {
+                                            OrderForLoyaltyData listDataForLoyalty = new OrderForLoyaltyData();
+                                            OrderDetailAddOn orderDetailAddOn = new OrderDetailAddOn();
+                                            orderDetailAddOn.setOrderDetail(orderDetail);
+                                            orderDetailAddOn.setProductAddOn(productAddOn);
+                                            orderDetailAddOn.setQuantity(productOrderAddOn.getProductQty());
+                                            orderDetailAddOn.setNotes(productOrderAddOn.getNotes());
+                                            orderDetailAddOn.setProductPrice(productOrderAddOn.getProductPrice());
+                                            orderDetailAddOn.setProductName(addOn.getProductName());
+                                            orderDetailAddOn.setProductAssignId(productAddOn.getProductAssignId());
+                                            orderDetailAddOn.setSubTotal(productOrderAddOn.getSubTotal());
+                                            orderDetailAddOn.save();
+                                            listDataForLoyalty.setSubsCategoryId(addOn.getSubsCategoryMerchant().id);
+                                            listDataForLoyalty.setSubsCategoryName(addOn.getSubsCategoryMerchant().getSubscategoryName());
+                                            listDataForLoyalty.setProductName(addOn.getProductName());
+                                            listDataForLoyalty.setProductPrice(productOrderAddOn.getProductPrice());
+                                            listDataForLoyalty.setSubTotal(productOrderAddOn.getSubTotal());
+                                            listOrderData.add(listDataForLoyalty);
+                                        }
                                     }
                                 }
                             }
+                            listOrderData.add(listDataOrder);
                         }
-                        listOrderData.add(listDataOrder);
-                        
                     }
                 }
                 List<LoyaltyPointMerchant> lpMerchant = LoyaltyPointMerchantRepository.find.where().eq("merchant", store.merchant).eq("t0.is_deleted", false).findList();
@@ -271,10 +296,19 @@ public class CheckoutOrderController extends BaseController {
                 order.setTotalPrice(orderRequest.getTotalPrice());
                 order.update();
 
+                // CHECK USAGE PAYMENT
+                MerchantPayment mPayment = MerchantPayment.findPayment.where().eq("merchant", store.merchant).eq("t0.device", orderRequest.getDeviceType()).eq("paymentMethod.paymentCode", orderRequest.getPaymentDetailResponse().getPaymentChannel()).findUnique();
+                System.out.print("Payload Merchant Payment: ");
+                System.out.println(Json.toJson(mPayment));
+                if(mPayment == null){
+                    response.setBaseResponse(0, 0, 0, "Tipe pembayaran tidak ditemukan", null);
+                    return notFound(Json.toJson(response));
+                }
+                
                 OrderPayment orderPayment = new OrderPayment();
                 orderPayment.setOrder(order);
                 orderPayment.setInvoiceNo(OrderPayment.generateInvoiceCode());
-                orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
+                orderPayment.setStatus(mPayment.typePayment.equalsIgnoreCase("DIRECT_PAYMENT") ? PaymentStatus.PAID.getStatus() : PaymentStatus.PENDING.getStatus());
                 orderPayment.setPaymentType(orderRequest.getPaymentDetailResponse().getPaymentType());
                 orderPayment.setPaymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel());
                 orderPayment.setPaymentDate(new Date());
@@ -288,67 +322,137 @@ public class CheckoutOrderController extends BaseController {
                 orderPayment.setTotalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount());
                 orderPayment.save();
 
-                // do initiate payment
-                InitiatePaymentRequest request = new InitiatePaymentRequest();
-                request.setOrderNumber(orderNumber);
-                request.setDeviceType(orderRequest.getDeviceType());
-                if (member == null) {
-                    request.setCustomerName(store.storeName);
+                if(mPayment.typePayment.equalsIgnoreCase("PAYMENT_GATEWAY")){
+                    // do initiate payment
+                    InitiatePaymentRequest request = new InitiatePaymentRequest();
+                    request.setOrderNumber(orderNumber);
+                    request.setDeviceType(orderRequest.getDeviceType());
+                    if (member == null) {
+                        request.setCustomerName(memberData.fullName != null && memberData.fullName != "" ? memberData.fullName : "GENERAL CUSTOMER");
+                    } else {
+                        if (member.fullName != null && member.fullName != "" || member.firstName != null && member.firstName != "" || member.lastName != null && member.lastName != "") {
+                            request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : member.firstName + " " + member.lastName);
+                        } else {
+                            request.setCustomerName("GENERAL CUSTOMER");
+                        }
+                        request.setCustomerEmail(member.email);
+                        request.setCustomerPhoneNumber(member.phone);
+                    }
+
+                    // please
+                    PaymentServiceRequest paymentServiceRequest = PaymentServiceRequest.builder()
+                            .paymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel())
+                            .paymentType(orderRequest.getPaymentDetailResponse().getPaymentType())
+                            .bankCode(orderRequest.getPaymentDetailResponse().getBankCode())
+                            .totalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount())
+                            .build();
+                    request.setPaymentServiceRequest(paymentServiceRequest);
+                    request.setProductOrderDetails(productOrderDetails);
+                    request.setStoreCode(store.storeCode);
+
+                    ServiceResponse serviceResponse = PaymentService.getInstance().initiatePayment(request);
+
+                    if (serviceResponse.getCode() == 408) {
+                        txn.rollback();
+                        ObjectNode result = Json.newObject();
+                        result.put("error_messages", Json.toJson(new String[]{"Request timeout, please try again later"}));
+                        response.setBaseResponse(1, offset, 1, timeOut, result);
+                        return badRequest(Json.toJson(response));
+                    } else if (serviceResponse.getCode() == 400) {
+                        txn.rollback();
+                        response.setBaseResponse(1, offset, 1, inputParameter, serviceResponse.getData());
+                        return badRequest(Json.toJson(response));
+                    } else {
+                        // update payment status
+                        order.setStatus(OrderStatus.NEW_ORDER.getStatus());
+                        order.setOrderQueue(createQueue(store.id));
+                        order.update();
+
+                        orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
+                        orderPayment.update();
+
+                        String object = objectMapper.writeValueAsString(serviceResponse.getData());
+                        JSONObject jsonObject = new JSONObject(object);
+                        String initiate = jsonObject.getJSONObject("data").toString();
+                        InitiatePaymentResponse initiatePaymentResponse = objectMapper.readValue(initiate, InitiatePaymentResponse.class);
+
+                        PaymentDetail payDetail = new PaymentDetail();
+                        payDetail.setOrderNumber(order.getOrderNumber());
+                        payDetail.setPaymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel());
+                        payDetail.setCreationTime(initiatePaymentResponse.getCreationTime());
+                        payDetail.setStatus(initiatePaymentResponse.getStatus());
+                        if (orderRequest.getPaymentDetailResponse().getPaymentChannel().equalsIgnoreCase("qr_code")) {
+                            payDetail.setQrCode(initiatePaymentResponse.getMetadata().getQrCode());
+                        } else if (orderRequest.getPaymentDetailResponse().getPaymentChannel().equalsIgnoreCase("virtual_account")){
+                            payDetail.setAccountNumber(initiatePaymentResponse.getMetadata().getAccountNumber());
+                        }
+                        payDetail.setReferenceId(initiatePaymentResponse.getMetadata().getReferenceId());
+                        payDetail.setTotalAmount(initiatePaymentResponse.getTotalAmount());
+                        payDetail.setOrderPayment(orderPayment);
+                        payDetail.save();
+
+                        txn.commit();
+
+                        OrderTransactionResponse orderTransactionResponse = new OrderTransactionResponse();
+                        orderTransactionResponse.setOrderNumber(order.getOrderNumber());
+                        orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
+                        orderTransactionResponse.setTotalAmount(initiatePaymentResponse.getTotalAmount());
+                        orderTransactionResponse.setQueueNumber(order.getOrderQueue());
+                        orderTransactionResponse.setStatus(order.getStatus());
+                        orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
+                        orderTransactionResponse.setMetadata(initiatePaymentResponse.getMetadata());
+
+                        response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
+                        return ok(Json.toJson(response));
+                    }
                 } else {
-                    request.setCustomerName(member.fullName);
-                    request.setCustomerEmail(member.email);
-                    request.setCustomerPhoneNumber(member.phone);
-                }
+                    System.out.println("PENDING / DIRECT");
+                    InitiatePaymentRequest request = new InitiatePaymentRequest();
+                    request.setOrderNumber(orderNumber);
+                    request.setDeviceType(orderRequest.getDeviceType());
+                    if (member == null) {
+                        request.setCustomerName(memberData.fullName != null && memberData.fullName != "" ? memberData.fullName : "GENERAL CUSTOMER");
+                    } else {
+                        if (member.fullName != null && member.fullName != "" || member.firstName != null && member.firstName != "" || member.lastName != null && member.lastName != "") {
+                            request.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : member.firstName + " " + member.lastName);
+                        } else {
+                            request.setCustomerName("GENERAL CUSTOMER");
+                        }
+                        request.setCustomerEmail(member.email);
+                        request.setCustomerPhoneNumber(member.phone);
+                    }
 
-                // please
-                PaymentServiceRequest paymentServiceRequest = PaymentServiceRequest.builder()
-                        .paymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel())
-                        .paymentType(orderRequest.getPaymentDetailResponse().getPaymentType())
-                        .bankCode(orderRequest.getPaymentDetailResponse().getBankCode())
-                        .totalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount())
-                        .build();
-                request.setPaymentServiceRequest(paymentServiceRequest);
-                request.setProductOrderDetails(productOrderDetails);
-                request.setStoreCode(store.storeCode);
+                    // please
+                    PaymentServiceRequest paymentServiceRequest = PaymentServiceRequest.builder()
+                            .paymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel())
+                            .paymentType(orderRequest.getPaymentDetailResponse().getPaymentType())
+                            .bankCode(null)
+                            .totalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount())
+                            .build();
+                    request.setPaymentServiceRequest(paymentServiceRequest);
+                    request.setProductOrderDetails(productOrderDetails);
+                    request.setStoreCode(store.storeCode);
 
-                ServiceResponse serviceResponse = PaymentService.getInstance().initiatePayment(request);
-
-                if (serviceResponse.getCode() == 408) {
-                    txn.rollback();
-                    ObjectNode result = Json.newObject();
-                    result.put("error_messages", Json.toJson(new String[]{"Request timeout, please try again later"}));
-                    response.setBaseResponse(1, offset, 1, timeOut, result);
-                    return badRequest(Json.toJson(response));
-                } else if (serviceResponse.getCode() == 400) {
-                    txn.rollback();
-                    response.setBaseResponse(1, offset, 1, inputParameter, serviceResponse.getData());
-                    return badRequest(Json.toJson(response));
-                } else {
                     // update payment status
-                    order.setStatus(OrderStatus.NEW_ORDER.getStatus());
+                    order.setStatus(mPayment.typePayment.equalsIgnoreCase("DIRECT_PAYMENT") ? OrderStatus.NEW_ORDER.getStatus() : OrderStatus.PENDING.getStatus());
                     order.setOrderQueue(createQueue(store.id));
                     order.update();
 
-                    orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
-                    orderPayment.update();
+                    if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
+                        orderPayment.setStatus(PaymentStatus.PAID.getStatus());
+                    } else {
+                        orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
+                    }
 
-                    String object = objectMapper.writeValueAsString(serviceResponse.getData());
-                    JSONObject jsonObject = new JSONObject(object);
-                    String initiate = jsonObject.getJSONObject("data").toString();
-                    InitiatePaymentResponse initiatePaymentResponse = objectMapper.readValue(initiate, InitiatePaymentResponse.class);
+                    orderPayment.update();
 
                     PaymentDetail payDetail = new PaymentDetail();
                     payDetail.setOrderNumber(order.getOrderNumber());
                     payDetail.setPaymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel());
-                    payDetail.setCreationTime(initiatePaymentResponse.getCreationTime());
-                    payDetail.setStatus(initiatePaymentResponse.getStatus());
-                    if (orderRequest.getPaymentDetailResponse().getPaymentChannel().equalsIgnoreCase("qr_code")) {
-                        payDetail.setQrCode(initiatePaymentResponse.getMetadata().getQrCode());
-                    } else if (orderRequest.getPaymentDetailResponse().getPaymentChannel().equalsIgnoreCase("virtual_account")){
-                        payDetail.setAccountNumber(initiatePaymentResponse.getMetadata().getAccountNumber());
-                    }
-                    payDetail.setReferenceId(initiatePaymentResponse.getMetadata().getReferenceId());
-                    payDetail.setTotalAmount(initiatePaymentResponse.getTotalAmount());
+                    payDetail.setCreationTime(new Date());
+                    payDetail.setStatus(mPayment.typePayment.equalsIgnoreCase("DIRECT_PAYMENT") ? PaymentStatus.PAID.getStatus() : PaymentStatus.PENDING.getStatus());
+                    payDetail.setReferenceId(null);
+                    payDetail.setTotalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount());
                     payDetail.setOrderPayment(orderPayment);
                     payDetail.save();
 
@@ -357,9 +461,11 @@ public class CheckoutOrderController extends BaseController {
                     OrderTransactionResponse orderTransactionResponse = new OrderTransactionResponse();
                     orderTransactionResponse.setOrderNumber(order.getOrderNumber());
                     orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
-                    orderTransactionResponse.setTotalAmount(initiatePaymentResponse.getTotalAmount());
+                    orderTransactionResponse.setTotalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount());
                     orderTransactionResponse.setQueueNumber(order.getOrderQueue());
-                    orderTransactionResponse.setMetadata(initiatePaymentResponse.getMetadata());
+                    orderTransactionResponse.setStatus(order.getStatus());
+                    orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
+                    orderTransactionResponse.setMetadata(null);
 
                     response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
                     return ok(Json.toJson(response));
@@ -370,13 +476,13 @@ public class CheckoutOrderController extends BaseController {
             } finally {
                 txn.end();
             }
-        } else if (authority == 403) {
-            response.setBaseResponse(0, 0, 0, forbidden, null);
-            return forbidden(Json.toJson(response));
-        } else {
-            response.setBaseResponse(0, 0, 0, unauthorized, null);
-            return unauthorized(Json.toJson(response));
-        }
+        // } else if (authority == 403) {
+        //     response.setBaseResponse(0, 0, 0, forbidden, null);
+        //     return forbidden(Json.toJson(response));
+        // } else {
+        //     response.setBaseResponse(0, 0, 0, unauthorized, null);
+        //     return unauthorized(Json.toJson(response));
+        // }
         response.setBaseResponse(0, 0, 0, error, null);
         return ok(Json.toJson(response));
     }
@@ -427,18 +533,33 @@ public class CheckoutOrderController extends BaseController {
                 return order == null ? 1 : order.getOrderQueue() + 1;
             }
             
-            public static Result changeStatusFromMerchant() {
-                Merchant ownMerchant = checkMerchantAccessAuthorization();
-                if(ownMerchant != null) {
-                    try{
-                        JsonNode json = request().body().asJson();
-                        OrderStatusChanges statusRequest = objectMapper.readValue(json.toString(), OrderStatusChanges.class);
-                        Transaction trx = Ebean.beginTransaction();
-                        try{
-                            Optional<Order> orderData = OrderRepository.findByOrderNumber(statusRequest.getOrderNumber());
-                            if(orderData.isPresent()){
+    public static Result changeStatusFromMerchant() {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if(ownMerchant != null) {
+            try{
+                JsonNode json = request().body().asJson();
+                OrderStatusChanges statusRequest = objectMapper.readValue(json.toString(), OrderStatusChanges.class);
+                Transaction trx = Ebean.beginTransaction();
+                try{
+                    Optional<Order> orderData = OrderRepository.findByOrderNumber(statusRequest.getOrderNumber());
+                    if(orderData.isPresent()){
+                        Order orders = OrderRepository.find.where().eq("t0.order_number", statusRequest.getOrderNumber()).findUnique();
+                        if(orders != null && orders.getStatus().equalsIgnoreCase("PENDING")) {
+                            System.out.println("Checkout change status");
+                            OrderPayment ordpayment = OrderPaymentRepository.find.where().eq("order", orders).findUnique();
+                            if(ordpayment != null){
+                                ordpayment.setStatus("PAID");
+                                ordpayment.update();
+                            }
+                            PaymentDetail paydetails = PaymentDetail.find.where().eq("t0.order_number", statusRequest.getOrderNumber()).findUnique();
+                            if(paydetails != null){
+                                paydetails.setStatus("PAID");
+                                paydetails.update();
+                            }
+                        }
                         orderData.get().setStatus(statusRequest.getStatusOrder());
                         orderData.get().update();
+
                         
                         trx.commit();
                         response.setBaseResponse(1, 0, 0, "Berhasil mengubah status Nomor Order " + orderData.get().getOrderNumber(), orderData.get().getOrderNumber());
@@ -478,8 +599,24 @@ public class CheckoutOrderController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
 
-                order.get().setStatus(Order.CANCELLED);
+                Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderId(order.get().id);
+                if (!orderPayment.isPresent()) {
+                    response.setBaseResponse(0, 0, 0, "order payment tidak ditemukan", null);
+                    return badRequest(Json.toJson(response));
+                }
 
+                PaymentDetail paymentDetail = orderPayment.get().getPaymentDetail();
+                if (paymentDetail == null) {
+                    response.setBaseResponse(0, 0, 0, "payment detail tidak ditemukan", null);
+                    return badRequest(Json.toJson(response));
+                }
+                paymentDetail.setStatus(PaymentDetail.INACTIVE);
+                paymentDetail.update();
+
+                orderPayment.get().setStatus(OrderPayment.CANCELLED);
+                orderPayment.get().update();
+
+                order.get().setStatus(Order.CANCELLED);
                 order.get().update();
 
                 trx.commit();

@@ -19,6 +19,9 @@ public class ProductMerchant extends BaseModel {
     @Column(name = "product_name")
     private String productName;
 
+    @Column(name = "no_sku")
+    private String noSKU;
+
     @Column(name = "is_active")
     private Boolean isActive;
 

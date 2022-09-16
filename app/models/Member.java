@@ -488,9 +488,9 @@ public class Member extends BaseModel {
     }
 
     public static String validation(String email, String phone, String fullName) {
-        if (email != null && !email.matches(CommonFunction.emailRegex)) {
-            return "Email format not valid.";
-        }
+//        if (email != null && !email.matches(CommonFunction.emailRegex)) {
+//            return "Email format not valid.";
+//        }
         String[] mails = email.split("@");
         Integer row = BlacklistEmail.find.where().eq("name", "@"+mails[1]).eq("is_deleted", false).findRowCount();
         if (row > 0){
@@ -741,6 +741,10 @@ public class Member extends BaseModel {
 
     public static Member findByEmail(String email) {
         return find.where().eq("email", email).findUnique();
+    }
+
+    public static Member findByEmailAndMerchantId(String email, Long merchantId) {
+        return find.where().eq("email", email).eq("merchant_id", merchantId).findUnique();
     }
 
     public Boolean getNewsLetter() {

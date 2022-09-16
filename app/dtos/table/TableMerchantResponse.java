@@ -14,6 +14,8 @@ public class TableMerchantResponse {
     private String name;
     @JsonProperty("status")
     private Boolean isActive;
+    @JsonProperty("is_available")
+    private Boolean isAvailable;
     @JsonProperty("store")
     private StoreRes storeResponse;
     @JsonProperty("table_type")
