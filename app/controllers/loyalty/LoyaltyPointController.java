@@ -243,6 +243,10 @@ public class LoyaltyPointController extends BaseController {
         if (email != null || phoneNumber != null) {
             try {
                 Store store = Store.find.where().eq("t0.store_code", storeCode).findUnique();
+                if(store == null){
+                    response.setBaseResponse(0, 0, 0, "Store code tidak boleh kosong", null);
+                    return badRequest(Json.toJson(response));
+                }
                 LoyaltyMemberResponse lmResponse = new LoyaltyMemberResponse();
                 Member memberData = null;
                 if(email != null && !email.isEmpty()){
@@ -262,10 +266,12 @@ public class LoyaltyPointController extends BaseController {
                 }
                 
                 if(memberData != null){
-                    lmResponse.setFullName(memberData.fullName);
+                    LoyaltyPointHistory lpHistory = LoyaltyPointHistoryRepository.find.where().eq("member", memberData).order("t0.id desc").setMaxRows(1).findUnique();
+                    lmResponse.setFullName(memberData.fullName != null && !memberData.fullName.isEmpty() ? memberData.fullName : "GENERAL CUSTOMER");
                     lmResponse.setEmail(memberData.email);
                     lmResponse.setPhone(memberData.phone);
                     lmResponse.setLoyaltyPoint(memberData.loyaltyPoint);
+                    lmResponse.setExpiredDate(lpHistory.getExpiredDate());
                     response.setBaseResponse(1, 0, 1, "Data loyalty berhasil di tampilkan", lmResponse);
                     return ok(Json.toJson(response));
                 } else {
@@ -343,6 +349,15 @@ public class LoyaltyPointController extends BaseController {
                 }
 
                 if(memberData != null){
+                    if (request.getFullName() != null && !request.getFullName().isEmpty()) {
+                        System.out.println("masuk?");
+                        Transaction trx = Ebean.beginTransaction();
+                        memberData.firstName = Helper.getFirstName(request.getFullName());
+                        memberData.lastName = Helper.getLastName(request.getFullName());
+                        memberData.fullName = request.getFullName();
+                        memberData.update();
+                        trx.commit();
+                    }
                     lmResponse.setMemberId(memberData.id);
                     lmResponse.setFirstName(memberData.firstName);
                     lmResponse.setLastName(memberData.lastName);
@@ -368,91 +383,68 @@ public class LoyaltyPointController extends BaseController {
         }
         return unauthorized(Json.toJson(response));
     }
-    // public static Result updateStatusPickUpPoint(Long id) {
-    //     Merchant ownMerchant = checkMerchantAccessAuthorization();
-    //     if (ownMerchant != null) {
-    //         try {
-    //             JsonNode json = request().body().asJson();
+    
+    public static Result historyLoyaltyMember(String email, String phoneNumber, String storeCode, int offset, int limit, String type) {
+        if (email != null || phoneNumber != null) {
+            try {
+                Store store = Store.find.where().eq("t0.store_code", storeCode).findUnique();
+                List<LoyaltyPointHistoryResponse> lmhResponseList = new ArrayList<>();
+                Member memberData = null;
+                if(email != null && !email.isEmpty()){
+                    if(!Helper.isValidEmailAddress(email)){
+                        response.setBaseResponse(0, 0, 0, "Email tidak valid", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    memberData = Member.find.where().eq("t0.email", email).eq("merchant", store.getMerchant()).eq("t0.is_active", true).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
+                }
 
-    //             PickUpPointResponse request = objectMapper.readValue(json.toString(), PickUpPointResponse.class);
-    //             Transaction trx = Ebean.beginTransaction();
-    //             PickUpPointMerchant pickuppoint = PickUpPointRepository.findByIdandMerchantId(id, ownMerchant.id);
-
-    //             if(pickuppoint != null){
-    //                 try {
-    //                     pickuppoint.setIsActive(request.getIsActive());
-    //                     pickuppoint.update();
-                        
-    //                     trx.commit();
-    //                     response.setBaseResponse(1, 0, 1, success + " mengubah status pick up point", pickuppoint);
-    //                     return ok(Json.toJson(response));
-    //                 } catch (Exception e) {
-    //                     logger.error("Error saat mengubah status pick up point", e);
-    //                     e.printStackTrace();
-    //                     trx.rollback();
-    //                 } finally {
-    //                     trx.end();
-    //                 }
-    //                 response.setBaseResponse(0, 0, 0, error, null);
-    //                 return badRequest(Json.toJson(response));
-    //             } else {
-    //                 response.setBaseResponse(0, 0, 0, "Data tidak ditemukan", null);
-    //                 return badRequest(Json.toJson(response));
-    //             }
-    //         } catch (Exception e) {
-    //             logger.error("Error saat parsing json", e);
-    //             e.printStackTrace();
-    //         }
-    //     }
-    //     response.setBaseResponse(0, 0, 0, unauthorized, null);
-    //     return unauthorized(Json.toJson(response));
-    // }
-
-    // public static Result getPickupPointForKiosK(Long storeId) {
-    //     if (storeId != null) {
-    //         try {
-    //             // JsonNode json = request().body().asJson();
-
-    //             // PickUpPointResponse request = objectMapper.readValue(json.toString(), PickUpPointResponse.class);
-    //             // Transaction trx = Ebean.beginTransaction();
+                if(memberData == null && phoneNumber != null && !phoneNumber.isEmpty()){
+                    if(!Helper.isValidPhoneNumber(phoneNumber)){
+                        response.setBaseResponse(0, 0, 0, "Nomor telepon tidak valid", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    memberData = Member.find.where().eq("t0.phone", phoneNumber).eq("merchant", store.getMerchant()).eq("t0.is_active", true).eq("t0.is_deleted", false).findUnique();
+                }
                 
-    //             //For PUPSetup 
-    //             PickUpPointSetup puPointSetup = PickUpPointSetupRepository.findByStoreId(storeId);
-    //             PickupPointKiosKResponse responsePickupPoint = new PickupPointKiosKResponse();
-
-    //             if(puPointSetup != null) {
-
-    //                 //For PUPList
-    //                 List<PickupPointKiosKResponse.PickupPointMerchant> responseDatas = new ArrayList<>();
-                    
-    //                 Query<PickUpPointMerchant> queryPuPointList = PickUpPointRepository.find.where().eq("t0.is_deleted", false).eq("t0.store_id", storeId).order("t0.id");
-    //                 List<PickUpPointMerchant> pickuppointList = PickUpPointRepository.getListPickUpPoint(queryPuPointList, "", "", 0, 0, storeId);
-
-    //                 responsePickupPoint.setId(puPointSetup.id);
-    //                 responsePickupPoint.setImagePUPSetup(puPointSetup.getImagePupointSetup());
-    //                 responsePickupPoint.setStoreId(puPointSetup.getStore().id);
-    //                 responsePickupPoint.setMerchantId(puPointSetup.getMerchant().id);
-    //                 for(PickUpPointMerchant puPointMerchantData : pickuppointList) {
-    //                     PickupPointKiosKResponse.PickupPointMerchant responseData = new PickupPointKiosKResponse.PickupPointMerchant();
-    //                     responseData.setId(puPointMerchantData.id);
-    //                     responseData.setPuPointName(puPointMerchantData.getPupointName());
-    //                     responseDatas.add(responseData);
-    //                     responsePickupPoint.setPickUpList(responseDatas);
-    //                 }
-                    
-    //                 response.setBaseResponse(1, 0, 1, "Menampilkan data", responsePickupPoint);
-    //                 return ok(Json.toJson(response));
-    //             } else {
-    //                 response.setBaseResponse(0, 0, 0, "Data tidak ditemukan", null);
-    //                 return badRequest(Json.toJson(response));
-    //             }
-
-    //         } catch (Exception e) {
-    //             logger.error("Error saat parsing json", e);
-    //             e.printStackTrace();
-    //         }
-    //     }
-    //     response.setBaseResponse(0, 0, 0, "Store code tidak boleh kosong", null);
-    //     return unauthorized(Json.toJson(response));
-    // }
+                if(memberData != null){
+                    Query<LoyaltyPointHistory> query = null;
+                    if (type != null && !type.isEmpty()) {
+                        if (type.equalsIgnoreCase("Pendapatan")) {
+                            query = LoyaltyPointHistoryRepository.find.where().ne("t0.added", BigDecimal.ZERO).eq("member", memberData).order("t0.id desc");
+                        } else if (type.equalsIgnoreCase("Pengeluaran")) {
+                            query = LoyaltyPointHistoryRepository.find.where().ne("t0.used", BigDecimal.ZERO).eq("member", memberData).order("t0.id desc");
+                        }
+                    }
+                    int totalData = LoyaltyPointHistoryRepository.getTotalData(query).size();
+                    List<LoyaltyPointHistory> lpHistoryList = LoyaltyPointHistoryRepository.getListLoyaltyPointHistory(query, offset, limit);
+                    if (lpHistoryList.size() > 0) {
+                        for (LoyaltyPointHistory lpHistory : lpHistoryList) {
+                            LoyaltyPointHistoryResponse lmhResponse = new LoyaltyPointHistoryResponse();
+                            lmhResponse.setFullName(lpHistory.getMember().fullName != null && !lpHistory.getMember().fullName.isEmpty() ? lpHistory.getMember().fullName : "GENERAL CUSTOMER");
+                            lmhResponse.setEmail(lpHistory.getMember().email);
+                            lmhResponse.setPhone(lpHistory.getMember().phone);
+                            lmhResponse.setOrderNumber(lpHistory.getOrder().getOrderNumber());
+                            lmhResponse.setPoint(lpHistory.getPoint());
+                            lmhResponse.setAdded(lpHistory.getAdded());
+                            lmhResponse.setUsed(lpHistory.getUsed());
+                            lmhResponse.setExpiredDate(lpHistory.getExpiredDate());
+                            lmhResponseList.add(lmhResponse);
+                        }
+                        response.setBaseResponse(totalData, offset, limit, "History point berhasil di tampilkan", lmhResponseList);
+                        return ok(Json.toJson(response));
+                    }
+                    response.setBaseResponse(0, 0, 0, "History point tidak tersedia", null);
+                    return ok(Json.toJson(response));
+                } else {
+                    response.setBaseResponse(0, 0, 0, "Data tidak ditemukan", null);
+                    return notFound(Json.toJson(response));
+                }
+            } catch (Exception e) {
+                logger.error("Error saat parsing json", e);
+                e.printStackTrace();
+            }
+        }
+        response.setBaseResponse(0, 0, 0, "Data email / nomor telepon diperlukan", null);
+        return unauthorized(Json.toJson(response));
+    }
 }

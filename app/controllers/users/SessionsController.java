@@ -1513,7 +1513,7 @@ public class SessionsController extends BaseController {
 					referral_code_new = generateReferralCode();
 				}
 
-				String validation = Member.validation(email, phone, fullName);
+				String validation = Member.validation(email, phone, fullName, merchantId);
 				if (validation == null) {
 					Transaction txn = Ebean.beginTransaction();
 					try {
@@ -1746,11 +1746,6 @@ public class SessionsController extends BaseController {
 				return badRequest(Json.toJson(response));
 			}
 
-			if (!email.matches(CommonFunction.emailRegex)) {
-				response.setBaseResponse(0, 0, 0, "format email tidak sesuai", Boolean.FALSE);
-				return badRequest(Json.toJson(response));
-			}
-
 			Member member = Member.findByEmailAndMerchantId(email, store.getMerchant().id);
 			if (member == null) {
 				response.setBaseResponse(0, 0, 0, "customer tidak terdaftar", Boolean.FALSE);
@@ -1759,6 +1754,9 @@ public class SessionsController extends BaseController {
 
 			Map<String, Object> responses = new HashMap<>();
 			responses.put("member_id", Integer.valueOf(Math.toIntExact(member.id)));
+			responses.put("email", member.email);
+			responses.put("name", member.fullName);
+			responses.put("phone_number", member.phone);
 			responses.put("status", Boolean.TRUE);
 
 			response.setBaseResponse(0, 0, 0, success, responses);
@@ -1772,6 +1770,64 @@ public class SessionsController extends BaseController {
 		}
 	}
 
+	public static Result updateProfile() {
+		int authority = checkAccessAuthorization("all");
+		if (authority == 200 || authority == 203) {
+			try {
+				JsonNode json = request().body().asJson();
+				Long merchantId = json.findPath("merchant_id").asLong();
+				String email = json.findPath("email").asText();
+				String name = json.findPath("name").asText();
+				String phoneNumber = json.findPath("phone_number").asText();
+
+				String validation = validateUpdateProfileRequest(phoneNumber, merchantId);
+				if (validation != null) {
+					response.setBaseResponse(0, 0, 0, validation, null);
+					return badRequest(Json.toJson(response));
+				}
+
+				Member member = Member.findByEmailAndMerchantId(email, merchantId);
+				if (member == null) {
+					response.setBaseResponse(0, 0, 0, "member tidak ditemukan.", null);
+					return badRequest(Json.toJson(response));
+				}
+
+				String[] names = name.split("\\s+");
+				if (names.length > 1) {
+					member.firstName = names[0];
+					member.lastName = names[1];
+				}
+				member.fullName = name;
+				member.email = email;
+				member.phone = phoneNumber;
+
+				member.update();
+
+				response.setBaseResponse(0, 0, 0, success + " update profile customer", member.id);
+				return ok(Json.toJson(response));
+			} catch (Exception e) {
+				response.setBaseResponse(0, 0, 0, error, null);
+				return internalServerError(Json.toJson(response));
+			}
+		} else if (authority == 403) {
+			response.setBaseResponse(0, 0, 0, forbidden, null);
+			return forbidden(Json.toJson(response));
+		} else {
+			response.setBaseResponse(0, 0, 0, unauthorized, null);
+			return unauthorized(Json.toJson(response));
+		}
+	}
+
+	private static String validateUpdateProfileRequest(String phoneNumber, Long merchantId) {
+		if (!phoneNumber.isEmpty()) {
+			Member member = Member.findByPhoneAndMerchantId(phoneNumber, merchantId);
+			if (member != null) {
+				return "Nomor telepon sudah terpakai.";
+			}
+		}
+
+		return null;
+	}
 
 
 }
