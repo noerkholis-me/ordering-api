@@ -18,6 +18,7 @@ import play.libs.Json;
 import play.mvc.Result;
 import repository.*;
 import validator.ProductValidator;
+import java.math.BigDecimal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,22 @@ public class ProductMerchantController extends BaseController {
                 }
                 Transaction trx = Ebean.beginTransaction();
                 try {
+                    if(productRequest.getProductName().length() > 50) {
+                        response.setBaseResponse(0, 0, 0, "Jumlah karakter tidak boleh melebihi 50 karakter", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    if (productRequest.getProductDetailRequest().getProductPrice().compareTo(BigDecimal.ZERO) < 0){
+                        response.setBaseResponse(0, 0, 0, "Harga tidak boleh kurang dari 0", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    if (productRequest.getProductDetailRequest().getDiscount().compareTo(0D) < 0){
+                        response.setBaseResponse(0, 0, 0, "Diskon tidak boleh kurang dari 0", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    if (productRequest.getProductDetailRequest().getProductPriceAfterDiscount().compareTo(BigDecimal.ZERO) < 0){
+                        response.setBaseResponse(0, 0, 0, "Harga Product Setelah Diskon Cashback tidak boleh kurang dari 0", null);
+                        return badRequest(Json.toJson(response));
+                    }
                     ProductMerchant newProductMerchant = new ProductMerchant();
                     CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(
                             productRequest.getCategoryId(), ownMerchant);
@@ -113,6 +130,23 @@ public class ProductMerchantController extends BaseController {
             JsonNode json = request().body().asJson();
             try {
                 ProductRequest productRequest = objectMapper.readValue(json.toString(), ProductRequest.class);
+                if(productRequest.getProductName().length() > 50) {
+                    response.setBaseResponse(0, 0, 0, "Jumlah karakter tidak boleh melebihi 50 karakter", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                if (productRequest.getProductDetailRequest().getProductPrice().compareTo(BigDecimal.ZERO) < 0){
+                    response.setBaseResponse(0, 0, 0, "Harga tidak boleh kurang dari 0", null);
+                    return badRequest(Json.toJson(response));
+                }
+                if (productRequest.getProductDetailRequest().getDiscount().compareTo(0D) < 0){
+                    response.setBaseResponse(0, 0, 0, "Diskon tidak boleh kurang dari 0", null);
+                    return badRequest(Json.toJson(response));
+                }
+                if (productRequest.getProductDetailRequest().getProductPriceAfterDiscount().compareTo(BigDecimal.ZERO) < 0){
+                    response.setBaseResponse(0, 0, 0, "Harga Product Setelah Diskon Cashback tidak boleh kurang dari 0", null);
+                    return badRequest(Json.toJson(response));
+                }
                 String validateRequest = ProductValidator.validateRequest(productRequest);
                 if (validateRequest != null) {
                     response.setBaseResponse(0, 0, 0, validateRequest, null);

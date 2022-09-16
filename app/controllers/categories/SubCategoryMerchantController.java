@@ -80,6 +80,10 @@ public class SubCategoryMerchantController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
+                        if(request.getSubcategoryName().length() > 50) {
+                            response.setBaseResponse(0, 0, 0, "Jumlah karakter tidak boleh melebihi 50 karakter", null);
+                            return badRequest(Json.toJson(response));
+                        }
                         SubCategoryMerchant newSubCategoryMerchant = new SubCategoryMerchant();
                         newSubCategoryMerchant.setSubcategoryName(request.getSubcategoryName());
                         newSubCategoryMerchant.setMerchant(ownMerchant);
@@ -166,6 +170,11 @@ public class SubCategoryMerchantController extends BaseController {
                         CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(subCategoryMerchant.getCategoryMerchant().id, ownMerchant);
                         if(categoryMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " kategori tidak ditemukan.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+
+                        if(request.getSubcategoryName().length() > 50) {
+                            response.setBaseResponse(0, 0, 0, "Jumlah karakter tidak boleh melebihi 50 karakter", null);
                             return badRequest(Json.toJson(response));
                         }
                         subCategoryMerchant.setSubcategoryName(request.getSubcategoryName());
@@ -483,6 +492,10 @@ public class SubCategoryMerchantController extends BaseController {
                     if (validate == null) {
                         Transaction trx = Ebean.beginTransaction();
                         try {
+                            if(request.getSubscategoryName().length() > 50) {
+                                response.setBaseResponse(0, 0, 0, "Jumlah karakter tidak boleh melebihi 50 karakter", null);
+                                return badRequest(Json.toJson(response));
+                            }
                             SubsCategoryMerchant newSubsCategoryMerchant = new SubsCategoryMerchant();
                             newSubsCategoryMerchant.setSubscategoryName(request.getSubscategoryName());
                             newSubsCategoryMerchant.setMerchant(ownMerchant);
@@ -542,6 +555,10 @@ public class SubCategoryMerchantController extends BaseController {
                             SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(subsCategoryMerchant.getSubCategoryMerchant().id, ownMerchant);
                             if (subCategoryMerchant == null) {
                                 response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
+                                return badRequest(Json.toJson(response));
+                            }
+                            if(request.getSubscategoryName().length() > 50) {
+                                response.setBaseResponse(0, 0, 0, "Jumlah karakter tidak boleh melebihi 50 karakter", null);
                                 return badRequest(Json.toJson(response));
                             }
                             subsCategoryMerchant.setSubscategoryName(request.getSubscategoryName());

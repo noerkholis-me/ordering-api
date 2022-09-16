@@ -54,6 +54,10 @@ public class TableMerchantController extends BaseController {
                         response.setBaseResponse(0, 0, 0, "table type id does not exists", null);
                         return badRequest(Json.toJson(response));
                     }
+                    if(tableMerchantRequest.getName().length() > 50) {
+                        response.setBaseResponse(0, 0, 0, "Jumlah karakter tidak boleh melebihi 50 karakter", null);
+                        return badRequest(Json.toJson(response));
+                    }
                     TableMerchant tableMerchant = new TableMerchant();
                     tableMerchant.setName(tableMerchantRequest.getName());
                     tableMerchant.setIsActive(tableMerchantRequest.getIsActive());
@@ -103,6 +107,10 @@ public class TableMerchantController extends BaseController {
                     Optional<TableType> tableType = TableTypeRepository.findById(tableMerchantRequest.getTableTypeId(), merchant);
                     if (!tableType.isPresent()) {
                         response.setBaseResponse(0, 0, 0, "table type id does not exists", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    if(tableMerchantRequest.getName().length() > 50) {
+                        response.setBaseResponse(0, 0, 0, "Jumlah karakter tidak boleh melebihi 50 karakter", null);
                         return badRequest(Json.toJson(response));
                     }
                     tableMerchant.get().setName(tableMerchantRequest.getName());
