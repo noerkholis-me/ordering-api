@@ -129,26 +129,26 @@ public class SessionsController extends BaseController {
                     if (member.isActive){
                         try {
                             MerchantLog log = MerchantLog.loginMerchant(deviceModel, deviceType, deviceId, member, userMerchant, userType);
-                            response.setBaseResponse(0, 0, 0, "Email Sudah Terdaftar Sebagai Merchant, Tidak Dapat Melanjutkan Login", null);
-                            return forbidden(Json.toJson(response));
-//                             if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_MINI_POS)){
-//                                 response.setBaseResponse(0, 0, 0, "Email Sudah Terdaftar Sebagai Merchant, Tidak Dapat Melanjutkan Login", null);
-//                                 return forbidden(Json.toJson(response));
-//                             } else if (log == null) {
-//                                 response.setBaseResponse(0, 0, 0, inputParameter, null);
-//                                 return badRequest(Json.toJson(response));
-//                             }
-//                             // modify session response for merchant can be reusable for property
-//                             MerchantSessionResponse profileData = toMerchantSessionResponse(member);
-//                             DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-//                             ObjectMapper om = new ObjectMapper();
-//                             om.addMixIn(Merchant.class, JsonMask.class);
-// //                        HashMap<String, Boolean> features = member.checkPrivilegeList();
-//                             List<FeatureAndPermissionSession> featureAndPermissionSessions = member.checkFeatureAndPermissions();
-//                             UserSession session = new UserSession(log.token, df.format(log.expiredDate), log.memberType, Json.parse(om.writeValueAsString(profileData)), featureAndPermissionSessions);
-// //                        session.setProfile_data(Json.parse(om.writeValueAsString(profileData)));
-//                             response.setBaseResponse(1, 0, 1, success, session);
-//                             return ok(Json.toJson(response));
+//                            response.setBaseResponse(0, 0, 0, "Email Sudah Terdaftar Sebagai Merchant, Tidak Dapat Melanjutkan Login", null);
+//                            return forbidden(Json.toJson(response));
+                             if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_MINI_POS)){
+                                 response.setBaseResponse(0, 0, 0, "Email Sudah Terdaftar Sebagai Merchant, Tidak Dapat Melanjutkan Login", null);
+                                 return forbidden(Json.toJson(response));
+                             } else if (log == null) {
+                                 response.setBaseResponse(0, 0, 0, inputParameter, null);
+                                 return badRequest(Json.toJson(response));
+                             }
+                             // modify session response for merchant can be reusable for property
+                             MerchantSessionResponse profileData = toMerchantSessionResponse(member);
+                             DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                             ObjectMapper om = new ObjectMapper();
+                             om.addMixIn(Merchant.class, JsonMask.class);
+ //                        HashMap<String, Boolean> features = member.checkPrivilegeList();
+                             List<FeatureAndPermissionSession> featureAndPermissionSessions = member.checkFeatureAndPermissions();
+                             UserSession session = new UserSession(log.token, df.format(log.expiredDate), log.memberType, Json.parse(om.writeValueAsString(profileData)), featureAndPermissionSessions);
+ //                        session.setProfile_data(Json.parse(om.writeValueAsString(profileData)));
+                             response.setBaseResponse(1, 0, 1, success, session);
+                             return ok(Json.toJson(response));
                         } catch (Exception e) {
                             // TODO Auto-generated catch block
                             e.printStackTrace();
