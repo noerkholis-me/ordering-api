@@ -58,6 +58,10 @@ public class CategoryMerchantController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
+                        if(request.getCategoryName().length() > 50) {
+                            response.setBaseResponse(0, 0, 0, "Jumlah karakter tidak boleh melebihi 50 karakter", null);
+                            return badRequest(Json.toJson(response));
+                        }
                         CategoryMerchant newCategoryMerchant = new CategoryMerchant();
                         newCategoryMerchant.setCategoryName(request.getCategoryName());
                         newCategoryMerchant.setMerchant(ownMerchant);
@@ -196,6 +200,10 @@ public class CategoryMerchantController extends BaseController {
                         CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (categoryMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " kategori tidak tersedia.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        if(request.getCategoryName().length() > 50) {
+                            response.setBaseResponse(0, 0, 0, "Jumlah karakter tidak boleh melebihi 50 karakter", null);
                             return badRequest(Json.toJson(response));
                         }
                         categoryMerchant.setCategoryName(request.getCategoryName());
