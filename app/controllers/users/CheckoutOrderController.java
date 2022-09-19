@@ -90,7 +90,7 @@ public class CheckoutOrderController extends BaseController {
                     member.update();
                     order.setMember(member);
                     order.setPhoneNumber(member.phone);
-                    order.setMemberName(memberData.fullName != null ? memberData.fullName : memberData.firstName + " " + memberData.lastName);
+                    order.setMemberName(member.fullName != null ? member.fullName : member.firstName + " " + member.lastName);
                 }
 
                 if (member != null && orderRequest.getUseLoyalty() == true) {
