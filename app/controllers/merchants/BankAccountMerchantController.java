@@ -47,7 +47,7 @@ public class BankAccountMerchantController extends BaseController {
                     }
                 }
 
-                Optional<BankAccountMerchant> bankAccountNumberMerchant = BankAccountMerchantRepository.findByAccountNumber(request.getAccountNumber());
+                Optional<BankAccountMerchant> bankAccountNumberMerchant = BankAccountMerchantRepository.findByAccountNumberNotPrimary(request.getAccountNumber());
                 if (bankAccountNumberMerchant.isPresent()) {
                     response.setBaseResponse(0, 0, 0, "account number "+ request.getAccountNumber() +" already exist", null);
                     return badRequest(Json.toJson(response));
@@ -110,7 +110,7 @@ public class BankAccountMerchantController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
 
-                Optional<BankAccountMerchant> bankAccountNumberMerchant = BankAccountMerchantRepository.findByAccountNumber(request.getAccountNumber());
+                Optional<BankAccountMerchant> bankAccountNumberMerchant = BankAccountMerchantRepository.findByAccountNumberNotPrimary(request.getAccountNumber());
                 if (bankAccountNumberMerchant.isPresent()) {
                     if (!bankAccountNumberMerchant.get().id.equals(id)) {
                         response.setBaseResponse(0, 0, 0, "account number "+ request.getAccountNumber() +" already exist", null);
