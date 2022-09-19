@@ -37,6 +37,8 @@ public class OrderMerchantController extends BaseController {
     private static final String PREPARING = "PREPARING";
     private static final String ON_COOKING = "ON COOKING";
     private static final String SERVING = "SERVING";
+    private static final String ON_PROCESS = "ON PROCESS";
+    private static final String READY_TO_PICKUP = "READY";
 
     private static BaseResponse response = new BaseResponse();
 
@@ -680,16 +682,19 @@ public class OrderMerchantController extends BaseController {
     private static String convertOrderStatus(OrderStatus orderStatus) {
         String status = null;
         switch (orderStatus) {
-            case PROCESS:
+            case NEW_ORDER:
                 status = PREPARING;
+            case PROCESS:
+                status = ON_PROCESS;
                 break;
             case READY_TO_PICKUP:
-                status = ON_COOKING;
+                status = READY_TO_PICKUP;
                 break;
             case DELIVERY:
                 status = SERVING;
                 break;
             default:
+                status = PREPARING;
                 break;
         }
         return status;

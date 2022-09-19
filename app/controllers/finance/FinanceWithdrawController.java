@@ -48,6 +48,10 @@ public class FinanceWithdrawController extends BaseController {
                     }
                     query = FinanceWithdrawRepository.finaAllWithdrawByStoreId(storeId);
                 }
+                if (startDate.compareTo(endDate) > 0) {
+                        response.setBaseResponse(0, 0, 0, "tanggal awal tidak boleh melebihi tanggal akhir", null);
+                        return badRequest(Json.toJson(response));
+                }
                 List<FinanceWithdraw> financeWithdraws = FinanceWithdrawRepository.findAllWithdraw(query, startDate, endDate, sort, offset, limit, status);
                 Integer totalData = FinanceWithdrawRepository.getTotalPage(query);
                 List<FinanceWithdrawResponse> financeWithdrawResponses = new ArrayList<>();
