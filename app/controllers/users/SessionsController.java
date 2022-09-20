@@ -1513,7 +1513,7 @@ public class SessionsController extends BaseController {
 					referral_code_new = generateReferralCode();
 				}
 
-				String validation = Member.validation(email, phone, fullName);
+				String validation = Member.validation(email, phone, fullName, merchantId);
 				if (validation == null) {
 					Transaction txn = Ebean.beginTransaction();
 					try {
@@ -1819,9 +1819,6 @@ public class SessionsController extends BaseController {
 	}
 
 	private static String validateUpdateProfileRequest(String phoneNumber, Long merchantId) {
-		if (!phoneNumber.matches(CommonFunction.phoneRegex)){
-			return "Format nomor telepon tidak valid.";
-		}
 		if (!phoneNumber.isEmpty()) {
 			Member member = Member.findByPhoneAndMerchantId(phoneNumber, merchantId);
 			if (member != null) {

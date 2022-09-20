@@ -105,7 +105,7 @@ public class DownloadOrderReport {
                         rowSheet.getCell(3).setCellStyle(cellStyle);
 
                         // Nama Customer
-                        rowSheet.createCell(4).setCellValue(member != null ? member.fullName : "General Customer ("+ data.getStore().storeName +")");
+                        rowSheet.createCell(4).setCellValue(member != null ? member.fullName : "GENERAL CUSTOMER ("+ data.getStore().storeName +")");
                         rowSheet.getCell(4).setCellStyle(cellStyle);
 
                         // Nama Toko
@@ -193,7 +193,7 @@ public class DownloadOrderReport {
                             rowSheet.getCell(3).setCellStyle(cellStyle);
 
                             // Nama Customer
-                            rowSheet.createCell(4).setCellValue(member != null ? member.fullName : "General Customer ("+ data.getStore().storeName +")");
+                            rowSheet.createCell(4).setCellValue(member != null ? member.fullName : "GENERAL CUSTOMER ("+ data.getStore().storeName +")");
                             rowSheet.getCell(4).setCellStyle(cellStyle);
 
                             // Nama Toko

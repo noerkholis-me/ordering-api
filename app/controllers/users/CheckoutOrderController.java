@@ -71,26 +71,26 @@ public class CheckoutOrderController extends BaseController {
                 Member memberData = new Member();
                 if (orderRequest.getCustomerEmail() != null && !orderRequest.getCustomerEmail().equalsIgnoreCase("")) {
                     member = Member.find.where().eq("t0.email", orderRequest.getCustomerEmail()).eq("merchant", store.merchant).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
-                    if (orderRequest.getCustomerPhoneNumber() != null && !orderRequest.getCustomerPhoneNumber().equalsIgnoreCase("")) {
-                        member = Member.find.where().eq("t0.phone", orderRequest.getCustomerPhoneNumber()).eq("t0.is_deleted", false).findUnique();
-                    }
-                    if(member == null){
-                        memberData.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
-                        memberData.email = orderRequest.getCustomerEmail() != null && orderRequest.getCustomerEmail() != "" ? orderRequest.getCustomerEmail() : null;
-                        memberData.phone = orderRequest.getCustomerPhoneNumber() != null && orderRequest.getCustomerPhoneNumber() != "" ? orderRequest.getCustomerPhoneNumber() : null;
-                        memberData.setMerchant(store.getMerchant());
-                        memberData.save();
-                        order.setMember(memberData);
-                        order.setPhoneNumber(memberData.phone);
-                        order.setMemberName(memberData.fullName != null ? memberData.fullName : memberData.firstName + " " + memberData.lastName);
-                    }
-                    if(member != null) {
-                        member.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
-                        member.update();
-                        order.setMember(member);
-                        order.setPhoneNumber(member.phone);
-                        order.setMemberName(memberData.fullName != null ? memberData.fullName : memberData.firstName + " " + memberData.lastName);
-                    }
+                }
+                if (orderRequest.getCustomerEmail().isEmpty() && orderRequest.getCustomerPhoneNumber() != null && !orderRequest.getCustomerPhoneNumber().equalsIgnoreCase("")) {
+                    member = Member.find.where().eq("t0.phone", orderRequest.getCustomerPhoneNumber()).eq("merchant", store.merchant).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
+                }
+                if(member == null){
+                    memberData.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
+                    memberData.email = orderRequest.getCustomerEmail() != null && orderRequest.getCustomerEmail() != "" ? orderRequest.getCustomerEmail() : null;
+                    memberData.phone = orderRequest.getCustomerPhoneNumber() != null && orderRequest.getCustomerPhoneNumber() != "" ? orderRequest.getCustomerPhoneNumber() : null;
+                    memberData.setMerchant(store.getMerchant());
+                    memberData.save();
+                    order.setMember(memberData);
+                    order.setPhoneNumber(memberData.phone);
+                    order.setMemberName(memberData.fullName != null ? memberData.fullName : memberData.firstName + " " + memberData.lastName);
+                }
+                if(member != null) {
+                    member.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
+                    member.update();
+                    order.setMember(member);
+                    order.setPhoneNumber(member.phone);
+                    order.setMemberName(memberData.fullName != null ? memberData.fullName : memberData.firstName + " " + memberData.lastName);
                 }
 
                 if (member != null && orderRequest.getUseLoyalty() == true) {
