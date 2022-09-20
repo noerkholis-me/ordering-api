@@ -39,6 +39,8 @@ public class ProductMerchantDetail extends BaseModel {
     private String productImage3;
     @Column(name = "product_image_4")
     private String productImage4;
+    @Transient
+    public Long total_penjualan;
 
     @OneToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "product_merchant_id", referencedColumnName = "id")
