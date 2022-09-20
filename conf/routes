@@ -428,6 +428,7 @@ GET     /product/kiosk/list                         controllers.product.ProductM
 
 #PRODUCT RECOMMENDATION
 GET     /product/recommendation                     controllers.product.ProductMerchantController.listRecommendedProduct(merchant_id: Long ?= 0)
+GET     /product/bestseller                     controllers.product.ProductMerchantController.listBestSeller(merchant_id: Long ?= 0)
 
 #BANNERS
 POST    /merchant/banners                           controllers.banners.BannersMerchantController.createBanners()
