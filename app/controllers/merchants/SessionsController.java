@@ -132,7 +132,7 @@ public class SessionsController extends BaseController {
 //                            response.setBaseResponse(0, 0, 0, "Email Sudah Terdaftar Sebagai Merchant, Tidak Dapat Melanjutkan Login", null);
 //                            return forbidden(Json.toJson(response));
                              if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_MINI_POS) || log != null && deviceType.equalsIgnoreCase(DEV_TYPE_MINI_POS)){
-                                 response.setBaseResponse(0, 0, 0, "Email Sudah Terdaftar Sebagai Merchant, Tidak Dapat Melanjutkan Login", null);
+                                 response.setBaseResponse(0, 0, 0, "Akun Anda sudah tercatat sebagai Superadmin Marketplace, silahkan mendaftarkan akun PoS menggunakan email lain.", null);
                                  return forbidden(Json.toJson(response));
                              } else if (log == null) {
                                  response.setBaseResponse(0, 0, 0, inputParameter, null);
