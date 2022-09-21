@@ -3,9 +3,7 @@ package repository;
 import models.merchant.ProductMerchant;
 import models.merchant.ProductMerchantDetail;
 import play.db.ebean.Model;
-import com.avaje.ebean.Expr;
-import com.avaje.ebean.ExpressionList;
-import com.avaje.ebean.Query;
+import com.avaje.ebean.*;
 
 import java.util.List;
 
@@ -90,6 +88,20 @@ public class ProductMerchantDetailRepository extends Model {
         ExpressionList<ProductMerchantDetail> exp = query.where();
         query = exp.query();
         return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static List<ProductMerchantDetail> forProductBestSeller(Long merchantID) {
+        String sql = "select pmd.id, pmd.product_type, pmd.is_customizable, pmd.product_price, pmd.discount_type, pmd.discount, pmd.product_price_after_discount, pmd.product_image_main, pmd.product_image_1, pmd.product_image_2, pmd.product_image_3, pmd.product_image_4, (select count(od.product_id) as totals from order_detail as od where od.product_id = pmd.product_merchant_id group by od.product_id order by totals desc ) as total_penjualan from product_merchant_detail as pmd where pmd.product_type = 'MAIN' and pmd.product_merchant_id in (select pm.id from product_merchant as pm where pm.is_deleted = false and pm.is_active = true and pm.merchant_id = "+merchantID+")";
+
+        RawSql rawSql = RawSqlBuilder.parse(sql).create();
+        // Query<TopSalesReportMerchant> query = Ebean.find(TopSalesReportMerchant.class);
+        Query<ProductMerchantDetail> query = Ebean.find(ProductMerchantDetail.class);;
+        query.setRawSql(rawSql);
+
+        // return query;
+
+        ExpressionList<ProductMerchantDetail> exp = query.where();
+        return query.findPagingList(10).getPage(0).getList();
     }
 
 }
