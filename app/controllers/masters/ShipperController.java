@@ -8,8 +8,11 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
 import dtos.shipper.*;
 import models.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import play.Logger;
+import play.libs.F;
 import play.libs.Json;
+import play.libs.ws.*;
 import play.mvc.Result;
 
 import java.io.BufferedReader;
@@ -199,30 +202,45 @@ public class ShipperController extends BaseController {
 
     @ApiOperation(value = "Get all domestic rate list.", notes = "Returns list of domestic rate.\n" + swaggerInfo
             + "", response = DomesticRatesResponse.class, responseContainer = "List", httpMethod = "GET")
-    public static Result getAllDomesticRatesByAreaId (Long originAreaId, Long destinationAreaId, Integer
-            price, Double weight, Double length, Double wide, Double height, Integer packageType) {
+    public static Result getAllDomesticRatesByAreaId (Long storeId, Long destinationAreaId, Integer
+            price, Double latitude, Double longitude, Double weight, Double length, Double wide, Double height, Integer storeType) {
         int authority = checkAccessAuthorization("all");
-        String domesticRateUrlApi = API_SHIPPER_ADDRESS + API_SHIPPER_DOMESTIC_RATES + API_KEY_SHIPPER
-                +"&0="+originAreaId+"&d="+destinationAreaId+"&l="+length+"&w="+wide+"&h="+height+"&wt="
-                +weight+"&v="+price;
-        logger.info("url : "+domesticRateUrlApi);
-        System.out.println("url : "+domesticRateUrlApi);
+        String domesticRateUrlApi = API_SHIPPER_ADDRESS + API_SHIPPER_DOMESTIC_RATES + API_KEY_SHIPPER;
+        Store objStore = Store.find.ref(storeId);
+
         if (authority == 200 || authority == 203) {
             try {
                 BufferedReader readerDomesticRates;
                 String lineDomesticRates;
                 StringBuffer responseContentDomesticRates = new StringBuffer();
 
-                URL url = new URL(domesticRateUrlApi);
+                String o = "&o="+objStore.shipperArea.id;
+                String d = "&d="+destinationAreaId;
+                String tmpOriginCoord = "&originCoord="+objStore.storeLatitude+","+objStore.storeLongitude;
+                String tmpDestinationCoord = "&destinationCoord="+latitude+","+longitude;
+                String v = "&v="+price;
+                String type = "&type="+2;
+                String tmpCod = "&cod="+0;
+                String tmpOrder = "&order="+0;
+                String l = "&l="+10;
+                String w = "&w="+10;
+                String h = "&h="+10;
+                String wt = "&wt="+1;
+                if (storeType == 1) {
+                    l = "&l="+length;
+                    w = "&w="+wide;
+                    h = "&h="+height;
+                    wt = "&wt="+weight;
+                }
+
+                URL url = new URL(domesticRateUrlApi+o+d+l+w+h+wt+v+type+tmpCod+tmpOrder+tmpOriginCoord+tmpDestinationCoord);
+
                 connDomesticRates = (HttpURLConnection) url.openConnection();
                 connDomesticRates.addRequestProperty("User-Agent", "Shipper/");
-                connDomesticRates.setRequestMethod("GET");
 
                 DomesticRatesResponse domesticRatesResponse = new DomesticRatesResponse();
                 int status = connDomesticRates.getResponseCode();
 
-                System.out.println("conn"+connDomesticRates.getRequestProperty("User-Agent"));
-                System.out.println("status "+status);
                 if (status == 200) {
                     // BEGIN READING AND ADDING DOMESTIC RATES
                     readerDomesticRates = new BufferedReader(new InputStreamReader(connDomesticRates.getInputStream()));
@@ -234,7 +252,6 @@ public class ShipperController extends BaseController {
 
                     JSONObject jsonDomesticRates = new JSONObject(responseContentDomesticRates.toString());
                     String originArea = jsonDomesticRates.getJSONObject("data").getString("originArea");
-                    System.out.println(" origin : "+originArea);
                     String destinationArea = jsonDomesticRates.getJSONObject("data").getString("destinationArea");
                     JSONArray arrayRegularType = jsonDomesticRates.getJSONObject("data").getJSONObject("rates").getJSONObject("logistic").getJSONArray("regular");
                     JSONArray arrayTruckingType = jsonDomesticRates.getJSONObject("data").getJSONObject("rates").getJSONObject("logistic").getJSONArray("trucking");
