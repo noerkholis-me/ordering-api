@@ -626,7 +626,7 @@ public class OrderMerchantController extends BaseController {
             for (Order order : orders) {
                 OrderQueueResponse orderQueueResponse = new OrderQueueResponse();
                 orderQueueResponse.setOrderQueue(order.getOrderQueue());
-                orderQueueResponse.setCustomerName(order.getMemberName());
+                orderQueueResponse.setCustomerName(order.getMemberName() != null ? order.getMemberName() : "GENERAL CUSTOMER");
                 orderQueueResponse.setOrderHour(order.getOrderDate());
                 OrderStatus orderStatus = OrderStatus.convertToOrderStatus(order.getStatus());
                 orderQueueResponse.setStatus(convertOrderStatus(orderStatus));
@@ -684,6 +684,7 @@ public class OrderMerchantController extends BaseController {
         switch (orderStatus) {
             case NEW_ORDER:
                 status = PREPARING;
+                break;
             case PROCESS:
                 status = ON_PROCESS;
                 break;
