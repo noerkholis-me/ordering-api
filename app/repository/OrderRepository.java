@@ -74,6 +74,15 @@ public class OrderRepository extends Model {
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
+    public static List<Order> findOrdersCustomerTotal(Query<Order> reqQuery) {
+        Query<Order> query = reqQuery;
+        query = query.orderBy("t0.order_date desc");
+
+        ExpressionList<Order> exp = query.where();
+        query = exp.query();
+        return query.findPagingList(0).getPage(0).getList();
+    }
+
     public static List<Order> findOrdersByToday(Query<Order> reqQuery, Date today) {
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
