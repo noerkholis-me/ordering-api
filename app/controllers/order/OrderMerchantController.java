@@ -626,7 +626,7 @@ public class OrderMerchantController extends BaseController {
             for (Order order : orders) {
                 OrderQueueResponse orderQueueResponse = new OrderQueueResponse();
                 orderQueueResponse.setOrderQueue(order.getOrderQueue());
-                orderQueueResponse.setCustomerName(order.getMemberName());
+                orderQueueResponse.setCustomerName(order.getMemberName() != null ? order.getMemberName() : "GENERAL CUSTOMER");
                 orderQueueResponse.setOrderHour(order.getOrderDate());
                 OrderStatus orderStatus = OrderStatus.convertToOrderStatus(order.getStatus());
                 orderQueueResponse.setStatus(convertOrderStatus(orderStatus));
@@ -656,6 +656,7 @@ public class OrderMerchantController extends BaseController {
             }
             Query<Order> orderQuery = OrderRepository.findAllOrderByMemberIdAndStoreId(memberId, storeId);
             List<Order> orders = OrderRepository.findOrdersCustomer(orderQuery, offset, limit);
+            List<Order> ordersTotal = OrderRepository.findOrdersCustomerTotal(orderQuery);
             List<OrderCustomerResponse> orderCustomerResponses = new ArrayList<>();
             for (Order order : orders) {
                 OrderCustomerResponse orderCustomerResponse = new OrderCustomerResponse();
@@ -668,7 +669,7 @@ public class OrderMerchantController extends BaseController {
                 orderCustomerResponses.add(orderCustomerResponse);
             }
 
-            response.setBaseResponse(orders.size(), offset, limit, success, orderCustomerResponses);
+            response.setBaseResponse(ordersTotal.size(), offset, limit, success, orderCustomerResponses);
             return ok(Json.toJson(response));
         } else if (authority == 403) {
             response.setBaseResponse(0, 0, 0, forbidden, null);
@@ -684,6 +685,7 @@ public class OrderMerchantController extends BaseController {
         switch (orderStatus) {
             case NEW_ORDER:
                 status = PREPARING;
+                break;
             case PROCESS:
                 status = ON_PROCESS;
                 break;
