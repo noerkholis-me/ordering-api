@@ -6,18 +6,25 @@ import com.hokeba.api.BaseResponse;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
-import dtos.shipper.*;
-import models.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import dtos.shipper.AreaResponse;
+import dtos.shipper.CityResponse;
+import dtos.shipper.DomesticRatesResponse;
+import dtos.shipper.Logistic;
+import dtos.shipper.ProvinceResponse;
+import dtos.shipper.RateType;
+import dtos.shipper.Rates;
+import dtos.shipper.SuburbResponse;
+import models.ShipperArea;
+import models.ShipperCity;
+import models.ShipperProvince;
+import models.ShipperSuburb;
+import models.Store;
 import play.Logger;
-import play.libs.F;
 import play.libs.Json;
-import play.libs.ws.*;
 import play.mvc.Result;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -247,7 +254,7 @@ public class ShipperController extends BaseController {
                     while ((lineDomesticRates = readerDomesticRates.readLine()) != null) {
                         responseContentDomesticRates.append(lineDomesticRates);
                     }
-                    readerDomesticRates.close();
+//                    readerDomesticRates.close();
                     // END READING AND ADDING DOMESTIC RATES
 
                     JSONObject jsonDomesticRates = new JSONObject(responseContentDomesticRates.toString());
