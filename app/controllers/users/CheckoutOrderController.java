@@ -4,45 +4,71 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.http.response.global.ServiceResponse;
 import controllers.BaseController;
-import dtos.order.*;
-import dtos.payment.*;
-import models.*;
-import models.internal.DeviceType;
-import models.internal.PaymentMethodConfig;
-import models.merchant.*;
+import dtos.loyalty.OrderForLoyaltyData;
+import dtos.order.OrderStatusChanges;
+import dtos.order.OrderTransaction;
+import dtos.order.OrderTransactionResponse;
+import dtos.order.ProductOrderAddOn;
+import dtos.order.ProductOrderDetail;
+import dtos.payment.InitiatePaymentRequest;
+import dtos.payment.InitiatePaymentResponse;
+import dtos.payment.PaymentRequest;
+import dtos.payment.PaymentServiceRequest;
+import models.Member;
+import models.Merchant;
+import models.Store;
+import models.SubsCategoryMerchant;
+import models.UserMerchant;
+import models.loyalty.LoyaltyPointHistory;
+import models.loyalty.LoyaltyPointMerchant;
+import models.merchant.MerchantPayment;
+import models.merchant.ProductMerchant;
+import models.merchant.TableMerchant;
 import models.productaddon.ProductAddOn;
 import models.pupoint.PickUpPointMerchant;
-import models.transaction.*;
+import models.transaction.Order;
+import models.transaction.OrderDetail;
+import models.transaction.OrderDetailAddOn;
+import models.transaction.OrderPayment;
+import models.transaction.OrderStatus;
+import models.transaction.PaymentDetail;
+import models.transaction.PaymentStatus;
 import org.json.JSONObject;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
-import repository.*;
-import models.loyalty.*;
-import repository.loyalty.*;
-import dtos.loyalty.*;
+import repository.OrderPaymentRepository;
+import repository.OrderRepository;
+import repository.ProductAddOnRepository;
+import repository.ProductMerchantRepository;
+import repository.TableMerchantRepository;
+import repository.loyalty.LoyaltyPointHistoryRepository;
+import repository.loyalty.LoyaltyPointMerchantRepository;
 import repository.pickuppoint.PickUpPointRepository;
 import service.PaymentService;
-import com.avaje.ebean.Query;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.io.File;
-import java.io.FileOutputStream;
 
 import java.math.RoundingMode;
 
-import service.DownloadOrderReport;
-
 public class CheckoutOrderController extends BaseController {
+
+    private static final String API_KEY_SHIPPER = "Q2JSCJ6lPZcraO4P6zDBr6vmoQVWsa3j6HLvaHWbgoPMyKrWljKG9vOteIELOz2u";
+    private static final String API_SHIPPER_ADDRESS = "https://api.sandbox.shipper.id/public/v1/";
+    private static final String API_SHIPPER_DOMESTIC_ORDER = "orders/domestics?apiKey=";
 
     private final static Logger.ALogger logger = Logger.of(CheckoutOrderController.class);
 
@@ -54,9 +80,26 @@ public class CheckoutOrderController extends BaseController {
         // int authority = checkAccessAuthorization("all");
         // if (authority == 200 || authority == 203) {
             JsonNode jsonNode = request().body().asJson();
+            ObjectNode nodeBaru = (ObjectNode) jsonNode;
             Transaction txn = Ebean.beginTransaction();
             try {
                 logger.info(">>> incoming order request..." + jsonNode.toString());
+
+                nodeBaru.set("o", jsonNode.get("origin_area_id"));
+                nodeBaru.set("d", jsonNode.get("destination_area_id"));
+                nodeBaru.set("l", jsonNode.get("length"));
+                nodeBaru.set("w", jsonNode.get("wide"));
+                nodeBaru.set("h", jsonNode.get("height"));
+                nodeBaru.set("wt", jsonNode.get("weight"));
+                nodeBaru.set("v", jsonNode.get("total_price"));
+                nodeBaru.set("rateID", jsonNode.get("rate_id"));
+                nodeBaru.set("contents", jsonNode.get("content"));
+                nodeBaru.set("packageType", jsonNode.get("package_type"));
+                nodeBaru.set("consigneeName", jsonNode.get("customer_name"));
+                nodeBaru.set("consigneePhoneNumber", jsonNode.get("customer_phone_number"));
+                nodeBaru.set("originAddress", jsonNode.get("origin_address"));
+                nodeBaru.set("destinationAddress", jsonNode.get("destination_address"));
+//                order.orderIdShipper = node.has("shipperName") ? node.get("shipperName").asText() : "";
 
                 // request order
                 OrderTransaction orderRequest = objectMapper.readValue(jsonNode.toString(), OrderTransaction.class);
@@ -66,6 +109,11 @@ public class CheckoutOrderController extends BaseController {
                     response.setBaseResponse(0, 0, 0, "Store code is not null", null);
                     return badRequest(Json.toJson(response));
                 }
+
+                ((ObjectNode) jsonNode).put("store_name", store.storeName);
+                ((ObjectNode) jsonNode).put("store_number", store.storePhone);
+                nodeBaru.set("consignerName", jsonNode.get("store_name"));
+                nodeBaru.set("consignerPhoneNumber", jsonNode.get("store_number"));
 
                 Member member = null;
                 Member memberData = new Member();
@@ -162,6 +210,7 @@ public class CheckoutOrderController extends BaseController {
                 order.save();
                 List<ProductOrderDetail> productOrderDetails = orderRequest.getProductOrderDetail();
                 StringBuilder message = new StringBuilder();
+                ArrayNode countersNode = nodeBaru.putArray("itemName");
                 List<OrderForLoyaltyData> listOrderData = new ArrayList<>();
                 for (ProductOrderDetail productOrderDetail : productOrderDetails) {
                     OrderForLoyaltyData listDataOrder = new OrderForLoyaltyData();
@@ -178,6 +227,11 @@ public class CheckoutOrderController extends BaseController {
                         orderDetail.setIsCustomizable(productOrderDetail.getIsCustomizable());
                         orderDetail.setOrder(order);
                         orderDetail.save();
+
+                        ObjectNode counterNode = countersNode.addObject();
+                        counterNode.put("name", productMerchant.getProductName());
+                        counterNode.put("qty", productOrderDetail.getProductQty());
+                        counterNode.put("value", productOrderDetail.getProductPrice());
 
                         // ADD FOR LOYALTY
                         SubsCategoryMerchant subsCategoryMerchant = productMerchant.getSubsCategoryMerchant();
@@ -343,6 +397,9 @@ public class CheckoutOrderController extends BaseController {
                         request.setCustomerPhoneNumber(member.phone);
                     }
 
+                    ((ObjectNode) jsonNode).put("externalID", orderNumber);
+                    nodeBaru.set("externalID", jsonNode.get("externalID"));
+
                     // please
                     PaymentServiceRequest paymentServiceRequest = PaymentServiceRequest.builder()
                             .paymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel())
@@ -409,6 +466,35 @@ public class CheckoutOrderController extends BaseController {
                         if (member != null){
                             member.lastPurchase = new Date();
                             member.update();
+                        }
+
+                        if (orderRequest.getOrderType().equalsIgnoreCase("DELIVERY")) {
+                            String domesticUrl = API_SHIPPER_ADDRESS + API_SHIPPER_DOMESTIC_ORDER + API_KEY_SHIPPER;
+                            String bodyRequest = nodeBaru.toString();
+                            ProcessBuilder shipperBuilder = new ProcessBuilder(
+                                    "curl",
+                                    "-XPOST",
+                                    "-H", "Content-Type:application/json",
+                                    "-H", "user-agent: Shipper/1.0",
+                                    domesticUrl,
+                                    "-d", bodyRequest
+                            );
+
+
+                            Process prosesBuilder = shipperBuilder.start();
+                            InputStream is = prosesBuilder.getInputStream();
+                            InputStreamReader isr = new InputStreamReader(is);
+                            BufferedReader br = new BufferedReader(isr);
+
+
+                            String line =  br.readLine();
+                            JsonNode jsonResponse = new ObjectMapper().readValue(line, JsonNode.class);
+                            String hasil = (String)jsonResponse.get("status").asText();
+
+                            if (hasil.equals("success")) {
+                                String idShipperOrder = (String)jsonResponse.get("data").get("id").asText();
+                                order.shipperOrderId = idShipperOrder;
+                            }
                         }
 
                         response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);

@@ -107,6 +107,9 @@ public class Order extends BaseModel {
     @JoinColumn(name = "user_merchant_id", referencedColumnName = "id")
     private UserMerchant userMerchant;
 
+    @Column(name = "shipper_order_id")
+    public String shipperOrderId;
+
     // ================================================================ //
 
     public static Finder<Long, Order> find = new Finder<>(Long.class, Order.class);
