@@ -2,6 +2,7 @@ package controllers.order;
 
 import com.avaje.ebean.Query;
 import com.avaje.ebean.Expr;
+import com.avaje.ebean.ExpressionList;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.util.Constant;
 import controllers.BaseController;
@@ -42,7 +43,7 @@ public class OrderMerchantController extends BaseController {
 
     private static BaseResponse response = new BaseResponse();
 
-    public static Result getOrderList(Long storeId, int offset, int limit, String statusOrder) throws Exception {
+    public static Result getOrderList(Long storeId, int offset, int limit, String statusOrder, String filter) throws Exception {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
@@ -73,6 +74,16 @@ public class OrderMerchantController extends BaseController {
 
                     }
                 }
+
+                ExpressionList<Order> exp = query.where();
+                exp = exp.disjunction();
+                exp = exp.ilike("t0.order_number", "%" + filter + "%");
+                exp = exp.ilike("t0.member_name", "%" + filter + "%");
+                exp = exp.ilike("member.fullName", "%" + filter + "%");
+                exp = exp.ilike("member.firstName", "%" + filter + "%");
+                exp = exp.ilike("member.lastName", "%" + filter + "%");
+                exp = exp.endJunction();
+                query = exp.query();
 
                 List<OrderList> orderLists = new ArrayList<>();
                 List<Order> orders = query.findPagingList(limit).getPage(offset).getList();
