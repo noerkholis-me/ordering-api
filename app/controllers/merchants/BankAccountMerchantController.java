@@ -303,7 +303,7 @@ public class BankAccountMerchantController extends BaseController {
             return "Nama tidak boleh lebih dari 50 karakter";
         if (request.getAccountNumber().length() < 10)
             return "Account number cannot be less than 10 digits";
-        if (request.getAccountNumber().length() > 10)
+        if (request.getAccountNumber().length() > 20)
             return "Account number cannot be more than 20 digits";
         if (!request.getAccountName().matches(CommonFunction.accountbankRegex))
             return "Just only alphabet allowed";
