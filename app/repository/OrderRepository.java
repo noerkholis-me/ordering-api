@@ -55,7 +55,7 @@ public class OrderRepository extends Model {
 
         ExpressionList<Order> exp = query.where();
         query = exp.query();
-        exp.raw("t0.status in ('PROCESS', 'READY_TO_PICKUP', 'DELIVERY')");
+        exp.raw("t0.status in ('NEW_ORDER', 'PROCESS', 'READY_TO_PICKUP', 'DELIVERY')");
         if (limit != 0) {
             query = query.setMaxRows(limit);
         }
@@ -72,6 +72,15 @@ public class OrderRepository extends Model {
             query = query.setMaxRows(limit);
         }
         return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static List<Order> findOrdersCustomerTotal(Query<Order> reqQuery) {
+        Query<Order> query = reqQuery;
+        query = query.orderBy("t0.order_date desc");
+
+        ExpressionList<Order> exp = query.where();
+        query = exp.query();
+        return query.findPagingList(0).getPage(0).getList();
     }
 
     public static List<Order> findOrdersByToday(Query<Order> reqQuery, Date today) {

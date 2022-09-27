@@ -107,6 +107,9 @@ public class Store extends BaseModel{
     @Setter
     private List<Order> orders;
 
+    @Column(name = "store_logo")
+    public String storeLogo;
+
     public static Finder<Long, Store> find = new Finder<Long, Store>(Long.class, Store.class);
 
     @javax.persistence.Transient

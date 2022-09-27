@@ -158,6 +158,10 @@ public class LoyaltyPointController extends BaseController {
             return "Cashback Value tidak boleh nol atau kosong";
         if (request.getMaxCashbackValue() == null)
             return "Max Cashback Value tidak boleh nol atau kosong";
+        if (request.getCashbackValue().compareTo(BigDecimal.ZERO) < 0)
+            return "Nilai Cashback tidak boleh kurang dari 0";
+        if (request.getMaxCashbackValue().compareTo(BigDecimal.ZERO) < 0)
+            return "Nilai Maximal Cashback tidak boleh kurang dari 0";
 
         return null;
     }
@@ -240,8 +244,8 @@ public class LoyaltyPointController extends BaseController {
     }
 
     public static Result useLoyalty(String email, String phoneNumber, String storeCode) {
-        if (email != null || phoneNumber != null) {
-            try {
+        try {
+            if (!email.isEmpty() || !phoneNumber.isEmpty()) {
                 Store store = Store.find.where().eq("t0.store_code", storeCode).findUnique();
                 if(store == null){
                     response.setBaseResponse(0, 0, 0, "Store code tidak boleh kosong", null);
@@ -257,7 +261,7 @@ public class LoyaltyPointController extends BaseController {
                     memberData = Member.find.where().eq("t0.email", email).eq("merchant", store.getMerchant()).eq("t0.is_active", true).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
                 }
 
-                if(memberData == null && phoneNumber != null && !phoneNumber.isEmpty()){
+                if(email.isEmpty() && memberData == null && phoneNumber != null && !phoneNumber.isEmpty()){
                     if(!Helper.isValidPhoneNumber(phoneNumber)){
                         response.setBaseResponse(0, 0, 0, "Nomor telepon tidak valid", null);
                         return badRequest(Json.toJson(response));
@@ -271,20 +275,22 @@ public class LoyaltyPointController extends BaseController {
                     lmResponse.setEmail(memberData.email);
                     lmResponse.setPhone(memberData.phone);
                     lmResponse.setLoyaltyPoint(memberData.loyaltyPoint);
-                    lmResponse.setExpiredDate(lpHistory.getExpiredDate());
+                    lmResponse.setExpiredDate(lpHistory != null && lpHistory.getExpiredDate() != null ? lpHistory.getExpiredDate() : null);
                     response.setBaseResponse(1, 0, 1, "Data loyalty berhasil di tampilkan", lmResponse);
                     return ok(Json.toJson(response));
                 } else {
                     response.setBaseResponse(0, 0, 0, "Data tidak ditemukan", null);
                     return notFound(Json.toJson(response));
                 }
-            } catch (Exception e) {
-                logger.error("Error saat parsing json", e);
-                e.printStackTrace();
             }
+            response.setBaseResponse(0, 0, 0, "Data email / nomor telepon diperlukan", null);
+            return unauthorized(Json.toJson(response));
+        } catch (Exception e) {
+            logger.error("Error saat parsing json", e);
+            e.printStackTrace();
+            response.setBaseResponse(0, 0, 0, e.toString(), null);
+            return badRequest(Json.toJson(response));
         }
-        response.setBaseResponse(0, 0, 0, "Data email / nomor telepon diperlukan", null);
-        return unauthorized(Json.toJson(response));
     }
 
     public static Result checkMember() {
@@ -322,7 +328,7 @@ public class LoyaltyPointController extends BaseController {
                     }
                 }
 
-                if(memberData == null && request.getPhoneNumber() != null && !request.getPhoneNumber().isEmpty()){
+                if((request.getEmail() == null && request.getEmail() == "") && (request.getPhoneNumber() != null && !request.getPhoneNumber().isEmpty())){
                     if(!Helper.isValidPhoneNumber(request.getPhoneNumber())){
                         response.setBaseResponse(0, 0, 0, "Nomor telepon tidak valid", null);
                         return badRequest(Json.toJson(response));
@@ -364,7 +370,7 @@ public class LoyaltyPointController extends BaseController {
                     lmResponse.setFullName(memberData.fullName);
                     lmResponse.setEmail(memberData.email);
                     lmResponse.setPhone(memberData.phone);
-                    lmResponse.setIsHaveLoyaltyPoint(memberData.loyaltyPoint.compareTo(new BigDecimal(0)) > 0);
+                    lmResponse.setIsHaveLoyaltyPoint(memberData.loyaltyPoint != null ? memberData.loyaltyPoint.compareTo(new BigDecimal(0)) > 0 : false);
                     lmResponse.setLoyaltyPoint(memberData.loyaltyPoint.intValue());
                     response.setBaseResponse(1, 0, 1, memberData.loyaltyPoint != BigDecimal.ZERO ? "Loyalty Point Member: Rp. " + lmResponse.getLoyaltyPoint() : "Tidak ada point", memberData.loyaltyPoint != BigDecimal.ZERO ? lmResponse : null);
                     return ok(Json.toJson(response));
@@ -385,8 +391,8 @@ public class LoyaltyPointController extends BaseController {
     }
     
     public static Result historyLoyaltyMember(String email, String phoneNumber, String storeCode, int offset, int limit, String type) {
-        if (email != null || phoneNumber != null) {
-            try {
+        try {
+            if (!email.isEmpty() || !phoneNumber.isEmpty()) {
                 Store store = Store.find.where().eq("t0.store_code", storeCode).findUnique();
                 List<LoyaltyPointHistoryResponse> lmhResponseList = new ArrayList<>();
                 Member memberData = null;
@@ -398,7 +404,7 @@ public class LoyaltyPointController extends BaseController {
                     memberData = Member.find.where().eq("t0.email", email).eq("merchant", store.getMerchant()).eq("t0.is_active", true).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
                 }
 
-                if(memberData == null && phoneNumber != null && !phoneNumber.isEmpty()){
+                if(email.isEmpty() && phoneNumber != null && !phoneNumber.isEmpty()){
                     if(!Helper.isValidPhoneNumber(phoneNumber)){
                         response.setBaseResponse(0, 0, 0, "Nomor telepon tidak valid", null);
                         return badRequest(Json.toJson(response));
@@ -413,9 +419,16 @@ public class LoyaltyPointController extends BaseController {
                             query = LoyaltyPointHistoryRepository.find.where().ne("t0.added", BigDecimal.ZERO).eq("member", memberData).order("t0.id desc");
                         } else if (type.equalsIgnoreCase("Pengeluaran")) {
                             query = LoyaltyPointHistoryRepository.find.where().ne("t0.used", BigDecimal.ZERO).eq("member", memberData).order("t0.id desc");
+                        } else {
+                            response.setBaseResponse(0, 0, 0, "Type yang anda masukan salah", null);
+                            return badRequest(Json.toJson(response));
                         }
                     }
-                    int totalData = LoyaltyPointHistoryRepository.getTotalData(query).size();
+
+                    int totalData = 0;
+                    if(LoyaltyPointHistoryRepository.getTotalData(query) != null){
+                        totalData = LoyaltyPointHistoryRepository.getTotalData(query).size();
+                    }
                     List<LoyaltyPointHistory> lpHistoryList = LoyaltyPointHistoryRepository.getListLoyaltyPointHistory(query, offset, limit);
                     if (lpHistoryList.size() > 0) {
                         for (LoyaltyPointHistory lpHistory : lpHistoryList) {
@@ -439,12 +452,14 @@ public class LoyaltyPointController extends BaseController {
                     response.setBaseResponse(0, 0, 0, "Data tidak ditemukan", null);
                     return notFound(Json.toJson(response));
                 }
-            } catch (Exception e) {
-                logger.error("Error saat parsing json", e);
-                e.printStackTrace();
             }
+            response.setBaseResponse(0, 0, 0, "Data email / nomor telepon diperlukan", null);
+            return unauthorized(Json.toJson(response));
+        } catch (Exception e) {
+            logger.error("Error saat parsing json", e);
+            e.printStackTrace();
+            response.setBaseResponse(0, 0, 0, e.toString(), null);
+            return badRequest(Json.toJson(response));
         }
-        response.setBaseResponse(0, 0, 0, "Data email / nomor telepon diperlukan", null);
-        return unauthorized(Json.toJson(response));
     }
 }

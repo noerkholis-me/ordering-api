@@ -2,6 +2,7 @@ package controllers.order;
 
 import com.avaje.ebean.Query;
 import com.avaje.ebean.Expr;
+import com.avaje.ebean.ExpressionList;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.util.Constant;
 import controllers.BaseController;
@@ -37,10 +38,12 @@ public class OrderMerchantController extends BaseController {
     private static final String PREPARING = "PREPARING";
     private static final String ON_COOKING = "ON COOKING";
     private static final String SERVING = "SERVING";
+    private static final String ON_PROCESS = "ON PROCESS";
+    private static final String READY_TO_PICKUP = "READY";
 
     private static BaseResponse response = new BaseResponse();
 
-    public static Result getOrderList(Long storeId, int offset, int limit, String statusOrder) throws Exception {
+    public static Result getOrderList(Long storeId, int offset, int limit, String statusOrder, String filter) throws Exception {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
@@ -71,6 +74,16 @@ public class OrderMerchantController extends BaseController {
 
                     }
                 }
+
+                ExpressionList<Order> exp = query.where();
+                exp = exp.disjunction();
+                exp = exp.ilike("t0.order_number", "%" + filter + "%");
+                exp = exp.ilike("t0.member_name", "%" + filter + "%");
+                exp = exp.ilike("member.fullName", "%" + filter + "%");
+                exp = exp.ilike("member.firstName", "%" + filter + "%");
+                exp = exp.ilike("member.lastName", "%" + filter + "%");
+                exp = exp.endJunction();
+                query = exp.query();
 
                 List<OrderList> orderLists = new ArrayList<>();
                 List<Order> orders = query.findPagingList(limit).getPage(offset).getList();
@@ -588,7 +601,11 @@ public class OrderMerchantController extends BaseController {
                     invoicePrintResponse.setCashierName("Admin");
                 }
 
-                invoicePrintResponse.setOrderQrCode(Base64.getEncoder().encodeToString(getOrder.getOrderNumber().getBytes(StandardCharsets.UTF_8)));
+                String orderNumberEncode = Base64.getEncoder().encodeToString(getOrder.getOrderNumber().getBytes(StandardCharsets.UTF_8));
+                String webhookOrderDetailUrl = Constant.getInstance().getWebhookOrderDetailUrl();
+                String orderDetailUrl = webhookOrderDetailUrl.replace("{orderNumber}", orderNumberEncode);
+
+                invoicePrintResponse.setOrderQrCode(orderDetailUrl);
 
                 response.setBaseResponse(1, offset, limit, success + " success showing data invoice.",
                         invoicePrintResponse);
@@ -620,7 +637,7 @@ public class OrderMerchantController extends BaseController {
             for (Order order : orders) {
                 OrderQueueResponse orderQueueResponse = new OrderQueueResponse();
                 orderQueueResponse.setOrderQueue(order.getOrderQueue());
-                orderQueueResponse.setCustomerName(order.getMemberName());
+                orderQueueResponse.setCustomerName(order.getMemberName() != null ? order.getMemberName() : "GENERAL CUSTOMER");
                 orderQueueResponse.setOrderHour(order.getOrderDate());
                 OrderStatus orderStatus = OrderStatus.convertToOrderStatus(order.getStatus());
                 orderQueueResponse.setStatus(convertOrderStatus(orderStatus));
@@ -650,6 +667,7 @@ public class OrderMerchantController extends BaseController {
             }
             Query<Order> orderQuery = OrderRepository.findAllOrderByMemberIdAndStoreId(memberId, storeId);
             List<Order> orders = OrderRepository.findOrdersCustomer(orderQuery, offset, limit);
+            List<Order> ordersTotal = OrderRepository.findOrdersCustomerTotal(orderQuery);
             List<OrderCustomerResponse> orderCustomerResponses = new ArrayList<>();
             for (Order order : orders) {
                 OrderCustomerResponse orderCustomerResponse = new OrderCustomerResponse();
@@ -662,7 +680,7 @@ public class OrderMerchantController extends BaseController {
                 orderCustomerResponses.add(orderCustomerResponse);
             }
 
-            response.setBaseResponse(orders.size(), offset, limit, success, orderCustomerResponses);
+            response.setBaseResponse(ordersTotal.size(), offset, limit, success, orderCustomerResponses);
             return ok(Json.toJson(response));
         } else if (authority == 403) {
             response.setBaseResponse(0, 0, 0, forbidden, null);
@@ -676,16 +694,20 @@ public class OrderMerchantController extends BaseController {
     private static String convertOrderStatus(OrderStatus orderStatus) {
         String status = null;
         switch (orderStatus) {
-            case PROCESS:
+            case NEW_ORDER:
                 status = PREPARING;
                 break;
+            case PROCESS:
+                status = ON_PROCESS;
+                break;
             case READY_TO_PICKUP:
-                status = ON_COOKING;
+                status = READY_TO_PICKUP;
                 break;
             case DELIVERY:
                 status = SERVING;
                 break;
             default:
+                status = PREPARING;
                 break;
         }
         return status;

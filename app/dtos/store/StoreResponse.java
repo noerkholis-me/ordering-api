@@ -39,5 +39,7 @@ public class StoreResponse {
     private String storeQrCode;
     @JsonProperty("merchant_id")
     private Long merchantId;
+    @JsonProperty("store_logo")
+    public String storeLogo;
 
 }

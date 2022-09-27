@@ -108,6 +108,7 @@ public class StoreController extends BaseController {
                         store.storeLatitude = Double.parseDouble(finalLotLang[0]);
                         store.storeLongitude = Double.parseDouble(finalLotLang[1]);
                         store.setStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode));
+                        store.storeLogo = storeRequest.getStoreLogo();
                         System.out.println(store.storeQrCode);
 
                         store.update();
@@ -251,6 +252,7 @@ public class StoreController extends BaseController {
                 .longitude(store.storeLongitude)
                 .storeQrCode(store.getStoreQrCode())
                 .merchantId(store.merchant.id)
+                .storeLogo(store.storeLogo)
                 .build();
     }
 
@@ -281,6 +283,7 @@ public class StoreController extends BaseController {
             store.storeCode = CommonFunction.generateRandomString(8);
         }
         store.storeQrCode = Constant.getInstance().getFrontEndUrl().concat(store.storeCode);
+        store.storeLogo = storeRequest.getStoreLogo();
     }
 
     public static String [] getLongitudeLatitude(String paramGmap){

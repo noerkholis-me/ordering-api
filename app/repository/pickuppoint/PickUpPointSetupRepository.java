@@ -60,13 +60,16 @@ public class PickUpPointSetupRepository extends Model {
 		ExpressionList<PickUpPointSetup> exp = query.where();
 
 
-		// exp = exp.disjunction();
+		exp = exp.conjunction();
 		if(storeId != null && storeId != 0) {
 			exp.eq("t0.store_id", storeId);
 		}
 		// exp = exp.like("t0.store_id", "%" + filter + "%");
         // exp = exp.endjunction();
 
+		exp = exp.disjunction();
+		exp = exp.ilike("store.storeName", "%" + filter + "%");
+		exp = exp.endJunction();
 		query = exp.query();
 
 		int total = query.findList().size();

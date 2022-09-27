@@ -33,6 +33,7 @@ public static final String passwordRegex = "^.{8,}$";
 	public static final String usernameRegex = "^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$";
 	public static final String nameRegex = "^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$";
 	public static final String skuRegex = "^[a-zA-Z]+(([_-][a-zA-Z ])?[a-zA-Z]*)*$";
+	public static final String accountbankRegex = "^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$";
 
 	// Otniel, 09-01-2017, Method untuk generate slug.
 	public static String slugGenerate(String input) {
