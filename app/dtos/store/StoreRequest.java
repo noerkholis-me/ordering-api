@@ -28,5 +28,7 @@ public class StoreRequest {
     private Long areaId;
     @JsonProperty("google_maps_url")
     private String googleMapsUrl;
+    @JsonProperty("store_logo")
+    public String storeLogo;
 
 }

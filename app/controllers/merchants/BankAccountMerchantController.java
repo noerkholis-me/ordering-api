@@ -15,6 +15,7 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.BankAccountMerchantRepository;
+import com.hokeba.util.CommonFunction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +47,13 @@ public class BankAccountMerchantController extends BaseController {
                         }
                     }
                 }
+
+                Optional<BankAccountMerchant> bankAccountNumberMerchant = BankAccountMerchantRepository.findByAccountNumberNotPrimary(request.getAccountNumber());
+                if (bankAccountNumberMerchant.isPresent()) {
+                    response.setBaseResponse(0, 0, 0, "account number "+ request.getAccountNumber() +" already exist", null);
+                    return badRequest(Json.toJson(response));
+                }
+
                 Transaction trx = Ebean.beginTransaction();
                 try {
                     BankAccountMerchant bankAccountMerchant = new BankAccountMerchant();
@@ -103,6 +111,14 @@ public class BankAccountMerchantController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
 
+                Optional<BankAccountMerchant> bankAccountNumberMerchant = BankAccountMerchantRepository.findByAccountNumberNotPrimary(request.getAccountNumber());
+                if (bankAccountNumberMerchant.isPresent()) {
+                    if (!bankAccountNumberMerchant.get().id.equals(id)) {
+                        response.setBaseResponse(0, 0, 0, "account number "+ request.getAccountNumber() +" already exist", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                }
+
                 Transaction trx = Ebean.beginTransaction();
                 try {
                     BankAccountMerchant getBankAccount = bankAccountMerchant.get();
@@ -157,7 +173,7 @@ public class BankAccountMerchantController extends BaseController {
 
                     trx.commit();
 
-                    response.setBaseResponse(1, offset, 1, success + " Update Bank Account", getBankAccount.id);
+                    response.setBaseResponse(1, offset, 1, "Success Delete Bank Account", getBankAccount.id);
                     return ok(Json.toJson(response));
                 } catch (Exception e) {
                     logger.error("Error while delete bank account", e);
@@ -283,6 +299,14 @@ public class BankAccountMerchantController extends BaseController {
             return "Account Name is not null or empty";
         if (request.getIsPrimary() == null)
             return "Is Primary is not null";
+        if (request.getAccountName().length() > 50)
+            return "Nama tidak boleh lebih dari 50 karakter";
+        if (request.getAccountNumber().length() < 10)
+            return "Account number cannot be less than 10 digits";
+        if (request.getAccountNumber().length() > 20)
+            return "Account number cannot be more than 20 digits";
+        if (!request.getAccountName().matches(CommonFunction.accountbankRegex))
+            return "Just only alphabet allowed";
         return null;
     }
 

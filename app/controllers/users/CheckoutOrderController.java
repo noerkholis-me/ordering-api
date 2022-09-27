@@ -76,21 +76,25 @@ public class CheckoutOrderController extends BaseController {
                     member = Member.find.where().eq("t0.phone", orderRequest.getCustomerPhoneNumber()).eq("merchant", store.merchant).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
                 }
                 if(member == null){
-                    memberData.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
-                    memberData.email = orderRequest.getCustomerEmail() != null && orderRequest.getCustomerEmail() != "" ? orderRequest.getCustomerEmail() : null;
-                    memberData.phone = orderRequest.getCustomerPhoneNumber() != null && orderRequest.getCustomerPhoneNumber() != "" ? orderRequest.getCustomerPhoneNumber() : null;
-                    memberData.setMerchant(store.getMerchant());
-                    memberData.save();
-                    order.setMember(memberData);
-                    order.setPhoneNumber(memberData.phone);
-                    order.setMemberName(memberData.fullName != null ? memberData.fullName : memberData.firstName + " " + memberData.lastName);
+                    if (orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != ""){
+                        memberData.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
+                        memberData.email = orderRequest.getCustomerEmail() != null && orderRequest.getCustomerEmail() != "" ? orderRequest.getCustomerEmail() : null;
+                        memberData.phone = orderRequest.getCustomerPhoneNumber() != null && orderRequest.getCustomerPhoneNumber() != "" ? orderRequest.getCustomerPhoneNumber() : null;
+                        memberData.setMerchant(store.getMerchant());
+                        memberData.save();
+                        order.setMember(memberData);
+                        order.setPhoneNumber(memberData.phone);
+                        order.setMemberName(memberData.fullName != null ? memberData.fullName : memberData.firstName + " " + memberData.lastName);
+                    } else {
+                        order.setMemberName("GENERAL CUSTOMER");
+                    }
                 }
                 if(member != null) {
                     member.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
                     member.update();
                     order.setMember(member);
                     order.setPhoneNumber(member.phone);
-                    order.setMemberName(memberData.fullName != null ? memberData.fullName : memberData.firstName + " " + memberData.lastName);
+                    order.setMemberName(member.fullName != null ? member.fullName : member.firstName + " " + member.lastName);
                 }
 
                 if (member != null && orderRequest.getUseLoyalty() == true) {
@@ -223,8 +227,9 @@ public class CheckoutOrderController extends BaseController {
                 if(orderRequest.getUseLoyalty() == true && orderRequest.getLoyaltyUsage() != null){
                     member.loyaltyPoint = member.loyaltyPoint.subtract(orderRequest.getLoyaltyUsage());
                     member.update();
-                    if(member != null){
-                    BigDecimal loyaltyMine = member.loyaltyPoint;
+                }
+                if(member != null){
+                    BigDecimal loyaltyMine = member.loyaltyPoint != null ? member.loyaltyPoint : BigDecimal.ZERO;
                     BigDecimal loyaltyPointGet = BigDecimal.ZERO;
                         if(!lpMerchant.isEmpty()){
                             for(LoyaltyPointMerchant lPoint: lpMerchant){
@@ -240,6 +245,7 @@ public class CheckoutOrderController extends BaseController {
                                 }
                                 // GET TOTAL LOYALTY
                                 if(lPoint.getCashbackType().equalsIgnoreCase("Percentage")){
+                                    loyaltyPointGet = BigDecimal.ZERO;
                                     totalLoyalty = subTotalPerCategory.multiply(lPoint.getCashbackValue());
                                     totalLoyalty = totalLoyalty.divide(new BigDecimal(100), 0, RoundingMode.DOWN);
                                     if(totalLoyalty.compareTo(lPoint.getMaxCashbackValue()) > 0){
@@ -258,11 +264,12 @@ public class CheckoutOrderController extends BaseController {
                                         member.update();
                                     }
                                 } else {
+                                    loyaltyPointGet = BigDecimal.ZERO;
                                     totalLoyalty = lPoint.getCashbackValue();
                                     System.out.print("Loyalty nya (max point): ");
                                     System.out.println(totalLoyalty);
                                     loyaltyPointGet = loyaltyPointGet.add(totalLoyalty);
-                                    member.loyaltyPoint = loyaltyMine.add(totalLoyalty);
+                                    member.loyaltyPoint = loyaltyMine != null ? loyaltyMine.add(totalLoyalty) : totalLoyalty;
                                     member.update();
                                 }
                             }
@@ -289,7 +296,6 @@ public class CheckoutOrderController extends BaseController {
                         lpHistory.setExpiredDate(date);
                         lpHistory.setMerchant(store.merchant);
                         lpHistory.save();
-                    }
                 }
 
                 order.setSubTotal(orderRequest.getSubTotal());
@@ -402,6 +408,11 @@ public class CheckoutOrderController extends BaseController {
                         orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
                         orderTransactionResponse.setMetadata(initiatePaymentResponse.getMetadata());
 
+                        if (member != null){
+                            member.lastPurchase = new Date();
+                            member.update();
+                        }
+
                         response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
                         return ok(Json.toJson(response));
                     }
@@ -466,6 +477,11 @@ public class CheckoutOrderController extends BaseController {
                     orderTransactionResponse.setStatus(order.getStatus());
                     orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
                     orderTransactionResponse.setMetadata(null);
+
+                    if (member != null){
+                        member.lastPurchase = new Date();
+                        member.update();
+                    }
 
                     response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
                     return ok(Json.toJson(response));

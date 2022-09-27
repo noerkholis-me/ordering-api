@@ -209,6 +209,11 @@ GET		/megamenubanner/:id							controllers.web.BannerMegaMenuController.detail(i
 
 ############################## FOR API MERCHANTS ######################################
 POST    /merchants/session/login              		controllers.merchants.SessionsController.signIn()
+######## enhance existing login to can handle multi merchant account #########
+POST    /merchants/session/login_v2/step_1          controllers.merchants.SessionsController.signInV2Step1()
+GET     /merchants/list              	            controllers.merchants.MerchantController.listMerchantsByEmail()
+POST    /merchants/session/login_v2/step_2          controllers.merchants.SessionsController.signInV2Step2()
+##############################################################################
 POST    /merchants/session/signup              		controllers.merchants.SessionsController.signUp()
 GET     /merchants/session/logout              		controllers.merchants.SessionsController.signOut()
 PATCH 	/merchants/session/activate					controllers.merchants.SessionsController.activate()
@@ -393,6 +398,8 @@ GET     /master/province                            controllers.masters.ShipperC
 GET     /master/city/:id/province                   controllers.masters.ShipperController.getAllCityByProvinceId(id: Long, cityName: String ?= "")
 GET     /master/suburb/:id/city                     controllers.masters.ShipperController.getAllSuburbByCityId(id: Long, suburbName: String ?= "")
 GET     /master/area/:id/suburb                     controllers.masters.ShipperController.getAllAreaBySuburbId(id: Long, areaName: String ?= "")
+#### new shipper API for delivery order ######
+GET     /master/domesticrates                       controllers.masters.ShipperController.getAllDomesticRatesByAreaId(storeId: Long ?= 0, destinationAreaId: Long ?= 0, price: Integer ?= 0, latitude: Double ?= 0, longitude: Double ?= 0, weight: Double ?= 0, length: Double ?= 0, wide: Double ?= 0, height: Double ?= 0, storeType: Int ?= 0)
 
 #STORE
 POST    /merchant/store                             controllers.merchants.StoreController.createStore()
@@ -423,6 +430,7 @@ GET     /product/kiosk/list                         controllers.product.ProductM
 
 #PRODUCT RECOMMENDATION
 GET     /product/recommendation                     controllers.product.ProductMerchantController.listRecommendedProduct(merchant_id: Long ?= 0)
+GET     /product/bestseller                     controllers.product.ProductMerchantController.listBestSeller(merchant_id: Long ?= 0)
 
 #BANNERS
 POST    /merchant/banners                           controllers.banners.BannersMerchantController.createBanners()
@@ -550,7 +558,7 @@ GET         /merchant/finance/withdraw/download                 controllers.fina
 GET         /merchant/finance/transaction/active-balance                 controllers.finance.FinanceTransactionController.getActiveBalance(store_id:Long ?= 0)
 
 # ORDER LIST
-GET         /merchant/orders/list                 controllers.order.OrderMerchantController.getOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="")
+GET         /merchant/orders/list                 controllers.order.OrderMerchantController.getOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="", filter:String?="")
 GET         /orders/status                       controllers.order.OrderMerchantController.statusOrderMQ(order_number:String ?= "")
 # UPDATE PROFILE
 PUT         /merchant/update/profile              controllers.users.UpdateProfileController.updateMerchantData()
