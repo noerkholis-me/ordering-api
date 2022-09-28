@@ -108,7 +108,7 @@ public class Order extends BaseModel {
     private UserMerchant userMerchant;
 
     @Column(name = "shipper_order_id")
-    public String shipperOrderId;
+    private String shipperOrderId;
 
     // ================================================================ //
 

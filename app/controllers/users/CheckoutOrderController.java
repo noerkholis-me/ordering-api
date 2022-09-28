@@ -493,7 +493,7 @@ public class CheckoutOrderController extends BaseController {
 
                             if (hasil.equals("success")) {
                                 String idShipperOrder = (String)jsonResponse.get("data").get("id").asText();
-                                order.shipperOrderId = idShipperOrder;
+                                order.setShipperOrderId(idShipperOrder);
                             }
                         }
 
