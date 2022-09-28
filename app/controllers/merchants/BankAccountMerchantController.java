@@ -15,6 +15,7 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.BankAccountMerchantRepository;
+import com.hokeba.util.CommonFunction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -300,6 +301,12 @@ public class BankAccountMerchantController extends BaseController {
             return "Is Primary is not null";
         if (request.getAccountName().length() > 50)
             return "Nama tidak boleh lebih dari 50 karakter";
+        if (request.getAccountNumber().length() < 10)
+            return "Account number cannot be less than 10 digits";
+        if (request.getAccountNumber().length() > 20)
+            return "Account number cannot be more than 20 digits";
+        if (!request.getAccountName().matches(CommonFunction.accountbankRegex))
+            return "Just only alphabet allowed";
         return null;
     }
 

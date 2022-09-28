@@ -133,6 +133,8 @@ public class CheckoutOrderController extends BaseController {
                         order.setMember(memberData);
                         order.setPhoneNumber(memberData.phone);
                         order.setMemberName(memberData.fullName != null ? memberData.fullName : memberData.firstName + " " + memberData.lastName);
+                    } else {
+                        order.setMemberName("GENERAL CUSTOMER");
                     }
                 }
                 if(member != null) {
