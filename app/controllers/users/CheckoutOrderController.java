@@ -99,6 +99,26 @@ public class CheckoutOrderController extends BaseController {
                 nodeBaru.set("consigneePhoneNumber", jsonNode.get("customer_phone_number"));
                 nodeBaru.set("originAddress", jsonNode.get("origin_address"));
                 nodeBaru.set("destinationAddress", jsonNode.get("destination_address"));
+
+                for (JsonNode jNode : jsonNode) {
+                    if (jNode instanceof ObjectNode) {
+                        ObjectNode objectNode = (ObjectNode) jNode;
+                        objectNode.remove("origin_area_id");
+                        objectNode.remove("destination_area_id");
+                        objectNode.remove("length");
+                        objectNode.remove("wide");
+                        objectNode.remove("height");
+                        objectNode.remove("weight");
+                        objectNode.remove("total_price");
+                        objectNode.remove("rate_id");
+                        objectNode.remove("content");
+                        objectNode.remove("package_type");
+                        objectNode.remove("customer_name");
+                        objectNode.remove("customer_phone_number");
+                        objectNode.remove("origin_address");
+                        objectNode.remove("destination_address");
+                    }
+                }
 //                order.orderIdShipper = node.has("shipperName") ? node.get("shipperName").asText() : "";
 
                 // request order
