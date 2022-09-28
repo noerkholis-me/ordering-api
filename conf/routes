@@ -628,3 +628,5 @@ GET         /external/:orderNumber/get-order-detail         controllers.webhook.
 PUT         /external/update-status-order                   controllers.webhook.OrderWebHookController.updateOrderStatus()
 
 PUT         /users/update-profile-customer                  controllers.users.SessionsController.updateProfile()
+####### webhook for get shipping status ##########
+POST 	/webhook/shipper-status 							controllers.users.WebhookShipperController.webhookStatusForSandbox()

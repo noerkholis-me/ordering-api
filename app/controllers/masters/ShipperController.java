@@ -254,7 +254,7 @@ public class ShipperController extends BaseController {
                     while ((lineDomesticRates = readerDomesticRates.readLine()) != null) {
                         responseContentDomesticRates.append(lineDomesticRates);
                     }
-//                    readerDomesticRates.close();
+                    readerDomesticRates.close();
                     // END READING AND ADDING DOMESTIC RATES
 
                     JSONObject jsonDomesticRates = new JSONObject(responseContentDomesticRates.toString());
