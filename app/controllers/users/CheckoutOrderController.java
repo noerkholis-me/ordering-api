@@ -85,20 +85,24 @@ public class CheckoutOrderController extends BaseController {
             try {
                 logger.info(">>> incoming order request..." + jsonNode.toString());
 
-                nodeBaru.set("o", jsonNode.get("origin_area_id"));
-                nodeBaru.set("d", jsonNode.get("destination_area_id"));
-                nodeBaru.set("l", jsonNode.get("length"));
-                nodeBaru.set("w", jsonNode.get("wide"));
-                nodeBaru.set("h", jsonNode.get("height"));
-                nodeBaru.set("wt", jsonNode.get("weight"));
-                nodeBaru.set("v", jsonNode.get("total_price"));
-                nodeBaru.set("rateID", jsonNode.get("rate_id"));
-                nodeBaru.set("contents", jsonNode.get("content"));
-                nodeBaru.set("packageType", jsonNode.get("package_type"));
-                nodeBaru.set("consigneeName", jsonNode.get("customer_name"));
-                nodeBaru.set("consigneePhoneNumber", jsonNode.get("customer_phone_number"));
-                nodeBaru.set("originAddress", jsonNode.get("origin_address"));
-                nodeBaru.set("destinationAddress", jsonNode.get("destination_address"));
+                String orderType = jsonNode.get("order_type").asText();
+
+                if (orderType.equalsIgnoreCase("DELIVERY")) {
+                    nodeBaru.set("o", jsonNode.get("origin_area_id"));
+                    nodeBaru.set("d", jsonNode.get("destination_area_id"));
+                    nodeBaru.set("l", jsonNode.get("length"));
+                    nodeBaru.set("w", jsonNode.get("wide"));
+                    nodeBaru.set("h", jsonNode.get("height"));
+                    nodeBaru.set("wt", jsonNode.get("weight"));
+                    nodeBaru.set("v", jsonNode.get("total_price"));
+                    nodeBaru.set("rateID", jsonNode.get("rate_id"));
+                    nodeBaru.set("contents", jsonNode.get("content"));
+                    nodeBaru.set("packageType", jsonNode.get("package_type"));
+                    nodeBaru.set("consigneeName", jsonNode.get("customer_name"));
+                    nodeBaru.set("consigneePhoneNumber", jsonNode.get("customer_phone_number"));
+                    nodeBaru.set("originAddress", jsonNode.get("origin_address"));
+                    nodeBaru.set("destinationAddress", jsonNode.get("destination_address"));
+                }
 
                 for (JsonNode jNode : jsonNode) {
                     if (jNode instanceof ObjectNode) {
