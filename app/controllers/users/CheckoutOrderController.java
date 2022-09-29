@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.http.response.global.ServiceResponse;
+import com.hokeba.util.Secured;
 import controllers.BaseController;
 import dtos.loyalty.OrderForLoyaltyData;
 import dtos.order.OrderStatusChanges;
@@ -42,6 +43,7 @@ import org.json.JSONObject;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import play.mvc.Security;
 import repository.OrderPaymentRepository;
 import repository.OrderRepository;
 import repository.ProductAddOnRepository;
@@ -69,6 +71,7 @@ public class CheckoutOrderController extends BaseController {
     private static final String API_KEY_SHIPPER = "Q2JSCJ6lPZcraO4P6zDBr6vmoQVWsa3j6HLvaHWbgoPMyKrWljKG9vOteIELOz2u";
     private static final String API_SHIPPER_ADDRESS = "https://api.sandbox.shipper.id/public/v1/";
     private static final String API_SHIPPER_DOMESTIC_ORDER = "orders/domestics?apiKey=";
+    private static final String API_SHIPPER_TRACKING = "orders?apiKey=";
 
     private final static Logger.ALogger logger = Logger.of(CheckoutOrderController.class);
 
@@ -765,6 +768,44 @@ public class CheckoutOrderController extends BaseController {
         }
         response.setBaseResponse(0, 0, 0, error, null);
         return ok(Json.toJson(response));
+    }
+
+    @Security.Authenticated(Secured.class)
+    public static Result getTrackingShipper(String id){
+
+        String domesticTrackingUrl = API_SHIPPER_ADDRESS + API_SHIPPER_TRACKING + API_KEY_SHIPPER;
+
+        try{
+
+            StringBuilder output = new StringBuilder();
+            StringBuilder outputError = new StringBuilder();
+
+            domesticTrackingUrl += "&id="+id;
+
+            ProcessBuilder pb2 = new ProcessBuilder(
+                    "curl",
+                    "-XGET",
+                    "-H", "user-agent: Shipper/",
+                    domesticTrackingUrl
+            );
+
+            Process p = pb2.start();
+
+            InputStream is = p.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader br = new BufferedReader(isr);
+
+            String line = br.readLine();
+            JsonNode jsonResponse = new ObjectMapper().readValue(line, JsonNode.class);
+
+            return ok(Json.toJson(jsonResponse));
+
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 }
