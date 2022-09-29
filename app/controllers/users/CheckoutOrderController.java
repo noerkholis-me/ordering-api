@@ -500,6 +500,7 @@ public class CheckoutOrderController extends BaseController {
                         if (orderRequest.getOrderType().equalsIgnoreCase("DELIVERY")) {
                             String domesticUrl = API_SHIPPER_ADDRESS + API_SHIPPER_DOMESTIC_ORDER + API_KEY_SHIPPER;
                             String bodyRequest = nodeBaru.toString();
+                            System.out.println("domestic order request : "+bodyRequest);
                             ProcessBuilder shipperBuilder = new ProcessBuilder(
                                     "curl",
                                     "-XPOST",
@@ -519,10 +520,13 @@ public class CheckoutOrderController extends BaseController {
                             String line =  br.readLine();
                             JsonNode jsonResponse = new ObjectMapper().readValue(line, JsonNode.class);
                             String hasil = (String)jsonResponse.get("status").asText();
+                            System.out.println("status domestic order : "+hasil);
 
                             if (hasil.equals("success")) {
                                 String idShipperOrder = (String)jsonResponse.get("data").get("id").asText();
+                                System.out.println("order id shipper : "+idShipperOrder);
                                 order.setShipperOrderId(idShipperOrder);
+                                order.save();
                             }
                         }
 
@@ -770,7 +774,6 @@ public class CheckoutOrderController extends BaseController {
         return ok(Json.toJson(response));
     }
 
-    @Security.Authenticated(Secured.class)
     public static Result getTrackingShipper(String id){
 
         String domesticTrackingUrl = API_SHIPPER_ADDRESS + API_SHIPPER_TRACKING + API_KEY_SHIPPER;
