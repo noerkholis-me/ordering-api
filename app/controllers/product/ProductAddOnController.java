@@ -213,7 +213,7 @@ public class ProductAddOnController extends BaseController {
 
     private static String validateRequest(ProductAddOnRequest productAddOnRequest) {
         if (productAddOnRequest == null)
-        return "Bidang tidak boleh nol atau kosong";
+            return "Bidang tidak boleh nol atau kosong";
         if (productAddOnRequest.getProductId() == null || productAddOnRequest.getProductId() == 0)
             return "Produk tidak boleh nol atau kosong";
         if (productAddOnRequest.getProductAssignId() == null || productAddOnRequest.getProductAssignId() == 0)
