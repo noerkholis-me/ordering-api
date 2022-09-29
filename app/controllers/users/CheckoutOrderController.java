@@ -20,11 +20,7 @@ import dtos.payment.InitiatePaymentRequest;
 import dtos.payment.InitiatePaymentResponse;
 import dtos.payment.PaymentRequest;
 import dtos.payment.PaymentServiceRequest;
-import models.Member;
-import models.Merchant;
-import models.Store;
-import models.SubsCategoryMerchant;
-import models.UserMerchant;
+import models.*;
 import models.loyalty.LoyaltyPointHistory;
 import models.loyalty.LoyaltyPointMerchant;
 import models.merchant.MerchantPayment;
@@ -59,10 +55,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import java.math.RoundingMode;
 
@@ -84,6 +77,7 @@ public class CheckoutOrderController extends BaseController {
         // if (authority == 200 || authority == 203) {
             JsonNode jsonNode = request().body().asJson();
             ObjectNode nodeBaru = (ObjectNode) jsonNode;
+//            ObjectNode nodeBaru = new ObjectNode();
             Transaction txn = Ebean.beginTransaction();
             try {
                 logger.info(">>> incoming order request..." + jsonNode.toString());
@@ -107,25 +101,81 @@ public class CheckoutOrderController extends BaseController {
                     nodeBaru.set("destinationAddress", jsonNode.get("destination_address"));
                 }
 
-                for (JsonNode jNode : jsonNode) {
-                    if (jNode instanceof ObjectNode) {
-                        ObjectNode objectNode = (ObjectNode) jNode;
-                        objectNode.remove("origin_area_id");
-                        objectNode.remove("destination_area_id");
-                        objectNode.remove("length");
-                        objectNode.remove("wide");
-                        objectNode.remove("height");
-                        objectNode.remove("weight");
-                        objectNode.remove("total_price");
-                        objectNode.remove("rate_id");
-                        objectNode.remove("content");
-                        objectNode.remove("package_type");
-                        objectNode.remove("customer_name");
-                        objectNode.remove("customer_phone_number");
-                        objectNode.remove("origin_address");
-                        objectNode.remove("destination_address");
-                    }
-                }
+                nodeBaru.remove("store_code");
+                nodeBaru.remove("order_type");
+                nodeBaru.remove("device_type");
+                nodeBaru.remove("customer_name");
+                nodeBaru.remove("customer_email");
+                nodeBaru.remove("customer_phone_number");
+                nodeBaru.remove("sub_total");
+                nodeBaru.remove("table_id");
+                nodeBaru.remove("total_price");
+                nodeBaru.remove("pickup_point_id");
+                nodeBaru.remove("payment_detail");
+//                        "":{
+//                            "payment_type":"virtual_account",
+//                            "payment_channel":"virtual_account",
+//                            "tax_percentage":11,
+//                            "service_percentage":5,
+//                            "tax_price":1760,
+//                            "service_price":800,
+//                            "payment_fee_type":"OWNER",
+//                            "payment_fee_customer":2250,
+//                            "payment_fee_owner":2250,
+//                            "total_amount":20810,
+//                            "bank_code":"BCA"
+//                },
+                nodeBaru.remove("product_order_detail");
+//                :[
+//                {
+//                    "product_id":701,
+//                        "product_price":19901,
+//                        "product_qty":1,
+//                        "sub_total":19901,
+//                        "is_customizable":false,
+//                        "notes":"",
+//                        "product_add_on":[]
+//                },
+//                {
+//                    "product_id":43,
+//                        "product_price":16000,
+//                        "product_qty":1,
+//                        "sub_total":16000,
+//                        "is_customizable":true,
+//                        "notes":"",
+//                        "product_add_on":[]
+//                }
+//                ],
+                nodeBaru.remove("use_loyalty");
+                nodeBaru.remove("loyalty_usage");
+                nodeBaru.remove("origin_area_id");
+                nodeBaru.remove("destination_area_id");
+                nodeBaru.remove("length");
+                nodeBaru.remove("wide");
+                nodeBaru.remove("height");
+                nodeBaru.remove("weight");
+                nodeBaru.remove("store_name");
+                nodeBaru.remove("store_number");
+
+//                for (JsonNode jNode : jsonNode) {
+//                    if (jNode instanceof ObjectNode) {
+//                        ObjectNode objectNode = (ObjectNode) jNode;
+//                        objectNode.remove("origin_area_id");
+//                        objectNode.remove("destination_area_id");
+//                        objectNode.remove("length");
+//                        objectNode.remove("wide");
+//                        objectNode.remove("height");
+//                        objectNode.remove("weight");
+//                        objectNode.remove("total_price");
+//                        objectNode.remove("rate_id");
+//                        objectNode.remove("content");
+//                        objectNode.remove("package_type");
+//                        objectNode.remove("customer_name");
+//                        objectNode.remove("customer_phone_number");
+//                        objectNode.remove("origin_address");
+//                        objectNode.remove("destination_address");
+//                    }
+//                }
 //                order.orderIdShipper = node.has("shipperName") ? node.get("shipperName").asText() : "";
 
                 // request order
@@ -426,8 +476,8 @@ public class CheckoutOrderController extends BaseController {
                         request.setCustomerPhoneNumber(member.phone);
                     }
 
-                    ((ObjectNode) jsonNode).put("externalID", orderNumber);
-                    nodeBaru.set("externalID", jsonNode.get("externalID"));
+//                    ((ObjectNode) jsonNode).put("externalID", orderNumber);
+//                    nodeBaru.set("externalID", jsonNode.get("externalID"));
 
                     // please
                     PaymentServiceRequest paymentServiceRequest = PaymentServiceRequest.builder()
@@ -519,6 +569,7 @@ public class CheckoutOrderController extends BaseController {
 
                             String line =  br.readLine();
                             JsonNode jsonResponse = new ObjectMapper().readValue(line, JsonNode.class);
+                            System.out.println("domestic response : "+jsonResponse.toString());
                             String hasil = (String)jsonResponse.get("status").asText();
                             System.out.println("status domestic order : "+hasil);
 
@@ -810,5 +861,104 @@ public class CheckoutOrderController extends BaseController {
 
         return null;
     }
+
+//    public static Result deliveryStatus (String memberId) {
+//
+//        //System.out.println("==============>>>>>>>>>>>>>>>>>>> " + memberId);
+//        Member member = Member.find.byId(Long.parseLong(memberId));
+//
+//        if (member == null) {
+//            messageDescription.put("deskripsi", "Member not found");
+//            response.setBaseResponse(1, 0, 1, error, messageDescription);
+//            return notFound(Json.toJson(response));
+//        }
+//
+//
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+//        SOrder dataOrder = SOrder.find.where()
+//                .eq("t0.member_id", member.id)
+//                .eq("t0.is_deleted",false)
+//                .orderBy("t0.id desc")
+//                .setMaxRows(1).findUnique();
+//
+//        if (dataOrder == null) {
+//            messageDescription.put("deskripsi", "Order not found");
+//            response.setBaseResponse(1, 0, 1, error, messageDescription);
+//            return notFound(Json.toJson(response));
+//        }
+//
+//
+//        try {
+//
+//            List<Map<String, Object>> details = new LinkedList<>();
+//            Map<String, Object> f = new HashMap<>();
+//
+//            String tmpStatusDescription = "";
+//            String tmpStatusPayment = "";
+//
+//            // System.out.println("======= -------- " + dataOrder.id);
+//            //System.out.println(">>>>>>>>>>> "  +dataOrder.getPaymentStatus());
+//
+//            if(dataOrder.getPaymentStatus()=="Paid"){
+//                tmpStatusDescription = "Your order is being prepared";
+//                tmpStatusPayment = "PAYMENT_VERIFY";
+//            }
+//            else if(dataOrder.getPaymentStatus()=="Process"){
+//                tmpStatusDescription = "Your order is being process";
+//                tmpStatusPayment = "PROCESS";
+//            }
+//            else if(dataOrder.getPaymentStatus()=="Pickup"){
+//                tmpStatusDescription = "Your order is ready to deliver";
+//                tmpStatusPayment= "PICK_UP";
+//            }
+//            else if(dataOrder.getPaymentStatus()=="On Delivery"){
+//                tmpStatusDescription = "Your order is being delivered";
+//                tmpStatusPayment= "DELIVERY";
+//            }
+//            else if(dataOrder.getPaymentStatus()=="Closed"){
+//                tmpStatusDescription = "Your order is already closed";
+//                tmpStatusPayment= "CLOSED";
+//            }
+//            else if(dataOrder.getPaymentStatus()=="Cancel"){
+//                tmpStatusDescription = "Your order is cancel";
+//                tmpStatusPayment= "CANCEL";
+//            }
+//            else if(dataOrder.getPaymentStatus()=="Waiting for Confirmation"){
+//                // tmpStatusDescription = "Your order is waiting for confirmation";
+//                // tmpStatusDescription = "Waiting for confirmation";
+//                tmpStatusDescription = "Your order need to confirm";
+//                tmpStatusPayment= "WAITING_CONFIRMATION";
+//            }
+//            else{
+//                tmpStatusDescription = "Your payment is unpaid";
+//                tmpStatusPayment= "UNPAID";
+//            }
+//
+//            Double tmpDiscount = dataOrder.discount!=null ? dataOrder.discount:0.0;
+//            Double tmpServiceFee = dataOrder.serviceFee!=null ? dataOrder.serviceFee:0.0;
+//
+//            List<SOrderDetail> dataDetails = SOrderDetail.find.where().eq("order_id", dataOrder.id).findList();
+//
+//            f.put("total_item", dataDetails.size());
+//            // f.put("total_price",CommonFunction.numberFormat(dataOrder.totalPrice-tmpDiscount+tmpServiceFee));
+//            // f.put("total_price",Double.valueOf(dataOrder.totalPrice-tmpDiscount+tmpServiceFee));
+//            f.put("total_price",Double.valueOf(dataOrder.totalPrice-tmpDiscount+tmpServiceFee+dataOrder.fullServicesFee));
+//            f.put("status",tmpStatusPayment);
+//            f.put("status_description",tmpStatusDescription);
+//            f.put("order_number",dataOrder.orderNumber);
+//
+//            details.add(f);
+//
+//            // response.setBaseResponse(1, 1, 1, "Success", details);
+//            response.setBaseResponse(1, 1, 1, "Success", f);
+//            return ok(Json.toJson(response));
+//
+//
+//        }catch(Exception err){
+//            err.printStackTrace();
+//        }
+//
+//        return null;
+//    }
 
 }
