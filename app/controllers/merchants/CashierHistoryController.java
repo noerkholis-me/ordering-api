@@ -646,6 +646,10 @@ public class CashierHistoryController extends BaseController {
             try {
                 System.out.println("user merchant id >>> ");
                 System.out.println(Json.toJson(ownUser));
+                if (startDate.compareTo(endDate) > 0) {
+                        response.setBaseResponse(0, 0, 0, "tanggal awal tidak boleh melebihi tanggal akhir", null);
+                        return badRequest(Json.toJson(response));
+                }
                 Query<CashierHistoryMerchant> query = CashierHistoryMerchantRepository.findAllCashierReportByMerchant(ownUser);
                 List<CashierHistoryMerchant> cashierHistoryMerchant = new ArrayList<>();
                 Store store = null;
