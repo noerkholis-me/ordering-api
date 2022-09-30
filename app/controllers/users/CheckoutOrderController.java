@@ -101,17 +101,17 @@ public class CheckoutOrderController extends BaseController {
                     nodeBaru.set("destinationAddress", jsonNode.get("destination_address"));
                 }
 
-                nodeBaru.remove("store_code");
-                nodeBaru.remove("order_type");
-                nodeBaru.remove("device_type");
-                nodeBaru.remove("customer_name");
-                nodeBaru.remove("customer_email");
-                nodeBaru.remove("customer_phone_number");
-                nodeBaru.remove("sub_total");
-                nodeBaru.remove("table_id");
-                nodeBaru.remove("total_price");
-                nodeBaru.remove("pickup_point_id");
-                nodeBaru.remove("payment_detail");
+//                nodeBaru.remove("store_code");
+//                nodeBaru.remove("order_type");
+//                nodeBaru.remove("device_type");
+//                nodeBaru.remove("customer_name");
+//                nodeBaru.remove("customer_email");
+//                nodeBaru.remove("customer_phone_number");
+//                nodeBaru.remove("sub_total");
+//                nodeBaru.remove("table_id");
+//                nodeBaru.remove("total_price");
+//                nodeBaru.remove("pickup_point_id");
+//                nodeBaru.remove("payment_detail");
 //                        "":{
 //                            "payment_type":"virtual_account",
 //                            "payment_channel":"virtual_account",
@@ -125,7 +125,7 @@ public class CheckoutOrderController extends BaseController {
 //                            "total_amount":20810,
 //                            "bank_code":"BCA"
 //                },
-                nodeBaru.remove("product_order_detail");
+//                nodeBaru.remove("product_order_detail");
 //                :[
 //                {
 //                    "product_id":701,
@@ -146,16 +146,16 @@ public class CheckoutOrderController extends BaseController {
 //                        "product_add_on":[]
 //                }
 //                ],
-                nodeBaru.remove("use_loyalty");
-                nodeBaru.remove("loyalty_usage");
-                nodeBaru.remove("origin_area_id");
-                nodeBaru.remove("destination_area_id");
-                nodeBaru.remove("length");
-                nodeBaru.remove("wide");
-                nodeBaru.remove("height");
-                nodeBaru.remove("weight");
-                nodeBaru.remove("store_name");
-                nodeBaru.remove("store_number");
+//                nodeBaru.remove("use_loyalty");
+//                nodeBaru.remove("loyalty_usage");
+//                nodeBaru.remove("origin_area_id");
+//                nodeBaru.remove("destination_area_id");
+//                nodeBaru.remove("length");
+//                nodeBaru.remove("wide");
+//                nodeBaru.remove("height");
+//                nodeBaru.remove("weight");
+//                nodeBaru.remove("store_name");
+//                nodeBaru.remove("store_number");
 
 //                for (JsonNode jNode : jsonNode) {
 //                    if (jNode instanceof ObjectNode) {
