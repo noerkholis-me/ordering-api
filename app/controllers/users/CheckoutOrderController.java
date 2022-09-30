@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.http.response.global.ServiceResponse;
-import com.hokeba.util.Secured;
 import controllers.BaseController;
 import dtos.loyalty.OrderForLoyaltyData;
 import dtos.order.OrderStatusChanges;
@@ -39,7 +38,6 @@ import org.json.JSONObject;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
-import play.mvc.Security;
 import repository.OrderPaymentRepository;
 import repository.OrderRepository;
 import repository.ProductAddOnRepository;
@@ -55,9 +53,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.*;
 
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 public class CheckoutOrderController extends BaseController {
 
@@ -101,81 +102,8 @@ public class CheckoutOrderController extends BaseController {
                     nodeBaru.set("destinationAddress", jsonNode.get("destination_address"));
                 }
 
-//                nodeBaru.remove("store_code");
-//                nodeBaru.remove("order_type");
-//                nodeBaru.remove("device_type");
-//                nodeBaru.remove("customer_name");
-//                nodeBaru.remove("customer_email");
-//                nodeBaru.remove("customer_phone_number");
-//                nodeBaru.remove("sub_total");
-//                nodeBaru.remove("table_id");
-//                nodeBaru.remove("total_price");
-//                nodeBaru.remove("pickup_point_id");
-//                nodeBaru.remove("payment_detail");
-//                        "":{
-//                            "payment_type":"virtual_account",
-//                            "payment_channel":"virtual_account",
-//                            "tax_percentage":11,
-//                            "service_percentage":5,
-//                            "tax_price":1760,
-//                            "service_price":800,
-//                            "payment_fee_type":"OWNER",
-//                            "payment_fee_customer":2250,
-//                            "payment_fee_owner":2250,
-//                            "total_amount":20810,
-//                            "bank_code":"BCA"
-//                },
-//                nodeBaru.remove("product_order_detail");
-//                :[
-//                {
-//                    "product_id":701,
-//                        "product_price":19901,
-//                        "product_qty":1,
-//                        "sub_total":19901,
-//                        "is_customizable":false,
-//                        "notes":"",
-//                        "product_add_on":[]
-//                },
-//                {
-//                    "product_id":43,
-//                        "product_price":16000,
-//                        "product_qty":1,
-//                        "sub_total":16000,
-//                        "is_customizable":true,
-//                        "notes":"",
-//                        "product_add_on":[]
-//                }
-//                ],
-//                nodeBaru.remove("use_loyalty");
-//                nodeBaru.remove("loyalty_usage");
-//                nodeBaru.remove("origin_area_id");
-//                nodeBaru.remove("destination_area_id");
-//                nodeBaru.remove("length");
-//                nodeBaru.remove("wide");
-//                nodeBaru.remove("height");
-//                nodeBaru.remove("weight");
-//                nodeBaru.remove("store_name");
-//                nodeBaru.remove("store_number");
+                System.out.println(">>> incoming order request 1..." + nodeBaru.toString());
 
-//                for (JsonNode jNode : jsonNode) {
-//                    if (jNode instanceof ObjectNode) {
-//                        ObjectNode objectNode = (ObjectNode) jNode;
-//                        objectNode.remove("origin_area_id");
-//                        objectNode.remove("destination_area_id");
-//                        objectNode.remove("length");
-//                        objectNode.remove("wide");
-//                        objectNode.remove("height");
-//                        objectNode.remove("weight");
-//                        objectNode.remove("total_price");
-//                        objectNode.remove("rate_id");
-//                        objectNode.remove("content");
-//                        objectNode.remove("package_type");
-//                        objectNode.remove("customer_name");
-//                        objectNode.remove("customer_phone_number");
-//                        objectNode.remove("origin_address");
-//                        objectNode.remove("destination_address");
-//                    }
-//                }
 //                order.orderIdShipper = node.has("shipperName") ? node.get("shipperName").asText() : "";
 
                 // request order
@@ -549,6 +477,32 @@ public class CheckoutOrderController extends BaseController {
 
                         if (orderRequest.getOrderType().equalsIgnoreCase("DELIVERY")) {
                             String domesticUrl = API_SHIPPER_ADDRESS + API_SHIPPER_DOMESTIC_ORDER + API_KEY_SHIPPER;
+
+                            //start remove fields for nodeBaru
+                            nodeBaru.remove("store_code");
+                            nodeBaru.remove("order_type");
+                            nodeBaru.remove("device_type");
+                            nodeBaru.remove("customer_name");
+                            nodeBaru.remove("customer_email");
+                            nodeBaru.remove("customer_phone_number");
+                            nodeBaru.remove("sub_total");
+                            nodeBaru.remove("table_id");
+                            nodeBaru.remove("total_price");
+                            nodeBaru.remove("pickup_point_id");
+                            nodeBaru.remove("payment_detail");
+                            nodeBaru.remove("product_order_detail");
+                            nodeBaru.remove("use_loyalty");
+                            nodeBaru.remove("loyalty_usage");
+                            nodeBaru.remove("origin_area_id");
+                            nodeBaru.remove("destination_area_id");
+                            nodeBaru.remove("length");
+                            nodeBaru.remove("wide");
+                            nodeBaru.remove("height");
+                            nodeBaru.remove("weight");
+                            nodeBaru.remove("store_name");
+                            nodeBaru.remove("store_number");
+                            //end remove
+
                             String bodyRequest = nodeBaru.toString();
                             System.out.println("domestic order request : "+bodyRequest);
                             ProcessBuilder shipperBuilder = new ProcessBuilder(
