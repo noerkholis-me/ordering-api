@@ -475,6 +475,8 @@ public class CheckoutOrderController extends BaseController {
                             member.update();
                         }
 
+                        // harus ditambah return klo error
+                        // tambah lat dan long saat order shipper ke shipper API v3
                         if (orderRequest.getOrderType().equalsIgnoreCase("DELIVERY")) {
                             String domesticUrl = API_SHIPPER_ADDRESS + API_SHIPPER_DOMESTIC_ORDER + API_KEY_SHIPPER;
 
