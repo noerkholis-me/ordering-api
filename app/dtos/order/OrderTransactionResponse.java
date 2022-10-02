@@ -29,5 +29,7 @@ public class OrderTransactionResponse {
     @JsonProperty("payment_method")
     private String paymentMethod;
     private MetaResponse metadata;
+    @JsonProperty("shipper_order_id")
+    private String shipperOrderId;
 
 }
