@@ -426,7 +426,8 @@ GET     /product/detail                             controllers.product.ProductM
 GET     /product/additional                         controllers.product.ProductMerchantController.productAdditional(product_id: Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0)
 GET     /pos/product/additional                         controllers.product.ProductMerchantController.posProductAdditional(product_id: Long ?= 0, store_id:Long ?= 0)
 
-GET     /product/kiosk/list                         controllers.product.ProductMerchantController.productListKiosk(brand_id:Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0)
+GET     /product/kiosk/list                         controllers.product.ProductMerchantController.productListKiosk(brand_id:Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "")
+GET     /product/mobile-qr/list                     controllers.product.ProductMerchantController.productListKiosk(brand_id:Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "")
 
 #PRODUCT RECOMMENDATION
 GET     /product/recommendation                     controllers.product.ProductMerchantController.listRecommendedProduct(merchant_id: Long ?= 0)

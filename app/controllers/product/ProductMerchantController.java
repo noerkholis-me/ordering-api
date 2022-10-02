@@ -768,12 +768,18 @@ public class ProductMerchantController extends BaseController {
         return badRequest(Json.toJson(response));
     }
     // FOR HOME CUSTOMER
-    public static Result productListKiosk(Long brandId, Long merchantId, Long storeId, Long categoryId) {
+    public static Result productListKiosk(Long brandId, Long merchantId, Long storeId, Long categoryId, String keyword) {
         if (brandId != null) {
             Transaction trx = Ebean.beginTransaction();
             try {
 
-                String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.subs_category_merchant_id = "+categoryId+" and pm.brand_merchant_id = "+brandId+" and pm.is_active = "+true+" and pm.is_deleted = false)";
+                String querySql;
+                String searchQuery = keyword != null && keyword.length() > 0 ? " and lower(pm.product_name) like '%"+keyword+"%'" : "";
+                if (categoryId > 0 ) {
+                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.subs_category_merchant_id = "+categoryId+" and pm.brand_merchant_id = "+brandId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
+                } else {
+                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.brand_merchant_id = "+brandId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
+                }
                 Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.id asc");
                 List<ProductMerchantDetail> dataProductDetail = ProductMerchantDetailRepository.getAllDataKiosK(query);
 
