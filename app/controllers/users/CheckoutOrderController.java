@@ -534,6 +534,11 @@ public class CheckoutOrderController extends BaseController {
                                 System.out.println("order id shipper : "+idShipperOrder);
                                 order.setShipperOrderId(idShipperOrder);
                                 order.save();
+                                orderTransactionResponse.setShipperOrderId(idShipperOrder);
+                            } else {
+                                String messageShipper = (String) jsonResponse.get("data").get("content").asText();
+                                response.setBaseResponse(1, offset, 1, messageShipper, orderTransactionResponse);
+                                return ok(Json.toJson(response));
                             }
                         }
 
