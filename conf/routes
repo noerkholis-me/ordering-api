@@ -631,4 +631,7 @@ PUT         /external/update-status-order                   controllers.webhook.
 PUT         /users/update-profile-customer                  controllers.users.SessionsController.updateProfile()
 ####### webhook for get shipping status ##########
 POST 	/webhook/shipper-status 							controllers.users.WebhookShipperController.webhookStatusForSandbox()
+
+####### for tracking shipper Sandbox ###########
 GET 	/shipper/tracking-shipper 				            controllers.users.CheckoutOrderController.getTrackingShipper(id:String)
+GET 	/shipper/tracking-shipment-status 				    controllers.users.CheckoutOrderController.getShipmentStatus(id:String)

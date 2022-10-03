@@ -68,7 +68,7 @@ public class CheckoutOrderController extends BaseController {
     private static final String API_SHIPPER_TRACKING = "orders?apiKey=";
     private static final String API_SHIPPER_ADDRESS_V3 = "https://merchant-api-sandbox.shipper.id";
     private static final String API_SHIPPER_AREAS_V3 = "/v3/location/areas?area_ids=";
-
+    private static final String API_SHIPPER_DETAIL = "orders/";
     private final static Logger.ALogger logger = Logger.of(CheckoutOrderController.class);
 
     private static BaseResponse response = new BaseResponse();
@@ -529,8 +529,8 @@ public class CheckoutOrderController extends BaseController {
 
                             String lineAreas =  brAreas.readLine();
                             JsonNode jsonResponseAreas = new ObjectMapper().readValue(lineAreas, JsonNode.class);
-                            String lattitude = (String) jsonResponseAreas.get("data").get("lat").get(0).asText();
-                            String longitude = (String) jsonResponseAreas.get("data").get("lng").get(0).asText();
+                            String lattitude = (String) jsonResponseAreas.get("data").get(0).get("lat").asText();
+                            String longitude = (String) jsonResponseAreas.get("data").get(0).get("lng").asText();
                             ((ObjectNode) jsonNode).put("customer_coordinate", lattitude+","+longitude);
                             nodeBaru.set("destinationCoord", jsonNode.get("customer_coordinate"));
 
@@ -831,6 +831,42 @@ public class CheckoutOrderController extends BaseController {
                     "-XGET",
                     "-H", "user-agent: Shipper/",
                     domesticTrackingUrl
+            );
+
+            Process p = pb2.start();
+
+            InputStream is = p.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader br = new BufferedReader(isr);
+
+            String line = br.readLine();
+            JsonNode jsonResponse = new ObjectMapper().readValue(line, JsonNode.class);
+
+            return ok(Json.toJson(jsonResponse));
+
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static Result getShipmentStatus(String orderShipperId) {
+        String shipperDetailUrl = API_SHIPPER_ADDRESS + API_SHIPPER_DETAIL+orderShipperId+"?apiKey=" + API_KEY_SHIPPER;
+
+        try{
+
+            StringBuilder output = new StringBuilder();
+            StringBuilder outputError = new StringBuilder();
+
+//            shipperDetailUrl;
+
+            ProcessBuilder pb2 = new ProcessBuilder(
+                    "curl",
+                    "-XGET",
+                    "-H", "user-agent: Shipper/",
+                    shipperDetailUrl
             );
 
             Process p = pb2.start();
