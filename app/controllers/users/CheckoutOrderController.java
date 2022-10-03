@@ -529,8 +529,8 @@ public class CheckoutOrderController extends BaseController {
 
                             String lineAreas =  brAreas.readLine();
                             JsonNode jsonResponseAreas = new ObjectMapper().readValue(lineAreas, JsonNode.class);
-                            String lattitude = (String) jsonResponseAreas.get("data").get("lat").asText();
-                            String longitude = (String) jsonResponseAreas.get("data").get("lng").asText();
+                            String lattitude = (String) jsonResponseAreas.get("data").get("lat").get(0).asText();
+                            String longitude = (String) jsonResponseAreas.get("data").get("lng").get(0).asText();
                             ((ObjectNode) jsonNode).put("customer_coordinate", lattitude+","+longitude);
                             nodeBaru.set("destinationCoord", jsonNode.get("customer_coordinate"));
 
