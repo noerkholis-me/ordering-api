@@ -517,7 +517,7 @@ public class CheckoutOrderController extends BaseController {
                                     "-H", "Content-Type:application/json",
                                     "-H", "user-agent: Shipper/1.0",
                                     "-H", "X-API-Key: "+API_KEY_SHIPPER,
-                                    API_SHIPPER_ADDRESS_V3+API_SHIPPER_AREAS_V3+nodeBaru.get("o").asInt()
+                                    API_SHIPPER_ADDRESS_V3+API_SHIPPER_AREAS_V3+nodeBaru.get("d").asInt()
                             );
 
 
