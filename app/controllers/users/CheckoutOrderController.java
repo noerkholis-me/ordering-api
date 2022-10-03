@@ -66,6 +66,8 @@ public class CheckoutOrderController extends BaseController {
     private static final String API_SHIPPER_ADDRESS = "https://api.sandbox.shipper.id/public/v1/";
     private static final String API_SHIPPER_DOMESTIC_ORDER = "orders/domestics?apiKey=";
     private static final String API_SHIPPER_TRACKING = "orders?apiKey=";
+    private static final String API_SHIPPER_ADDRESS_V3 = "https://merchant-api-sandbox.shipper.id";
+    private static final String API_SHIPPER_AREAS_V3 = "/v3/location/areas?area_ids=";
 
     private final static Logger.ALogger logger = Logger.of(CheckoutOrderController.class);
 
@@ -117,8 +119,10 @@ public class CheckoutOrderController extends BaseController {
 
                 ((ObjectNode) jsonNode).put("store_name", store.storeName);
                 ((ObjectNode) jsonNode).put("store_number", store.storePhone);
+                ((ObjectNode) jsonNode).put("store_coordinate", store.storeLatitude+","+store.storeLongitude);
                 nodeBaru.set("consignerName", jsonNode.get("store_name"));
                 nodeBaru.set("consignerPhoneNumber", jsonNode.get("store_number"));
+                nodeBaru.set("originCoord", jsonNode.get("store_coordinate"));
 
                 Member member = null;
                 Member memberData = new Member();
@@ -504,6 +508,31 @@ public class CheckoutOrderController extends BaseController {
                             nodeBaru.remove("store_name");
                             nodeBaru.remove("store_number");
                             //end remove
+
+                            //start find lat and long from areaId;
+
+                            ProcessBuilder shipperBuilderForAreas = new ProcessBuilder(
+                                    "curl",
+                                    "-XGET",
+                                    "-H", "Content-Type:application/json",
+                                    "-H", "user-agent: Shipper/1.0",
+                                    "-H", "X-API-Key: "+API_KEY_SHIPPER,
+                                    API_SHIPPER_ADDRESS_V3+API_SHIPPER_AREAS_V3+nodeBaru.get("o").asInt()
+                            );
+
+
+                            Process prosesBuilderForAreas = shipperBuilderForAreas.start();
+                            InputStream isAreas = prosesBuilderForAreas.getInputStream();
+                            InputStreamReader isrAreas = new InputStreamReader(isAreas);
+                            BufferedReader brAreas = new BufferedReader(isrAreas);
+
+
+                            String lineAreas =  brAreas.readLine();
+                            JsonNode jsonResponseAreas = new ObjectMapper().readValue(lineAreas, JsonNode.class);
+                            String lattitude = (String) jsonResponseAreas.get("data").get("lat").asText();
+                            String longitude = (String) jsonResponseAreas.get("data").get("lng").asText();
+                            ((ObjectNode) jsonNode).put("customer_coordinate", lattitude+","+longitude);
+                            nodeBaru.set("destinationCoord", jsonNode.get("customer_coordinate"));
 
                             String bodyRequest = nodeBaru.toString();
                             System.out.println("domestic order request : "+bodyRequest);
