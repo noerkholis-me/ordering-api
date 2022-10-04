@@ -20,6 +20,7 @@ import play.mvc.BodyParser;
 import play.mvc.Http;
 import play.mvc.Result;
 import repository.*;
+import java.math.BigDecimal;
 
 import java.io.File;
 import java.util.*;
@@ -114,10 +115,16 @@ public class ProductStoreController extends BaseController {
             return "Bidang tidak boleh nol atau kosong";
         if (request.getStoreId() == null)
             return "Store tidak boleh nol atau kosong";
-        if (request.getStorePrice() == null)
+        if (request.getStorePrice() == null || request.getStorePrice() == BigDecimal.ZERO)
             return "Harga tidak boleh nol atau kosong";
         if (request.getProductId() == null)
             return "Id Produk tidak boleh nol atau kosong";
+        if (request.getStorePrice().compareTo(BigDecimal.ZERO) < 0)
+            return "Harga tidak boleh kurang dari 0";
+        if (request.getDiscount().compareTo(0D) < 0)
+            return "Nilai Discount tidak boleh kurang dari 0";
+        if (request.getFinalPrice().compareTo(BigDecimal.ZERO) < 0)
+            return "Harga Final tidak boleh kurang dari 0";
 
         return null;
     }
