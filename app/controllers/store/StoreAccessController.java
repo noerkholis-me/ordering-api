@@ -138,11 +138,13 @@ public class StoreAccessController extends BaseController {
                     for (StoreAccessDetail storeDetail : dataDetail) {
                         StoreAccessResponse.StoreAccessDetail responseDetail = new StoreAccessResponse.StoreAccessDetail();
                         Store storeDataFetch = Store.findById(storeDetail.getStore().id);
-                        responseDetail.setId(storeDataFetch.id);
-                        responseDetail.setStoreName(storeDataFetch.storeName);
-                        responseDetail.setIsActive(storeDataFetch.isActive);
-                        responsesDetail.add(responseDetail);
-                        responseStoreAccess.setStoreData(responseDetail != null ? responsesDetail : null);
+                        if (storeDataFetch != null){
+                            responseDetail.setId(storeDataFetch.id);
+                            responseDetail.setStoreName(storeDataFetch.storeName);
+                            responseDetail.setIsActive(storeDataFetch.isActive);
+                            responsesDetail.add(responseDetail);
+                            responseStoreAccess.setStoreData(responseDetail != null ? responsesDetail : null);
+                        }
                     }
                     responsesStoreAccess.add(responseStoreAccess);
                 }

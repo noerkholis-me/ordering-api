@@ -61,6 +61,7 @@ public class TableMerchantController extends BaseController {
                     TableMerchant tableMerchant = new TableMerchant();
                     tableMerchant.setName(tableMerchantRequest.getName());
                     tableMerchant.setIsActive(tableMerchantRequest.getIsActive());
+                    tableMerchant.setIsAvailable(Boolean.TRUE);
                     tableMerchant.setStore(store);
                     tableMerchant.setTableType(tableType.get());
                     tableMerchant.save();
