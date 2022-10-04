@@ -51,15 +51,15 @@ public class ProductMerchantController extends BaseController {
                         response.setBaseResponse(0, 0, 0, "Jumlah karakter tidak boleh melebihi 50 karakter", null);
                         return badRequest(Json.toJson(response));
                     }
-                    if (productRequest.getProductDetailRequest().getProductPrice().compareTo(BigDecimal.ZERO) < 0){
+                    if ((productRequest.getProductDetailRequest().getProductPrice() != null) && productRequest.getProductDetailRequest().getProductPrice().compareTo(BigDecimal.ZERO) < 0){
                         response.setBaseResponse(0, 0, 0, "Harga tidak boleh kurang dari 0", null);
                         return badRequest(Json.toJson(response));
                     }
-                    if (productRequest.getProductDetailRequest().getDiscount().compareTo(0D) < 0){
+                    if ((productRequest.getProductDetailRequest().getDiscount() != null) && productRequest.getProductDetailRequest().getDiscount().compareTo(0D) < 0){
                         response.setBaseResponse(0, 0, 0, "Diskon tidak boleh kurang dari 0", null);
                         return badRequest(Json.toJson(response));
                     }
-                    if (productRequest.getProductDetailRequest().getProductPriceAfterDiscount().compareTo(BigDecimal.ZERO) < 0){
+                    if ((productRequest.getProductDetailRequest().getProductPriceAfterDiscount() != null) && productRequest.getProductDetailRequest().getProductPriceAfterDiscount().compareTo(BigDecimal.ZERO) < 0){
                         response.setBaseResponse(0, 0, 0, "Harga Product Setelah Diskon Cashback tidak boleh kurang dari 0", null);
                         return badRequest(Json.toJson(response));
                     }
@@ -105,19 +105,23 @@ public class ProductMerchantController extends BaseController {
 
                     trx.commit();
 
-                    response.setBaseResponse(1,offset, 1, success + " Product updated successfully", newProductMerchant.id);
+                    response.setBaseResponse(1,offset, 1, success + " Product created successfully", newProductMerchant.id);
                     return ok(Json.toJson(response));
 
                 } catch (Exception e) {
                     logger.error("Error while creating product", e);
                     e.printStackTrace();
                     trx.rollback();
+                    response.setBaseResponse(0, 0, 0, "Error while creating product" + e.toString(), null);
+                    return badRequest(Json.toJson(response));
                 } finally {
                     trx.end();
                 }
             } catch (Exception e) {
                 logger.error("Error while parsing json", e);
                 e.printStackTrace();
+                response.setBaseResponse(0, 0, 0, "Error while creating product" + e.toString(), null);
+                return badRequest(Json.toJson(response));
             }
         }
 
@@ -410,8 +414,8 @@ public class ProductMerchantController extends BaseController {
         newProductMerchantDetail.setIsCustomizable(productRequest.getProductDetailRequest().getIsCustomizable());
         newProductMerchantDetail.setProductPrice(productRequest.getProductDetailRequest().getProductPrice());
         newProductMerchantDetail.setDiscountType(productRequest.getProductDetailRequest().getDiscountType());
-        newProductMerchantDetail.setDiscount(productRequest.getProductDetailRequest().getDiscount());
-        newProductMerchantDetail.setProductPriceAfterDiscount(productRequest.getProductDetailRequest().getProductPriceAfterDiscount());
+        newProductMerchantDetail.setDiscount(productRequest.getProductDetailRequest().getDiscount() != null ? productRequest.getProductDetailRequest().getDiscount() : 0D);
+        newProductMerchantDetail.setProductPriceAfterDiscount(productRequest.getProductDetailRequest().getProductPriceAfterDiscount() != null ? productRequest.getProductDetailRequest().getProductPriceAfterDiscount() : productRequest.getProductDetailRequest().getProductPrice());
         newProductMerchantDetail.setProductImageMain(productRequest.getProductDetailRequest().getProductImageMain());
         newProductMerchantDetail.setProductImage1(productRequest.getProductDetailRequest().getProductImage1());
         newProductMerchantDetail.setProductImage2(productRequest.getProductDetailRequest().getProductImage2());
