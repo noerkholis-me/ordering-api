@@ -112,12 +112,16 @@ public class ProductMerchantController extends BaseController {
                     logger.error("Error while creating product", e);
                     e.printStackTrace();
                     trx.rollback();
+                    response.setBaseResponse(0, 0, 0, "Error while creating product" + e.toString(), null);
+                    return badRequest(Json.toJson(response));
                 } finally {
                     trx.end();
                 }
             } catch (Exception e) {
                 logger.error("Error while parsing json", e);
                 e.printStackTrace();
+                response.setBaseResponse(0, 0, 0, "Error while creating product" + e.toString(), null);
+                return badRequest(Json.toJson(response));
             }
         }
 
