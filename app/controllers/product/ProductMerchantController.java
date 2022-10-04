@@ -769,7 +769,7 @@ public class ProductMerchantController extends BaseController {
     }
     // FOR HOME CUSTOMER
     public static Result productListKiosk(Long brandId, Long merchantId, Long storeId, Long categoryId, String keyword) {
-        if (brandId != null) {
+        if (!brandId.equals(0L)) {
             Transaction trx = Ebean.beginTransaction();
             try {
 
@@ -815,6 +815,14 @@ public class ProductMerchantController extends BaseController {
                     }
 
                     productResponseKiosK.setProductImageMain(productMerchantDetail.getProductImageMain());
+                    BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(productMerchant.getBrandMerchant().id, productMerchant.getMerchant());
+                    if (brandMerchant != null) {
+                        ProductResponse.BrandResponse brandResponse = ProductResponse.BrandResponse.builder()
+                                .id(brandMerchant.id)
+                                .brandName(brandMerchant.getBrandName())
+                                .build();
+                        productResponseKiosK.setBrand(brandResponse);
+                    }
                     listProductResponseKiosK.add(productResponseKiosK);
                 }
                 
@@ -829,9 +837,77 @@ public class ProductMerchantController extends BaseController {
             }
             response.setBaseResponse(0, 0, 0, error, null);
             return badRequest(Json.toJson(response));
+        } else {
+            Transaction trx = Ebean.beginTransaction();
+            try {
+
+                String querySql;
+                String searchQuery = keyword != null && keyword.length() > 0 ? " and lower(pm.product_name) like '%"+keyword+"%'" : "";
+                if (categoryId > 0 ) {
+                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.subs_category_merchant_id = "+categoryId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
+                } else {
+                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
+                }
+                Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.id asc");
+                List<ProductMerchantDetail> dataProductDetail = ProductMerchantDetailRepository.getAllDataKiosK(query);
+
+                List<ProductKiosKResponse> listProductResponseKiosK = new ArrayList<>();
+                for(ProductMerchantDetail productMerchantDetail : dataProductDetail){
+                    ProductKiosKResponse productResponseKiosK = new ProductKiosKResponse();
+                    ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(productMerchantDetail.getProductMerchant().id, merchantId);
+                    ProductStore productStore = ProductStoreRepository.findForCust(productMerchant.id, storeId, productMerchant.getMerchant());
+                    productResponseKiosK.setProductId(productMerchant.id);
+                    productResponseKiosK.setNoSKU(productMerchant.getNoSKU());
+                    productResponseKiosK.setProductName(productMerchant.getProductName());
+                    productResponseKiosK.setProductType(productMerchantDetail.getProductType());
+                    productResponseKiosK.setIsCustomizable(productMerchantDetail.getIsCustomizable());
+                    productResponseKiosK.setIsActive(productMerchant.getIsActive());
+                    productResponseKiosK.setMerchantId(productMerchant.getMerchant().id);
+
+                    if(productStore != null) {
+                        productResponseKiosK.setProductPrice(productStore.getStorePrice());
+                        productResponseKiosK.setDiscountType(productStore.getDiscountType());
+                        productResponseKiosK.setDiscount(productStore.getDiscount());
+                        productResponseKiosK.setProductPriceAfterDiscount(productStore.getFinalPrice());
+                    } else {
+                        productResponseKiosK.setProductPrice(productMerchantDetail.getProductPrice());
+                        productResponseKiosK.setDiscountType(productMerchantDetail.getDiscountType());
+                        productResponseKiosK.setDiscount(productMerchantDetail.getDiscount());
+                        productResponseKiosK.setProductPriceAfterDiscount(productMerchantDetail.getProductPriceAfterDiscount());
+                    }
+
+                    ProductMerchantDescription productMerchantDescription = ProductMerchantDescriptionRepository.findByProductMerchantDetail(productMerchantDetail);
+                    if (productMerchantDescription != null) {
+                        productResponseKiosK.setShortDescription(productMerchantDescription.getShortDescription());
+                        productResponseKiosK.setLongDescription(productMerchantDescription.getLongDescription());
+                    }
+
+                    productResponseKiosK.setProductImageMain(productMerchantDetail.getProductImageMain());
+                    BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(productMerchant.getBrandMerchant().id, productMerchant.getMerchant());
+                    if (brandMerchant != null) {
+                        ProductResponse.BrandResponse brandResponse = ProductResponse.BrandResponse.builder()
+                                .id(brandMerchant.id)
+                                .brandName(brandMerchant.getBrandName())
+                                .build();
+                        productResponseKiosK.setBrand(brandResponse);
+                    }
+                    listProductResponseKiosK.add(productResponseKiosK);
+                }
+
+                response.setBaseResponse(dataProductDetail.size(), 0, 0, "Berhasil menampilkan produk", listProductResponseKiosK);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                logger.error("Error saat menampilkan produk", e);
+                e.printStackTrace();
+                trx.rollback();
+            } finally {
+                trx.end();
+            }
+            response.setBaseResponse(0, 0, 0, error, null);
+            return badRequest(Json.toJson(response));
         }
-        response.setBaseResponse(0, 0, 0, "Tidak dapat menampilkan produk", null);
-        return badRequest(Json.toJson(response));
+//        response.setBaseResponse(0, 0, 0, "Tidak dapat menampilkan produk", null);
+//        return badRequest(Json.toJson(response));
     }
 
     // PRODUCT BEST SELLER

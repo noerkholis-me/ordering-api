@@ -56,4 +56,7 @@ public class ProductKiosKResponse implements Serializable {
     @JsonProperty("long_description")
     private String longDescription;
 
+    @JsonProperty("brand")
+    private ProductResponse.BrandResponse brand;
+
 }
