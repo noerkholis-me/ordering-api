@@ -95,5 +95,7 @@ public class OrderList {
     @JsonProperty("payment_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Jakarta")
     private Date paymentDate;
+    @JsonProperty("shipper_order_id")
+    private String shipperOrderId;
 
 }
