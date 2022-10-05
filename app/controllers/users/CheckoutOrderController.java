@@ -36,6 +36,7 @@ import models.transaction.PaymentDetail;
 import models.transaction.PaymentStatus;
 import org.json.JSONObject;
 import play.Logger;
+import play.Play;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.OrderPaymentRepository;
@@ -62,11 +63,11 @@ import java.util.Optional;
 
 public class CheckoutOrderController extends BaseController {
 
-    private static final String API_KEY_SHIPPER = "Q2JSCJ6lPZcraO4P6zDBr6vmoQVWsa3j6HLvaHWbgoPMyKrWljKG9vOteIELOz2u";
-    private static final String API_SHIPPER_ADDRESS = "https://api.sandbox.shipper.id/public/v1/";
+    private static final String API_KEY_SHIPPER = Play.application().configuration().getString("sandbox.shipping.shipperapi.apikey");
+    private static final String API_SHIPPER_ADDRESS = Play.application().configuration().getString("sandbox.shipping.shipperapi.v1.url");
     private static final String API_SHIPPER_DOMESTIC_ORDER = "orders/domestics?apiKey=";
     private static final String API_SHIPPER_TRACKING = "orders?apiKey=";
-    private static final String API_SHIPPER_ADDRESS_V3 = "https://merchant-api-sandbox.shipper.id";
+    private static final String API_SHIPPER_ADDRESS_V3 = Play.application().configuration().getString("sandbox.shipping.shipperapi.v3.url");
     private static final String API_SHIPPER_AREAS_V3 = "/v3/location/areas?area_ids=";
     private static final String API_SHIPPER_DETAIL = "orders/";
     private final static Logger.ALogger logger = Logger.of(CheckoutOrderController.class);
@@ -120,9 +121,11 @@ public class CheckoutOrderController extends BaseController {
                 ((ObjectNode) jsonNode).put("store_name", store.storeName);
                 ((ObjectNode) jsonNode).put("store_number", store.storePhone);
                 ((ObjectNode) jsonNode).put("store_coordinate", store.storeLatitude+","+store.storeLongitude);
+                ((ObjectNode) jsonNode).put("shipper_payment_type", "postpay");
                 nodeBaru.set("consignerName", jsonNode.get("store_name"));
                 nodeBaru.set("consignerPhoneNumber", jsonNode.get("store_number"));
                 nodeBaru.set("originCoord", jsonNode.get("store_coordinate"));
+                nodeBaru.set("paymentType", jsonNode.get("shipper_payment_type"));
 
                 Member member = null;
                 Member memberData = new Member();

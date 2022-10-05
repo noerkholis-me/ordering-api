@@ -155,6 +155,7 @@ public class WebhookShipperController extends BaseController {
 
 
         String tmpStatusCode = (String) node.get("external_status").get("code").asText();
+        String tmpStatusName = (String) node.get("external_status").get("name").asText();
         String tmpDescription = (String) node.get("external_status").get("description").asText();
 
         System.out.println("STATUS CODE : " + tmpStatusCode);
@@ -164,65 +165,74 @@ public class WebhookShipperController extends BaseController {
         Transaction txn = Ebean.beginTransaction();
         try{
 
-            if(tmpStatusCode.equals("1000")){
-                System.out.println("=========== PAKET SEDANG DIPERSIAPKAN");
-            }else if(tmpStatusCode.equals("1010")){
-                System.out.println("=========== TUNGGU PENJEMPUTAN");
-            }else if(tmpStatusCode.equals("1020")){
-                System.out.println("=========== SEDANG DIJEMPUT");
-            }else if(tmpStatusCode.equals("1030")){
-                System.out.println("=========== PROSES PENJEMPUTAN");
-            }else if(tmpStatusCode.equals("1040")){
-                System.out.println("=========== PERJALANAN KE HUB");
-            }else if(tmpStatusCode.equals("1050")){
-                System.out.println("=========== SAMPAI DI HUB");
-            }else if(tmpStatusCode.equals("1060")){
-                System.out.println("=========== SORTIR BARANG");
-            }else if(tmpStatusCode.equals("1070")){
+            statusOrder.status = tmpStatusName;
 
-                System.out.println("=========== DIKIRIM KE 3PLNAME");
-                statusOrder.status = "Your order is being delivered.";
+            statusOrder.notes = tmpDescription;
+            statusOrder.order = objOrder;
+            statusOrder.order_id = objOrder.id;
+            statusOrder.save();
 
-                statusOrder.notes = "Your order is being delivered.";
-                statusOrder.order = objOrder;
-                statusOrder.order_id = objOrder.id;
-                statusOrder.save();
+            txn.commit();
 
-                txn.commit();
+//            if(tmpStatusCode.equals("1000")){
+//                System.out.println("=========== PAKET SEDANG DIPERSIAPKAN");
+//            }else if(tmpStatusCode.equals("1010")){
+//                System.out.println("=========== TUNGGU PENJEMPUTAN");
+//            }else if(tmpStatusCode.equals("1020")){
+//                System.out.println("=========== SEDANG DIJEMPUT");
+//            }else if(tmpStatusCode.equals("1030")){
+//                System.out.println("=========== PROSES PENJEMPUTAN");
+//            }else if(tmpStatusCode.equals("1040")){
+//                System.out.println("=========== PERJALANAN KE HUB");
+//            }else if(tmpStatusCode.equals("1050")){
+//                System.out.println("=========== SAMPAI DI HUB");
+//            }else if(tmpStatusCode.equals("1060")){
+//                System.out.println("=========== SORTIR BARANG");
+//            }else if(tmpStatusCode.equals("1070")){
+//
+//                System.out.println("=========== DIKIRIM KE 3PLNAME");
+//                statusOrder.status = "Your order is being delivered.";
+//
+//                statusOrder.notes = "Your order is being delivered.";
+//                statusOrder.order = objOrder;
+//                statusOrder.order_id = objOrder.id;
+//                statusOrder.save();
+//
+//                txn.commit();
 
-            }else if(tmpStatusCode.equals("1080")){
+//            }else if(tmpStatusCode.equals("1080")){
+//
+//                System.out.println("=========== DITERIMA 3PLNAME");
+//                statusOrder.status = "Your order is being delivered.";
+//
+//                statusOrder.notes = "Your order is being delivered.";
+//                statusOrder.order = objOrder;
+//                statusOrder.order_id = objOrder.id;
+//                statusOrder.save();
+//
+//                txn.commit();
 
-                System.out.println("=========== DITERIMA 3PLNAME");
-                statusOrder.status = "Your order is being delivered.";
-
-                statusOrder.notes = "Your order is being delivered.";
-                statusOrder.order = objOrder;
-                statusOrder.order_id = objOrder.id;
-                statusOrder.save();
-
-                txn.commit();
-
-            }else if(tmpStatusCode.equals("1090")){
-                System.out.println("=========== PAKET TERKIRIM");
-
-                // ========= BEGIN STATUS CMS
-
-                statusOrder.status = "Your order has closed. Happy Eating!";
-                // ========= END STATUS CMS
-
-                statusOrder.notes = "Your order has closed. Happy Eating!";
-                statusOrder.order = objOrder;
-                statusOrder.order_id = objOrder.id;
-                statusOrder.save();
-
-                txn.commit();
+//            }else if(tmpStatusCode.equals("1090")){
+//                System.out.println("=========== PAKET TERKIRIM");
+//
+//                // ========= BEGIN STATUS CMS
+//
+//                statusOrder.status = "Your order has closed. Happy Eating!";
+//                // ========= END STATUS CMS
+//
+//                statusOrder.notes = "Your order has closed. Happy Eating!";
+//                statusOrder.order = objOrder;
+//                statusOrder.order_id = objOrder.id;
+//                statusOrder.save();
+//
+//                txn.commit();
 
 
-            }else if(tmpStatusCode.equals("1100")){
-                System.out.println("=========== DIKEMBALIKAN KE PENGIRIM");
-            }else {
-                System.out.println("=========== CANCELLED");
-            }
+//            }else if(tmpStatusCode.equals("1100")){
+//                System.out.println("=========== DIKEMBALIKAN KE PENGIRIM");
+//            }else {
+//                System.out.println("=========== CANCELLED");
+//            }
 
 
 
