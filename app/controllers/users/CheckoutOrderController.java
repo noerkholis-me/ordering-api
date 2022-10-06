@@ -97,7 +97,7 @@ public class CheckoutOrderController extends BaseController {
                     nodeBaru.set("wt", jsonNode.get("weight"));
                     nodeBaru.set("v", jsonNode.get("total_price"));
                     nodeBaru.set("rateID", jsonNode.get("rate_id"));
-                    nodeBaru.set("contents", jsonNode.get("content"));
+                    nodeBaru.set("contents", jsonNode.get("destination_address"));
                     nodeBaru.set("packageType", jsonNode.get("package_type"));
                     nodeBaru.set("consigneeName", jsonNode.get("customer_name"));
                     nodeBaru.set("consigneePhoneNumber", jsonNode.get("customer_phone_number"));
