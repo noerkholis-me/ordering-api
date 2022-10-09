@@ -41,5 +41,7 @@ public class StoreResponse {
     private Long merchantId;
     @JsonProperty("store_logo")
     public String storeLogo;
+    @JsonProperty("merchant_type")
+    public String merchantType;
 
 }
