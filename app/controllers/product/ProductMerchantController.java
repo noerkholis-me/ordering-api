@@ -141,15 +141,15 @@ public class ProductMerchantController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
 
-                if (productRequest.getProductDetailRequest().getProductPrice().compareTo(BigDecimal.ZERO) < 0){
+                if ((productRequest.getProductDetailRequest().getProductPrice() != null) && productRequest.getProductDetailRequest().getProductPrice().compareTo(BigDecimal.ZERO) < 0){
                     response.setBaseResponse(0, 0, 0, "Harga tidak boleh kurang dari 0", null);
                     return badRequest(Json.toJson(response));
                 }
-                if (productRequest.getProductDetailRequest().getDiscount().compareTo(0D) < 0){
+                if ((productRequest.getProductDetailRequest().getDiscount() != null) && productRequest.getProductDetailRequest().getDiscount().compareTo(0D) < 0){
                     response.setBaseResponse(0, 0, 0, "Diskon tidak boleh kurang dari 0", null);
                     return badRequest(Json.toJson(response));
                 }
-                if (productRequest.getProductDetailRequest().getProductPriceAfterDiscount().compareTo(BigDecimal.ZERO) < 0){
+                if ((productRequest.getProductDetailRequest().getProductPriceAfterDiscount() != null) && productRequest.getProductDetailRequest().getProductPriceAfterDiscount().compareTo(BigDecimal.ZERO) < 0){
                     response.setBaseResponse(0, 0, 0, "Harga Product Setelah Diskon Cashback tidak boleh kurang dari 0", null);
                     return badRequest(Json.toJson(response));
                 }
@@ -332,12 +332,22 @@ public class ProductMerchantController extends BaseController {
                     .categoryName(categoryMerchant.getCategoryName())
                     .build();
             productResponse.setCategory(categoryResponse);
+        } else {
+            ProductResponse.CategoryResponse categoryResponse = ProductResponse.CategoryResponse.builder()
+                    .categoryName("-")
+                    .build();
+            productResponse.setCategory(categoryResponse);
         }
         SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubCategoryMerchant().id, productMerchant.getMerchant());
         if (subCategoryMerchant != null) {
             ProductResponse.SubCategoryResponse subCategoryResponse = ProductResponse.SubCategoryResponse.builder()
                     .id(subCategoryMerchant.id)
                     .subCategoryName(subCategoryMerchant.getSubcategoryName())
+                    .build();
+            productResponse.setSubCategory(subCategoryResponse);
+        } else {
+            ProductResponse.SubCategoryResponse subCategoryResponse = ProductResponse.SubCategoryResponse.builder()
+                    .subCategoryName("-")
                     .build();
             productResponse.setSubCategory(subCategoryResponse);
         }
@@ -348,12 +358,22 @@ public class ProductMerchantController extends BaseController {
                     .subsCategoryName(subsCategoryMerchant.getSubscategoryName())
                     .build();
             productResponse.setSubsCategory(subsCategoryResponse);
+        } else {
+            ProductResponse.SubsCategoryResponse subsCategoryResponse = ProductResponse.SubsCategoryResponse.builder()
+                    .subsCategoryName("-")
+                    .build();
+            productResponse.setSubsCategory(subsCategoryResponse);
         }
         BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(productMerchant.getBrandMerchant().id, productMerchant.getMerchant());
         if (brandMerchant != null) {
             ProductResponse.BrandResponse brandResponse = ProductResponse.BrandResponse.builder()
                     .id(brandMerchant.id)
                     .brandName(brandMerchant.getBrandName())
+                    .build();
+            productResponse.setBrand(brandResponse);
+        } else {
+            ProductResponse.BrandResponse brandResponse = ProductResponse.BrandResponse.builder()
+                    .brandName("-")
                     .build();
             productResponse.setBrand(brandResponse);
         }
@@ -470,12 +490,22 @@ public class ProductMerchantController extends BaseController {
                                 .categoryName(categoryMerchant.getCategoryName())
                                 .build();
                         productResponse.setCategory(categoryResponse);
+                    } else {
+                        ProductResponse.CategoryResponse categoryResponse = ProductResponse.CategoryResponse.builder()
+                                .categoryName("-")
+                                .build();
+                        productResponse.setCategory(categoryResponse);
                     }
                     SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubCategoryMerchant().id, productMerchant.getMerchant());
                     if (subCategoryMerchant != null) {
                         ProductResponse.SubCategoryResponse subCategoryResponse = ProductResponse.SubCategoryResponse.builder()
                                 .id(subCategoryMerchant.id)
                                 .subCategoryName(subCategoryMerchant.getSubcategoryName())
+                                .build();
+                        productResponse.setSubCategory(subCategoryResponse);
+                    } else {
+                        ProductResponse.SubCategoryResponse subCategoryResponse = ProductResponse.SubCategoryResponse.builder()
+                                .subCategoryName("-")
                                 .build();
                         productResponse.setSubCategory(subCategoryResponse);
                     }
@@ -486,12 +516,22 @@ public class ProductMerchantController extends BaseController {
                                 .subsCategoryName(subsCategoryMerchant.getSubscategoryName())
                                 .build();
                         productResponse.setSubsCategory(subsCategoryResponse);
+                    } else {
+                        ProductResponse.SubsCategoryResponse subsCategoryResponse = ProductResponse.SubsCategoryResponse.builder()
+                                .subsCategoryName("-")
+                                .build();
+                        productResponse.setSubsCategory(subsCategoryResponse);
                     }
                     BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(productMerchant.getBrandMerchant().id, productMerchant.getMerchant());
                     if (brandMerchant != null) {
                         ProductResponse.BrandResponse brandResponse = ProductResponse.BrandResponse.builder()
                                 .id(brandMerchant.id)
                                 .brandName(brandMerchant.getBrandName())
+                                .build();
+                        productResponse.setBrand(brandResponse);
+                    } else {
+                        ProductResponse.BrandResponse brandResponse = ProductResponse.BrandResponse.builder()
+                                .brandName("-")
                                 .build();
                         productResponse.setBrand(brandResponse);
                     }
@@ -567,12 +607,22 @@ public class ProductMerchantController extends BaseController {
                                 .categoryName(categoryMerchant.getCategoryName())
                                 .build();
                         productResponse.setCategory(categoryResponse);
+                    } else {
+                        ProductResponse.CategoryResponse categoryResponse = ProductResponse.CategoryResponse.builder()
+                                .categoryName("-")
+                                .build();
+                        productResponse.setCategory(categoryResponse);
                     }
                     SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubCategoryMerchant().id, productMerchant.getMerchant());
                     if (subCategoryMerchant != null) {
                         ProductResponse.SubCategoryResponse subCategoryResponse = ProductResponse.SubCategoryResponse.builder()
                                 .id(subCategoryMerchant.id)
                                 .subCategoryName(subCategoryMerchant.getSubcategoryName())
+                                .build();
+                        productResponse.setSubCategory(subCategoryResponse);
+                    } else {
+                        ProductResponse.SubCategoryResponse subCategoryResponse = ProductResponse.SubCategoryResponse.builder()
+                                .subCategoryName("-")
                                 .build();
                         productResponse.setSubCategory(subCategoryResponse);
                     }
@@ -583,12 +633,22 @@ public class ProductMerchantController extends BaseController {
                                 .subsCategoryName(subsCategoryMerchant.getSubscategoryName())
                                 .build();
                         productResponse.setSubsCategory(subsCategoryResponse);
+                    } else {
+                        ProductResponse.SubsCategoryResponse subsCategoryResponse = ProductResponse.SubsCategoryResponse.builder()
+                                .subsCategoryName("-")
+                                .build();
+                        productResponse.setSubsCategory(subsCategoryResponse);
                     }
                     BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(productMerchant.getBrandMerchant().id, productMerchant.getMerchant());
                     if (brandMerchant != null) {
                         ProductResponse.BrandResponse brandResponse = ProductResponse.BrandResponse.builder()
                                 .id(brandMerchant.id)
                                 .brandName(brandMerchant.getBrandName())
+                                .build();
+                        productResponse.setBrand(brandResponse);
+                    } else {
+                        ProductResponse.BrandResponse brandResponse = ProductResponse.BrandResponse.builder()
+                                .brandName("-")
                                 .build();
                         productResponse.setBrand(brandResponse);
                     }
@@ -965,12 +1025,22 @@ public class ProductMerchantController extends BaseController {
                                     .categoryName(categoryMerchant.getCategoryName())
                                     .build();
                             productResponse.setCategory(categoryResponse);
+                        } else {
+                            ProductResponse.CategoryResponse categoryResponse = ProductResponse.CategoryResponse.builder()
+                                    .categoryName("-")
+                                    .build();
+                            productResponse.setCategory(categoryResponse);
                         }
                         SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(productMerchant.getSubCategoryMerchant().id, productMerchant.getMerchant());
                         if (subCategoryMerchant != null) {
                             ProductResponse.SubCategoryResponse subCategoryResponse = ProductResponse.SubCategoryResponse.builder()
                                     .id(subCategoryMerchant.id)
                                     .subCategoryName(subCategoryMerchant.getSubcategoryName())
+                                    .build();
+                            productResponse.setSubCategory(subCategoryResponse);
+                        } else {
+                            ProductResponse.SubCategoryResponse subCategoryResponse = ProductResponse.SubCategoryResponse.builder()
+                                    .subCategoryName("-")
                                     .build();
                             productResponse.setSubCategory(subCategoryResponse);
                         }
@@ -981,12 +1051,22 @@ public class ProductMerchantController extends BaseController {
                                     .subsCategoryName(subsCategoryMerchant.getSubscategoryName())
                                     .build();
                             productResponse.setSubsCategory(subsCategoryResponse);
+                        } else {
+                            ProductResponse.SubsCategoryResponse subsCategoryResponse = ProductResponse.SubsCategoryResponse.builder()
+                                    .subsCategoryName("-")
+                                    .build();
+                            productResponse.setSubsCategory(subsCategoryResponse);
                         }
                         BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(productMerchant.getBrandMerchant().id, productMerchant.getMerchant());
                         if (brandMerchant != null) {
                             ProductResponse.BrandResponse brandResponse = ProductResponse.BrandResponse.builder()
                                     .id(brandMerchant.id)
                                     .brandName(brandMerchant.getBrandName())
+                                    .build();
+                            productResponse.setBrand(brandResponse);
+                        } else {
+                            ProductResponse.BrandResponse brandResponse = ProductResponse.BrandResponse.builder()
+                                    .brandName("-")
                                     .build();
                             productResponse.setBrand(brandResponse);
                         }
