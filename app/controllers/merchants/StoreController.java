@@ -253,6 +253,7 @@ public class StoreController extends BaseController {
                 .storeQrCode(store.getStoreQrCode())
                 .merchantId(store.merchant.id)
                 .storeLogo(store.storeLogo)
+                .merchantType(store.merchant.merchantType)
                 .build();
     }
 
