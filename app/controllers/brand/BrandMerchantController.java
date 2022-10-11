@@ -24,6 +24,8 @@ import play.mvc.Http;
 import play.mvc.Result;
 import repository.*;
 import dtos.product.*;
+import repository.ProductMerchantRepository;
+import models.merchant.ProductMerchant;
 
 import java.io.File;
 import java.util.*;
@@ -285,6 +287,12 @@ public class BrandMerchantController extends BaseController {
                         BrandMerchant BrandMerchant = BrandMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (BrandMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " brand tidak tersedia.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+
+                        List<ProductMerchant> totalData = ProductMerchantRepository.find.where().eq("brand_merchant_id", BrandMerchant.id).eq("is_deleted", Boolean.FALSE).findPagingList(0).getPage(0).getList();
+                        if (totalData.size() != 0) {
+                            response.setBaseResponse(0, 0, 0, "Tidak dapat menghapus Brand. " +BrandMerchant.getBrandName()+ " memiliki " + totalData.size() + " Produk.", null);
                             return badRequest(Json.toJson(response));
                         }
 
