@@ -21,7 +21,7 @@ public class ShipperOrderStatus extends BaseModel {
 
     public String status;
     public String notes;
-    public Long order_id;
+//    public Long order_id;
 
 
     public static Model.Finder<Long, ShipperOrderStatus> find = new Model.Finder<Long, ShipperOrderStatus>(Long.class, ShipperOrderStatus.class);
