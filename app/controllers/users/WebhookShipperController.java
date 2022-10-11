@@ -168,8 +168,8 @@ public class WebhookShipperController extends BaseController {
             statusOrder.status = tmpStatusName;
 
             statusOrder.notes = tmpDescription;
-//            statusOrder.order = objOrder;
-            statusOrder.order_id = objOrder.id;
+            statusOrder.order = objOrder;
+//            statusOrder.order_id = objOrder.id;
             statusOrder.save();
 
             txn.commit();
