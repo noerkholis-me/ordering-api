@@ -2,6 +2,9 @@ package controllers.masters;
 
 import com.amazonaws.util.json.JSONArray;
 import com.amazonaws.util.json.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hokeba.api.BaseResponse;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -20,10 +23,13 @@ import models.ShipperProvince;
 import models.ShipperSuburb;
 import models.Store;
 import play.Logger;
+import play.Play;
 import play.libs.Json;
 import play.mvc.Result;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -34,8 +40,14 @@ import java.util.List;
 public class ShipperController extends BaseController {
 
     private final static Logger.ALogger logger = Logger.of(ShipperController.class);
-    private static final String API_KEY_SHIPPER = "Q2JSCJ6lPZcraO4P6zDBr6vmoQVWsa3j6HLvaHWbgoPMyKrWljKG9vOteIELOz2u";
-    private static final String API_SHIPPER_ADDRESS = "https://api.sandbox.shipper.id/public/v1/";
+
+    private static final String API_KEY_SHIPPER = Play.application().configuration().getString("sandbox.shipping.shipperapi.apikey");
+    private static final String API_SHIPPER_ADDRESS = Play.application().configuration().getString("sandbox.shipping.shipperapi.v1.url");
+    private static final String API_SHIPPER_DOMESTIC_ORDER = "orders/domestics?apiKey=";
+    private static final String API_SHIPPER_TRACKING = "orders?apiKey=";
+    private static final String API_SHIPPER_ADDRESS_V3 = Play.application().configuration().getString("sandbox.shipping.shipperapi.v3.url");
+    private static final String API_SHIPPER_AREAS_V3 = "/v3/location/areas?area_ids=";
+    private static final String API_SHIPPER_DETAIL = "orders/";
     private static final String API_SHIPPER_DOMESTIC_RATES = "domesticRates?apiKey=";
 
     private static HttpURLConnection connDomesticRates;
@@ -210,8 +222,34 @@ public class ShipperController extends BaseController {
     @ApiOperation(value = "Get all domestic rate list.", notes = "Returns list of domestic rate.\n" + swaggerInfo
             + "", response = DomesticRatesResponse.class, responseContainer = "List", httpMethod = "GET")
     public static Result getAllDomesticRatesByAreaId (Long storeId, Long destinationAreaId, Integer
-            price, Double latitude, Double longitude, Double weight, Double length, Double wide, Double height, Integer storeType) {
+            price, Double weight, Double length, Double wide, Double height, Integer storeType) throws IOException {
         int authority = checkAccessAuthorization("all");
+
+        //start find latitude and longitude from areaId;
+
+        ProcessBuilder shipperBuilderForAreas = new ProcessBuilder(
+                "curl",
+                "-XGET",
+                "-H", "Content-Type:application/json",
+                "-H", "user-agent: Shipper/1.0",
+                "-H", "X-API-Key: "+API_KEY_SHIPPER,
+                API_SHIPPER_ADDRESS_V3+API_SHIPPER_AREAS_V3+destinationAreaId
+        );
+
+
+        Process prosesBuilderForAreas = shipperBuilderForAreas.start();
+        InputStream isAreas = prosesBuilderForAreas.getInputStream();
+        InputStreamReader isrAreas = new InputStreamReader(isAreas);
+        BufferedReader brAreas = new BufferedReader(isrAreas);
+
+
+        String lineAreas =  brAreas.readLine();
+        JsonNode jsonResponseAreas = new ObjectMapper().readValue(lineAreas, JsonNode.class);
+        String lattitude = (String) jsonResponseAreas.get("data").get(0).get("lat").asText();
+        String longitude = (String) jsonResponseAreas.get("data").get(0).get("lng").asText();
+
+        //end find latitude and longitude
+
         String domesticRateUrlApi = API_SHIPPER_ADDRESS + API_SHIPPER_DOMESTIC_RATES + API_KEY_SHIPPER;
         Store objStore = Store.find.ref(storeId);
 
@@ -224,7 +262,7 @@ public class ShipperController extends BaseController {
                 String o = "&o="+objStore.shipperArea.id;
                 String d = "&d="+destinationAreaId;
                 String tmpOriginCoord = "&originCoord="+objStore.storeLatitude+","+objStore.storeLongitude;
-                String tmpDestinationCoord = "&destinationCoord="+latitude+","+longitude;
+                String tmpDestinationCoord = "&destinationCoord="+lattitude+","+longitude;
                 String v = "&v="+price;
                 String type = "&type="+2;
                 String tmpCod = "&cod="+0;
