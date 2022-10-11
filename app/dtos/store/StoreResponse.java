@@ -43,5 +43,7 @@ public class StoreResponse {
     public String storeLogo;
     @JsonProperty("merchant_type")
     public String merchantType;
+    @JsonProperty("store_queue_url")
+    private String storeQueueUrl;
 
 }
