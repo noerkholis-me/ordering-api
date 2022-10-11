@@ -25,6 +25,8 @@ import repository.CategoryMerchantRepository;
 import repository.SubCategoryMerchantRepository;
 import repository.SubsCategoryMerchantRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
+import repository.ProductMerchantRepository;
+import models.merchant.ProductMerchant;
 
 import java.io.File;
 import java.util.*;
@@ -237,6 +239,12 @@ public class SubCategoryMerchantController extends BaseController {
                         SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (subCategoryMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+
+                        List<ProductMerchant> totalData = ProductMerchantRepository.find.where().eq("sub_category_merchant_id", subCategoryMerchant.id).eq("is_deleted", Boolean.FALSE).findPagingList(0).getPage(0).getList();
+                        if (totalData.size() != 0) {
+                            response.setBaseResponse(0, 0, 0, "Tidak dapat menghapus sub kategori. " +subCategoryMerchant.getSubcategoryName()+ " memiliki " + totalData.size() + " Produk.", null);
                             return badRequest(Json.toJson(response));
                         }
 
@@ -656,6 +664,12 @@ public class SubCategoryMerchantController extends BaseController {
                             SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                             if (subsCategoryMerchant == null) {
                                 response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
+                                return badRequest(Json.toJson(response));
+                            }
+
+                            List<ProductMerchant> totalData = ProductMerchantRepository.find.where().eq("subs_category_merchant_id", subsCategoryMerchant.id).eq("is_deleted", Boolean.FALSE).findPagingList(0).getPage(0).getList();
+                            if (totalData.size() != 0) {
+                                response.setBaseResponse(0, 0, 0, "Tidak dapat menghapus sub kategori. " +subsCategoryMerchant.getSubscategoryName()+ " memiliki " + totalData.size() + " Produk.", null);
                                 return badRequest(Json.toJson(response));
                             }
     

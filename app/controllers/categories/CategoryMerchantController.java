@@ -24,6 +24,8 @@ import play.mvc.Result;
 import repository.CategoryMerchantRepository;
 import repository.SubCategoryMerchantRepository;
 import repository.SubsCategoryMerchantRepository;
+import repository.ProductMerchantRepository;
+import models.merchant.ProductMerchant;
 
 import java.io.File;
 import java.util.*;
@@ -265,6 +267,12 @@ public class CategoryMerchantController extends BaseController {
                         CategoryMerchant CategoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(id, ownMerchant);
                         if (CategoryMerchant == null) {
                             response.setBaseResponse(0, 0, 0, error + " kategori tidak tersedia.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+
+                        List<ProductMerchant> totalData = ProductMerchantRepository.find.where().eq("category_merchant_id", CategoryMerchant.id).eq("is_deleted", Boolean.FALSE).findPagingList(0).getPage(0).getList();
+                        if (totalData.size() != 0) {
+                            response.setBaseResponse(0, 0, 0, "Tidak dapat menghapus kategori. " +CategoryMerchant.getCategoryName()+ " memiliki " + totalData.size() + " Produk.", null);
                             return badRequest(Json.toJson(response));
                         }
 
