@@ -6,6 +6,7 @@ import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
+import com.hokeba.util.Constant;
 import controllers.BaseController;
 import dtos.product.*;
 import models.*;
@@ -442,6 +443,7 @@ public class ProductMerchantController extends BaseController {
         newProductMerchantDetail.setProductImage3(productRequest.getProductDetailRequest().getProductImage3());
         newProductMerchantDetail.setProductImage4(productRequest.getProductDetailRequest().getProductImage4());
         newProductMerchantDetail.setProductMerchant(newProductMerchant);
+        newProductMerchantDetail.setProductMerchantQrCode(Constant.getInstance().getFrontEndUrl().concat("product/"+newProductMerchant.id+"/detail"));
     }
 
     // PRODUK REKOMENDASI
@@ -859,6 +861,7 @@ public class ProductMerchantController extends BaseController {
                     productResponseKiosK.setIsCustomizable(productMerchantDetail.getIsCustomizable());
                     productResponseKiosK.setIsActive(productMerchant.getIsActive());
                     productResponseKiosK.setMerchantId(productMerchant.getMerchant().id);
+                    productResponseKiosK.setProductMerchantQrCode(productMerchantDetail.getProductMerchantQrCode());
                     
                     if(productStore != null) {
                         productResponseKiosK.setProductPrice(productStore.getStorePrice());
