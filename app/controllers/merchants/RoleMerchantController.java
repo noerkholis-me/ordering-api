@@ -16,10 +16,12 @@ import models.Feature;
 import models.Merchant;
 import models.RoleMerchant;
 import models.RoleMerchantFeature;
+import models.UserMerchant;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.RoleMerchantRepository;
+import repository.UserMerchantRepository;
 
 import java.util.*;
 import com.avaje.ebean.Query;
