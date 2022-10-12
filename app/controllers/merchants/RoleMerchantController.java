@@ -16,10 +16,12 @@ import models.Feature;
 import models.Merchant;
 import models.RoleMerchant;
 import models.RoleMerchantFeature;
+import models.UserMerchant;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.RoleMerchantRepository;
+import repository.UserMerchantRepository;
 
 import java.util.*;
 import com.avaje.ebean.Query;
@@ -265,7 +267,11 @@ public class RoleMerchantController extends BaseController {
                             response.setBaseResponse(0, 0, 0, error + " role merchant not found.", null);
                             return badRequest(Json.toJson(response));
                         }
-
+                        List<UserMerchant> userMerchant = UserMerchantRepository.find.where().eq("t0.role_id", roleMerchant.id).eq("t0.is_deleted", Boolean.FALSE).findPagingList(0).getPage(0).getList();
+                        if (userMerchant.size() != 0) {
+                            response.setBaseResponse(0, 0, 0, "Tidak dapat menghapus Role. " +roleMerchant.getName()+ " memiliki " + userMerchant.size() + " User Active.", null);
+                            return badRequest(Json.toJson(response));
+                        }
                         roleMerchant.isDeleted = true;
                         roleMerchant.update();
                         trx.commit();
