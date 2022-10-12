@@ -39,6 +39,7 @@ public class Helper {
     public final static String MERCHANT_URL = Play.application().configuration().getString("whizliz.merchant.url");
     public final static String BACKEND_URL = Play.application().configuration().getString("whizliz.cms.url");
     public final static String POS_URL = Play.application().configuration().getString("sandbox.pos.url");
+    public final static String MOBILEQR_URL = Play.application().configuration().getString("whizliz.frontend.url");
     
     /*public static void email(String to, String name, String htmlMsg, String subject) throws Exception {
         // Create the email message
