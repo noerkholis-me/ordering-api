@@ -930,6 +930,7 @@ public class ProductMerchantController extends BaseController {
                     productResponseKiosK.setIsCustomizable(productMerchantDetail.getIsCustomizable());
                     productResponseKiosK.setIsActive(productMerchant.getIsActive());
                     productResponseKiosK.setMerchantId(productMerchant.getMerchant().id);
+                    productResponseKiosK.setProductMerchantQrCode(productMerchantDetail.getProductMerchantQrCode());
 
                     if(productStore != null) {
                         productResponseKiosK.setProductPrice(productStore.getStorePrice());
