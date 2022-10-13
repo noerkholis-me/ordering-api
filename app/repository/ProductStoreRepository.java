@@ -112,4 +112,16 @@ public class ProductStoreRepository extends Model {
 
 		return resData;
 	}
+
+	public static List<ProductStore> findByStoreId(Store store) {
+		try {
+			return find.where()
+					.eq("store", store)
+					.eq("t0.is_deleted", Boolean.FALSE)
+					.findList();
+		} catch (PersistenceException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 }
