@@ -7,6 +7,8 @@ import dtos.shipper.ProvinceResponse;
 import dtos.shipper.SuburbResponse;
 import lombok.*;
 
+import java.util.List;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -45,5 +47,7 @@ public class StoreResponse {
     public String merchantType;
     @JsonProperty("store_queue_url")
     private String storeQueueUrl;
+    @JsonProperty("product_stores")
+    private List<ProductStoreResponseForStore> productStoreResponses;
 
 }
