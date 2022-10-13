@@ -293,7 +293,7 @@ public class StoreController extends BaseController {
                 .merchantId(store.merchant.id)
                 .storeLogo(store.storeLogo)
                 .merchantType(store.merchant.merchantType)
-                .storeQueueUrl(Helper.API_URL + "/" + store.storeCode + "/queue")
+                .storeQueueUrl(Helper.MOBILEQR_URL + "/" + store.storeCode + "/queue")
                 .build();
     }
 
