@@ -22,12 +22,12 @@ import models.ShipperCity;
 import models.ShipperProvince;
 import models.ShipperSuburb;
 import models.Store;
+import models.merchant.ProductMerchant;
+import models.merchant.ProductMerchantDetail;
 import models.merchant.TableMerchant;
 import models.pupoint.PickUpPointMerchant;
 import models.store.StoreAccessDetail;
-import repository.ProductStoreRepository;
-import repository.StoreAccessRepository;
-import repository.TableMerchantRepository;
+import repository.*;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
@@ -178,8 +178,8 @@ public class StoreController extends BaseController {
                     response.setBaseResponse(0, 0, 0, " Store is not found.", null);
                     return badRequest(Json.toJson(response));
                 }
-                List<ProductStore> productStoreList = ProductStoreRepository.findByStoreId(store);
-                StoreResponse storeResponse = toResponse(store, productStoreList);
+                List<ProductMerchant> productMerchantList = ProductMerchantRepository.findProductMerchantIsActiveAndMerchant(ownMerchant, true);
+                StoreResponse storeResponse = toResponse(store, productMerchantList);
                 response.setBaseResponse(1, 0, 0, success + " Showing data store", storeResponse);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
@@ -297,13 +297,17 @@ public class StoreController extends BaseController {
                 .build();
     }
 
-    private static StoreResponse toResponse(Store store, List<ProductStore> productStoreList) {
+    private static StoreResponse toResponse(Store store, List<ProductMerchant> productMerchantList) {
         List<ProductStoreResponseForStore> list = new ArrayList<>();
-        for (ProductStore productStore : productStoreList) {
+        for (ProductMerchant productMerchant : productMerchantList) {
+            ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productMerchant);
+            String linkQrProductMerchant = productMerchantDetail.getProductMerchantQrCode();
+            String[] parts = linkQrProductMerchant.split("/");
+            String qrProductMerchantUrl = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+store.storeCode+"/"+store.id+"/"+productMerchant.getMerchant().id+"/"+parts[3]+"/"+parts[4]+"/"+parts[5];
             ProductStoreResponseForStore productStoreResponse = new ProductStoreResponseForStore();
-            productStoreResponse.setProductId(productStore.productMerchant.id);
-            productStoreResponse.setProductName(productStore.productMerchant.getProductName());
-            productStoreResponse.setProductStoreQrCode(productStore.getProductStoreQrCode());
+            productStoreResponse.setProductId(productMerchant.id);
+            productStoreResponse.setProductName(productMerchant.getProductName());
+            productStoreResponse.setProductStoreQrCode(qrProductMerchantUrl);
             list.add(productStoreResponse);
         }
         return StoreResponse.builder()
