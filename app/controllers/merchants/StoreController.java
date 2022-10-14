@@ -179,6 +179,7 @@ public class StoreController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
                 List<ProductMerchant> productMerchantList = ProductMerchantRepository.findProductMerchantIsActiveAndMerchant(ownMerchant, true);
+                System.out.println("Listnya : "+productMerchantList.size());
                 StoreResponse storeResponse = toResponse(store, productMerchantList);
                 response.setBaseResponse(1, 0, 0, success + " Showing data store", storeResponse);
                 return ok(Json.toJson(response));
@@ -302,8 +303,11 @@ public class StoreController extends BaseController {
         for (ProductMerchant productMerchant : productMerchantList) {
             ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productMerchant);
             String linkQrProductMerchant = productMerchantDetail.getProductMerchantQrCode();
-            String[] parts = linkQrProductMerchant.split("/");
-            String qrProductMerchantUrl = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+store.storeCode+"/"+store.id+"/"+productMerchant.getMerchant().id+"/"+parts[3]+"/"+parts[4]+"/"+parts[5];
+            String qrProductMerchantUrl = null;
+            if (linkQrProductMerchant != null) {
+                String[] parts = linkQrProductMerchant.split("/");
+                qrProductMerchantUrl = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+store.storeCode+"/"+store.id+"/"+productMerchant.getMerchant().id+"/"+parts[3]+"/"+parts[4]+"/"+parts[5];
+            }
             ProductStoreResponseForStore productStoreResponse = new ProductStoreResponseForStore();
             productStoreResponse.setProductId(productMerchant.id);
             productStoreResponse.setProductName(productMerchant.getProductName());
