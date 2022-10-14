@@ -16,10 +16,16 @@ import dtos.store.StoreRequest;
 import dtos.store.StoreResponse;
 import dtos.store.StoreResponsePuP;
 import models.*;
+import models.merchant.*;
+import models.store.*;
+import models.pupoint.*;
+import repository.*;
+import repository.pickuppoint.*;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import utils.ShipperHelper;
+import com.hokeba.util.Helper;
 import java.math.BigDecimal;
 
 import java.util.ArrayList;
@@ -189,6 +195,31 @@ public class StoreController extends BaseController {
                         response.setBaseResponse(0, 0, 0, " Store is not found.", null);
                         return badRequest(Json.toJson(response));
                     }
+
+                    List<TableMerchant> totalDataTable = TableMerchantRepository.find.where().eq("store_id", store.id).eq("is_deleted", Boolean.FALSE).findPagingList(0).getPage(0).getList();
+                    if (totalDataTable.size() != 0) {
+                        response.setBaseResponse(0, 0, 0, "Tidak dapat menghapus Store. " +store.storeName+ " memiliki " + totalDataTable.size() + " Table.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+
+                    List<PickUpPointMerchant> totalDataPickUpPoint = PickUpPointRepository.find.where().eq("store_id", store.id).eq("is_deleted", Boolean.FALSE).findPagingList(0).getPage(0).getList();
+                    if (totalDataPickUpPoint.size() != 0) {
+                        response.setBaseResponse(0, 0, 0, "Tidak dapat menghapus Store. " +store.storeName+ " memiliki " + totalDataPickUpPoint.size() + " Pickup Point.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+
+                    List<ProductStore> totalDataProductStore = ProductStoreRepository.find.where().eq("store_id", store.id).eq("is_deleted", Boolean.FALSE).findPagingList(0).getPage(0).getList();
+                    if (totalDataProductStore.size() != 0) {
+                        response.setBaseResponse(0, 0, 0, "Tidak dapat menghapus Store. " +store.storeName+ " memiliki " + totalDataProductStore.size() + " Product Store.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+
+                    List<StoreAccessDetail> totalDataStoreAccess = StoreAccessRepository.findDetail.where().eq("store_id", store.id).eq("is_deleted", Boolean.FALSE).findPagingList(0).getPage(0).getList();
+                    if (totalDataStoreAccess.size() != 0) {
+                        response.setBaseResponse(0, 0, 0, "Tidak dapat menghapus Store. " +store.storeName+ " memiliki " + totalDataStoreAccess.size() + " Store Access.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+
                     store.isActive = Boolean.FALSE;
                     store.isDeleted = Boolean.TRUE;
 
@@ -253,6 +284,7 @@ public class StoreController extends BaseController {
                 .storeQrCode(store.getStoreQrCode())
                 .merchantId(store.merchant.id)
                 .storeLogo(store.storeLogo)
+                .storeQueueUrl(Helper.MOBILEQR_URL + store.storeCode + "/queue")
                 .build();
     }
 
