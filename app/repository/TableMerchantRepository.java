@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public class TableMerchantRepository extends Model {
 
-    private static Finder<Long, TableMerchant> find = new Finder<>(Long.class, TableMerchant.class);
+    public static Finder<Long, TableMerchant> find = new Finder<>(Long.class, TableMerchant.class);
 
     public static Optional<TableMerchant> findById(Long id) {
         return Optional.ofNullable(
