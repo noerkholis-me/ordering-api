@@ -1,7 +1,7 @@
 package controllers.users;
 
-import models.WebhookShipper;
-import play.libs.Json;
+import models.transaction.Order;
+import models.transaction.ShipperOrderStatus;
 import com.hokeba.api.BaseResponse;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,12 +11,8 @@ import com.avaje.ebean.Ebean;
 import play.mvc.Result;
 import controllers.BaseController;
 import com.wordnik.swagger.annotations.Api;
-import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
-import models.WebhookShipper;
 import models.SOrder;
 import models.SOrderStatus;
 
@@ -144,6 +140,112 @@ public class WebhookShipperController extends BaseController {
 
         //response.setBaseResponse(1, offset, 1, "success", tmpDescription);
         //return ok(Json.toJson(response));   
+        return ok();
+    }
+
+    public static Result webhookStatusForSandbox(){
+
+        JsonNode node = request().body().asJson();
+
+        String shipperId = node.get("order_id").asText();
+        Order objOrder = Order.find.where().eq("shipper_order_id", shipperId).eq("t0.is_deleted",false).findUnique();
+
+        System.out.println("Obj Order " + objOrder.getShipperOrderId());
+        ShipperOrderStatus statusOrder = new ShipperOrderStatus();
+
+
+        String tmpStatusCode = (String) node.get("external_status").get("code").asText();
+        String tmpStatusName = (String) node.get("external_status").get("name").asText();
+        String tmpDescription = (String) node.get("external_status").get("description").asText();
+
+        System.out.println("STATUS CODE : " + tmpStatusCode);
+
+
+
+        Transaction txn = Ebean.beginTransaction();
+        try{
+
+            statusOrder.status = tmpStatusName;
+
+            statusOrder.notes = tmpDescription;
+            statusOrder.order = objOrder;
+//            statusOrder.order_id = objOrder.id;
+            statusOrder.save();
+
+            txn.commit();
+
+//            if(tmpStatusCode.equals("1000")){
+//                System.out.println("=========== PAKET SEDANG DIPERSIAPKAN");
+//            }else if(tmpStatusCode.equals("1010")){
+//                System.out.println("=========== TUNGGU PENJEMPUTAN");
+//            }else if(tmpStatusCode.equals("1020")){
+//                System.out.println("=========== SEDANG DIJEMPUT");
+//            }else if(tmpStatusCode.equals("1030")){
+//                System.out.println("=========== PROSES PENJEMPUTAN");
+//            }else if(tmpStatusCode.equals("1040")){
+//                System.out.println("=========== PERJALANAN KE HUB");
+//            }else if(tmpStatusCode.equals("1050")){
+//                System.out.println("=========== SAMPAI DI HUB");
+//            }else if(tmpStatusCode.equals("1060")){
+//                System.out.println("=========== SORTIR BARANG");
+//            }else if(tmpStatusCode.equals("1070")){
+//
+//                System.out.println("=========== DIKIRIM KE 3PLNAME");
+//                statusOrder.status = "Your order is being delivered.";
+//
+//                statusOrder.notes = "Your order is being delivered.";
+//                statusOrder.order = objOrder;
+//                statusOrder.order_id = objOrder.id;
+//                statusOrder.save();
+//
+//                txn.commit();
+
+//            }else if(tmpStatusCode.equals("1080")){
+//
+//                System.out.println("=========== DITERIMA 3PLNAME");
+//                statusOrder.status = "Your order is being delivered.";
+//
+//                statusOrder.notes = "Your order is being delivered.";
+//                statusOrder.order = objOrder;
+//                statusOrder.order_id = objOrder.id;
+//                statusOrder.save();
+//
+//                txn.commit();
+
+//            }else if(tmpStatusCode.equals("1090")){
+//                System.out.println("=========== PAKET TERKIRIM");
+//
+//                // ========= BEGIN STATUS CMS
+//
+//                statusOrder.status = "Your order has closed. Happy Eating!";
+//                // ========= END STATUS CMS
+//
+//                statusOrder.notes = "Your order has closed. Happy Eating!";
+//                statusOrder.order = objOrder;
+//                statusOrder.order_id = objOrder.id;
+//                statusOrder.save();
+//
+//                txn.commit();
+
+
+//            }else if(tmpStatusCode.equals("1100")){
+//                System.out.println("=========== DIKEMBALIKAN KE PENGIRIM");
+//            }else {
+//                System.out.println("=========== CANCELLED");
+//            }
+
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            txn.rollback();
+        } finally {
+            txn.end();
+        }
+
+        //response.setBaseResponse(1, offset, 1, "success", tmpDescription);
+        //return ok(Json.toJson(response));
         return ok();
     }
 

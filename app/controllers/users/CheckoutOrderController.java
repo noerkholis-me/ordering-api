@@ -4,46 +4,72 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.http.response.global.ServiceResponse;
 import controllers.BaseController;
-import dtos.order.*;
-import dtos.payment.*;
+import dtos.loyalty.OrderForLoyaltyData;
+import dtos.order.OrderStatusChanges;
+import dtos.order.OrderTransaction;
+import dtos.order.OrderTransactionResponse;
+import dtos.order.ProductOrderAddOn;
+import dtos.order.ProductOrderDetail;
+import dtos.payment.InitiatePaymentRequest;
+import dtos.payment.InitiatePaymentResponse;
+import dtos.payment.PaymentRequest;
+import dtos.payment.PaymentServiceRequest;
 import models.*;
-import models.internal.DeviceType;
-import models.internal.PaymentMethodConfig;
-import models.merchant.*;
+import models.loyalty.LoyaltyPointHistory;
+import models.loyalty.LoyaltyPointMerchant;
+import models.merchant.MerchantPayment;
+import models.merchant.ProductMerchant;
+import models.merchant.TableMerchant;
 import models.productaddon.ProductAddOn;
 import models.pupoint.PickUpPointMerchant;
-import models.transaction.*;
+import models.transaction.Order;
+import models.transaction.OrderDetail;
+import models.transaction.OrderDetailAddOn;
+import models.transaction.OrderPayment;
+import models.transaction.OrderStatus;
+import models.transaction.PaymentDetail;
+import models.transaction.PaymentStatus;
 import org.json.JSONObject;
 import play.Logger;
+import play.Play;
 import play.libs.Json;
 import play.mvc.Result;
-import repository.*;
-import models.loyalty.*;
-import repository.loyalty.*;
-import dtos.loyalty.*;
+import repository.OrderPaymentRepository;
+import repository.OrderRepository;
+import repository.ProductAddOnRepository;
+import repository.ProductMerchantRepository;
+import repository.TableMerchantRepository;
+import repository.loyalty.LoyaltyPointHistoryRepository;
+import repository.loyalty.LoyaltyPointMerchantRepository;
 import repository.pickuppoint.PickUpPointRepository;
 import service.PaymentService;
-import com.avaje.ebean.Query;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.io.File;
-import java.io.FileOutputStream;
-
-import java.math.RoundingMode;
-
-import service.DownloadOrderReport;
 
 public class CheckoutOrderController extends BaseController {
 
+    private static final String API_KEY_SHIPPER = Play.application().configuration().getString("sandbox.shipping.shipperapi.apikey");
+    private static final String API_SHIPPER_ADDRESS = Play.application().configuration().getString("sandbox.shipping.shipperapi.v1.url");
+    private static final String API_SHIPPER_DOMESTIC_ORDER = "orders/domestics?apiKey=";
+    private static final String API_SHIPPER_TRACKING = "orders?apiKey=";
+    private static final String API_SHIPPER_ADDRESS_V3 = Play.application().configuration().getString("sandbox.shipping.shipperapi.v3.url");
+    private static final String API_SHIPPER_AREAS_V3 = "/v3/location/areas?area_ids=";
+    private static final String API_SHIPPER_DETAIL = "orders/";
     private final static Logger.ALogger logger = Logger.of(CheckoutOrderController.class);
 
     private static BaseResponse response = new BaseResponse();
@@ -54,9 +80,34 @@ public class CheckoutOrderController extends BaseController {
         // int authority = checkAccessAuthorization("all");
         // if (authority == 200 || authority == 203) {
             JsonNode jsonNode = request().body().asJson();
+            ObjectNode nodeBaru = (ObjectNode) jsonNode;
+//            ObjectNode nodeBaru = new ObjectNode();
             Transaction txn = Ebean.beginTransaction();
             try {
                 logger.info(">>> incoming order request..." + jsonNode.toString());
+
+                String orderType = jsonNode.get("order_type").asText();
+
+                if (orderType.equalsIgnoreCase("DELIVERY")) {
+                    nodeBaru.set("o", jsonNode.get("origin_area_id"));
+                    nodeBaru.set("d", jsonNode.get("destination_area_id"));
+                    nodeBaru.set("l", jsonNode.get("length"));
+                    nodeBaru.set("w", jsonNode.get("wide"));
+                    nodeBaru.set("h", jsonNode.get("height"));
+                    nodeBaru.set("wt", jsonNode.get("weight"));
+                    nodeBaru.set("v", jsonNode.get("total_price"));
+                    nodeBaru.set("rateID", jsonNode.get("rate_id"));
+                    nodeBaru.set("contents", jsonNode.get("destination_address"));
+                    nodeBaru.set("packageType", jsonNode.get("package_type"));
+                    nodeBaru.set("consigneeName", jsonNode.get("customer_name"));
+                    nodeBaru.set("consigneePhoneNumber", jsonNode.get("customer_phone_number"));
+                    nodeBaru.set("originAddress", jsonNode.get("origin_address"));
+                    nodeBaru.set("destinationAddress", jsonNode.get("destination_address"));
+                }
+
+                System.out.println(">>> incoming order request 1..." + nodeBaru.toString());
+
+//                order.orderIdShipper = node.has("shipperName") ? node.get("shipperName").asText() : "";
 
                 // request order
                 OrderTransaction orderRequest = objectMapper.readValue(jsonNode.toString(), OrderTransaction.class);
@@ -66,6 +117,15 @@ public class CheckoutOrderController extends BaseController {
                     response.setBaseResponse(0, 0, 0, "Store code is not null", null);
                     return badRequest(Json.toJson(response));
                 }
+
+                ((ObjectNode) jsonNode).put("store_name", store.storeName);
+                ((ObjectNode) jsonNode).put("store_number", store.storePhone);
+                ((ObjectNode) jsonNode).put("store_coordinate", store.storeLatitude+","+store.storeLongitude);
+                ((ObjectNode) jsonNode).put("shipper_payment_type", "postpay");
+                nodeBaru.set("consignerName", jsonNode.get("store_name"));
+                nodeBaru.set("consignerPhoneNumber", jsonNode.get("store_number"));
+                nodeBaru.set("originCoord", jsonNode.get("store_coordinate"));
+                nodeBaru.set("paymentType", jsonNode.get("shipper_payment_type"));
 
                 Member member = null;
                 Member memberData = new Member();
@@ -164,6 +224,7 @@ public class CheckoutOrderController extends BaseController {
                 order.save();
                 List<ProductOrderDetail> productOrderDetails = orderRequest.getProductOrderDetail();
                 StringBuilder message = new StringBuilder();
+                ArrayNode countersNode = nodeBaru.putArray("itemName");
                 List<OrderForLoyaltyData> listOrderData = new ArrayList<>();
                 for (ProductOrderDetail productOrderDetail : productOrderDetails) {
                     OrderForLoyaltyData listDataOrder = new OrderForLoyaltyData();
@@ -180,6 +241,11 @@ public class CheckoutOrderController extends BaseController {
                         orderDetail.setIsCustomizable(productOrderDetail.getIsCustomizable());
                         orderDetail.setOrder(order);
                         orderDetail.save();
+
+                        ObjectNode counterNode = countersNode.addObject();
+                        counterNode.put("name", productMerchant.getProductName());
+                        counterNode.put("qty", productOrderDetail.getProductQty());
+                        counterNode.put("value", productOrderDetail.getProductPrice());
 
                         // ADD FOR LOYALTY
                         SubsCategoryMerchant subsCategoryMerchant = productMerchant.getSubsCategoryMerchant();
@@ -345,6 +411,9 @@ public class CheckoutOrderController extends BaseController {
                         request.setCustomerPhoneNumber(member.phone);
                     }
 
+//                    ((ObjectNode) jsonNode).put("externalID", orderNumber);
+//                    nodeBaru.set("externalID", jsonNode.get("externalID"));
+
                     // please
                     PaymentServiceRequest paymentServiceRequest = PaymentServiceRequest.builder()
                             .paymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel())
@@ -411,6 +480,98 @@ public class CheckoutOrderController extends BaseController {
                         if (member != null){
                             member.lastPurchase = new Date();
                             member.update();
+                        }
+
+                        // harus ditambah return klo error
+                        // tambah lat dan long saat order shipper ke shipper API v3
+                        if (orderRequest.getOrderType().equalsIgnoreCase("DELIVERY")) {
+                            String domesticUrl = API_SHIPPER_ADDRESS + API_SHIPPER_DOMESTIC_ORDER + API_KEY_SHIPPER;
+
+                            //start remove fields for nodeBaru
+                            nodeBaru.remove("store_code");
+                            nodeBaru.remove("order_type");
+                            nodeBaru.remove("device_type");
+                            nodeBaru.remove("customer_name");
+                            nodeBaru.remove("customer_email");
+                            nodeBaru.remove("customer_phone_number");
+                            nodeBaru.remove("sub_total");
+                            nodeBaru.remove("table_id");
+                            nodeBaru.remove("total_price");
+                            nodeBaru.remove("pickup_point_id");
+                            nodeBaru.remove("payment_detail");
+                            nodeBaru.remove("product_order_detail");
+                            nodeBaru.remove("use_loyalty");
+                            nodeBaru.remove("loyalty_usage");
+                            nodeBaru.remove("origin_area_id");
+                            nodeBaru.remove("destination_area_id");
+                            nodeBaru.remove("length");
+                            nodeBaru.remove("wide");
+                            nodeBaru.remove("height");
+                            nodeBaru.remove("weight");
+                            nodeBaru.remove("store_name");
+                            nodeBaru.remove("store_number");
+                            //end remove
+
+                            //start find lat and long from areaId;
+
+                            ProcessBuilder shipperBuilderForAreas = new ProcessBuilder(
+                                    "curl",
+                                    "-XGET",
+                                    "-H", "Content-Type:application/json",
+                                    "-H", "user-agent: Shipper/1.0",
+                                    "-H", "X-API-Key: "+API_KEY_SHIPPER,
+                                    API_SHIPPER_ADDRESS_V3+API_SHIPPER_AREAS_V3+nodeBaru.get("d").asInt()
+                            );
+
+
+                            Process prosesBuilderForAreas = shipperBuilderForAreas.start();
+                            InputStream isAreas = prosesBuilderForAreas.getInputStream();
+                            InputStreamReader isrAreas = new InputStreamReader(isAreas);
+                            BufferedReader brAreas = new BufferedReader(isrAreas);
+
+
+                            String lineAreas =  brAreas.readLine();
+                            JsonNode jsonResponseAreas = new ObjectMapper().readValue(lineAreas, JsonNode.class);
+                            String lattitude = (String) jsonResponseAreas.get("data").get(0).get("lat").asText();
+                            String longitude = (String) jsonResponseAreas.get("data").get(0).get("lng").asText();
+                            ((ObjectNode) jsonNode).put("customer_coordinate", lattitude+","+longitude);
+                            nodeBaru.set("destinationCoord", jsonNode.get("customer_coordinate"));
+
+                            String bodyRequest = nodeBaru.toString();
+                            System.out.println("domestic order request : "+bodyRequest);
+                            ProcessBuilder shipperBuilder = new ProcessBuilder(
+                                    "curl",
+                                    "-XPOST",
+                                    "-H", "Content-Type:application/json",
+                                    "-H", "user-agent: Shipper/1.0",
+                                    domesticUrl,
+                                    "-d", bodyRequest
+                            );
+
+
+                            Process prosesBuilder = shipperBuilder.start();
+                            InputStream is = prosesBuilder.getInputStream();
+                            InputStreamReader isr = new InputStreamReader(is);
+                            BufferedReader br = new BufferedReader(isr);
+
+
+                            String line =  br.readLine();
+                            JsonNode jsonResponse = new ObjectMapper().readValue(line, JsonNode.class);
+                            System.out.println("domestic response : "+jsonResponse.toString());
+                            String hasil = (String)jsonResponse.get("status").asText();
+                            System.out.println("status domestic order : "+hasil);
+
+                            if (hasil.equals("success")) {
+                                String idShipperOrder = (String)jsonResponse.get("data").get("id").asText();
+                                System.out.println("order id shipper : "+idShipperOrder);
+                                order.setShipperOrderId(idShipperOrder);
+                                order.save();
+                                orderTransactionResponse.setShipperOrderId(idShipperOrder);
+                            } else {
+                                String messageShipper = (String) jsonResponse.get("data").get("content").asText();
+                                response.setBaseResponse(1, offset, 1, messageShipper, orderTransactionResponse);
+                                return ok(Json.toJson(response));
+                            }
                         }
 
                         response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
@@ -656,5 +817,177 @@ public class CheckoutOrderController extends BaseController {
         response.setBaseResponse(0, 0, 0, error, null);
         return ok(Json.toJson(response));
     }
+
+    public static Result getTrackingShipper(String id){
+
+        String domesticTrackingUrl = API_SHIPPER_ADDRESS + API_SHIPPER_TRACKING + API_KEY_SHIPPER;
+
+        try{
+
+            StringBuilder output = new StringBuilder();
+            StringBuilder outputError = new StringBuilder();
+
+            domesticTrackingUrl += "&id="+id;
+
+            ProcessBuilder pb2 = new ProcessBuilder(
+                    "curl",
+                    "-XGET",
+                    "-H", "user-agent: Shipper/",
+                    domesticTrackingUrl
+            );
+
+            Process p = pb2.start();
+
+            InputStream is = p.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader br = new BufferedReader(isr);
+
+            String line = br.readLine();
+            JsonNode jsonResponse = new ObjectMapper().readValue(line, JsonNode.class);
+
+            return ok(Json.toJson(jsonResponse));
+
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public static Result getShipmentStatus(String orderShipperId) {
+        String shipperDetailUrl = API_SHIPPER_ADDRESS + API_SHIPPER_DETAIL+orderShipperId+"?apiKey=" + API_KEY_SHIPPER;
+
+        try{
+
+            StringBuilder output = new StringBuilder();
+            StringBuilder outputError = new StringBuilder();
+
+//            shipperDetailUrl;
+
+            ProcessBuilder pb2 = new ProcessBuilder(
+                    "curl",
+                    "-XGET",
+                    "-H", "user-agent: Shipper/",
+                    shipperDetailUrl
+            );
+
+            Process p = pb2.start();
+
+            InputStream is = p.getInputStream();
+            InputStreamReader isr = new InputStreamReader(is);
+            BufferedReader br = new BufferedReader(isr);
+
+            String line = br.readLine();
+            JsonNode jsonResponse = new ObjectMapper().readValue(line, JsonNode.class);
+
+            return ok(Json.toJson(jsonResponse));
+
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+//    public static Result deliveryStatus (String memberId) {
+//
+//        //System.out.println("==============>>>>>>>>>>>>>>>>>>> " + memberId);
+//        Member member = Member.find.byId(Long.parseLong(memberId));
+//
+//        if (member == null) {
+//            messageDescription.put("deskripsi", "Member not found");
+//            response.setBaseResponse(1, 0, 1, error, messageDescription);
+//            return notFound(Json.toJson(response));
+//        }
+//
+//
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+//        SOrder dataOrder = SOrder.find.where()
+//                .eq("t0.member_id", member.id)
+//                .eq("t0.is_deleted",false)
+//                .orderBy("t0.id desc")
+//                .setMaxRows(1).findUnique();
+//
+//        if (dataOrder == null) {
+//            messageDescription.put("deskripsi", "Order not found");
+//            response.setBaseResponse(1, 0, 1, error, messageDescription);
+//            return notFound(Json.toJson(response));
+//        }
+//
+//
+//        try {
+//
+//            List<Map<String, Object>> details = new LinkedList<>();
+//            Map<String, Object> f = new HashMap<>();
+//
+//            String tmpStatusDescription = "";
+//            String tmpStatusPayment = "";
+//
+//            // System.out.println("======= -------- " + dataOrder.id);
+//            //System.out.println(">>>>>>>>>>> "  +dataOrder.getPaymentStatus());
+//
+//            if(dataOrder.getPaymentStatus()=="Paid"){
+//                tmpStatusDescription = "Your order is being prepared";
+//                tmpStatusPayment = "PAYMENT_VERIFY";
+//            }
+//            else if(dataOrder.getPaymentStatus()=="Process"){
+//                tmpStatusDescription = "Your order is being process";
+//                tmpStatusPayment = "PROCESS";
+//            }
+//            else if(dataOrder.getPaymentStatus()=="Pickup"){
+//                tmpStatusDescription = "Your order is ready to deliver";
+//                tmpStatusPayment= "PICK_UP";
+//            }
+//            else if(dataOrder.getPaymentStatus()=="On Delivery"){
+//                tmpStatusDescription = "Your order is being delivered";
+//                tmpStatusPayment= "DELIVERY";
+//            }
+//            else if(dataOrder.getPaymentStatus()=="Closed"){
+//                tmpStatusDescription = "Your order is already closed";
+//                tmpStatusPayment= "CLOSED";
+//            }
+//            else if(dataOrder.getPaymentStatus()=="Cancel"){
+//                tmpStatusDescription = "Your order is cancel";
+//                tmpStatusPayment= "CANCEL";
+//            }
+//            else if(dataOrder.getPaymentStatus()=="Waiting for Confirmation"){
+//                // tmpStatusDescription = "Your order is waiting for confirmation";
+//                // tmpStatusDescription = "Waiting for confirmation";
+//                tmpStatusDescription = "Your order need to confirm";
+//                tmpStatusPayment= "WAITING_CONFIRMATION";
+//            }
+//            else{
+//                tmpStatusDescription = "Your payment is unpaid";
+//                tmpStatusPayment= "UNPAID";
+//            }
+//
+//            Double tmpDiscount = dataOrder.discount!=null ? dataOrder.discount:0.0;
+//            Double tmpServiceFee = dataOrder.serviceFee!=null ? dataOrder.serviceFee:0.0;
+//
+//            List<SOrderDetail> dataDetails = SOrderDetail.find.where().eq("order_id", dataOrder.id).findList();
+//
+//            f.put("total_item", dataDetails.size());
+//            // f.put("total_price",CommonFunction.numberFormat(dataOrder.totalPrice-tmpDiscount+tmpServiceFee));
+//            // f.put("total_price",Double.valueOf(dataOrder.totalPrice-tmpDiscount+tmpServiceFee));
+//            f.put("total_price",Double.valueOf(dataOrder.totalPrice-tmpDiscount+tmpServiceFee+dataOrder.fullServicesFee));
+//            f.put("status",tmpStatusPayment);
+//            f.put("status_description",tmpStatusDescription);
+//            f.put("order_number",dataOrder.orderNumber);
+//
+//            details.add(f);
+//
+//            // response.setBaseResponse(1, 1, 1, "Success", details);
+//            response.setBaseResponse(1, 1, 1, "Success", f);
+//            return ok(Json.toJson(response));
+//
+//
+//        }catch(Exception err){
+//            err.printStackTrace();
+//        }
+//
+//        return null;
+//    }
 
 }

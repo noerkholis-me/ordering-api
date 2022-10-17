@@ -45,6 +45,8 @@ public class ProductMerchantDetail extends BaseModel {
     @OneToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "product_merchant_id", referencedColumnName = "id")
     private ProductMerchant productMerchant;
+    @Column(name = "product_merchant_qr_code")
+    public String productMerchantQrCode;
 
 
 }

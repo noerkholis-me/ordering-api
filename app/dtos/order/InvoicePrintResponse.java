@@ -87,6 +87,8 @@ public class InvoicePrintResponse {
     @JsonProperty("order_qr_code")
     private String orderQrCode;
 
+    @JsonProperty("shipper_order_id")
+    private String shipperOrderId;
 
 
 }
