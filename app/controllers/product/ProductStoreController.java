@@ -5,30 +5,35 @@ import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
+import com.hokeba.util.Constant;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
-import dtos.product.*;
-import dtos.store.*;
-import models.*;
-import models.merchant.*;
+import dtos.product.ProductDetailResponse;
+import dtos.product.ProductResponseStore;
+import dtos.product.ProductStoreResponse;
+import models.Merchant;
+import models.Product;
+import models.ProductStore;
+import models.Store;
+import models.merchant.ProductMerchant;
+import models.merchant.ProductMerchantDetail;
 import play.Logger;
 import play.libs.Json;
-import play.mvc.BodyParser;
-import play.mvc.Http;
 import play.mvc.Result;
-import repository.*;
+
 import java.math.BigDecimal;
 
-import java.io.File;
-import java.util.*;
 import com.avaje.ebean.Query;
-import utils.ImageDirectory;
-import utils.ImageUtil;
+import repository.ProductMerchantDetailRepository;
+import repository.ProductMerchantRepository;
+import repository.ProductStoreRepository;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Api(value = "/merchants/productstore", description = "Product Store")
 public class ProductStoreController extends BaseController {
@@ -75,6 +80,7 @@ public class ProductStoreController extends BaseController {
                         newProductStore.setMerchant(ownMerchant);
                         newProductStore.setActive(request.getIsActive());
                         newProductStore.setStorePrice(request.getStorePrice());
+                        newProductStore.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode+"/"+store.id+"/"+ownMerchant.id+"/product/"+productMerchant.id+"/detail"));
                         if (request.getDiscountType() != null) {
                             newProductStore.setDiscountType(request.getDiscountType());
                         }
@@ -243,6 +249,7 @@ public class ProductStoreController extends BaseController {
                         productStore.setMerchant(ownMerchant);
                         productStore.setActive(request.getIsActive());
                         productStore.setStorePrice(request.getStorePrice());
+                        productStore.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode+"/"+store.id+"/"+ownMerchant.id+"/product/"+productMerchant.id+"/detail"));
                         if (request.getDiscountType() != null) {
                             productStore.setDiscountType(request.getDiscountType());
                         }

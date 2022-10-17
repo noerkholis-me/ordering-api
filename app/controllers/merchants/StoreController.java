@@ -1,7 +1,6 @@
 package controllers.merchants;
 
 import com.avaje.ebean.Ebean;
-import com.avaje.ebean.Page;
 import com.avaje.ebean.Query;
 import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -12,24 +11,32 @@ import com.hokeba.util.Constant;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
+import dtos.store.ProductStoreResponseForStore;
 import dtos.store.StoreRequest;
 import dtos.store.StoreResponse;
 import dtos.store.StoreResponsePuP;
-import models.*;
-import models.merchant.*;
-import models.store.*;
-import models.pupoint.*;
+import models.Merchant;
+import models.ProductStore;
+import models.ShipperArea;
+import models.ShipperCity;
+import models.ShipperProvince;
+import models.ShipperSuburb;
+import models.Store;
+import models.merchant.ProductMerchant;
+import models.merchant.ProductMerchantDetail;
+import models.merchant.TableMerchant;
+import models.pupoint.PickUpPointMerchant;
+import models.store.StoreAccessDetail;
 import repository.*;
-import repository.pickuppoint.*;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import repository.pickuppoint.PickUpPointRepository;
 import utils.ShipperHelper;
 import com.hokeba.util.Helper;
 import java.math.BigDecimal;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 @Api(value = "/merchants/store", description = "Store Management")
@@ -171,7 +178,9 @@ public class StoreController extends BaseController {
                     response.setBaseResponse(0, 0, 0, " Store is not found.", null);
                     return badRequest(Json.toJson(response));
                 }
-                StoreResponse storeResponse = toResponse(store);
+                List<ProductMerchant> productMerchantList = ProductMerchantRepository.findProductMerchantIsActiveAndMerchant(ownMerchant, true);
+                System.out.println("Listnya : "+productMerchantList.size());
+                StoreResponse storeResponse = toResponse(store, productMerchantList);
                 response.setBaseResponse(1, 0, 0, success + " Showing data store", storeResponse);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
@@ -284,7 +293,46 @@ public class StoreController extends BaseController {
                 .storeQrCode(store.getStoreQrCode())
                 .merchantId(store.merchant.id)
                 .storeLogo(store.storeLogo)
+                .merchantType(store.merchant.merchantType)
                 .storeQueueUrl(Helper.MOBILEQR_URL + store.storeCode + "/queue")
+                .build();
+    }
+
+    private static StoreResponse toResponse(Store store, List<ProductMerchant> productMerchantList) {
+        List<ProductStoreResponseForStore> list = new ArrayList<>();
+        for (ProductMerchant productMerchant : productMerchantList) {
+            ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productMerchant);
+            String linkQrProductMerchant = productMerchantDetail.getProductMerchantQrCode();
+            String qrProductMerchantUrl = null;
+            if (linkQrProductMerchant != null) {
+                String[] parts = linkQrProductMerchant.split("/");
+                qrProductMerchantUrl = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+store.storeCode+"/"+store.id+"/"+productMerchant.getMerchant().id+"/"+parts[3]+"/"+parts[4]+"/"+parts[5];
+            }
+            ProductStoreResponseForStore productStoreResponse = new ProductStoreResponseForStore();
+            productStoreResponse.setProductId(productMerchant.id);
+            productStoreResponse.setProductName(productMerchant.getProductName());
+            productStoreResponse.setProductStoreQrCode(qrProductMerchantUrl);
+            list.add(productStoreResponse);
+        }
+        return StoreResponse.builder()
+                .id(store.id)
+                .storeCode(store.storeCode)
+                .storeName(store.storeName)
+                .storePhone(store.storePhone)
+                .address(store.storeAddress)
+                .province(ShipperHelper.toProvinceResponse(store.shipperProvince))
+                .city(ShipperHelper.toCityResponse(store.shipperCity))
+                .suburb(ShipperHelper.toSuburbResponse(store.shipperSuburb))
+                .area(ShipperHelper.toAreaResponse(store.shipperArea))
+                .googleMapsUrl(store.getStoreGmap())
+                .latitude(store.storeLatitude)
+                .longitude(store.storeLongitude)
+                .storeQrCode(store.getStoreQrCode())
+                .merchantId(store.merchant.id)
+                .storeLogo(store.storeLogo)
+                .merchantType(store.merchant.merchantType)
+                .storeQueueUrl(Helper.MOBILEQR_URL + store.storeCode + "/queue")
+                .productStoreResponses(list)
                 .build();
     }
 

@@ -403,6 +403,7 @@ public class OrderMerchantController extends BaseController {
                         orderRes.setPaymentChannel(getOrderPayment.getPaymentChannel());
                         orderRes.setTotalAmountPayment(getOrderPayment.getTotalAmount());
                         orderRes.setPaymentDate(getOrderPayment.getPaymentDate());
+                        orderRes.setShipperOrderId(order.getShipperOrderId());
 
                         List<OrderDetail> orderDetails = OrderRepository.findOrderDetailByOrderId(order.id);
                         List<OrderList.ProductOrderDetail> productOrderDetails = new ArrayList<>();
@@ -606,6 +607,7 @@ public class OrderMerchantController extends BaseController {
                 String orderDetailUrl = webhookOrderDetailUrl.replace("{orderNumber}", orderNumberEncode);
 
                 invoicePrintResponse.setOrderQrCode(orderDetailUrl);
+                invoicePrintResponse.setShipperOrderId(getOrder.getShipperOrderId());
 
                 response.setBaseResponse(1, offset, limit, success + " success showing data invoice.",
                         invoicePrintResponse);

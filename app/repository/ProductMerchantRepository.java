@@ -94,4 +94,8 @@ public class ProductMerchantRepository extends Model {
         return query.findPagingList(0).getPage(0).getList();
     }
 
+    public static List<ProductMerchant> findProductMerchantIsActiveAndMerchant(Merchant merchant, Boolean isActive) {
+        return find.where().eq("isDeleted", false).eq("isActive", isActive).eq("merchant", merchant).order("id").findList();
+    }
+
 }

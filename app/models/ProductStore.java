@@ -56,4 +56,8 @@ public class ProductStore extends BaseModel {
     @JoinColumn(name="store_id", referencedColumnName = "id")
     @Getter @Setter
     public Store store;
+
+    @Column(name = "product_store_qr_code")
+    @Getter @Setter
+    public String productStoreQrCode;
 }
