@@ -27,10 +27,11 @@ public class MerchantController extends BaseController {
 
     @ApiOperation(value = "Get all merchant list for specific email.", notes = "Returns list of merchant for specific email.\n" + swaggerInfo
             + "", response = Merchant.class, responseContainer = "List", httpMethod = "GET")
-    public static Result listMerchantsByEmail() {
-        Merchant ownMerchant = checkMerchantAccessAuthorization();
-        if (ownMerchant != null) {
-            List<Merchant> queryMerchant = Merchant.find.where().eq("t0.is_deleted", false).eq("t0.email", ownMerchant.email).order("id").findList();
+    public static Result listMerchantsByEmail(String userType) {
+        if (userType.equals("merchant")) {
+            Merchant ownMerchant = checkMerchantAccessAuthorization();
+            if (ownMerchant != null) {
+                List<Merchant> queryMerchant = Merchant.find.where().eq("t0.is_deleted", false).eq("t0.email", ownMerchant.email).order("id").findList();
                 List<MerchantResponse> responses = new ArrayList<>();
                 if (queryMerchant != null || !queryMerchant.isEmpty()) {
                     for (Merchant data : queryMerchant) {
@@ -44,7 +45,20 @@ public class MerchantController extends BaseController {
                     response.setBaseResponse(queryMerchant.size() , 0, 0, success + " showing data", responses);
                     return ok(Json.toJson(response));
                 } else {
-                    List<UserMerchant> queryUserMerchant = UserMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.email", ownMerchant.email).order("id").findList();
+                    response.setBaseResponse(0, 0, 0, notFound, null);
+                    return notFound(Json.toJson(response));
+                }
+            } else if (ownMerchant == null) {
+                response.setBaseResponse(0, 0, 0, forbidden, null);
+                return forbidden(Json.toJson(response));
+            }
+        } else if (userType.equals("user_merchant")){
+            UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
+            if (userMerchant != null) {
+                List<MerchantResponse> responses = new ArrayList<>();
+                List<UserMerchant> queryUserMerchant = UserMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.email", userMerchant.getEmail()).order("id").findList();
+                System.out.println("isinya : "+queryUserMerchant.size());
+                if (queryUserMerchant != null || !queryUserMerchant.isEmpty()) {
                     for (UserMerchant data : queryUserMerchant) {
                         MerchantResponse response = new MerchantResponse();
                         response.setId(data.id);
@@ -55,11 +69,16 @@ public class MerchantController extends BaseController {
                     }
                     response.setBaseResponse(queryUserMerchant.size() , 0, 0, success + " showing data", responses);
                     return ok(Json.toJson(response));
+                } else {
+                    response.setBaseResponse(0, 0, 0, notFound, null);
+                    return notFound(Json.toJson(response));
                 }
-        } else if (ownMerchant == null) {
-            response.setBaseResponse(0, 0, 0, forbidden, null);
-            return forbidden(Json.toJson(response));
+            } else if (userMerchant == null) {
+                response.setBaseResponse(0, 0, 0, forbidden, null);
+                return forbidden(Json.toJson(response));
+            }
         }
+
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
     }
