@@ -255,8 +255,16 @@ public class UpdateProfileController extends BaseController {
                     response.setBaseResponse(0, 0, 0, "Nama Depan tidak boleh kosong", null);
                     return badRequest(Json.toJson(response));
                 }
+                if (request.getFirstName().length() > 50) {
+                    response.setBaseResponse(0, 0, 0, "Nama Depan tidak boleh lebih dari 50 character", null);
+                    return badRequest(Json.toJson(response));
+                }
                 if (request.getLastName() == null || Objects.equals(request.getLastName(), "")) {
                     response.setBaseResponse(0, 0, 0, "Nama Belakang tidak boleh kosong", null);
+                    return badRequest(Json.toJson(response));
+                }
+                if (request.getLastName().length() > 50) {
+                    response.setBaseResponse(0, 0, 0, "Nama Belakang tidak boleh lebih dari 50 character", null);
                     return badRequest(Json.toJson(response));
                 }
                 // =======================================================================
