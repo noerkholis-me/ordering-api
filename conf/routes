@@ -450,8 +450,8 @@ GET    /merchant/productstore/:id                        controllers.product.Pro
 DELETE    /merchant/productstore/:id                     controllers.product.ProductStoreController.deleteProductStore(id: Long)
 PUT   /merchant/productstore/:id/status                  controllers.product.ProductStoreController.setStatus(id: Long)
 
-GET    /merchant/productstore/kiosk/list                 controllers.product.ProductStoreController.listProductStore(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
-GET    /merchant/productstore/mobile-qr/list             controllers.product.ProductStoreController.listProductStore(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/productstore/kiosk/list                 controllers.product.ProductStoreController.listProductStoreForKiosk(merchant_id:Long ?= 0, store_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/productstore/mobile-qr/list             controllers.product.ProductStoreController.listProductStoreForMobileQR(merchant_id:Long ?= 0, store_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 
 #ORDER
 POST /users/order/checkout                               controllers.users.CheckoutOrderController.checkoutOrder()
