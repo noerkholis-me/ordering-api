@@ -452,6 +452,8 @@ PUT   /merchant/productstore/:id/status                  controllers.product.Pro
 
 GET    /merchant/productstore/kiosk/list                 controllers.product.ProductStoreController.listProductStoreForKiosk(merchant_id:Long ?= 0, store_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET    /merchant/productstore/mobile-qr/list             controllers.product.ProductStoreController.listProductStoreForMobileQR(merchant_id:Long ?= 0, store_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/productstore/kiosk/list-by-category     controllers.product.ProductStoreController.listProductStoreByCategoriesForKIOSK(merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0, sub_category_id:Long ?= 0, subs_category_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/productstore/mobile-qr/list-by-category controllers.product.ProductStoreController.listProductStoreByCategoriesForMobileQR(merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0, sub_category_id:Long ?= 0, subs_category_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 
 #ORDER
 POST /users/order/checkout                               controllers.users.CheckoutOrderController.checkoutOrder()
