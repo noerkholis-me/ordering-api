@@ -1,7 +1,13 @@
 package dtos.shipper;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,6 +19,6 @@ public class DomesticRatesResponse {
     private String originArea;
     @JsonProperty("destinationArea")
     private String destinationArea;
-    @JsonProperty("rates")
-    private Rates rates;
+    @JsonProperty("pricings")
+    private List<Pricing> pricings;
 }
