@@ -193,10 +193,10 @@ public class ProductStoreController extends BaseController {
 
                         Store store = Store.findById(dataPStore.getStore().id);
                         if (store == null) {
-                            response.setBaseResponse(0, 0, 0, " Store tidak ditemukan.", null);
-                            return badRequest(Json.toJson(response));
+                            responsePStore.setStoresName("Store Deleted");
+                        } else {
+                            responsePStore.setStoresName(store.storeName);
                         }
-                        responsePStore.setStoresName(store.storeName);
 
                         responsesProductStore.add(responsePStore);
                         responseProd.setProductStore(responsePStore != null ? responsesProductStore : null);
