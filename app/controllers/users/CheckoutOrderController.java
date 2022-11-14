@@ -633,7 +633,7 @@ public class CheckoutOrderController extends BaseController {
                                 order.save();
                                 orderTransactionResponse.setShipperOrderId(idShipperOrder);
                             } else {
-                                String messageShipper = (String) jsonResponse.get("data").get("content").asText();
+                                String messageShipper = (String) jsonResponse.get("metadata").get("http_status").asText();
                                 response.setBaseResponse(1, offset, 1, messageShipper, orderTransactionResponse);
                                 return ok(Json.toJson(response));
                             }
