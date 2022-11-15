@@ -69,7 +69,7 @@ public class CheckoutOrderController extends BaseController {
     private static final String API_SHIPPER_TRACKING = "orders?apiKey=";
     private static final String API_SHIPPER_ADDRESS_V3 = Play.application().configuration().getString("sandbox.shipping.shipperapi.v3.url");
     private static final String API_SHIPPER_AREAS_V3 = "/v3/location/areas?area_ids=";
-    private static final String API_SHIPPER_DETAIL = "orders/";
+    private static final String API_SHIPPER_DETAIL = "/v3/order";
     private final static Logger.ALogger logger = Logger.of(CheckoutOrderController.class);
 
     private static BaseResponse response = new BaseResponse();
@@ -921,7 +921,7 @@ public class CheckoutOrderController extends BaseController {
     }
 
     public static Result getShipmentStatus(String orderShipperId) {
-        String shipperDetailUrl = API_SHIPPER_ADDRESS + API_SHIPPER_DETAIL+orderShipperId+"?apiKey=" + API_KEY_SHIPPER;
+        String shipperDetailUrl = API_SHIPPER_ADDRESS_V3 + API_SHIPPER_DETAIL+"/"+orderShipperId;
 
         try{
 
@@ -933,7 +933,7 @@ public class CheckoutOrderController extends BaseController {
             ProcessBuilder pb2 = new ProcessBuilder(
                     "curl",
                     "-XGET",
-                    "-H", "user-agent: Shipper/",
+                    "-H", "X-API-Key: "+API_KEY_SHIPPER,
                     shipperDetailUrl
             );
 
