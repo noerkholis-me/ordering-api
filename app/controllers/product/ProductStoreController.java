@@ -13,6 +13,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
 import dtos.product.ProductDetailResponse;
 import dtos.product.ProductResponseStore;
+import dtos.product.ProductSpecificStoreResponse;
 import dtos.product.ProductStoreResponse;
 import models.Merchant;
 import models.Product;
@@ -223,19 +224,18 @@ public class ProductStoreController extends BaseController {
         if (!merchantId.equals(0L) && !storeId.equals(0L)) {
             try {
                 Merchant merchant = Merchant.find.byId(merchantId);
-                System.out.println("merchant name : "+merchant.name);
+
                 if (merchant != null) {
                     Store store = Store.find.byId(storeId);
-                    System.out.println("store name : "+store.storeName);
+
                     if (store != null) {
                         String searchQuery = keyword != null && keyword.length() > 0 ? " and lower(pm.product_name) like '%"+keyword+"%'" : "";
                         String querySql = "t0.product_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
                         List<ProductStore> listProductStore = ProductStoreRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("merchant", merchant).eq("store", store).orderBy().desc("t0.id").findList();
-                        System.out.println("list product store : "+listProductStore.get(0).id);
-                        List<ProductResponseStore> responses = new ArrayList<>();
-                        List<ProductResponseStore.ProductStore> responsesProductStore = new ArrayList<>();
+
+                        List<ProductSpecificStoreResponse> responses = new ArrayList<>();
                         for (ProductStore productStore : listProductStore) {
-                            ProductResponseStore responseProd = new ProductResponseStore();
+                            ProductSpecificStoreResponse responseProd = new ProductSpecificStoreResponse();
                             ProductMerchant productMerchant = ProductMerchantRepository.find.byId(productStore.productMerchant.id);
                             responseProd.setProductId(productMerchant.id);
                             responseProd.setProductName(productMerchant.getProductName());
@@ -257,8 +257,28 @@ public class ProductStoreController extends BaseController {
                                         .build();
                                 responseProd.setProductDetail(productDetailResponse);
                             }
+                            ProductSpecificStoreResponse.Brand brand =  new ProductSpecificStoreResponse.Brand();
+                            brand.setBrandId(productMerchant.getBrandMerchant().id);
+                            brand.setBrandName(productMerchant.getBrandMerchant().getBrandName());
+
+                            ProductSpecificStoreResponse.Category category = new ProductSpecificStoreResponse.Category();
+                            category.setCategoryId(productMerchant.getCategoryMerchant().id);
+                            category.setCategoryName(productMerchant.getCategoryMerchant().getCategoryName());
+
+                            ProductSpecificStoreResponse.SubCategory subCategory = new ProductSpecificStoreResponse.SubCategory();
+                            subCategory.setSubCategoryId(productMerchant.getSubCategoryMerchant().id);
+                            subCategory.setSubCategoryName(productMerchant.getSubCategoryMerchant().getSubcategoryName());
+
+                            ProductSpecificStoreResponse.SubsCategory subsCategory = new ProductSpecificStoreResponse.SubsCategory();
+                            subsCategory.setSubsCategoryId(productMerchant.getSubsCategoryMerchant().id);
+                            subsCategory.setSubsCategoryName(productMerchant.getSubsCategoryMerchant().getSubscategoryName());
+
+                            responseProd.setBrand(brand);
+                            responseProd.setCategory(category);
+                            responseProd.setSubCategory(subCategory);
+                            responseProd.setSubsCategory(subsCategory);
                             responseProd.setMerchantId(productMerchant.getMerchant().id);
-                            ProductResponseStore.ProductStore responseStore = new  ProductResponseStore.ProductStore();
+                            ProductSpecificStoreResponse.ProductStore responseStore = new  ProductSpecificStoreResponse.ProductStore();
                             responseStore.setId(productStore.id);
                             responseStore.setStoreId(productStore.getStore().id);
                             responseStore.setProductId(productStore.getProductMerchant().id);
@@ -276,8 +296,7 @@ public class ProductStoreController extends BaseController {
                             }
                             responseStore.setStoresName(store.storeName);
 
-                            responsesProductStore.add(responseStore);
-                            responseProd.setProductStore(responseStore != null ? responsesProductStore : null);
+                            responseProd.setProductStore(responseStore != null ? responseStore : null);
 
                             responses.add(responseProd);
                         }
@@ -316,19 +335,18 @@ public class ProductStoreController extends BaseController {
         if (!merchantId.equals(0L) && !storeId.equals(0L)) {
             try {
                 Merchant merchant = Merchant.find.byId(merchantId);
-                System.out.println("merchant name : "+merchant.name);
+
                 if (merchant != null) {
                     Store store = Store.find.byId(storeId);
-                    System.out.println("store name : "+store.storeName);
+
                     if (store != null) {
                         String searchQuery = keyword != null && keyword.length() > 0 ? " and lower(pm.product_name) like '%"+keyword+"%'" : "";
                         String querySql = "t0.product_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
                         List<ProductStore> listProductStore = ProductStoreRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("merchant", merchant).eq("store", store).orderBy().desc("t0.id").findList();
-                        System.out.println("list product store : "+listProductStore.get(0).id);
-                        List<ProductResponseStore> responses = new ArrayList<>();
-                        List<ProductResponseStore.ProductStore> responsesProductStore = new ArrayList<>();
+
+                        List<ProductSpecificStoreResponse> responses = new ArrayList<>();
                         for (ProductStore productStore : listProductStore) {
-                            ProductResponseStore responseProd = new ProductResponseStore();
+                            ProductSpecificStoreResponse responseProd = new ProductSpecificStoreResponse();
                             ProductMerchant productMerchant = ProductMerchantRepository.find.byId(productStore.productMerchant.id);
                             responseProd.setProductId(productMerchant.id);
                             responseProd.setProductName(productMerchant.getProductName());
@@ -350,8 +368,28 @@ public class ProductStoreController extends BaseController {
                                         .build();
                                 responseProd.setProductDetail(productDetailResponse);
                             }
+                            ProductSpecificStoreResponse.Brand brand =  new ProductSpecificStoreResponse.Brand();
+                            brand.setBrandId(productMerchant.getBrandMerchant().id);
+                            brand.setBrandName(productMerchant.getBrandMerchant().getBrandName());
+
+                            ProductSpecificStoreResponse.Category category = new ProductSpecificStoreResponse.Category();
+                            category.setCategoryId(productMerchant.getCategoryMerchant().id);
+                            category.setCategoryName(productMerchant.getCategoryMerchant().getCategoryName());
+
+                            ProductSpecificStoreResponse.SubCategory subCategory = new ProductSpecificStoreResponse.SubCategory();
+                            subCategory.setSubCategoryId(productMerchant.getSubCategoryMerchant().id);
+                            subCategory.setSubCategoryName(productMerchant.getSubCategoryMerchant().getSubcategoryName());
+
+                            ProductSpecificStoreResponse.SubsCategory subsCategory = new ProductSpecificStoreResponse.SubsCategory();
+                            subsCategory.setSubsCategoryId(productMerchant.getSubsCategoryMerchant().id);
+                            subsCategory.setSubsCategoryName(productMerchant.getSubsCategoryMerchant().getSubscategoryName());
+
+                            responseProd.setBrand(brand);
+                            responseProd.setCategory(category);
+                            responseProd.setSubCategory(subCategory);
+                            responseProd.setSubsCategory(subsCategory);
                             responseProd.setMerchantId(productMerchant.getMerchant().id);
-                            ProductResponseStore.ProductStore responseStore = new  ProductResponseStore.ProductStore();
+                            ProductSpecificStoreResponse.ProductStore responseStore = new ProductSpecificStoreResponse.ProductStore();
                             responseStore.setId(productStore.id);
                             responseStore.setStoreId(productStore.getStore().id);
                             responseStore.setProductId(productStore.getProductMerchant().id);
@@ -369,8 +407,7 @@ public class ProductStoreController extends BaseController {
                             }
                             responseStore.setStoresName(store.storeName);
 
-                            responsesProductStore.add(responseStore);
-                            responseProd.setProductStore(responseStore != null ? responsesProductStore : null);
+                            responseProd.setProductStore(responseStore != null ? responseStore : null);
 
                             responses.add(responseProd);
                         }
@@ -409,10 +446,10 @@ public class ProductStoreController extends BaseController {
         if (!merchantId.equals(0L) && !storeId.equals(0L)) {
             try {
                 Merchant merchant = Merchant.find.byId(merchantId);
-                System.out.println("merchant name : "+merchant.name);
+
                 if (merchant != null) {
                     Store store = Store.find.byId(storeId);
-                    System.out.println("store name : "+store.storeName);
+
                     if (store != null) {
                         String querySql;
                         String searchQuery = keyword != null && keyword.length() > 0 ? " and lower(pm.product_name) like '%"+keyword+"%'" : "";
@@ -435,11 +472,10 @@ public class ProductStoreController extends BaseController {
                         }
 
                         List<ProductStore> listProductStore = ProductStoreRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("merchant", merchant).eq("store", store).orderBy().desc("t0.id").findList();
-                        System.out.println("list product store : "+listProductStore.get(0).id);
-                        List<ProductResponseStore> responses = new ArrayList<>();
-                        List<ProductResponseStore.ProductStore> responsesProductStore = new ArrayList<>();
+
+                        List<ProductSpecificStoreResponse> responses = new ArrayList<>();
                         for (ProductStore productStore : listProductStore) {
-                            ProductResponseStore responseProd = new ProductResponseStore();
+                            ProductSpecificStoreResponse responseProd = new ProductSpecificStoreResponse();
                             ProductMerchant productMerchant = ProductMerchantRepository.find.byId(productStore.productMerchant.id);
                             responseProd.setProductId(productMerchant.id);
                             responseProd.setProductName(productMerchant.getProductName());
@@ -461,8 +497,28 @@ public class ProductStoreController extends BaseController {
                                         .build();
                                 responseProd.setProductDetail(productDetailResponse);
                             }
+                            ProductSpecificStoreResponse.Brand brand =  new ProductSpecificStoreResponse.Brand();
+                            brand.setBrandId(productMerchant.getBrandMerchant().id);
+                            brand.setBrandName(productMerchant.getBrandMerchant().getBrandName());
+
+                            ProductSpecificStoreResponse.Category category = new ProductSpecificStoreResponse.Category();
+                            category.setCategoryId(productMerchant.getCategoryMerchant().id);
+                            category.setCategoryName(productMerchant.getCategoryMerchant().getCategoryName());
+
+                            ProductSpecificStoreResponse.SubCategory subCategory = new ProductSpecificStoreResponse.SubCategory();
+                            subCategory.setSubCategoryId(productMerchant.getSubCategoryMerchant().id);
+                            subCategory.setSubCategoryName(productMerchant.getSubCategoryMerchant().getSubcategoryName());
+
+                            ProductSpecificStoreResponse.SubsCategory subsCategory = new ProductSpecificStoreResponse.SubsCategory();
+                            subsCategory.setSubsCategoryId(productMerchant.getSubsCategoryMerchant().id);
+                            subsCategory.setSubsCategoryName(productMerchant.getSubsCategoryMerchant().getSubscategoryName());
+
+                            responseProd.setBrand(brand);
+                            responseProd.setCategory(category);
+                            responseProd.setSubCategory(subCategory);
+                            responseProd.setSubsCategory(subsCategory);
                             responseProd.setMerchantId(productMerchant.getMerchant().id);
-                            ProductResponseStore.ProductStore responseStore = new  ProductResponseStore.ProductStore();
+                            ProductSpecificStoreResponse.ProductStore responseStore = new  ProductSpecificStoreResponse.ProductStore();
                             responseStore.setId(productStore.id);
                             responseStore.setStoreId(productStore.getStore().id);
                             responseStore.setProductId(productStore.getProductMerchant().id);
@@ -480,8 +536,7 @@ public class ProductStoreController extends BaseController {
                             }
                             responseStore.setStoresName(store.storeName);
 
-                            responsesProductStore.add(responseStore);
-                            responseProd.setProductStore(responseStore != null ? responsesProductStore : null);
+                            responseProd.setProductStore(responseStore != null ? responseStore : null);
 
                             responses.add(responseProd);
                         }
@@ -520,10 +575,10 @@ public class ProductStoreController extends BaseController {
         if (!merchantId.equals(0L) && !storeId.equals(0L)) {
             try {
                 Merchant merchant = Merchant.find.byId(merchantId);
-                System.out.println("merchant name : "+merchant.name);
+
                 if (merchant != null) {
                     Store store = Store.find.byId(storeId);
-                    System.out.println("store name : "+store.storeName);
+
                     if (store != null) {
                         String querySql;
                         String searchQuery = keyword != null && keyword.length() > 0 ? " and lower(pm.product_name) like '%"+keyword+"%'" : "";
@@ -546,11 +601,10 @@ public class ProductStoreController extends BaseController {
                         }
 
                         List<ProductStore> listProductStore = ProductStoreRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("merchant", merchant).eq("store", store).orderBy().desc("t0.id").findList();
-                        System.out.println("list product store : "+listProductStore.get(0).id);
-                        List<ProductResponseStore> responses = new ArrayList<>();
-                        List<ProductResponseStore.ProductStore> responsesProductStore = new ArrayList<>();
+
+                        List<ProductSpecificStoreResponse> responses = new ArrayList<>();
                         for (ProductStore productStore : listProductStore) {
-                            ProductResponseStore responseProd = new ProductResponseStore();
+                            ProductSpecificStoreResponse responseProd = new ProductSpecificStoreResponse();
                             ProductMerchant productMerchant = ProductMerchantRepository.find.byId(productStore.productMerchant.id);
                             responseProd.setProductId(productMerchant.id);
                             responseProd.setProductName(productMerchant.getProductName());
@@ -572,8 +626,28 @@ public class ProductStoreController extends BaseController {
                                         .build();
                                 responseProd.setProductDetail(productDetailResponse);
                             }
+                            ProductSpecificStoreResponse.Brand brand =  new ProductSpecificStoreResponse.Brand();
+                            brand.setBrandId(productMerchant.getBrandMerchant().id);
+                            brand.setBrandName(productMerchant.getBrandMerchant().getBrandName());
+
+                            ProductSpecificStoreResponse.Category category = new ProductSpecificStoreResponse.Category();
+                            category.setCategoryId(productMerchant.getCategoryMerchant().id);
+                            category.setCategoryName(productMerchant.getCategoryMerchant().getCategoryName());
+
+                            ProductSpecificStoreResponse.SubCategory subCategory = new ProductSpecificStoreResponse.SubCategory();
+                            subCategory.setSubCategoryId(productMerchant.getSubCategoryMerchant().id);
+                            subCategory.setSubCategoryName(productMerchant.getSubCategoryMerchant().getSubcategoryName());
+
+                            ProductSpecificStoreResponse.SubsCategory subsCategory = new ProductSpecificStoreResponse.SubsCategory();
+                            subsCategory.setSubsCategoryId(productMerchant.getSubsCategoryMerchant().id);
+                            subsCategory.setSubsCategoryName(productMerchant.getSubsCategoryMerchant().getSubscategoryName());
+
+                            responseProd.setBrand(brand);
+                            responseProd.setCategory(category);
+                            responseProd.setSubCategory(subCategory);
+                            responseProd.setSubsCategory(subsCategory);
                             responseProd.setMerchantId(productMerchant.getMerchant().id);
-                            ProductResponseStore.ProductStore responseStore = new  ProductResponseStore.ProductStore();
+                            ProductSpecificStoreResponse.ProductStore responseStore = new  ProductSpecificStoreResponse.ProductStore();
                             responseStore.setId(productStore.id);
                             responseStore.setStoreId(productStore.getStore().id);
                             responseStore.setProductId(productStore.getProductMerchant().id);
@@ -591,8 +665,7 @@ public class ProductStoreController extends BaseController {
                             }
                             responseStore.setStoresName(store.storeName);
 
-                            responsesProductStore.add(responseStore);
-                            responseProd.setProductStore(responseStore != null ? responsesProductStore : null);
+                            responseProd.setProductStore(responseStore != null ? responseStore : null);
 
                             responses.add(responseProd);
                         }
