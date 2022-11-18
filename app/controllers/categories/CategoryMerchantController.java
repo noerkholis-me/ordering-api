@@ -11,20 +11,13 @@ import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
 import dtos.category.*;
-import models.Merchant;
-import models.CategoryMerchant;
-import models.SubCategoryMerchant;
-import models.SubsCategoryMerchant;
-import models.Photo;
+import models.*;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Http;
 import play.mvc.Result;
-import repository.CategoryMerchantRepository;
-import repository.SubCategoryMerchantRepository;
-import repository.SubsCategoryMerchantRepository;
-import repository.ProductMerchantRepository;
+import repository.*;
 import models.merchant.ProductMerchant;
 
 import java.io.File;
@@ -413,14 +406,35 @@ public class CategoryMerchantController extends BaseController {
             return unauthorized(Json.toJson(response));
         }
 
-    public static Result listCategoryFE(Long merchantId) {
+    public static Result listCategoryFE(Long merchantId, Long storeId) {
 
             Query<CategoryMerchant> query = CategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).order("t0.id");
+            Store store = Store.find.byId(storeId);
+            if (store == null) {
+                response.setBaseResponse(0, 0, 0, "Store tidak ditemukan", null);
+                return badRequest(Json.toJson(response));
+            }
             try {
+
+                Integer totalCategoryData = 0;
                 List<CategoryMerchantResponse> responses = new ArrayList<>();
                 List<CategoryMerchant> totalData = CategoryMerchantRepository.getTotalData(query);
                 List<CategoryMerchant> responseIndex = CategoryMerchantRepository.getDataCategory(query, "", "", 0, 0);
                 for (CategoryMerchant data : responseIndex) {
+                    List<ProductMerchant> listDataCategory = ProductMerchantRepository.find.where().eq("t0.merchant_id", merchantId).eq("t0.category_merchant_id", data.id).eq("t0.is_active", true).eq("t0.is_deleted", false).orderBy().desc("t0.id").findList();
+                    for (ProductMerchant productMerchant : listDataCategory) {
+                        List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
+                        if (listProductStore.size() > 0) {
+                            for (ProductStore productStore : listProductStore) {
+                                if (productStore.getStore().id.equals(store.id)) {
+                                    totalCategoryData = totalCategoryData + 1;
+                                }
+                            }
+                        } else {
+                            totalCategoryData = totalCategoryData + 1;
+                        }
+                    }
+
                     CategoryMerchantResponse response = new CategoryMerchantResponse();
                     Query<SubCategoryMerchant> querySub = SubCategoryMerchantRepository.find.where().eq("t0.category_id", data.id).eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).order("t0.id");
                     List<SubCategoryMerchant> dataSub = SubCategoryMerchantRepository.getDataForCategory(querySub);
@@ -432,7 +446,23 @@ public class CategoryMerchantController extends BaseController {
                     response.setIsDeleted(data.isDeleted);
                     response.setIsActive(data.isActive());
                     response.setMerchantId(data.getMerchant().id);
+                    response.setTotalProduct(totalCategoryData);
+                    Integer totalSubCategoryData = 0;
                     for(SubCategoryMerchant dataSubs : dataSub) {
+                        List<ProductMerchant> listDataSubCategory = ProductMerchantRepository.find.where().eq("t0.merchant_id", merchantId).eq("t0.sub_category_merchant_id", dataSubs.id).eq("t0.is_active", true).eq("t0.is_deleted", false).orderBy().desc("t0.id").findList();
+                        for (ProductMerchant productMerchant : listDataSubCategory) {
+                            List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
+                            if (listProductStore.size() > 0) {
+                                for (ProductStore productStore : listProductStore) {
+                                    if (productStore.getStore().id.equals(store.id)) {
+                                        totalSubCategoryData = totalSubCategoryData + 1;
+                                    }
+                                }
+                            } else {
+                                totalSubCategoryData = totalSubCategoryData + 1;
+                            }
+                        }
+
                         CategoryMerchantResponse.SubCategoryMerchant responseSub = new CategoryMerchantResponse.SubCategoryMerchant();
                         Query<SubsCategoryMerchant> querySubs = SubsCategoryMerchantRepository.find.where().eq("t0.subcategory_id", dataSubs.id).eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).order("t0.id");
                         List<SubsCategoryMerchant> dataSubThree = SubsCategoryMerchantRepository.getDataForCategory(querySubs);
@@ -443,7 +473,23 @@ public class CategoryMerchantController extends BaseController {
                         responseSub.setImageMobile(dataSubs.getImageMobile());
                         responseSub.setIsActive(dataSubs.isActive);
                         responseSub.setIsDeleted(dataSubs.isDeleted);
+                        responseSub.setTotalProduct(totalSubCategoryData);
+                        Integer totalSubsCategoryData = 0;
                         for(SubsCategoryMerchant dataSubsThree : dataSubThree) {
+                            List<ProductMerchant> listDataSubsCategory = ProductMerchantRepository.find.where().eq("t0.merchant_id", merchantId).eq("t0.subs_category_merchant_id", dataSubsThree.id).eq("t0.is_active", true).eq("t0.is_deleted", false).orderBy().desc("t0.id").findList();
+                            for (ProductMerchant productMerchant : listDataSubsCategory) {
+                                List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
+                                if (listProductStore.size() > 0) {
+                                    for (ProductStore productStore : listProductStore) {
+                                        if (productStore.getStore().id.equals(store.id)) {
+                                            totalSubsCategoryData = totalSubsCategoryData + 1;
+                                        }
+                                    }
+                                } else {
+                                    totalSubsCategoryData = totalSubsCategoryData + 1;
+                                }
+                            }
+
                             CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant responseSubs = new CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant();
                             responseSubs.setId(dataSubsThree.id);
                             responseSubs.setSubscategoryName(dataSubsThree.getSubscategoryName());
@@ -452,6 +498,7 @@ public class CategoryMerchantController extends BaseController {
                             responseSubs.setIsActive(dataSubsThree.isActive);
                             responseSubs.setIsDeleted(dataSubsThree.isDeleted);
                             responseSubs.setSequence(dataSubsThree.getSequence());
+                            responseSubs.setTotalProduct(totalSubsCategoryData);
                             responsesSubs.add(responseSubs);
                             responseSub.setSubsCategory(responseSubs != null ? responsesSubs : null);
                         }

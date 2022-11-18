@@ -238,7 +238,7 @@ public class ProductStoreController extends BaseController {
                         List<ProductSpecificStoreResponse> responses = new ArrayList<>();
                         for (ProductMerchant productMerchant : productMerchants) {
                             ProductSpecificStoreResponse responseProd = new ProductSpecificStoreResponse();
-                            List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
+                            List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
                             if (listProductStore.size() > 0) {
                                 for (ProductStore productStore : listProductStore) {
                                     if (productStore.getStore().id.equals(store.id)) {
@@ -396,7 +396,7 @@ public class ProductStoreController extends BaseController {
                         List<ProductSpecificStoreResponse> responses = new ArrayList<>();
                         for (ProductMerchant productMerchant : productMerchants) {
                             ProductSpecificStoreResponse responseProd = new ProductSpecificStoreResponse();
-                            List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
+                            List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
                             if (listProductStore.size() > 0) {
                                 for (ProductStore productStore : listProductStore) {
                                     if (productStore.getStore().id.equals(store.id)) {
@@ -571,7 +571,7 @@ public class ProductStoreController extends BaseController {
                         List<ProductSpecificStoreResponse> responses = new ArrayList<>();
                         for (ProductMerchant productMerchant : productMerchants) {
                             ProductSpecificStoreResponse responseProd = new ProductSpecificStoreResponse();
-                            List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
+                            List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
                             if (listProductStore.size() > 0) {
                                 for (ProductStore productStore : listProductStore) {
                                     if (productStore.getStore().id.equals(store.id)) {
@@ -746,7 +746,7 @@ public class ProductStoreController extends BaseController {
                         List<ProductSpecificStoreResponse> responses = new ArrayList<>();
                         for (ProductMerchant productMerchant : productMerchants) {
                             ProductSpecificStoreResponse responseProd = new ProductSpecificStoreResponse();
-                            List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
+                            List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
                             if (listProductStore.size() > 0) {
                                 for (ProductStore productStore : listProductStore) {
                                     if (productStore.getStore().id.equals(store.id)) {
