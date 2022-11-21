@@ -31,16 +31,16 @@ public class TableTypeController extends BaseController {
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     public static Result addTableType() {
-        Merchant merchant = checkMerchantAccessAuthorization();
-        if (merchant != null) {
-            JsonNode json = request().body().asJson();
-            try {
+        try {
+            Merchant merchant = checkMerchantAccessAuthorization();
+            if (merchant != null) {
+                JsonNode json = request().body().asJson();
                 TableTypeRequest tableTypeRequest = objectMapper.readValue(json.toString(), TableTypeRequest.class);
                 List<TableType> tableTypes = TableTypeRepository.findAllByMerchant(merchant);
-                if (tableTypes.size() >= MAXIMUM_TABLE_TYPE) {
-                    response.setBaseResponse(0, 0, 0, "maximum table type is only 3", null);
-                    return badRequest(Json.toJson(response));
-                }
+                // if (tableTypes.size() >= MAXIMUM_TABLE_TYPE) {
+                //     response.setBaseResponse(0, 0, 0, "maximum table type is only 3", null);
+                //     return badRequest(Json.toJson(response));
+                // }
                 if (tableTypeRequest.getMinimumTableCount() < 1 || tableTypeRequest.getMaximumTableCount() <= tableTypeRequest.getMinimumTableCount()) {
                     response.setBaseResponse(0, 0, 0, "minimum table count must be greater than 0 and maximum table count must be greater than minimum table count", null);
                     return badRequest(Json.toJson(response));
@@ -65,13 +65,16 @@ public class TableTypeController extends BaseController {
                 } finally {
                     trx.end();
                 }
-            } catch (Exception e) {
-                logger.error("Error while creating table type", e);
-                e.printStackTrace();
+            } else {
+                response.setBaseResponse(0, 0, 0, unauthorized, null);
+                return unauthorized(Json.toJson(response));
             }
+        } catch (Exception e) {
+            response.setBaseResponse(0, 0, 0, e.toString(), null);
+            return badRequest(Json.toJson(response));
         }
-        response.setBaseResponse(0, 0, 0, unauthorized, null);
-        return unauthorized(Json.toJson(response));
+        response.setBaseResponse(0, 0, 0, "Error while create a table type", null);
+        return badRequest(Json.toJson(response));
     }
 
     public static Result editTableType(Long id) {
