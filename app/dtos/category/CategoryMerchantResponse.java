@@ -32,6 +32,9 @@ public class CategoryMerchantResponse  {
 
     @JsonProperty("merchant_id")
     private Long merchantId;
+
+    @JsonProperty("total_product")
+    private Integer totalProduct;
     
     private List<SubCategoryMerchant> subCategory;
 
@@ -56,6 +59,9 @@ public class CategoryMerchantResponse  {
 
         @JsonProperty("is_active")
         private Boolean isActive;
+
+        @JsonProperty("total_product")
+        private Integer totalProduct;
 
         private List<SubsCategoryMerchant> subsCategory;
 
@@ -86,6 +92,9 @@ public class CategoryMerchantResponse  {
 
             @JsonProperty("sequence")
             public int sequence;
+
+            @JsonProperty("total_product")
+            private Integer totalProduct;
         }
     }
 
