@@ -416,11 +416,12 @@ public class CategoryMerchantController extends BaseController {
             }
             try {
 
-                Integer totalCategoryData = 0;
+
                 List<CategoryMerchantResponse> responses = new ArrayList<>();
                 List<CategoryMerchant> totalData = CategoryMerchantRepository.getTotalData(query);
                 List<CategoryMerchant> responseIndex = CategoryMerchantRepository.getDataCategory(query, "", "", 0, 0);
                 for (CategoryMerchant data : responseIndex) {
+                    Integer totalCategoryData = 0;
                     List<ProductMerchant> listDataCategory = ProductMerchantRepository.find.where().eq("t0.merchant_id", merchantId).eq("t0.category_merchant_id", data.id).eq("t0.is_active", true).eq("t0.is_deleted", false).orderBy().desc("t0.id").findList();
                     for (ProductMerchant productMerchant : listDataCategory) {
                         List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
@@ -447,8 +448,9 @@ public class CategoryMerchantController extends BaseController {
                     response.setIsActive(data.isActive());
                     response.setMerchantId(data.getMerchant().id);
                     response.setTotalProduct(totalCategoryData);
-                    Integer totalSubCategoryData = 0;
+
                     for(SubCategoryMerchant dataSubs : dataSub) {
+                        Integer totalSubCategoryData = 0;
                         List<ProductMerchant> listDataSubCategory = ProductMerchantRepository.find.where().eq("t0.merchant_id", merchantId).eq("t0.sub_category_merchant_id", dataSubs.id).eq("t0.is_active", true).eq("t0.is_deleted", false).orderBy().desc("t0.id").findList();
                         for (ProductMerchant productMerchant : listDataSubCategory) {
                             List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
@@ -474,8 +476,9 @@ public class CategoryMerchantController extends BaseController {
                         responseSub.setIsActive(dataSubs.isActive);
                         responseSub.setIsDeleted(dataSubs.isDeleted);
                         responseSub.setTotalProduct(totalSubCategoryData);
-                        Integer totalSubsCategoryData = 0;
+
                         for(SubsCategoryMerchant dataSubsThree : dataSubThree) {
+                            Integer totalSubsCategoryData = 0;
                             List<ProductMerchant> listDataSubsCategory = ProductMerchantRepository.find.where().eq("t0.merchant_id", merchantId).eq("t0.subs_category_merchant_id", dataSubsThree.id).eq("t0.is_active", true).eq("t0.is_deleted", false).orderBy().desc("t0.id").findList();
                             for (ProductMerchant productMerchant : listDataSubsCategory) {
                                 List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
