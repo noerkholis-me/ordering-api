@@ -357,7 +357,7 @@ DELETE  /merchant/brand/:id/delete                  controllers.brand.BrandMerch
 PUT     /merchant/brand/:id/update                  controllers.brand.BrandMerchantController.editBrand(id:Long)
 GET     /merchant/brand/:id/detail                  controllers.brand.BrandMerchantController.viewBrand(id:Long)
 PUT     /merchant/brand/:id/status                  controllers.brand.BrandMerchantController.setStatus(id: Long)
-GET     /brand/:merchantId                          controllers.brand.BrandMerchantController.listBrandHomepage(merchantId: Long, offset:Int ?= 0)
+GET     /brand/:merchantId                          controllers.brand.BrandMerchantController.listBrandHomepage(merchantId: Long, store_id:Long ?= 0, offset:Int ?= 0)
 
 #BRAND DETAIL CUSTOMER
 GET     /brand/:id/detail                           controllers.brand.BrandMerchantController.detailBrandHome(id:Long, merchant_id:Long ?= 0, store_id:Long ?= 0)
@@ -371,7 +371,7 @@ GET     /merchant/category/:id/detail                  controllers.categories.Ca
 PUT     /merchant/category/:id/status                  controllers.categories.CategoryMerchantController.setStatus(id: Long)
 
 #CATEGORY KIOSK
-GET     /data/category/list                            controllers.categories.CategoryMerchantController.listCategoryFE(merchant_id:Long ?= 0)
+GET     /data/category/list                            controllers.categories.CategoryMerchantController.listCategoryFE(merchant_id:Long ?= 0, store_id:Long ?= 0)
 
 #SUB CATEGORY
 GET     /merchant/subcategory/list                        controllers.categories.SubCategoryMerchantController.listSubCategory(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
@@ -450,8 +450,8 @@ GET    /merchant/productstore/:id                        controllers.product.Pro
 DELETE    /merchant/productstore/:id                     controllers.product.ProductStoreController.deleteProductStore(id: Long)
 PUT   /merchant/productstore/:id/status                  controllers.product.ProductStoreController.setStatus(id: Long)
 
-GET    /merchant/productstore/kiosk/list                 controllers.product.ProductStoreController.listProductStoreForKiosk(merchant_id:Long ?= 0, store_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
-GET    /merchant/productstore/mobile-qr/list             controllers.product.ProductStoreController.listProductStoreForMobileQR(merchant_id:Long ?= 0, store_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/productstore/kiosk/list                 controllers.product.ProductStoreController.listProductStoreForKiosk(merchant_id:Long ?= 0, store_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 30)
+GET    /merchant/productstore/mobile-qr/list             controllers.product.ProductStoreController.listProductStoreForMobileQR(merchant_id:Long ?= 0, store_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 30)
 GET    /merchant/productstore/kiosk/list-by-category     controllers.product.ProductStoreController.listProductStoreByCategoriesForKIOSK(merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0, sub_category_id:Long ?= 0, subs_category_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET    /merchant/productstore/mobile-qr/list-by-category controllers.product.ProductStoreController.listProductStoreByCategoriesForMobileQR(merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0, sub_category_id:Long ?= 0, subs_category_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 
