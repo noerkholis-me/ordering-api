@@ -80,7 +80,6 @@ public class CheckoutOrderController extends BaseController {
         // int authority = checkAccessAuthorization("all");
         // if (authority == 200 || authority == 203) {
             JsonNode jsonNode = request().body().asJson();
-//            ObjectNode nodeBaru = (ObjectNode) jsonNode;
 
             Transaction txn = Ebean.beginTransaction();
             try {
@@ -146,26 +145,7 @@ public class CheckoutOrderController extends BaseController {
                     ((ObjectNode) jsonRequest.get("package")).put("price", jsonNode.get("total_price").asInt());
                     ((ObjectNode) jsonRequest.get("package")).put("package_type", jsonNode.get("package_type").asInt());
                     ((ObjectNode) jsonRequest).remove("items");
-
-//                    nodeBaru.set("o", jsonNode.get("origin_area_id"));
-//                    nodeBaru.set("d", jsonNode.get("destination_area_id"));
-//                    nodeBaru.set("l", jsonNode.get("length"));
-//                    nodeBaru.set("w", jsonNode.get("wide"));
-//                    nodeBaru.set("h", jsonNode.get("height"));
-//                    nodeBaru.set("wt", jsonNode.get("weight"));
-//                    nodeBaru.set("v", jsonNode.get("total_price"));
-//                    nodeBaru.set("rateID", jsonNode.get("rate_id"));
-//                    nodeBaru.set("contents", jsonNode.get("destination_address"));
-//                    nodeBaru.set("packageType", jsonNode.get("package_type"));
-//                    nodeBaru.set("consigneeName", jsonNode.get("customer_name"));
-//                    nodeBaru.set("consigneePhoneNumber", jsonNode.get("customer_phone_number"));
-//                    nodeBaru.set("originAddress", jsonNode.get("origin_address"));
-//                    nodeBaru.set("destinationAddress", jsonNode.get("destination_address"));
                 }
-
-//                System.out.println(">>> incoming order request 1..." + nodeBaru.toString());
-
-//                order.orderIdShipper = node.has("shipperName") ? node.get("shipperName").asText() : "";
 
                 // request order
                 OrderTransaction orderRequest = objectMapper.readValue(jsonNode.toString(), OrderTransaction.class);
@@ -185,8 +165,6 @@ public class CheckoutOrderController extends BaseController {
                 ((ObjectNode) jsonRequest.get("origin")).put("lng", String.valueOf(store.storeLongitude));
 
                 ((ObjectNode) jsonRequest).put("payment_type", "postpay");
-
-                // yg blum external id
 
                 Member member = null;
                 Member memberData = new Member();
@@ -547,59 +525,11 @@ public class CheckoutOrderController extends BaseController {
                         if (orderRequest.getOrderType().equalsIgnoreCase("DELIVERY")) {
                             String domesticUrl = API_SHIPPER_ADDRESS_V3 + API_SHIPPER_DOMESTIC_ORDER;
 
-                            //start remove fields for nodeBaru
-//                            nodeBaru.remove("store_code");
-//                            nodeBaru.remove("order_type");
-//                            nodeBaru.remove("device_type");
-//                            nodeBaru.remove("customer_name");
-//                            nodeBaru.remove("customer_email");
-//                            nodeBaru.remove("customer_phone_number");
-//                            nodeBaru.remove("sub_total");
-//                            nodeBaru.remove("table_id");
-//                            nodeBaru.remove("total_price");
-//                            nodeBaru.remove("pickup_point_id");
-//                            nodeBaru.remove("payment_detail");
-//                            nodeBaru.remove("product_order_detail");
-//                            nodeBaru.remove("use_loyalty");
-//                            nodeBaru.remove("loyalty_usage");
-//                            nodeBaru.remove("origin_area_id");
-//                            nodeBaru.remove("destination_area_id");
-//                            nodeBaru.remove("length");
-//                            nodeBaru.remove("wide");
-//                            nodeBaru.remove("height");
-//                            nodeBaru.remove("weight");
-//                            nodeBaru.remove("store_name");
-//                            nodeBaru.remove("store_number");
-                            //end remove
-
                             //start find lat and long from areaId;
 
                             ObjectNode requestNode = (ObjectNode) jsonRequest;
 
                             System.out.println("incoming shipper order request : "+requestNode.toString());
-
-//                            ProcessBuilder shipperBuilderForAreas = new ProcessBuilder(
-//                                    "curl",
-//                                    "-XGET",
-//                                    "-H", "Content-Type:application/json",
-//                                    "-H", "user-agent: Shipper/1.0",
-//                                    "-H", "X-API-Key: "+API_KEY_SHIPPER,
-//                                    API_SHIPPER_ADDRESS_V3+API_SHIPPER_AREAS_V3+requestNode.get("destination").get(0).get("area_id").asInt()
-//                            );
-//
-//
-//                            Process prosesBuilderForAreas = shipperBuilderForAreas.start();
-//                            InputStream isAreas = prosesBuilderForAreas.getInputStream();
-//                            InputStreamReader isrAreas = new InputStreamReader(isAreas);
-//                            BufferedReader brAreas = new BufferedReader(isrAreas);
-//
-//
-//                            String lineAreas =  brAreas.readLine();
-//                            JsonNode jsonResponseAreas = new ObjectMapper().readValue(lineAreas, JsonNode.class);
-//                            String lattitude = (String) jsonResponseAreas.get("data").get(0).get("lat").asText();
-//                            String longitude = (String) jsonResponseAreas.get("data").get(0).get("lng").asText();
-////                            ((ObjectNode) jsonNode).put("customer_coordinate", lattitude+","+longitude);
-////                            nodeBaru.set("destinationCoord", jsonNode.get("customer_coordinate"));
 
                             String bodyRequest = requestNode.toString();
                             System.out.println("domestic order request : "+bodyRequest);
