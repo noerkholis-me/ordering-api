@@ -43,4 +43,7 @@ public class BrandMerchantResponse  {
     @JsonProperty("brand_description")
     public String brandDescription;
 
+    @JsonProperty("total_product")
+    private Integer totalProduct;
+
 }

@@ -11,12 +11,8 @@ import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
 import dtos.brand.*;
-import models.Merchant;
-import models.BrandMerchant;
+import models.*;
 import models.merchant.*;
-import models.ProductStore;
-import models.SubsCategoryMerchant;
-import models.Photo;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.BodyParser;
@@ -409,15 +405,35 @@ public class BrandMerchantController extends BaseController {
 
         @ApiOperation(value = "Get all brand list.", notes = "Returns list of brand.\n" + swaggerInfo
             + "", response = BrandMerchant.class, responseContainer = "List", httpMethod = "GET")
-    public static Result listBrandHomepage(Long merchantId, int offset) {
+    public static Result listBrandHomepage(Long merchantId, Long storeId, int offset) {
         Merchant ownMerchant = Merchant.merchantGetId(merchantId);
         if (ownMerchant != null) {
+            Store store = Store.find.byId(storeId);
+            if (store == null) {
+                response.setBaseResponse(0, 0, 0, "Store tidak ditemukan", null);
+                return badRequest(Json.toJson(response));
+            }
             Query<BrandMerchant> query = BrandMerchantRepository.find.where().eq("t0.is_deleted", false).eq("merchant", ownMerchant).eq("t0.is_active", true).order("t0.name");
             try {
+                Integer totalBrandData = 0;
                 List<BrandMerchantResponse> responses = new ArrayList<>();
                 List<BrandMerchant> totalData = BrandMerchantRepository.getTotalData(query);
                 List<BrandMerchant> responseIndex = BrandMerchantRepository.getDataBrandHomepage(query, offset);
                 for (BrandMerchant data : responseIndex) {
+                    List<ProductMerchant> listDataCategory = ProductMerchantRepository.find.where().eq("t0.merchant_id", merchantId).eq("t0.brand_merchant_id", data.id).eq("t0.is_active", true).eq("t0.is_deleted", false).orderBy().desc("t0.id").findList();
+                    for (ProductMerchant productMerchant : listDataCategory) {
+                        List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
+                        if (listProductStore.size() > 0) {
+                            for (ProductStore productStore : listProductStore) {
+                                if (productStore.getStore().id.equals(store.id)) {
+                                    totalBrandData = totalBrandData + 1;
+                                }
+                            }
+                        } else {
+                            totalBrandData = totalBrandData + 1;
+                        }
+                    }
+
                     BrandMerchantResponse response = new BrandMerchantResponse();
                     response.setId(data.id);
                     response.setBrandName(data.getBrandName());
@@ -430,6 +446,7 @@ public class BrandMerchantController extends BaseController {
                     response.setIsDeleted(data.isDeleted);
                     response.setIsActive(data.isActive());
                     response.setMerchantId(data.getMerchant().id);
+                    response.setTotalProduct(totalBrandData);
                     responses.add(response);
                 }
                 response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size() , offset, limit, success + " menampilkan data", responses);
