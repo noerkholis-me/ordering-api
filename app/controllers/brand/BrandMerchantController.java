@@ -415,11 +415,12 @@ public class BrandMerchantController extends BaseController {
             }
             Query<BrandMerchant> query = BrandMerchantRepository.find.where().eq("t0.is_deleted", false).eq("merchant", ownMerchant).eq("t0.is_active", true).order("t0.name");
             try {
-                Integer totalBrandData = 0;
+
                 List<BrandMerchantResponse> responses = new ArrayList<>();
                 List<BrandMerchant> totalData = BrandMerchantRepository.getTotalData(query);
                 List<BrandMerchant> responseIndex = BrandMerchantRepository.getDataBrandHomepage(query, offset);
                 for (BrandMerchant data : responseIndex) {
+                    Integer totalBrandData = 0;
                     List<ProductMerchant> listDataCategory = ProductMerchantRepository.find.where().eq("t0.merchant_id", merchantId).eq("t0.brand_merchant_id", data.id).eq("t0.is_active", true).eq("t0.is_deleted", false).orderBy().desc("t0.id").findList();
                     for (ProductMerchant productMerchant : listDataCategory) {
                         List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();

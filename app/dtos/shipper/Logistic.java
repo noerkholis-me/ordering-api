@@ -13,14 +13,19 @@ import java.util.List;
 @Data
 @Builder
 public class Logistic {
-    @JsonProperty("regular")
-    private List<RateType> regular;
-    @JsonProperty("trucking")
-    private List<RateType> trucking;
-    @JsonProperty("instant")
-    private List<RateType> instant;
-    @JsonProperty("same_day")
-    private List<RateType> sameDay;
-    @JsonProperty("express")
-    private List<RateType> express;
+
+    @JsonProperty("id")
+    private Long id;
+
+    @JsonProperty("name")
+    private String name;
+
+    @JsonProperty("logo_url")
+    private String logoUrl;
+
+    @JsonProperty("code")
+    private String code;
+
+    @JsonProperty("company_name")
+    private String companyName;
 }

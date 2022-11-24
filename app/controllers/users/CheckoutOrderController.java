@@ -65,11 +65,11 @@ public class CheckoutOrderController extends BaseController {
 
     private static final String API_KEY_SHIPPER = Play.application().configuration().getString("sandbox.shipping.shipperapi.apikey");
     private static final String API_SHIPPER_ADDRESS = Play.application().configuration().getString("sandbox.shipping.shipperapi.v1.url");
-    private static final String API_SHIPPER_DOMESTIC_ORDER = "orders/domestics?apiKey=";
+    private static final String API_SHIPPER_DOMESTIC_ORDER = "/v3/order";
     private static final String API_SHIPPER_TRACKING = "orders?apiKey=";
     private static final String API_SHIPPER_ADDRESS_V3 = Play.application().configuration().getString("sandbox.shipping.shipperapi.v3.url");
     private static final String API_SHIPPER_AREAS_V3 = "/v3/location/areas?area_ids=";
-    private static final String API_SHIPPER_DETAIL = "orders/";
+    private static final String API_SHIPPER_DETAIL = "/v3/order";
     private final static Logger.ALogger logger = Logger.of(CheckoutOrderController.class);
 
     private static BaseResponse response = new BaseResponse();
@@ -80,34 +80,72 @@ public class CheckoutOrderController extends BaseController {
         // int authority = checkAccessAuthorization("all");
         // if (authority == 200 || authority == 203) {
             JsonNode jsonNode = request().body().asJson();
-            ObjectNode nodeBaru = (ObjectNode) jsonNode;
-//            ObjectNode nodeBaru = new ObjectNode();
+
             Transaction txn = Ebean.beginTransaction();
             try {
                 logger.info(">>> incoming order request..." + jsonNode.toString());
 
                 String orderType = jsonNode.get("order_type").asText();
 
+                ObjectMapper mapper = new ObjectMapper();
+                String requestDomesticOrderShipper = "{\n" + "\"consignee\": {\n" + "\"name\": \"Penerima\",\n" +
+                        "\"phone_number\": \"62852280038095\"\n" + "},\n" + "\"consigner\": {\n" +
+                        "\"name\": \"Pengirim\",\n" + "\"phone_number\": \"62852280038095\"\n" + "},\n" +
+                        "\"courier\": {\n" + "\"cod\": false,\n" + "\"rate_id\": 58,\n" + "\"use_insurance\": true\n" + "},\n" +
+                        "\"coverage\": \"domestic\",\n" + "\"destination\": {\n" + "\"address\": \"Jalan Kenangan\",\n" +
+                        "\"area_id\": 12212,\n" + "\"lat\": \"-6.123123123\",\n" + "\"lng\": \"104.12312312\"\n" + "},\n" +
+                        "\"external_id\": \"KRN1231123121\",\n" +
+                        "\"origin\": {\n" + "\"address\": \"Jalan Kenangan\",\n" + "\"area_id\": 12212,\n" +
+                        "\"lat\": \"-6.123123123\",\n" + "\"lng\": \"104.12312312\"\n" + "},\n" +
+                        "\"package\": {\n" + "\"height\": 60,\n" + "\"items\": [\n" + "{\n" +
+                        "\"name\": \"Baju Baju\",\n" + "\"price\": 120000,\n" + "\"qty\": 12\n" + "}\n" + "],\n" +
+                        "\"length\": 30,\n" + "\"package_type\": 2,\n" + "\"price\": 1440000,\n" +
+                        "\"weight\": 1.1231,\n" + "\"width\": 40\n" + "},\n" + "\"payment_type\": \"postpay\"\n" + "}";
+                JsonNode jsonRequest = mapper.readTree(requestDomesticOrderShipper);
+
                 if (orderType.equalsIgnoreCase("DELIVERY")) {
-                    nodeBaru.set("o", jsonNode.get("origin_area_id"));
-                    nodeBaru.set("d", jsonNode.get("destination_area_id"));
-                    nodeBaru.set("l", jsonNode.get("length"));
-                    nodeBaru.set("w", jsonNode.get("wide"));
-                    nodeBaru.set("h", jsonNode.get("height"));
-                    nodeBaru.set("wt", jsonNode.get("weight"));
-                    nodeBaru.set("v", jsonNode.get("total_price"));
-                    nodeBaru.set("rateID", jsonNode.get("rate_id"));
-                    nodeBaru.set("contents", jsonNode.get("destination_address"));
-                    nodeBaru.set("packageType", jsonNode.get("package_type"));
-                    nodeBaru.set("consigneeName", jsonNode.get("customer_name"));
-                    nodeBaru.set("consigneePhoneNumber", jsonNode.get("customer_phone_number"));
-                    nodeBaru.set("originAddress", jsonNode.get("origin_address"));
-                    nodeBaru.set("destinationAddress", jsonNode.get("destination_address"));
+                    ((ObjectNode) jsonRequest.get("consignee")).put("name", jsonNode.get("customer_name").asText());
+                    ((ObjectNode) jsonRequest.get("consignee")).put("phone_number", jsonNode.get("customer_phone_number").asText());
+
+                    ((ObjectNode) jsonRequest.get("courier")).put("rate_id", jsonNode.get("rate_id").asInt());
+                    ((ObjectNode) jsonRequest.get("courier")).put("cod", jsonNode.get("cod").asBoolean());
+                    ((ObjectNode) jsonRequest.get("courier")).put("use_insurance", jsonNode.get("use_insurance").asBoolean());
+
+                    ((ObjectNode) jsonRequest).put("coverage", "domestic");
+
+                    ProcessBuilder shipperBuilderForAreas = new ProcessBuilder(
+                            "curl",
+                            "-XGET",
+                            "-H", "Content-Type:application/json",
+                            "-H", "user-agent: Shipper/1.0",
+                            "-H", "X-API-Key: "+API_KEY_SHIPPER,
+                            API_SHIPPER_ADDRESS_V3+API_SHIPPER_AREAS_V3+jsonNode.get("destination_area_id").asInt()
+                    );
+
+
+                    Process prosesBuilderForAreas = shipperBuilderForAreas.start();
+                    InputStream isAreas = prosesBuilderForAreas.getInputStream();
+                    InputStreamReader isrAreas = new InputStreamReader(isAreas);
+                    BufferedReader brAreas = new BufferedReader(isrAreas);
+
+
+                    String lineAreas =  brAreas.readLine();
+                    JsonNode jsonResponseAreas = new ObjectMapper().readValue(lineAreas, JsonNode.class);
+                    String lattitude = (String) jsonResponseAreas.get("data").get(0).get("lat").asText();
+                    String longitude = (String) jsonResponseAreas.get("data").get(0).get("lng").asText();
+
+                    ((ObjectNode) jsonRequest.get("destination")).put("address", jsonNode.get("destination_address").asText());
+                    ((ObjectNode) jsonRequest.get("destination")).put("area_id", jsonNode.get("destination_area_id").asInt());
+                    ((ObjectNode) jsonRequest.get("destination")).put("lat", lattitude);
+                    ((ObjectNode) jsonRequest.get("destination")).put("lng", longitude);
+                    ((ObjectNode) jsonRequest.get("package")).put("height", jsonNode.get("height").asInt());
+                    ((ObjectNode) jsonRequest.get("package")).put("length", jsonNode.get("length").asInt());
+                    ((ObjectNode) jsonRequest.get("package")).put("width", jsonNode.get("wide").asInt());
+                    ((ObjectNode) jsonRequest.get("package")).put("weight", jsonNode.get("weight").asDouble());
+                    ((ObjectNode) jsonRequest.get("package")).put("price", jsonNode.get("total_price").asInt());
+                    ((ObjectNode) jsonRequest.get("package")).put("package_type", jsonNode.get("package_type").asInt());
+                    ((ObjectNode) jsonRequest).remove("items");
                 }
-
-                System.out.println(">>> incoming order request 1..." + nodeBaru.toString());
-
-//                order.orderIdShipper = node.has("shipperName") ? node.get("shipperName").asText() : "";
 
                 // request order
                 OrderTransaction orderRequest = objectMapper.readValue(jsonNode.toString(), OrderTransaction.class);
@@ -118,14 +156,15 @@ public class CheckoutOrderController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
 
-                ((ObjectNode) jsonNode).put("store_name", store.storeName);
-                ((ObjectNode) jsonNode).put("store_number", store.storePhone);
-                ((ObjectNode) jsonNode).put("store_coordinate", store.storeLatitude+","+store.storeLongitude);
-                ((ObjectNode) jsonNode).put("shipper_payment_type", "postpay");
-                nodeBaru.set("consignerName", jsonNode.get("store_name"));
-                nodeBaru.set("consignerPhoneNumber", jsonNode.get("store_number"));
-                nodeBaru.set("originCoord", jsonNode.get("store_coordinate"));
-                nodeBaru.set("paymentType", jsonNode.get("shipper_payment_type"));
+                ((ObjectNode) jsonRequest.get("consigner")).put("name", store.storeName);
+                ((ObjectNode) jsonRequest.get("consigner")).put("phone_number", store.storePhone);
+
+                ((ObjectNode) jsonRequest.get("origin")).put("address", store.storeAddress);
+                ((ObjectNode) jsonRequest.get("origin")).put("area_id", store.shipperArea.id);
+                ((ObjectNode) jsonRequest.get("origin")).put("lat", String.valueOf(store.storeLatitude));
+                ((ObjectNode) jsonRequest.get("origin")).put("lng", String.valueOf(store.storeLongitude));
+
+                ((ObjectNode) jsonRequest).put("payment_type", "postpay");
 
                 Member member = null;
                 Member memberData = new Member();
@@ -224,7 +263,8 @@ public class CheckoutOrderController extends BaseController {
                 order.save();
                 List<ProductOrderDetail> productOrderDetails = orderRequest.getProductOrderDetail();
                 StringBuilder message = new StringBuilder();
-                ArrayNode countersNode = nodeBaru.putArray("itemName");
+                ArrayNode countersNode = ((ObjectNode) jsonRequest).putArray("items");
+//                ArrayNode countersNode = nodeBaru.putArray("itemName");
                 List<OrderForLoyaltyData> listOrderData = new ArrayList<>();
                 for (ProductOrderDetail productOrderDetail : productOrderDetails) {
                     OrderForLoyaltyData listDataOrder = new OrderForLoyaltyData();
@@ -245,7 +285,7 @@ public class CheckoutOrderController extends BaseController {
                         ObjectNode counterNode = countersNode.addObject();
                         counterNode.put("name", productMerchant.getProductName());
                         counterNode.put("qty", productOrderDetail.getProductQty());
-                        counterNode.put("value", productOrderDetail.getProductPrice());
+                        counterNode.put("price", productOrderDetail.getProductPrice());
 
                         // ADD FOR LOYALTY
                         SubsCategoryMerchant subsCategoryMerchant = productMerchant.getSubsCategoryMerchant();
@@ -411,8 +451,7 @@ public class CheckoutOrderController extends BaseController {
                         request.setCustomerPhoneNumber(member.phone);
                     }
 
-//                    ((ObjectNode) jsonNode).put("externalID", orderNumber);
-//                    nodeBaru.set("externalID", jsonNode.get("externalID"));
+                    ((ObjectNode) jsonRequest).put("external_id", orderNumber);
 
                     // please
                     PaymentServiceRequest paymentServiceRequest = PaymentServiceRequest.builder()
@@ -482,68 +521,24 @@ public class CheckoutOrderController extends BaseController {
                             member.update();
                         }
 
-                        // harus ditambah return klo error
                         // tambah lat dan long saat order shipper ke shipper API v3
                         if (orderRequest.getOrderType().equalsIgnoreCase("DELIVERY")) {
-                            String domesticUrl = API_SHIPPER_ADDRESS + API_SHIPPER_DOMESTIC_ORDER + API_KEY_SHIPPER;
-
-                            //start remove fields for nodeBaru
-                            nodeBaru.remove("store_code");
-                            nodeBaru.remove("order_type");
-                            nodeBaru.remove("device_type");
-                            nodeBaru.remove("customer_name");
-                            nodeBaru.remove("customer_email");
-                            nodeBaru.remove("customer_phone_number");
-                            nodeBaru.remove("sub_total");
-                            nodeBaru.remove("table_id");
-                            nodeBaru.remove("total_price");
-                            nodeBaru.remove("pickup_point_id");
-                            nodeBaru.remove("payment_detail");
-                            nodeBaru.remove("product_order_detail");
-                            nodeBaru.remove("use_loyalty");
-                            nodeBaru.remove("loyalty_usage");
-                            nodeBaru.remove("origin_area_id");
-                            nodeBaru.remove("destination_area_id");
-                            nodeBaru.remove("length");
-                            nodeBaru.remove("wide");
-                            nodeBaru.remove("height");
-                            nodeBaru.remove("weight");
-                            nodeBaru.remove("store_name");
-                            nodeBaru.remove("store_number");
-                            //end remove
+                            String domesticUrl = API_SHIPPER_ADDRESS_V3 + API_SHIPPER_DOMESTIC_ORDER;
 
                             //start find lat and long from areaId;
 
-                            ProcessBuilder shipperBuilderForAreas = new ProcessBuilder(
-                                    "curl",
-                                    "-XGET",
-                                    "-H", "Content-Type:application/json",
-                                    "-H", "user-agent: Shipper/1.0",
-                                    "-H", "X-API-Key: "+API_KEY_SHIPPER,
-                                    API_SHIPPER_ADDRESS_V3+API_SHIPPER_AREAS_V3+nodeBaru.get("d").asInt()
-                            );
+                            ObjectNode requestNode = (ObjectNode) jsonRequest;
 
+                            System.out.println("incoming shipper order request : "+requestNode.toString());
 
-                            Process prosesBuilderForAreas = shipperBuilderForAreas.start();
-                            InputStream isAreas = prosesBuilderForAreas.getInputStream();
-                            InputStreamReader isrAreas = new InputStreamReader(isAreas);
-                            BufferedReader brAreas = new BufferedReader(isrAreas);
-
-
-                            String lineAreas =  brAreas.readLine();
-                            JsonNode jsonResponseAreas = new ObjectMapper().readValue(lineAreas, JsonNode.class);
-                            String lattitude = (String) jsonResponseAreas.get("data").get(0).get("lat").asText();
-                            String longitude = (String) jsonResponseAreas.get("data").get(0).get("lng").asText();
-                            ((ObjectNode) jsonNode).put("customer_coordinate", lattitude+","+longitude);
-                            nodeBaru.set("destinationCoord", jsonNode.get("customer_coordinate"));
-
-                            String bodyRequest = nodeBaru.toString();
+                            String bodyRequest = requestNode.toString();
                             System.out.println("domestic order request : "+bodyRequest);
                             ProcessBuilder shipperBuilder = new ProcessBuilder(
                                     "curl",
                                     "-XPOST",
                                     "-H", "Content-Type:application/json",
                                     "-H", "user-agent: Shipper/1.0",
+                                    "-H", "X-API-Key: "+API_KEY_SHIPPER,
                                     domesticUrl,
                                     "-d", bodyRequest
                             );
@@ -558,17 +553,17 @@ public class CheckoutOrderController extends BaseController {
                             String line =  br.readLine();
                             JsonNode jsonResponse = new ObjectMapper().readValue(line, JsonNode.class);
                             System.out.println("domestic response : "+jsonResponse.toString());
-                            String hasil = (String)jsonResponse.get("status").asText();
+                            String hasil = (String)jsonResponse.get("metadata").get("http_status").asText();
                             System.out.println("status domestic order : "+hasil);
 
-                            if (hasil.equals("success")) {
-                                String idShipperOrder = (String)jsonResponse.get("data").get("id").asText();
+                            if (hasil.equals("Created")) {
+                                String idShipperOrder = (String)jsonResponse.get("data").get("order_id").asText();
                                 System.out.println("order id shipper : "+idShipperOrder);
                                 order.setShipperOrderId(idShipperOrder);
                                 order.save();
                                 orderTransactionResponse.setShipperOrderId(idShipperOrder);
                             } else {
-                                String messageShipper = (String) jsonResponse.get("data").get("content").asText();
+                                String messageShipper = (String) jsonResponse.get("metadata").get("http_status").asText();
                                 response.setBaseResponse(1, offset, 1, messageShipper, orderTransactionResponse);
                                 return ok(Json.toJson(response));
                             }
@@ -856,7 +851,7 @@ public class CheckoutOrderController extends BaseController {
     }
 
     public static Result getShipmentStatus(String orderShipperId) {
-        String shipperDetailUrl = API_SHIPPER_ADDRESS + API_SHIPPER_DETAIL+orderShipperId+"?apiKey=" + API_KEY_SHIPPER;
+        String shipperDetailUrl = API_SHIPPER_ADDRESS_V3 + API_SHIPPER_DETAIL+"/"+orderShipperId;
 
         try{
 
@@ -868,7 +863,7 @@ public class CheckoutOrderController extends BaseController {
             ProcessBuilder pb2 = new ProcessBuilder(
                     "curl",
                     "-XGET",
-                    "-H", "user-agent: Shipper/",
+                    "-H", "X-API-Key: "+API_KEY_SHIPPER,
                     shipperDetailUrl
             );
 
