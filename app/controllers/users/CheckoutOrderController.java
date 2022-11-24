@@ -142,9 +142,9 @@ public class CheckoutOrderController extends BaseController {
                     ((ObjectNode) jsonRequest.get("package")).put("length", jsonNode.get("length").asInt());
                     ((ObjectNode) jsonRequest.get("package")).put("width", jsonNode.get("wide").asInt());
                     ((ObjectNode) jsonRequest.get("package")).put("weight", jsonNode.get("weight").asDouble());
-                    ((ObjectNode) jsonRequest.get("package")).put("price", jsonNode.get("total_price").asInt());
+                    ((ObjectNode) jsonRequest.get("package")).put("price", jsonNode.get("sub_total").asInt());
                     ((ObjectNode) jsonRequest.get("package")).put("package_type", jsonNode.get("package_type").asInt());
-                    ((ObjectNode) jsonRequest).remove("items");
+                    ((ObjectNode) jsonRequest.get("package")).remove("items");
                 }
 
                 // request order
@@ -263,7 +263,7 @@ public class CheckoutOrderController extends BaseController {
                 order.save();
                 List<ProductOrderDetail> productOrderDetails = orderRequest.getProductOrderDetail();
                 StringBuilder message = new StringBuilder();
-                ArrayNode countersNode = ((ObjectNode) jsonRequest).putArray("items");
+                ArrayNode countersNode = ((ObjectNode) jsonRequest.get("package")).putArray("items");
 //                ArrayNode countersNode = nodeBaru.putArray("itemName");
                 List<OrderForLoyaltyData> listOrderData = new ArrayList<>();
                 for (ProductOrderDetail productOrderDetail : productOrderDetails) {
@@ -285,7 +285,7 @@ public class CheckoutOrderController extends BaseController {
                         ObjectNode counterNode = countersNode.addObject();
                         counterNode.put("name", productMerchant.getProductName());
                         counterNode.put("qty", productOrderDetail.getProductQty());
-                        counterNode.put("price", productOrderDetail.getProductPrice());
+                        counterNode.put("price", productOrderDetail.getProductPrice().intValue());
 
                         // ADD FOR LOYALTY
                         SubsCategoryMerchant subsCategoryMerchant = productMerchant.getSubsCategoryMerchant();
