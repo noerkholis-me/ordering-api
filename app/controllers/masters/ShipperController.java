@@ -276,7 +276,7 @@ public class ShipperController extends BaseController {
                     ((ObjectNode) jsonNode).put("weight", 1);
                 }
                 ((ObjectNode) jsonNode).put("cod", false);
-                ((ObjectNode) jsonNode).put("for_order", false);
+                ((ObjectNode) jsonNode).put("for_order", true);
                 ((ObjectNode) jsonNode).put("item_value", price);
                 ((ObjectNode) jsonNode.get("origin")).put("area_id", objStore.shipperArea.id);
                 ((ObjectNode) jsonNode.get("origin")).put("lat", String.valueOf(objStore.storeLatitude));
