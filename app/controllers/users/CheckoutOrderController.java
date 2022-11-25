@@ -655,7 +655,7 @@ public class CheckoutOrderController extends BaseController {
         //     response.setBaseResponse(0, 0, 0, unauthorized, null);
         //     return unauthorized(Json.toJson(response));
         // }
-        response.setBaseResponse(0, 0, 0, error, null);
+        response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat pembayaran, silahkan refresh halaman dan ulangi pemesanan", null);
         return ok(Json.toJson(response));
     }
 

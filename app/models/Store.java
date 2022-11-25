@@ -159,7 +159,7 @@ public class Store extends BaseModel{
     }
 
     public static Store findByStoreCode(String storeCode) {
-        return find.where().eq("storeCode", storeCode).findUnique();
+        return find.where().eq("storeCode", storeCode).eq("is_deleted", false).findUnique();
     }
 
     public static Integer RowCount() {
