@@ -29,7 +29,7 @@ public static final String passwordRegex = "^.{8,}$";
 	public static final String emailRegex =
 			"^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
 					+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
-	public static final String phoneRegex = "^(?=.{11,16}$)([0])([0-9])*$";
+	public static final String phoneRegex = "^(?=.{7,16}$)([0])([0-9])*$";
 	public static final String usernameRegex = "^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$";
 	public static final String nameRegex = "^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$";
 	public static final String skuRegex = "^[a-zA-Z]+(([_-][a-zA-Z ])?[a-zA-Z]*)*$";
