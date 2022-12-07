@@ -8,6 +8,7 @@ import com.hokeba.util.Encryption;
 import models.*;
 import models.Currency;
 import play.Logger;
+import play.Play;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -20,12 +21,14 @@ import java.util.stream.Collectors;
 
 public class SeedDefaultConfiguration {
 
-	private static final String API_KEY_SHIPPER = "Q2JSCJ6lPZcraO4P6zDBr6vmoQVWsa3j6HLvaHWbgoPMyKrWljKG9vOteIELOz2u";
-	private static final String API_SHIPPER_ADDRESS = "https://api.sandbox.shipper.id/public/v1/";
-	private static final String API_SHIPPER_PROVINCE = "provinces?apiKey=";
-	private static final String API_SHIPPER_CITY = "cities?apiKey=";
-	private static final String API_SHIPPER_SUBURB = "suburbs?apiKey=";
-	private static final String API_SHIPPER_AREA = "areas?apiKey=";
+	private static final String API_KEY_SHIPPER = Play.application().configuration().getString("sandbox.shipping.shipperapi.apikey");
+//	private static final String API_SHIPPER_ADDRESS = "https://api.sandbox.shipper.id/public/v1/";
+	private static final String API_SHIPPER_ADDRESS_V3 = Play.application().configuration().getString("sandbox.shipping.shipperapi.v3.url");
+//	private static final String API_SHIPPER_AREAS_V3 = "/v3/location/areas?area_ids=";
+	private static final String API_SHIPPER_PROVINCE = "/v3/location/country/228/provinces";
+	private static final String API_SHIPPER_CITY = "/v3/location/province/";
+	private static final String API_SHIPPER_SUBURB = "/v3/location/city/";
+	private static final String API_SHIPPER_AREA = "/v3/location/suburb/";
 
 	private static HttpURLConnection connProvince;
 	private static HttpURLConnection connCity;
@@ -637,10 +640,10 @@ public class SeedDefaultConfiguration {
 				String suburbUrlApi = "";
 				String areaUrlApi = "";
 
-				provinceUrlApi = API_SHIPPER_ADDRESS + API_SHIPPER_PROVINCE + API_KEY_SHIPPER;
-				cityUrlApi = API_SHIPPER_ADDRESS + API_SHIPPER_CITY + API_KEY_SHIPPER;
-				suburbUrlApi = API_SHIPPER_ADDRESS + API_SHIPPER_SUBURB + API_KEY_SHIPPER;
-				areaUrlApi = API_SHIPPER_ADDRESS + API_SHIPPER_AREA + API_KEY_SHIPPER;
+				provinceUrlApi = API_SHIPPER_ADDRESS_V3 + API_SHIPPER_PROVINCE;
+				cityUrlApi = API_SHIPPER_ADDRESS_V3 + API_SHIPPER_CITY;
+				suburbUrlApi = API_SHIPPER_ADDRESS_V3 + API_SHIPPER_SUBURB;
+				areaUrlApi = API_SHIPPER_ADDRESS_V3 + API_SHIPPER_AREA;
 
 				try {
 
@@ -650,7 +653,7 @@ public class SeedDefaultConfiguration {
 
 					URL url = new URL(provinceUrlApi);
 					connProvince = (HttpURLConnection) url.openConnection();
-					connProvince.addRequestProperty("User-Agent", "Shipper/");
+					connProvince.addRequestProperty("X-API-Key", API_KEY_SHIPPER);
 
 					int status = connProvince.getResponseCode();
 					if (status == 200) {
@@ -664,7 +667,7 @@ public class SeedDefaultConfiguration {
 						// END READING AND ADDING PROVINCE
 
 						JSONObject jsonProvince = new JSONObject(responseContentProvince.toString());
-						JSONArray arrayProvince = jsonProvince.getJSONObject("data").getJSONArray("rows");
+						JSONArray arrayProvince = jsonProvince.getJSONArray("data");
 						for (int i = 0; i < arrayProvince.length(); i++) {
 
 							JSONObject pve = arrayProvince.getJSONObject(i);
@@ -684,9 +687,9 @@ public class SeedDefaultConfiguration {
 								String lineCity;
 								StringBuffer responseContentCity = new StringBuffer();
 
-								URL urlCity = new URL(cityUrlApi + "&province=" + pve.getInt("id"));
+								URL urlCity = new URL(cityUrlApi + pve.getInt("id") + "/cities");
 								connCity = (HttpURLConnection) urlCity.openConnection();
-								connCity.addRequestProperty("User-Agent", "Shipper/");
+								connCity.addRequestProperty("X-API-Key", API_KEY_SHIPPER);
 
 								int statusCity = connCity.getResponseCode();
 								if (statusCity == 200) {
@@ -702,7 +705,7 @@ public class SeedDefaultConfiguration {
 									// END READING AND ADDING CITY
 
 									JSONObject jsonCity = new JSONObject(responseContentCity.toString());
-									JSONArray arrayCity = jsonCity.getJSONObject("data").getJSONArray("rows");
+									JSONArray arrayCity = jsonCity.getJSONArray("data");
 									for (int a = 0; a < arrayCity.length(); a++) {
 
 										Transaction txnCity = Ebean.beginTransaction();
@@ -722,9 +725,9 @@ public class SeedDefaultConfiguration {
 											String lineSuburb;
 											StringBuffer responseContentSuburb = new StringBuffer();
 
-											URL urlSuburb = new URL(suburbUrlApi + "&city=" + cty.getInt("id"));
+											URL urlSuburb = new URL(suburbUrlApi + cty.getInt("id") + "/suburbs");
 											connSuburb = (HttpURLConnection) urlSuburb.openConnection();
-											connSuburb.addRequestProperty("User-Agent", "Shipper/");
+											connSuburb.addRequestProperty("X-API-Key", API_KEY_SHIPPER);
 
 											int statusSuburb = connSuburb.getResponseCode();
 											if (statusSuburb == 200) {
@@ -742,8 +745,7 @@ public class SeedDefaultConfiguration {
 
 												JSONObject jsonSuburb = new JSONObject(
 														responseContentSuburb.toString());
-												JSONArray arraySuburb = jsonSuburb.getJSONObject("data")
-														.getJSONArray("rows");
+												JSONArray arraySuburb = jsonSuburb.getJSONArray("data");
 												for (int x = 0; x < arraySuburb.length(); x++) {
 
 													Transaction txnSuburb = Ebean.beginTransaction();
@@ -756,7 +758,6 @@ public class SeedDefaultConfiguration {
 														objShipperSuburb.userCms = objShipperProvince.userCms;
 														objShipperSuburb.shipperCity = objShipperCity;
 														objShipperSuburb.name = sbr.getString("name");
-														objShipperSuburb.alias = sbr.getString("alias");
 														objShipperSuburb.save();
 														// txnSuburb.commit();
 
@@ -765,9 +766,9 @@ public class SeedDefaultConfiguration {
 														StringBuffer responseContentArea = new StringBuffer();
 
 														URL urlArea = new URL(
-																areaUrlApi + "&suburb=" + sbr.getInt("id"));
+																areaUrlApi + sbr.getInt("id") + "/areas");
 														connArea = (HttpURLConnection) urlArea.openConnection();
-														connArea.addRequestProperty("User-Agent", "Shipper/");
+														connArea.addRequestProperty("X-API-Key", API_KEY_SHIPPER);
 
 														int statusArea = connArea.getResponseCode();
 														if (statusArea == 200) {
@@ -785,8 +786,7 @@ public class SeedDefaultConfiguration {
 
 															JSONObject jsonArea = new JSONObject(
 																	responseContentArea.toString());
-															JSONArray arrayArea = jsonArea.getJSONObject("data")
-																	.getJSONArray("rows");
+															JSONArray arrayArea = jsonArea.getJSONArray("data");
 															for (int y = 0; y < arrayArea.length(); y++) {
 
 																Transaction txnArea = Ebean.beginTransaction();
@@ -799,7 +799,6 @@ public class SeedDefaultConfiguration {
 																	objShipperArea.userCms = objShipperProvince.userCms;
 																	objShipperArea.shipperSuburb = objShipperSuburb;
 																	objShipperArea.name = area.getString("name");
-																	objShipperArea.alias = area.getString("alias");
 																	objShipperArea.postCode = area
 																			.getString("postcode");
 																	objShipperArea.save();

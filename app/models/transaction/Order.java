@@ -94,6 +94,9 @@ public class Order extends BaseModel {
     @javax.persistence.Transient
     public Long table_id;
 
+    @javax.persistence.Transient
+    public Long pickup_point_id;
+
     @Column(name = "table_name")
     private String tableName;
     

@@ -399,7 +399,7 @@ GET     /master/city/:id/province                   controllers.masters.ShipperC
 GET     /master/suburb/:id/city                     controllers.masters.ShipperController.getAllSuburbByCityId(id: Long, suburbName: String ?= "")
 GET     /master/area/:id/suburb                     controllers.masters.ShipperController.getAllAreaBySuburbId(id: Long, areaName: String ?= "")
 #### new shipper API for delivery order ######
-GET     /master/domesticrates                       controllers.masters.ShipperController.getAllDomesticRatesByAreaId(storeId: Long ?= 0, destinationAreaId: Long ?= 0, price: Integer ?= 0, weight: Double ?= 0, length: Double ?= 0, wide: Double ?= 0, height: Double ?= 0, storeType: Int ?= 0)
+GET     /master/domesticrates                       controllers.masters.ShipperController.getAllDomesticRatesByAreaId(storeId: Long ?= 0, destinationAreaId: Long ?= 0, price: Integer ?= 0, weight: Double ?= 0, length: Double ?= 0, wide: Double ?= 0, height: Double ?= 0, storeType: Int ?= 0, deliveryType: Int ?= 0)
 
 #STORE
 POST    /merchant/store                             controllers.merchants.StoreController.createStore()
@@ -446,10 +446,13 @@ GET     /banners/:merchantId                        controllers.banners.BannersM
 POST    /merchant/productstore                           controllers.product.ProductStoreController.createProductStore()
 PUT    /merchant/productstore/:id                        controllers.product.ProductStoreController.editProductStore(id: Long)
 GET    /merchant/productstore/list                       controllers.product.ProductStoreController.listProductStore(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/productstore/v2/list                    controllers.product.ProductStoreController.listProductStoreV2(store_code:String ?= "", keyword:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET    /merchant/productstore/:id                        controllers.product.ProductStoreController.viewProductStore(id: Long)
 DELETE    /merchant/productstore/:id                     controllers.product.ProductStoreController.deleteProductStore(id: Long)
 PUT   /merchant/productstore/:id/status                  controllers.product.ProductStoreController.setStatus(id: Long)
+GET    /merchant/productstore/detail/v2/:id              controllers.product.ProductStoreController.viewProductStoreV2(id: Long, store_code: String ?= "")
 
+GET    /merchant/productstore/pos/v2/list                controllers.product.ProductStoreController.listProductStorePOSV2(store_code:String ?= "", filter:String ?= "", keyword:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET    /merchant/productstore/kiosk/list                 controllers.product.ProductStoreController.listProductStoreForKiosk(merchant_id:Long ?= 0, store_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 30)
 GET    /merchant/productstore/mobile-qr/list             controllers.product.ProductStoreController.listProductStoreForMobileQR(merchant_id:Long ?= 0, store_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 30)
 GET    /merchant/productstore/kiosk/list-by-category     controllers.product.ProductStoreController.listProductStoreByCategoriesForKIOSK(merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0, sub_category_id:Long ?= 0, subs_category_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
