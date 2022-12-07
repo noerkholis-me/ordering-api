@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import utils.BigDecimalSerialize;
+import models.merchant.*;
+import models.pupoint.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -90,5 +90,10 @@ public class InvoicePrintResponse {
     @JsonProperty("shipper_order_id")
     private String shipperOrderId;
 
+    @JsonProperty("table")
+    private TableMerchant tableMerchant;
+
+    @JsonProperty("pickup_point")
+    private PickUpPointMerchant pickupPoint;
 
 }

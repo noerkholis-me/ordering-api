@@ -24,6 +24,14 @@ import repository.FeeSettingMerchantRepository;
 import repository.OrderPaymentRepository;
 import repository.OrderRepository;
 
+// TableMerchant
+import models.merchant.TableMerchant;
+import repository.TableMerchantRepository;
+
+// TableMerchant
+import models.pupoint.*;
+import repository.pickuppoint.PickUpPointRepository;
+
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.text.SimpleDateFormat;
@@ -575,6 +583,18 @@ public class OrderMerchantController extends BaseController {
                     }
                     orderDetailResponse.setOrderDetailAddOns(orderDetailAddOns);
                     orderDetailResponses.add(orderDetailResponse);
+                }
+                TableMerchant tmerch = TableMerchantRepository.find.where().eq("t0.id", getOrder.table_id).findUnique();
+                if(tmerch != null){
+                    invoicePrintResponse.setTableMerchant(tmerch);
+                } else {
+                    invoicePrintResponse.setTableMerchant(null);
+                }
+                PickUpPointMerchant pupMerchant = PickUpPointRepository.find.where().eq("t0.id", getOrder.pickup_point_id).findUnique();
+                if(pupMerchant != null){
+                    invoicePrintResponse.setPickupPoint(pupMerchant);
+                } else {
+                    invoicePrintResponse.setPickupPoint(null);
                 }
                 invoicePrintResponse.setOrderDetails(orderDetailResponses);
                 invoicePrintResponse.setSubTotal(getOrder.getSubTotal());
