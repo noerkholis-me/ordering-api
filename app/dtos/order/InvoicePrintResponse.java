@@ -95,5 +95,6 @@ public class InvoicePrintResponse {
 
     @JsonProperty("pickup_point")
     private PickUpPointMerchant pickupPoint;
+    
 
 }
