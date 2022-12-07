@@ -54,10 +54,10 @@ public class UserMerchantController extends BaseController {
                     Transaction trx = Ebean.beginTransaction();
                     try {
                         Merchant merchantData = Merchant.findByEmail(request.getEmail(), false);
-                        if(merchantData != null) {
-                            response.setBaseResponse(0, 0, 0, "Email terdaftar sebagai merchant, tidak dapat digunakan kembali", null);
-                            return badRequest(Json.toJson(response));
-                        }
+//                        if(merchantData != null) {
+//                            response.setBaseResponse(0, 0, 0, "Email terdaftar sebagai merchant, tidak dapat digunakan kembali", null);
+//                            return badRequest(Json.toJson(response));
+//                        }
                         RoleMerchant role = RoleMerchantRepository.find.byId(request.getRoleId());
                         if (role == null) {
                             response.setBaseResponse(0, 0, 0, error + " Role id not found.", null);
