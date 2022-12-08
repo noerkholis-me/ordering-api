@@ -25,7 +25,7 @@ public class UserMerchantRepository extends Model {
     public static UserMerchant findByEmailAndRole_MerchantId(String email, Merchant merchant) {
 		try {
 			return find.where()
-				.eq("email", email)
+				.ieq("email", email.toLowerCase())
 				.eq("role.merchant", merchant)
 				.eq("isActive", Boolean.TRUE)
 				.findUnique();
@@ -37,7 +37,7 @@ public class UserMerchantRepository extends Model {
 
 	public static UserMerchant findByEmail(String email) {
 		return find.where()
-				.eq("email", email)
+				.ieq("email", email.toLowerCase())
 				.eq("isDeleted", false)
 				.eq("isActive", Boolean.TRUE)
 				.findUnique();
@@ -46,7 +46,7 @@ public class UserMerchantRepository extends Model {
 	public static UserMerchant findByIdAndEmail(Long userMerchantId, String email) {
 		return find.where()
 				.eq("id", userMerchantId)
-				.eq("email", email)
+				.ieq("email", email.toLowerCase())
 				.eq("isDeleted", false)
 				.eq("isActive", Boolean.TRUE)
 				.findUnique();
@@ -54,7 +54,7 @@ public class UserMerchantRepository extends Model {
 
 	public static List<UserMerchant> findByEmailList(String email) {
 		return find.where()
-				.eq("email", email)
+				.ieq("email", email.toLowerCase())
 				.eq("isDeleted", false)
 				.eq("isActive", Boolean.TRUE)
 				.findList();
@@ -62,7 +62,7 @@ public class UserMerchantRepository extends Model {
 
 	public static UserMerchant forResendEmail(String email, Merchant merchant) {
 		return find.where()
-				.eq("t0.email", email)
+				.ieq("t0.email", email.toLowerCase())
 				.eq("role.merchant", merchant)
 				.eq("t0.is_deleted", Boolean.FALSE)
 				.setMaxRows(1)
