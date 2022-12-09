@@ -34,5 +34,9 @@ public class UserMerchantSessionResponse {
     private Boolean isOpen;
     @JsonProperty("store_access")
     private StoreAccessResponse storeAccess;
+    @JsonProperty("merchant_type")
+    public String merchantType;
+    @JsonProperty("account_label")
+    public String accountLabel;
 
 }

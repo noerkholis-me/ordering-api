@@ -69,6 +69,10 @@ public class MerchantSessionResponse {
 
     @JsonProperty("is_active")
     public boolean isActive;
+    @JsonProperty("merchant_type")
+    public String merchantType;
+    @JsonProperty("merchant_qr_code")
+    public String merchantQrCode;
 
     public MerchantSessionResponse() {
     }
@@ -381,4 +385,12 @@ public class MerchantSessionResponse {
     public void setActive(boolean active) {
         isActive = active;
     }
+
+    public String getMerchantType() { return merchantType; }
+
+    public void setMerchantType(String merchantType) { this.merchantType = merchantType; }
+
+    public String getMerchantQrCode() { return merchantQrCode; }
+
+    public void setMerchantQrCode(String merchantQrCode) { this.merchantQrCode = merchantQrCode; }
 }

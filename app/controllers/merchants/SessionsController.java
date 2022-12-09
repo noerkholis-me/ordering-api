@@ -553,6 +553,8 @@ public class SessionsController extends BaseController {
         profileData.setBalance(member.getBalance());
         profileData.setResetTime(member.resetTime);
         profileData.setActive(member.isActive);
+        profileData.setMerchantType(member.merchantType);
+        profileData.setMerchantQrCode(member.merchantQrCode);
 
         return profileData;
     }
@@ -567,6 +569,8 @@ public class SessionsController extends BaseController {
         userMerchantResponse.setGender(userMerchant.getGender());
         userMerchantResponse.setBirthDate(userMerchant.getBirthDateFormat());
         userMerchantResponse.setIsActive(userMerchant.getIsActive());
+        userMerchantResponse.setMerchantType(userMerchant.getRole().getMerchant().merchantType);
+        userMerchantResponse.setAccountLabel(userMerchant.fullName + " - " + userMerchant.getRole().getMerchant().name);
 
         StoreAccess dataAccess = StoreAccessRepository.findById(userMerchant.id);
         if (dataAccess != null) {
