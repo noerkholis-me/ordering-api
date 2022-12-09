@@ -511,7 +511,7 @@ public class Merchant extends BaseModel{
         if (row > 0){
             return "The email service provider that you are using can not be used in Whizliz Please use another email service provider.";
         }
-        Merchant member = Merchant.find.where().eq("email", email).setMaxRows(1).findUnique();
+        Merchant member = Merchant.find.where().ieq("email", email.toLowerCase()).setMaxRows(1).findUnique();
         if (member != null) {
             return "The email is already registered.";
         }
@@ -590,7 +590,7 @@ public class Merchant extends BaseModel{
 
     public static Merchant login(String email, String password) {
         String encPassword = Encryption.EncryptAESCBCPCKS5Padding(password);
-        Merchant member = Merchant.find.where().and(Expr.eq("email", email), Expr.eq("password", encPassword))
+        Merchant member = Merchant.find.where().and(Expr.ieq("email", email.toLowerCase()), Expr.eq("password", encPassword))
                 .eq("ownMerchant", false).setMaxRows(1).findUnique();
         return member;
     }
@@ -715,15 +715,15 @@ public class Merchant extends BaseModel{
     }
 
     public static Merchant findByEmail(String email, Boolean is_deleted) {
-    	return Merchant.find.where().eq("t0.email", email).eq("t0.is_deleted", is_deleted).setMaxRows(1).findUnique();
+    	return Merchant.find.where().ieq("t0.email", email.toLowerCase()).eq("t0.is_deleted", is_deleted).setMaxRows(1).findUnique();
     }
 
     public static List<Merchant> findByEmailList(String email, Boolean is_deleted) {
-        return Merchant.find.where().eq("t0.email", email).eq("t0.is_deleted", is_deleted).setMaxRows(1).findList();
+        return Merchant.find.where().ieq("t0.email", email.toLowerCase()).eq("t0.is_deleted", is_deleted).setMaxRows(1).findList();
     }
 
     public static Merchant findByIdAndEmail(Long merchantId, String email, Boolean is_deleted) {
-        return Merchant.find.where().eq("t0.id", merchantId).eq("t0.email", email).eq("t0.is_deleted", is_deleted).setMaxRows(1).findUnique();
+        return Merchant.find.where().eq("t0.id", merchantId).ieq("t0.email", email.toLowerCase()).eq("t0.is_deleted", is_deleted).setMaxRows(1).findUnique();
     }
 
 }

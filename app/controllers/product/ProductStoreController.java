@@ -64,7 +64,7 @@ public class ProductStoreController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
                 ProductStore psQuery = ProductStoreRepository.find.where().eq("productMerchant", productMerchant)
-                        .eq("store", store).findUnique();
+                        .eq("store", store).eq("t0.is_deleted", false).findUnique();
                 if (psQuery != null) {
                     response.setBaseResponse(0, 0, 0,
                             "Tidak dapat menambahkan " + productMerchant.getProductName() + " ke toko yang sama.",

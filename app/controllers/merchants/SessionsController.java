@@ -99,9 +99,9 @@ public class SessionsController extends BaseController {
             Boolean userType = Boolean.FALSE;
 
             if (email.matches(CommonFunction.emailRegex)) {
-                userMerchant = UserMerchantRepository.findByEmail(email);
+                userMerchant = UserMerchantRepository.findByEmail(email.toLowerCase());
                 if (userMerchant == null) {
-                    member = Merchant.findByEmail(email, false);
+                    member = Merchant.findByEmail(email.toLowerCase(), false);
                     if (member != null) {
                         if(!Merchant.isPasswordValid(member.password, password)){
                             response.setBaseResponse(0, 0, 0, "Email atau password yang anda masukkan salah!", null);
@@ -241,17 +241,24 @@ public class SessionsController extends BaseController {
             Boolean userType = Boolean.FALSE;
 
             if (email.matches(CommonFunction.emailRegex)) {
-                userMerchantList = UserMerchantRepository.findByEmailList(email);
+                    System.out.println("Here?");
+                userMerchantList = UserMerchantRepository.findByEmailList(email.toLowerCase());
                 if (userMerchantList == null || userMerchantList.isEmpty()) {
-                    memberList = Merchant.findByEmailList(email, false);
+                    System.out.println("Or Heres?");
+                    memberList = Merchant.findByEmailList(email.toLowerCase(), false);
+                    System.out.println("Or Here Its?");
                     for (Merchant memberByEmail : memberList) {
+                        System.out.println("Or guys?");
                         logger.info("Member email : " + memberByEmail);
+                        
+                        System.out.println("Or Here guys?");
 //                        if (memberByEmail != null) {
 //                            if(!Merchant.isPasswordValid(member.password, password)){
 //                                response.setBaseResponse(0, 0, 0, "Email atau password yang anda masukkan salah!", null);
 //                                return badRequest(Json.toJson(response));
 //                            }
                             if (Merchant.isPasswordValid(memberByEmail.password, password)) {
+                                System.out.println("Or Heret?");
                                 member = memberByEmail;
                                 userType = Boolean.TRUE;
                                 break;
@@ -264,6 +271,7 @@ public class SessionsController extends BaseController {
                     }
                     logger.info("member : "+member);
                 } else {
+                    System.out.println("Or Here?");
                     for (UserMerchant userMerchantByEmail : userMerchantList) {
                         logger.info("user merchant byemail : "+userMerchantByEmail);
                         if (UserMerchantRepository.isPasswordValid(userMerchantByEmail.getPassword(), password)) {
@@ -399,9 +407,9 @@ public class SessionsController extends BaseController {
             Boolean userType = Boolean.FALSE;
 
             if (email.matches(CommonFunction.emailRegex)) {
-                userMerchant = UserMerchantRepository.findByIdAndEmail(id, email);
+                userMerchant = UserMerchantRepository.findByIdAndEmail(id, email.toLowerCase());
                 if (userMerchant == null) {
-                    member = Merchant.findByIdAndEmail(id, email, false);
+                    member = Merchant.findByIdAndEmail(id, email.toLowerCase(), false);
                     if (member != null) {
                         userType = Boolean.TRUE;
                     } else {
@@ -787,11 +795,11 @@ public class SessionsController extends BaseController {
             Merchant member = null;
             UserMerchant userMerchant = null;
             Boolean userType = Boolean.FALSE;
-            member = Merchant.find.where().eq("is_active", true).eq("email", email).setMaxRows(1).findUnique();
+            member = Merchant.find.where().eq("is_active", true).ieq("email", email.toLowerCase()).setMaxRows(1).findUnique();
             if (member != null) {
                 userType = Boolean.TRUE;
             } else {
-                userMerchant = UserMerchantRepository.findByEmail(email);
+                userMerchant = UserMerchantRepository.findByEmail(email.toLowerCase());
                 userType = Boolean.FALSE;
             }
 
