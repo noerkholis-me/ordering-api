@@ -12,6 +12,7 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
 import dtos.category.*;
 import models.*;
+import models.merchant.ProductMerchantDetail;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.BodyParser;
@@ -422,9 +423,11 @@ public class CategoryMerchantController extends BaseController {
                 List<CategoryMerchant> responseIndex = CategoryMerchantRepository.getDataCategory(query, "", "", 0, 0);
                 for (CategoryMerchant data : responseIndex) {
                     Integer totalCategoryData = 0;
-                    List<ProductMerchant> listDataCategory = ProductMerchantRepository.find.where().eq("t0.merchant_id", merchantId).eq("t0.category_merchant_id", data.id).eq("t0.is_active", true).eq("t0.is_deleted", false).orderBy().desc("t0.id").findList();
-                    for (ProductMerchant productMerchant : listDataCategory) {
-                        List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
+                    String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.category_merchant_id = "+data.id+" and pm.is_active = "+true+" and pm.is_deleted = false )";
+                    Query<ProductMerchantDetail> queryProductCategory = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.id asc");
+                    List<ProductMerchantDetail> dataProductDetailCategory = ProductMerchantDetailRepository.getAllDataKiosK(queryProductCategory);
+                    for (ProductMerchantDetail productMerchantDetail : dataProductDetailCategory) {
+                        List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchantDetail.getProductMerchant().id).orderBy().desc("t0.id").findList();
                         if (listProductStore.size() > 0) {
                             for (ProductStore productStore : listProductStore) {
                                 if (productStore.getStore().id.equals(store.id)) {
@@ -451,9 +454,11 @@ public class CategoryMerchantController extends BaseController {
 
                     for(SubCategoryMerchant dataSubs : dataSub) {
                         Integer totalSubCategoryData = 0;
-                        List<ProductMerchant> listDataSubCategory = ProductMerchantRepository.find.where().eq("t0.merchant_id", merchantId).eq("t0.sub_category_merchant_id", dataSubs.id).eq("t0.is_active", true).eq("t0.is_deleted", false).orderBy().desc("t0.id").findList();
-                        for (ProductMerchant productMerchant : listDataSubCategory) {
-                            List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
+                        String querySqlSubCategory = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.sub_category_merchant_id = "+data.id+" and pm.is_active = "+true+" and pm.is_deleted = false )";
+                        Query<ProductMerchantDetail> queryProductSubCategory = ProductMerchantDetailRepository.find.where().raw(querySqlSubCategory).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.id asc");
+                        List<ProductMerchantDetail> dataProductDetailSubCategory = ProductMerchantDetailRepository.getAllDataKiosK(queryProductSubCategory);
+                        for (ProductMerchantDetail productMerchantDetail : dataProductDetailSubCategory) {
+                            List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchantDetail.getProductMerchant().id).orderBy().desc("t0.id").findList();
                             if (listProductStore.size() > 0) {
                                 for (ProductStore productStore : listProductStore) {
                                     if (productStore.getStore().id.equals(store.id)) {
@@ -479,9 +484,11 @@ public class CategoryMerchantController extends BaseController {
 
                         for(SubsCategoryMerchant dataSubsThree : dataSubThree) {
                             Integer totalSubsCategoryData = 0;
-                            List<ProductMerchant> listDataSubsCategory = ProductMerchantRepository.find.where().eq("t0.merchant_id", merchantId).eq("t0.subs_category_merchant_id", dataSubsThree.id).eq("t0.is_active", true).eq("t0.is_deleted", false).orderBy().desc("t0.id").findList();
-                            for (ProductMerchant productMerchant : listDataSubsCategory) {
-                                List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
+                            String querySqlSubsCategory = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.subs_category_merchant_id = "+data.id+" and pm.is_active = "+true+" and pm.is_deleted = false )";
+                            Query<ProductMerchantDetail> queryProductSubsCategory = ProductMerchantDetailRepository.find.where().raw(querySqlSubsCategory).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.id asc");
+                            List<ProductMerchantDetail> dataProductDetailSubsCategory = ProductMerchantDetailRepository.getAllDataKiosK(queryProductSubsCategory);
+                            for (ProductMerchantDetail productMerchantDetail : dataProductDetailSubsCategory) {
+                                List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchantDetail.getProductMerchant().id).orderBy().desc("t0.id").findList();
                                 if (listProductStore.size() > 0) {
                                     for (ProductStore productStore : listProductStore) {
                                         if (productStore.getStore().id.equals(store.id)) {

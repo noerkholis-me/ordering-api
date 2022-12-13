@@ -421,9 +421,11 @@ public class BrandMerchantController extends BaseController {
                 List<BrandMerchant> responseIndex = BrandMerchantRepository.getDataBrandHomepage(query, offset);
                 for (BrandMerchant data : responseIndex) {
                     Integer totalBrandData = 0;
-                    List<ProductMerchant> listDataCategory = ProductMerchantRepository.find.where().eq("t0.merchant_id", merchantId).eq("t0.brand_merchant_id", data.id).eq("t0.is_active", true).eq("t0.is_deleted", false).orderBy().desc("t0.id").findList();
-                    for (ProductMerchant productMerchant : listDataCategory) {
-                        List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchant.id).orderBy().desc("t0.id").findList();
+                    String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.brand_merchant_id = "+data.id+" and pm.is_active = "+true+" and pm.is_deleted = false )";
+                    Query<ProductMerchantDetail> queryProduct = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.id asc");
+                    List<ProductMerchantDetail> dataProductDetail = ProductMerchantDetailRepository.getAllDataKiosK(queryProduct);
+                    for (ProductMerchantDetail productMerchantDetail : dataProductDetail) {
+                        List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchantDetail.getProductMerchant().id).orderBy().desc("t0.id").findList();
                         if (listProductStore.size() > 0) {
                             for (ProductStore productStore : listProductStore) {
                                 if (productStore.getStore().id.equals(store.id)) {

@@ -345,11 +345,11 @@ public class UserMerchantController extends BaseController {
         if (request.getLastName() != null && request.getLastName().length() > 50)
             return "Last name cannot be more than 50 characters.";
         // =============================================================================================================== //
-        if (isEdit == Boolean.FALSE) {
-            UserMerchant userMerchant = UserMerchantRepository.find.where().eq("t0.email", request.getEmail()).eq("is_deleted", Boolean.FALSE).findUnique();
-            if (userMerchant != null)
-                return "Email telah terdaftar";
-        }
+//        if (isEdit == Boolean.FALSE) {
+//            UserMerchant userMerchant = UserMerchantRepository.find.where().eq("t0.email", request.getEmail()).eq("is_deleted", Boolean.FALSE).findUnique();
+//            if (userMerchant != null)
+//                return "Email telah terdaftar";
+//        }
         return null;
     }
 
