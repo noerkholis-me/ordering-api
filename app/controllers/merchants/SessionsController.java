@@ -571,6 +571,7 @@ public class SessionsController extends BaseController {
         userMerchantResponse.setIsActive(userMerchant.getIsActive());
         userMerchantResponse.setMerchantType(userMerchant.getRole().getMerchant().merchantType);
         userMerchantResponse.setAccountLabel(userMerchant.fullName + " - " + userMerchant.getRole().getMerchant().name);
+        userMerchantResponse.setRole(userMerchant.getRole());
 
         StoreAccess dataAccess = StoreAccessRepository.findById(userMerchant.id);
         if (dataAccess != null) {

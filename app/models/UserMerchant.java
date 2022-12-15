@@ -129,13 +129,13 @@ public class UserMerchant extends BaseModel {
     }
 
     public List<FeatureAndPermissionSession> checkFeatureAndPermissions() {
-        List<RoleMerchantFeature> roleMerchantFeatures = RoleMerchantFeature.findByRoleMerchantId(this.role.id);
+        List<RoleMerchantFeature> roleMerchantFeatures = RoleMerchantFeature.findByRoleId(this.role.id);
         if (roleMerchantFeatures == null || roleMerchantFeatures.isEmpty()) {
             return null;
         }
         List<RoleMerchantFeature> myFeature = this.role.getFeatureList();
         List<FeatureAndPermissionSession> featureAndPermissionSessionList = new ArrayList<>();
-        for (RoleMerchantFeature feature : myFeature) {
+        for (RoleMerchantFeature feature : roleMerchantFeatures) {
             FeatureAndPermissionSession featureAndPermissionSession = new FeatureAndPermissionSession();
             featureAndPermissionSession.setFeatureName(feature.getFeature().name);
             featureAndPermissionSession.setIsView(feature.getIsView());
