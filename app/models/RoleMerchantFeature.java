@@ -79,6 +79,11 @@ public class RoleMerchantFeature extends Model {
         return query.findList();
     }
 
+    public static List<RoleMerchantFeature> findByRoleId(Long roleMerchantId) {
+        Query<RoleMerchantFeature> query = RoleMerchantFeature.find.where().eq("t0.role_merchant_id", roleMerchantId).order("t0.feature_id asc");
+        return query.findList();
+    }
+
     public static List<RoleMerchantFeature> getFeaturesByRole(Long id){
         String sql = "SELECT role_merchant_id, feature_id, is_view, is_add, is_edit, is_delete FROM role_merchant_feature rmf\n" +
                 "left join feature f on rmf.feature_id = f.id \n" +
