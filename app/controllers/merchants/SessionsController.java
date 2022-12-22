@@ -39,7 +39,6 @@ import models.UserMerchant;
 import models.merchant.CashierHistoryMerchant;
 import models.store.StoreAccess;
 import models.store.StoreAccessDetail;
-import org.h2.engine.User;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.BodyParser;
@@ -571,7 +570,6 @@ public class SessionsController extends BaseController {
         userMerchantResponse.setIsActive(userMerchant.getIsActive());
         userMerchantResponse.setMerchantType(userMerchant.getRole().getMerchant().merchantType);
         userMerchantResponse.setAccountLabel(userMerchant.fullName + " - " + userMerchant.getRole().getMerchant().name);
-        userMerchantResponse.setRole(userMerchant.getRole());
 
         StoreAccess dataAccess = StoreAccessRepository.findById(userMerchant.id);
         if (dataAccess != null) {

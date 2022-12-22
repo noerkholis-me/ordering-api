@@ -454,7 +454,7 @@ public class CategoryMerchantController extends BaseController {
 
                     for(SubCategoryMerchant dataSubs : dataSub) {
                         Integer totalSubCategoryData = 0;
-                        String querySqlSubCategory = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.sub_category_merchant_id = "+data.id+" and pm.is_active = "+true+" and pm.is_deleted = false )";
+                        String querySqlSubCategory = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.sub_category_merchant_id = "+dataSubs.id+" and pm.is_active = "+true+" and pm.is_deleted = false )";
                         Query<ProductMerchantDetail> queryProductSubCategory = ProductMerchantDetailRepository.find.where().raw(querySqlSubCategory).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.id asc");
                         List<ProductMerchantDetail> dataProductDetailSubCategory = ProductMerchantDetailRepository.getAllDataKiosK(queryProductSubCategory);
                         for (ProductMerchantDetail productMerchantDetail : dataProductDetailSubCategory) {
@@ -484,7 +484,7 @@ public class CategoryMerchantController extends BaseController {
 
                         for(SubsCategoryMerchant dataSubsThree : dataSubThree) {
                             Integer totalSubsCategoryData = 0;
-                            String querySqlSubsCategory = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.subs_category_merchant_id = "+data.id+" and pm.is_active = "+true+" and pm.is_deleted = false )";
+                            String querySqlSubsCategory = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.subs_category_merchant_id = "+dataSubsThree.id+" and pm.is_active = "+true+" and pm.is_deleted = false )";
                             Query<ProductMerchantDetail> queryProductSubsCategory = ProductMerchantDetailRepository.find.where().raw(querySqlSubsCategory).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.id asc");
                             List<ProductMerchantDetail> dataProductDetailSubsCategory = ProductMerchantDetailRepository.getAllDataKiosK(queryProductSubsCategory);
                             for (ProductMerchantDetail productMerchantDetail : dataProductDetailSubsCategory) {
