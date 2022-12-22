@@ -549,10 +549,12 @@ public class OrderMerchantController extends BaseController {
                 AppSettings appSettings = AppSettingRepository.findByMerchantId(store.getMerchant().id);
                 String sandboxImage = Constant.getInstance().getImageUrl().concat("/assets/images/logo-sandbox.png");
                 if (appSettings == null) {
-                    invoicePrintResponse.setImageStoreUrl(sandboxImage);
+                    invoicePrintResponse.setImageStoreUrl(sandboxImage != null && sandboxImage != "" ? sandboxImage: "");
+                } else if (appSettings != null && appSettings.getAppLogo() != null && appSettings.getAppLogo() != "") {
+                    invoicePrintResponse.setImageStoreUrl(appSettings.getAppLogo() != null && appSettings.getAppLogo() != "" ? appSettings.getAppLogo() : sandboxImage);
+                } else {
+                    invoicePrintResponse.setImageStoreUrl(sandboxImage != null && sandboxImage != "" ? sandboxImage: "");
                 }
-
-                invoicePrintResponse.setImageStoreUrl(appSettings.getAppLogo() != null && appSettings.getAppLogo() != "" ? appSettings.getAppLogo() : sandboxImage);
 
                 invoicePrintResponse.setStoreName(store.storeName);
                 invoicePrintResponse.setStoreAddress(store.storeAddress);
