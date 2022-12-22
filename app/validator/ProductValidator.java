@@ -9,7 +9,7 @@ public class ProductValidator {
     public static String validateRequest(ProductRequest productRequest) {
         if (productRequest.getNoSKU() != "" && productRequest.getNoSKU() != null) {
             if (!productRequest.getNoSKU().matches(skuRegex)) {
-                return "Hanya bisa alfanumeric";
+                return "No SKU hanya bisa alfanumeric";
             }
         }
         if (productRequest.getNoSKU() == "" || productRequest.getNoSKU() == null)

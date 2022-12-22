@@ -11,7 +11,7 @@ libraryDependencies ++= Seq(
   javaEbean,
   cache,
   javaWs,
-  "org.postgresql" % "postgresql" % "9.4-1201-jdbc41",
+  "org.postgresql" % "postgresql" % "42.4.1",
   "com.wordnik" %% "swagger-play2" % "1.3.12" exclude("org.reflections", "reflections"),
   "org.webjars" % "swagger-ui" % "2.1.8-M1",
   "org.reflections" % "reflections" % "0.9.8" notTransitive (),
