@@ -549,10 +549,12 @@ public class OrderMerchantController extends BaseController {
                 AppSettings appSettings = AppSettingRepository.findByMerchantId(store.getMerchant().id);
                 String sandboxImage = Constant.getInstance().getImageUrl().concat("/assets/images/logo-sandbox.png");
                 if (appSettings == null) {
-                    invoicePrintResponse.setImageStoreUrl(sandboxImage);
+                    invoicePrintResponse.setImageStoreUrl(sandboxImage != null && sandboxImage != "" ? sandboxImage: "");
+                } else if (appSettings != null && appSettings.getAppLogo() != null && appSettings.getAppLogo() != "") {
+                    invoicePrintResponse.setImageStoreUrl(appSettings.getAppLogo() != null && appSettings.getAppLogo() != "" ? appSettings.getAppLogo() : sandboxImage);
+                } else {
+                    invoicePrintResponse.setImageStoreUrl(sandboxImage != null && sandboxImage != "" ? sandboxImage: "");
                 }
-
-                invoicePrintResponse.setImageStoreUrl(appSettings.getAppLogo() != null && appSettings.getAppLogo() != "" ? appSettings.getAppLogo() : sandboxImage);
 
                 invoicePrintResponse.setStoreName(store.storeName);
                 invoicePrintResponse.setStoreAddress(store.storeAddress);
@@ -656,10 +658,30 @@ public class OrderMerchantController extends BaseController {
             Query<Order> orderQuery = OrderRepository.findAllOrderByStoreIdNow(storeId);
             List<Order> orders = OrderRepository.findOrdersQueue(orderQuery, offset, limit);
             List<OrderQueueResponse> orderQueueResponses = new ArrayList<>();
+            OrderQueueResponse.OrderDetail orderQueueResponsesDetail = new OrderQueueResponse.OrderDetail();
             for (Order order : orders) {
                 OrderQueueResponse orderQueueResponse = new OrderQueueResponse();
                 orderQueueResponse.setOrderQueue(order.getOrderQueue());
+                orderQueueResponse.setTransactionNo(order.getOrderNumber());
                 orderQueueResponse.setCustomerName(order.getMemberName() != null ? order.getMemberName() : "GENERAL CUSTOMER");
+                List<OrderQueueResponse.OrderDetail> orderDetailListResponses = new ArrayList<>();
+                List<OrderDetail> orderDetailList = order.getOrderDetails();
+                for (OrderDetail oDetails : orderDetailList) {
+                    OrderQueueResponse.OrderDetail orderDetailListResponse = new OrderQueueResponse.OrderDetail();
+                    orderDetailListResponse.setProductName(oDetails.getProductName());
+                    orderDetailListResponse.setQty(oDetails.getQuantity());
+                    orderDetailListResponses.add(orderDetailListResponse);
+                    List<OrderQueueResponse.OrderDetail.OrderDetailAddOn> orderDetailAddOnListResponses = new ArrayList<>();
+                    List<OrderDetailAddOn> orderDetailAddOnList = oDetails.getOrderDetailAddOns();
+                    for (OrderDetailAddOn oDetailAddOn: orderDetailAddOnList) {
+                        OrderQueueResponse.OrderDetail.OrderDetailAddOn orderDetailAddOnListResponse = new OrderQueueResponse.OrderDetail.OrderDetailAddOn();
+                        orderDetailAddOnListResponse.setProductName(oDetails.getProductName());
+                        orderDetailAddOnListResponse.setQty(oDetails.getQuantity());
+                        orderDetailAddOnListResponses.add(orderDetailAddOnListResponse);
+                    }
+                    orderDetailListResponse.setOrderDetailAddOn(orderDetailAddOnListResponses);
+                }
+                orderQueueResponse.setOrderDetails(orderDetailListResponses);
                 orderQueueResponse.setOrderHour(order.getOrderDate());
                 OrderStatus orderStatus = OrderStatus.convertToOrderStatus(order.getStatus());
                 orderQueueResponse.setStatus(convertOrderStatus(orderStatus));

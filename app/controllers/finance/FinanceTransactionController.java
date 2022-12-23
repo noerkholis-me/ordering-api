@@ -52,14 +52,18 @@ public class FinanceTransactionController extends BaseController {
                 List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findAllTransaction(query, startDate, endDate, sort, offset, limit, status);
                 Integer totalData = FinanceTransactionRepository.getTotalPage(query);
                 List<FinanceTransactionResponse> financeTransactionResponses = new ArrayList<>();
+                String refNumber = "";
                 for (FinanceTransaction transaction : financeTransactions) {
                     FinanceTransactionResponse trxRes = new FinanceTransactionResponse();
-                    trxRes.setReferenceNumber(transaction.getReferenceNumber());
-                    trxRes.setDate(transaction.getDate());
-                    trxRes.setTransactionType(transaction.getTransactionType());
-                    trxRes.setStatus(transaction.getStatus());
-                    trxRes.setAmount(transaction.getAmount());
-                    financeTransactionResponses.add(trxRes);
+                    if (!transaction.getReferenceNumber().equals(refNumber)){
+                        refNumber = transaction.getReferenceNumber();
+                        trxRes.setReferenceNumber(transaction.getReferenceNumber());
+                        trxRes.setDate(transaction.getDate());
+                        trxRes.setTransactionType(transaction.getTransactionType());
+                        trxRes.setStatus(transaction.getStatus());
+                        trxRes.setAmount(transaction.getAmount());
+                        financeTransactionResponses.add(trxRes);
+                    }
                 }
                 response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", financeTransactionResponses);
                 return ok(Json.toJson(response));
@@ -67,9 +71,12 @@ public class FinanceTransactionController extends BaseController {
                 LOGGER.error("Error when getting transaction data");
                 e.printStackTrace();
             }
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
         }
-        response.setBaseResponse(0, 0, 0, unauthorized, null);
-        return unauthorized(Json.toJson(response));
+        response.setBaseResponse(0, 0, 0, "Error saat menampilkan data", null);
+        return badRequest(Json.toJson(response));
 
     }
 
@@ -121,10 +128,42 @@ public class FinanceTransactionController extends BaseController {
                     } else {
                         activeBalanceStore = store.getActiveBalance();
                     }
-                    totalActiveBalance = merchant.totalActiveBalance;
+
+                    Query<FinanceTransaction> query = null;
+                    // default query find by merchant id
+                    query = FinanceTransactionRepository.findAllTransactionByMerchantId(merchant.id);
+                    if (store != null) {
+                        query = FinanceTransactionRepository.findAllTransactionByStoreId(store.id);
+                    }
+                    List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findAllTransaction(query, "", "", "", 0, 0, "");
+                    List<FinanceTransactionResponse> financeTransactionResponses = new ArrayList<>();
+                    String refNumber = "";
+                    for (FinanceTransaction transaction : financeTransactions) {
+                        FinanceTransactionResponse trxRes = new FinanceTransactionResponse();
+                        if (!transaction.getReferenceNumber().equals(refNumber)){
+                            System.out.println("1");
+                            System.out.println(transaction.getStatus());
+                            refNumber = transaction.getReferenceNumber();
+                            if (transaction.getStatus().equals("IN")){
+                                totalActiveBalance = totalActiveBalance.add(transaction.getAmount());
+                                System.out.print("2");
+                                System.out.println(totalActiveBalance);
+                            } else if (transaction.getStatus().equals("OUT")) {
+                                totalActiveBalance = totalActiveBalance.subtract(transaction.getAmount());
+                                System.out.print("3");
+                                System.out.println(totalActiveBalance);
+                            } else if (transaction.getStatus().equals("WITHDRAW")) {
+                                totalActiveBalance = totalActiveBalance.subtract(transaction.getAmount());
+                                System.out.print("4");
+                                System.out.println(totalActiveBalance);
+                            }
+                        }
+                    }
+
+                    // totalActiveBalance = merchant.totalActiveBalance;
 
                     ActiveBalanceResponse activeBalanceResponse = new ActiveBalanceResponse();
-                    activeBalanceResponse.setActiveBalance(activeBalanceStore);
+                    activeBalanceResponse.setActiveBalance(totalActiveBalance);
                     activeBalanceResponse.setTotalActiveBalance(totalActiveBalance);
 
                     trx.commit();
@@ -135,16 +174,23 @@ public class FinanceTransactionController extends BaseController {
                     LOGGER.error("Error pada saat get active balance", e);
                     e.printStackTrace();
                     trx.rollback();
+                    response.setBaseResponse(0, 0, 0, "error pada saat get active balance", null);
+                    return badRequest(Json.toJson(response));
                 } finally {
                     trx.end();
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
                 LOGGER.error("error while get active balance ", ex);
+                response.setBaseResponse(0, 0, 0, "Error pada saat get active balance", null);
+                return badRequest(Json.toJson(response));
             }
+        } else {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
         }
-        response.setBaseResponse(0, 0, 0, unauthorized, null);
-        return unauthorized(Json.toJson(response));
+        // response.setBaseResponse(0, 0, 0, "Error pada saat get active balance", null);
+        // return badRequest(Json.toJson(response));
     }
 
 }

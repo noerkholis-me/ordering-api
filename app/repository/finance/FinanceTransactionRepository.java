@@ -19,9 +19,9 @@ import java.util.List;
 
 public class FinanceTransactionRepository extends BaseModel {
 
-    private final static Logger.ALogger LOGGER = Logger.of(FinanceTransactionRepository.class);
+    public final static Logger.ALogger LOGGER = Logger.of(FinanceTransactionRepository.class);
 
-    private static final Finder<Long, FinanceTransaction> find = new Finder<>(Long.class, FinanceTransaction.class);
+    public static final Finder<Long, FinanceTransaction> find = new Finder<>(Long.class, FinanceTransaction.class);
 
 
     public static Integer getTotalPage(Query<FinanceTransaction> reqQuery) {
