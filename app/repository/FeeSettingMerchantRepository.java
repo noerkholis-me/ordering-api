@@ -3,6 +3,8 @@ package repository;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import models.Merchant;
+import models.Store;
+import models.UserMerchant;
 import models.merchant.FeeSettingMerchant;
 import play.db.ebean.Model;
 
@@ -31,8 +33,22 @@ public class FeeSettingMerchantRepository extends Model {
         );
     }
 
+    public static Optional<FeeSettingMerchant> findByLatestFeeSettingByStore(Long storeId) {
+        return Optional.of(
+                find.where()
+                        .eq("t0.store_id", storeId)
+                        .eq("t0.is_deleted", false)
+                        .orderBy("t0.date desc")
+                        .findList().get(0)
+        );
+    }
+
     public static Query<FeeSettingMerchant> findAllByMerchantQuery(Merchant merchant) {
         return find.where().eq("isDeleted", false).eq("merchant", merchant).orderBy("date desc");
+    }
+
+    public static Query<FeeSettingMerchant> findAllByStoreQuery(Store store) {
+        return find.where().eq("isDeleted", false).eq("store", store).orderBy("date desc");
     }
 
     public static List<FeeSettingMerchant> getTotalPage(Query<FeeSettingMerchant> requestQuery) {

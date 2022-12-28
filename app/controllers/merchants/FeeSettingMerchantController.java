@@ -10,6 +10,8 @@ import controllers.BaseController;
 import dtos.feesetting.FeeSettingRequest;
 import dtos.feesetting.FeeSettingResponse;
 import models.Merchant;
+import models.Store;
+import models.UserMerchant;
 import models.merchant.FeeSettingMerchant;
 import play.Logger;
 import play.libs.Json;
@@ -45,6 +47,18 @@ public class FeeSettingMerchantController extends BaseController {
                     feeSetting.setPaymentFee(feeSettingRequest.getPaymentFee());
                     feeSetting.setUpdatedBy(feeSettingRequest.getUpdatedBy());
                     feeSetting.setMerchant(merchant);
+                    if (feeSettingRequest.getUserType().equals("user_merchant")) {
+                        if (feeSettingRequest.getStoreId() == null) {
+                            response.setBaseResponse(0, 0, 0, "Store ID required", null);
+                            return badRequest(Json.toJson(response));
+                        }
+                        Store store = Store.find.byId(feeSettingRequest.getStoreId());
+                        if (store == null) {
+                            response.setBaseResponse(0, 0, 0, "Store not found", null);
+                            return notFound(Json.toJson(response));
+                        }
+                        feeSetting.setStore(store);
+                    }
                     feeSetting.save();
 
                     trx.commit();
@@ -67,11 +81,25 @@ public class FeeSettingMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result getAllFeeSetting(String filter, String sort, int offset, int limit) {
+    public static Result getAllFeeSetting(Long storeId, String userType, String filter, String sort, int offset, int limit) {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
-                Query<FeeSettingMerchant> feeSettingMerchantQuery = FeeSettingMerchantRepository.findAllByMerchantQuery(merchant);
+                Query<FeeSettingMerchant> feeSettingMerchantQuery;
+                if (userType.equals("user_merchant")) {
+                    if (storeId.equals(0L)) {
+                        response.setBaseResponse(0, 0, 0, "Store ID required", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    Store store = Store.find.byId(storeId);
+                    if (store == null) {
+                        response.setBaseResponse(0, 0, 0, "Store not found", null);
+                        return notFound(Json.toJson(response));
+                    }
+                    feeSettingMerchantQuery = FeeSettingMerchantRepository.findAllByStoreQuery(store);
+                } else {
+                    feeSettingMerchantQuery = FeeSettingMerchantRepository.findAllByMerchantQuery(merchant);
+                }
                 List<FeeSettingMerchant> getTotalPage = FeeSettingMerchantRepository.getTotalPage(feeSettingMerchantQuery);
                 List<FeeSettingMerchant> getFeeSettings = FeeSettingMerchantRepository.findAllWithPaging(feeSettingMerchantQuery, sort, filter, offset, limit);
                 List<FeeSettingResponse> feeSettingResponses = new ArrayList<>();
@@ -97,12 +125,24 @@ public class FeeSettingMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result getFeeSetting(Long merchantId) {
+    public static Result getFeeSetting(Long merchantId, String userType) {
         int authority = checkAccessAuthorization("all");
         if (authority == 200 || authority == 203) {
             try {
 
-                Optional<FeeSettingMerchant> feeSettingMerchant = FeeSettingMerchantRepository.findByLatestFeeSetting(merchantId);
+                Optional<FeeSettingMerchant> feeSettingMerchant;
+                if (userType.equals("user_merchant")) {
+                    Long storeId = merchantId;
+                    Store store = Store.find.byId(storeId);
+                    if (store == null) {
+                        response.setBaseResponse(0, 0, 0, "Store not found", null);
+                        return notFound(Json.toJson(response));
+                    }
+                    feeSettingMerchant = FeeSettingMerchantRepository.findByLatestFeeSettingByStore(storeId);
+                } else {
+                    feeSettingMerchant = FeeSettingMerchantRepository.findByLatestFeeSetting(merchantId);
+                }
+
                 if (!feeSettingMerchant.isPresent()) {
                     response.setBaseResponse(0, 0, 0, notFound, null);
                     return notFound(Json.toJson(response));
