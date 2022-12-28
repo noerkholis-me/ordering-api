@@ -1,9 +1,12 @@
 package models.merchant;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import models.BaseModel;
 import models.Merchant;
+import models.Store;
+import models.UserMerchant;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -41,5 +44,9 @@ public class FeeSettingMerchant extends BaseModel {
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "merchant_id", referencedColumnName = "id")
     private Merchant merchant;
+
+    @ManyToOne(cascade = { CascadeType.ALL })
+    @JsonBackReference
+    private Store store;
 
 }
