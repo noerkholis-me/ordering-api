@@ -452,7 +452,7 @@ DELETE    /merchant/productstore/:id                     controllers.product.Pro
 PUT   /merchant/productstore/:id/status                  controllers.product.ProductStoreController.setStatus(id: Long)
 GET    /merchant/productstore/detail/v2/:id              controllers.product.ProductStoreController.viewProductStoreV2(id: Long, store_code: String ?= "")
 
-GET    /merchant/productstore/pos/v2/list                controllers.product.ProductStoreController.listProductStorePOSV2(store_code:String ?= "", filter:String ?= "", keyword:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/productstore/pos/v2/list                controllers.product.ProductStoreController.listProductStorePOSV2(storeId:Long ?= 0, filter:String ?= "", keyword:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET    /merchant/productstore/kiosk/list                 controllers.product.ProductStoreController.listProductStoreForKiosk(merchant_id:Long ?= 0, store_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 30)
 GET    /merchant/productstore/mobile-qr/list             controllers.product.ProductStoreController.listProductStoreForMobileQR(merchant_id:Long ?= 0, store_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 30)
 GET    /merchant/productstore/kiosk/list-by-category     controllers.product.ProductStoreController.listProductStoreByCategoriesForKIOSK(merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0, sub_category_id:Long ?= 0, subs_category_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
@@ -506,8 +506,8 @@ GET     /merchant/setup/pickuppoint/listdata              controllers.pickuppoin
 
 #FEESETTINGMERCHANT
 POST    /merchant/feesetting                       controllers.merchants.FeeSettingMerchantController.addFeeSetting()
-GET    /merchant/feesetting                         controllers.merchants.FeeSettingMerchantController.getAllFeeSetting(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
-GET     /users/feesetting/:id                           controllers.merchants.FeeSettingMerchantController.getFeeSetting(id: Long)
+GET    /merchant/feesetting                         controllers.merchants.FeeSettingMerchantController.getAllFeeSetting(store_id:Long ?= 0L, user_type:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET     /users/feesetting/:id                           controllers.merchants.FeeSettingMerchantController.getFeeSetting(id: Long, user_type:String ?= "")
 
 #FEESETTINGCONFIG
 GET     /master/feesettingconfig                   controllers.masters.FeeSettingConfigController.getFeeSettingConfig()
