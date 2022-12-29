@@ -65,7 +65,7 @@ public class FinanceTransactionController extends BaseController {
                         financeTransactionResponses.add(trxRes);
                     }
                 }
-                response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", financeTransactionResponses);
+                response.setBaseResponse(financeTransactionResponses.size(), offset, limit, success + " Showing data transaction", financeTransactionResponses);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 LOGGER.error("Error when getting transaction data");
