@@ -48,14 +48,24 @@ public class FinanceTransactionRepository extends BaseModel {
                 .query();
     }
 
-    public static Integer getTotalTransaction(Long merchantId, String startDate, String endDate) throws Exception {
-        Query<FinanceTransaction> finance =
-                Ebean.find(FinanceTransaction.class)
-                        .fetch("store")
-                        .fetch("store.merchant")
-                        .where()
-                        .eq("store.merchant.id", merchantId)
-                        .query();
+    public static Integer getTotalTransaction(Long merchantId, String startDate, String endDate, Long storeId) throws Exception {
+        Query<FinanceTransaction> finance = null;
+        if (storeId != 0L && storeId != null){
+            finance = Ebean.find(FinanceTransaction.class)
+                .fetch("store")
+                .fetch("store.merchant")
+                .where()
+                .eq("store.id", storeId)
+                .eq("store.merchant.id", merchantId)
+                .query();
+        } else {
+            finance = Ebean.find(FinanceTransaction.class)
+                .fetch("store")
+                .fetch("store.merchant")
+                .where()
+                .eq("store.merchant.id", merchantId)
+                .query();
+        }
         ExpressionList<FinanceTransaction> exp = finance.where();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         Date start = simpleDateFormat.parse(startDate.concat(" 00:00:00.0"));
