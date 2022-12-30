@@ -7,6 +7,8 @@ import models.Member;
 import models.Merchant;
 import models.merchant.ProductMerchant;
 import play.db.ebean.Model;
+import models.transaction.Order;
+import java.util.ArrayList;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -38,7 +40,7 @@ public class MemberRepository extends Model {
         return query.findPagingList(0).getPage(0).getList().size();
     }
 
-    public static Integer getTotalMember(Merchant merchant, String startDate, String endDate) throws Exception {
+    public static Integer getTotalMember(Merchant merchant, String startDate, String endDate, Long storeId) throws Exception {
         Query<Member> memberQuery = find.where()
                 .eq("merchant", merchant)
                 .query();
@@ -51,7 +53,29 @@ public class MemberRepository extends Model {
         Timestamp startTimestamp = new Timestamp(start.getTime());
         Timestamp endTimestamp = new Timestamp(end.getTime());
         exp.between("t0.created_at", startTimestamp, endTimestamp);
-        return memberQuery.findList().size();
+        List<Member> members = memberQuery.findList();
+        List<Member> membersArray = new ArrayList<>();
+        Long memberId = null;
+        for (Member membersLoop: members) {
+            Member newMember = new Member();
+            Order orders = new Order();
+            newMember.id = membersLoop.id;
+            if(!newMember.id.equals(memberId)){
+                orders = Ebean.find(Order.class)
+                    .where()
+                    .eq("store.id", storeId)
+                    .eq("user_id", membersLoop.id)
+                    .setMaxRows(1).findUnique();
+                if(orders != null) {
+                    membersArray.add(newMember);
+                }
+            }
+        }
+        if(storeId != null && storeId != 0L) {
+            return membersArray.size();
+        } else {
+            return memberQuery.findList().size();
+        }
     }
 
     public static Query<Member> findAllMemberByMerchantId(Long merchantId) {
