@@ -581,11 +581,11 @@ GET         /re/account-activation                  controllers.users.UpdateProf
 POST         /resend/account-activation                  controllers.users.ResendEmailVerification.resendEmailVerificationUserMerchant(email: String ?= "")
 
 # DASHBOARD
-GET         /merchant/dashboard/chart/total-transaction-customer      controllers.dashboard.DashboardController.getTotalTransactionAndMember(start_date: String?= "", end_date: String?= "")
-GET         /merchant/dashboard/total-customer      controllers.dashboard.DashboardController.getTotalCustomer(start_date: String?= "", end_date: String?= "")
+GET         /merchant/dashboard/chart/total-transaction-customer      controllers.dashboard.DashboardController.getTotalTransactionAndMember(start_date: String?= "", end_date: String?= "", storeId: Long ?= 0)
+GET         /merchant/dashboard/total-customer      controllers.dashboard.DashboardController.getTotalCustomer(start_date: String?= "", end_date: String?= "", storeId: Long ?= 0)
 GET         /merchant/dashboard/total-product      controllers.dashboard.DashboardController.getTotalProduct(start_date: String?= "", end_date: String?= "")
 GET         /merchant/dashboard/total-transaction-amount      controllers.dashboard.DashboardController.getTotalTransactionAmount(start_date: String?= "", end_date: String?= "")
-GET         /merchant/dashboard/total-transaction      controllers.dashboard.DashboardController.getTotalTransaction(start_date: String?= "", end_date: String?= "")
+GET         /merchant/dashboard/total-transaction      controllers.dashboard.DashboardController.getTotalTransaction(start_date: String?= "", end_date: String?= "", storeId: Long ?= 0)
 GET         /merchant/dashboard/total-withdraw      controllers.dashboard.DashboardController.getTotalWithdraw(start_date: String?= "", end_date: String?= "")
 
 GET         /merchant/order/print-invoice/:orderNumber      controllers.order.OrderMerchantController.printInvoice(orderNumber: String)
