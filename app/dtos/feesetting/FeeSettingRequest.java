@@ -26,5 +26,9 @@ public class FeeSettingRequest {
     private BigDecimal paymentFee;
     @JsonProperty("updated_by")
     private String updatedBy;
+    @JsonProperty("user_type")
+    private String userType;
+    @JsonProperty("store_id")
+    private Long storeId;
 
 }
