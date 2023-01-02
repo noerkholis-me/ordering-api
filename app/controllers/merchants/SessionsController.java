@@ -836,17 +836,19 @@ public class SessionsController extends BaseController {
                     String redirect = "";
 
                     // is cashier
+                    System.out.println("is cashier true");
+                    String forgotPasswordCodePos = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
                     if(isCashier == Boolean.TRUE) {
-                        System.out.println("is cashier true");
-                        String forgotPasswordCodePos = Encryption.EncryptAESCBCPCKS5Padding(merchantEmail + "-" + String.valueOf(now));
                         redirect = Constant.getInstance().getPosUrl() + "/password-recovery" + "/" + forgotPasswordCodePos;
-                        try {
-                            userMerchant.setResetToken(forgotPasswordCodePos);
-                            userMerchant.setResetTime(now);
-                            userMerchant.update();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                    } else {
+                        redirect = Constant.getInstance().getMerchantUrl() + "/password-recovery" + "/" + forgotPasswordCodePos;
+                    }
+                    try {
+                        userMerchant.setResetToken(forgotPasswordCodePos);
+                        userMerchant.setResetTime(now);
+                        userMerchant.update();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
 
                     String finalRedirect = redirect;
