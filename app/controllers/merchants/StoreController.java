@@ -47,7 +47,7 @@ public class StoreController extends BaseController {
     private static BaseResponse response = new BaseResponse();
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    @ApiOperation(value = "Creat store.", notes = "Save store.\n" + swaggerInfo
+    @ApiOperation(value = "Create store.", notes = "Save store.\n" + swaggerInfo
             + "", responseContainer = "Add", httpMethod = "POST")
     public static Result createStore () {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
@@ -68,7 +68,7 @@ public class StoreController extends BaseController {
                         store.save();
                         trx.commit();
 
-                        response.setBaseResponse(1, 0, 1, success + " Store created successfully", null);
+                        response.setBaseResponse(1, 0, 1, success + " Store created successfully", toResponse(store));
                         return ok(Json.toJson(response));
                     } catch (Exception e) {
                         logger.error("Error while creating store", e);
