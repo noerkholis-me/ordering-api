@@ -446,7 +446,7 @@ GET     /banners/:merchantId                        controllers.banners.BannersM
 POST    /merchant/productstore                           controllers.product.ProductStoreController.createProductStore()
 PUT    /merchant/productstore/:id                        controllers.product.ProductStoreController.editProductStore(id: Long)
 GET    /merchant/productstore/list                       controllers.product.ProductStoreController.listProductStore(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
-GET    /merchant/productstore/v2/list                    controllers.product.ProductStoreController.listProductStoreV2(store_code:String ?= "", keyword:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/productstore/v2/list                    controllers.product.ProductStoreController.listProductStoreV2(storeId:Long ?= 0, keyword:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET    /merchant/productstore/:id                        controllers.product.ProductStoreController.viewProductStore(id: Long)
 DELETE    /merchant/productstore/:id                     controllers.product.ProductStoreController.deleteProductStore(id: Long)
 PUT   /merchant/productstore/:id/status                  controllers.product.ProductStoreController.setStatus(id: Long)
