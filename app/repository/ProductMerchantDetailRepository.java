@@ -14,6 +14,10 @@ public class ProductMerchantDetailRepository extends Model {
     public static ProductMerchantDetail findByProduct(ProductMerchant productMerchant) {
         return find.where().eq("productMerchant", productMerchant).findUnique();
     }
+    
+    public static ProductMerchantDetail findMainProduct(ProductMerchant productMerchant) {
+        return find.where().eq("t0.is_deleted", false).eq("t0.product_merchant_id", productMerchant.id).eq("t0.product_type", "MAIN").findUnique();
+    }
 
     public static ProductMerchantDetail findDetailProduct(Long productId, Long merchantId) {
         String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.id = "+productId+" and pm.merchant_id = "+merchantId+" and pm.is_active = "+true+" and pm.is_deleted = "+false+")";
