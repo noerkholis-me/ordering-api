@@ -62,7 +62,10 @@ public class OrderMerchantController extends BaseController {
                 if(statusOrder.equalsIgnoreCase("CANCELED")){
                     query = OrderRepository.find.where().eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                 } else if (statusOrder.equalsIgnoreCase("PENDING")) {
-                    query = OrderRepository.find.where().or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null)).or(Expr.ne("t0.status", "CANCELLED"), Expr.ne("t0.status", "CANCELED")).eq("orderPayment.status", statusOrder).eq("store.merchant", merchant).order("t0.id desc");
+                    query = OrderRepository.find.where()
+                    		.or(Expr.ne("t0.device_type", "MINIPOS"), Expr.isNull("t0.user_merchant_id"))
+                    		.ne("t0.status", "CANCELLED").ne("t0.status", "CANCELED")
+                    		.eq("orderPayment.status", statusOrder).eq("store.merchant", merchant).order("t0.id desc");
                 } else {
                     query = OrderRepository.find.where().eq("orderPayment.status", "PAID").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                 }
@@ -214,8 +217,8 @@ public class OrderMerchantController extends BaseController {
                 		.order("t0.id desc");
             } else if (statusOrder.equalsIgnoreCase("PENDING")) {
                 query = OrderRepository.find.where()
-                		.or(Expr.ne("t0.device_type", "MINIPOS"), Expr.eq("t0.user_merchant_id", null))
-                		.or(Expr.ne("t0.status", "CANCELLED"), Expr.ne("t0.status", "CANCELED"))
+                		.or(Expr.ne("t0.device_type", "MINIPOS"), Expr.isNull("t0.user_merchant_id"))
+                		.ne("t0.status", "CANCELLED").ne("t0.status", "CANCELED")
                 		.eq("orderPayment.status", statusOrder)
                 		.eq("store", store)
                 		.order("t0.id desc");
