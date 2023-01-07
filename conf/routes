@@ -446,13 +446,13 @@ GET     /banners/:merchantId                        controllers.banners.BannersM
 POST    /merchant/productstore                           controllers.product.ProductStoreController.createProductStore()
 PUT    /merchant/productstore/:id                        controllers.product.ProductStoreController.editProductStore(id: Long)
 GET    /merchant/productstore/list                       controllers.product.ProductStoreController.listProductStore(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
-GET    /merchant/productstore/v2/list                    controllers.product.ProductStoreController.listProductStoreV2(store_code:String ?= "", keyword:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/productstore/v2/list                    controllers.product.ProductStoreController.listProductStoreV2(storeId:Long ?= 0, keyword:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET    /merchant/productstore/:id                        controllers.product.ProductStoreController.viewProductStore(id: Long)
 DELETE    /merchant/productstore/:id                     controllers.product.ProductStoreController.deleteProductStore(id: Long)
 PUT   /merchant/productstore/:id/status                  controllers.product.ProductStoreController.setStatus(id: Long)
 GET    /merchant/productstore/detail/v2/:id              controllers.product.ProductStoreController.viewProductStoreV2(id: Long, store_code: String ?= "")
 
-GET    /merchant/productstore/pos/v2/list                controllers.product.ProductStoreController.listProductStorePOSV2(store_code:String ?= "", filter:String ?= "", keyword:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/productstore/pos/v2/list                controllers.product.ProductStoreController.listProductStorePOSV2(storeId:Long ?= 0, filter:String ?= "", keyword:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET    /merchant/productstore/kiosk/list                 controllers.product.ProductStoreController.listProductStoreForKiosk(merchant_id:Long ?= 0, store_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 30)
 GET    /merchant/productstore/mobile-qr/list             controllers.product.ProductStoreController.listProductStoreForMobileQR(merchant_id:Long ?= 0, store_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 30)
 GET    /merchant/productstore/kiosk/list-by-category     controllers.product.ProductStoreController.listProductStoreByCategoriesForKIOSK(merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0, sub_category_id:Long ?= 0, subs_category_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
@@ -581,11 +581,11 @@ GET         /re/account-activation                  controllers.users.UpdateProf
 POST         /resend/account-activation                  controllers.users.ResendEmailVerification.resendEmailVerificationUserMerchant(email: String ?= "")
 
 # DASHBOARD
-GET         /merchant/dashboard/chart/total-transaction-customer      controllers.dashboard.DashboardController.getTotalTransactionAndMember(start_date: String?= "", end_date: String?= "")
-GET         /merchant/dashboard/total-customer      controllers.dashboard.DashboardController.getTotalCustomer(start_date: String?= "", end_date: String?= "")
+GET         /merchant/dashboard/chart/total-transaction-customer      controllers.dashboard.DashboardController.getTotalTransactionAndMember(start_date: String?= "", end_date: String?= "", storeId: Long ?= 0)
+GET         /merchant/dashboard/total-customer      controllers.dashboard.DashboardController.getTotalCustomer(start_date: String?= "", end_date: String?= "", storeId: Long ?= 0)
 GET         /merchant/dashboard/total-product      controllers.dashboard.DashboardController.getTotalProduct(start_date: String?= "", end_date: String?= "")
 GET         /merchant/dashboard/total-transaction-amount      controllers.dashboard.DashboardController.getTotalTransactionAmount(start_date: String?= "", end_date: String?= "")
-GET         /merchant/dashboard/total-transaction      controllers.dashboard.DashboardController.getTotalTransaction(start_date: String?= "", end_date: String?= "")
+GET         /merchant/dashboard/total-transaction      controllers.dashboard.DashboardController.getTotalTransaction(start_date: String?= "", end_date: String?= "", storeId: Long ?= 0)
 GET         /merchant/dashboard/total-withdraw      controllers.dashboard.DashboardController.getTotalWithdraw(start_date: String?= "", end_date: String?= "")
 
 GET         /merchant/order/print-invoice/:orderNumber      controllers.order.OrderMerchantController.printInvoice(orderNumber: String)

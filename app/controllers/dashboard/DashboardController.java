@@ -32,7 +32,7 @@ public class DashboardController extends BaseController {
 
     private static BaseResponse response = new BaseResponse();
 
-    public static Result getTotalTransactionAndMember(String startDate, String endDate) {
+    public static Result getTotalTransactionAndMember(String startDate, String endDate, Long storeId) {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
@@ -47,8 +47,8 @@ public class DashboardController extends BaseController {
                 for (LocalDate date = startLocalDate; !date.isAfter(endLocalDate); date = date.plusMonths(1)) {
                     ChartCustomerTransactionResponse chartCustomerTransactionResponse = new ChartCustomerTransactionResponse();
 
-                    Integer totalTransaction = FinanceTransactionRepository.getTotalTransaction(merchant.id, date.with(firstDayOfMonth()).toString(), date.with(lastDayOfMonth()).toString());
-                    Integer totalMember = MemberRepository.getTotalMember(merchant, date.with(firstDayOfMonth()).toString(), date.with(lastDayOfMonth()).toString());
+                    Integer totalTransaction = FinanceTransactionRepository.getTotalTransaction(merchant.id, date.with(firstDayOfMonth()).toString(), date.with(lastDayOfMonth()).toString(), storeId);
+                    Integer totalMember = MemberRepository.getTotalMember(merchant, date.with(firstDayOfMonth()).toString(), date.with(lastDayOfMonth()).toString(), storeId);
 
                     chartCustomerTransactionResponse.setTotalTransaction(totalTransaction);
                     chartCustomerTransactionResponse.setTotalMember(totalMember);
@@ -70,14 +70,14 @@ public class DashboardController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result getTotalCustomer(String startDate, String endDate) {
+    public static Result getTotalCustomer(String startDate, String endDate, Long storeId) {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
-                Integer totalCustomer = MemberRepository.getTotalMember(merchant, startDate, endDate);
+                Integer totalCustomer = MemberRepository.getTotalMember(merchant, startDate, endDate, storeId);
                 Map<String, Integer> data = new HashMap<>();
                 data.put("total_customer", totalCustomer);
-                response.setBaseResponse(1, offset, limit, success + " Showing total member ", data);
+                response.setBaseResponse(totalCustomer, offset, limit, success + " Showing total member ", data);
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -132,11 +132,11 @@ public class DashboardController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result getTotalTransaction(String startDate, String endDate) {
+    public static Result getTotalTransaction(String startDate, String endDate, Long storeId) {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
-                Integer totalTransaction = FinanceTransactionRepository.getTotalTransaction(merchant.id, startDate, endDate);
+                Integer totalTransaction = FinanceTransactionRepository.getTotalTransaction(merchant.id, startDate, endDate, storeId);
                 Map<String, Integer> data = new HashMap<>();
                 data.put("total_transaction", totalTransaction);
                 response.setBaseResponse(1, offset, limit, success + " Showing total transaction", data);
