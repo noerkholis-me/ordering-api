@@ -78,5 +78,10 @@ public class PaymentInformationResponse {
 
     @JsonProperty("customer_name")
     private String customerName;
+    
+    @JsonProperty("store_address")
+    private String storeAddress;
+    @JsonProperty("store_phone")
+    private String storePhone;
 
 }
