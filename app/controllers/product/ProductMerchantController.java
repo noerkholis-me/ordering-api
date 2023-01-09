@@ -1,6 +1,7 @@
 package controllers.product;
 
 import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Expr;
 import com.avaje.ebean.Query;
 import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -231,7 +232,14 @@ public class ProductMerchantController extends BaseController {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
             try {
-                Query<ProductMerchant> query = ProductMerchantRepository.findProductIsActiveAndMerchant(ownMerchant, isActive);
+                // Query<ProductMerchant> query = ProductMerchantRepository.findProductIsActiveAndMerchant(ownMerchant, isActive);
+                Query<ProductMerchant> query = ProductMerchantRepository.find.where()
+                                                .eq("isDeleted", false)
+                                                .eq("isActive", isActive)
+                                                .eq("merchant", ownMerchant)
+                                                .or(
+                                                Expr.ilike("t0.product_name", "%" + filter + "%"),
+                                                Expr.ilike("t0.no_sku", "%" + filter + "%")).order("id");
                 List<ProductMerchant> totalData = ProductMerchantRepository.getTotalDataPage(query);
                 List<ProductMerchant> productMerchants = ProductMerchantRepository.findProductWithPaging(query, sort, filter, offset, limit);
                 List<ProductResponse> productMerchantResponse = toResponses(productMerchants);
