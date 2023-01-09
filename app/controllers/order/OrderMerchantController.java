@@ -8,6 +8,7 @@ import com.hokeba.util.Constant;
 import controllers.BaseController;
 import dtos.order.*;
 import repository.BrandMerchantRepository;
+import models.Address;
 import models.BrandMerchant;
 import models.Member;
 import models.Merchant;
@@ -759,10 +760,20 @@ public class OrderMerchantController extends BaseController {
                 invoicePrintResponse.setOrderQueue(getOrder.getOrderQueue());
                 invoicePrintResponse.setPaymentStatus(orderPayment.getStatus());
                 invoicePrintResponse.setReferenceNumber("-");
-                if (getOrder.getMember() != null) {
-                    invoicePrintResponse.setCustomerName(getOrder.getMember().fullName != null ? getOrder.getMember().fullName : getOrder.getMember().firstName + " " + getOrder.getMember().lastName);
+                
+                Member memberTarget = getOrder.getMember();
+                if (memberTarget != null) {
+                    invoicePrintResponse.setCustomerName(memberTarget.fullName != null ? memberTarget.fullName : memberTarget.firstName + " " + memberTarget.lastName);
+                    Address shipping = Address.getPrimaryAddress(memberTarget.id, Address.SHIPPING_ADDRESS);
+                    invoicePrintResponse.setCustomerShippingAddress(shipping != null ? shipping.address : "-");
+                    Address billing = Address.getPrimaryAddress(memberTarget.id, Address.BILLING_ADDRESS);
+                    invoicePrintResponse.setCustomerBillingAddress(billing != null ? billing.address : "-");
+                    invoicePrintResponse.setCustomerPhone(getOrder.getPhoneNumber());
                 } else {
-                    invoicePrintResponse.setCustomerName("GENERAL CUSTOMER " + getOrder.getStore().storeName);
+                	invoicePrintResponse.setCustomerName("GENERAL CUSTOMER " + getOrder.getStore().storeName);
+                	invoicePrintResponse.setCustomerShippingAddress("-");
+                	invoicePrintResponse.setCustomerBillingAddress("-");
+                	invoicePrintResponse.setCustomerPhone(getOrder.getPhoneNumber());
                 }
 
                 if (getOrder.getUserMerchant() != null) {
