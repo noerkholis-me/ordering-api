@@ -919,10 +919,12 @@ public class OrderMerchantController extends BaseController {
                 }
                 Order getOrder = order.get();
 
-                Store store = getOrder.getStore();
-
                 PaymentInformationResponse paymentInformation = new PaymentInformationResponse();
 
+                Store store = getOrder.getStore();
+                paymentInformation.setStoreAddress(store == null ? "-" : store.storeAddress);
+                paymentInformation.setStorePhone(store == null ? "-" : store.storePhone);
+                
                 OrderPayment orderPayment = getOrder.getOrderPayment();
                 paymentInformation.setInvoiceNumber(orderPayment.getInvoiceNo());
                 paymentInformation.setOrderNumber(getOrder.getOrderNumber());
