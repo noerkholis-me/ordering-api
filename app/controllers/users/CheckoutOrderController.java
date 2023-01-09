@@ -226,7 +226,7 @@ public class CheckoutOrderController extends BaseController {
                 }
 
                 // pickup point and table
-                if (orderRequest.getOrderType().equalsIgnoreCase("TAKEAWAY") && orderRequest.getDeviceType().equalsIgnoreCase("KIOSK")) {
+                if (orderRequest.getOrderType().equalsIgnoreCase("TAKE AWAY") && orderRequest.getDeviceType().equalsIgnoreCase("KIOSK")) {
                     // check pickup point
                     PickUpPointMerchant pickUpPointMerchant = null;
                     if(orderRequest.getPickupPointId() != null && orderRequest.getPickupPointId() != 0){
@@ -240,7 +240,7 @@ public class CheckoutOrderController extends BaseController {
                     order.setPickupPointName(pickUpPointMerchant != null ? pickUpPointMerchant.getPupointName() : null);
                     order.setTableMerchant(null);
                     order.setTableName(null);
-                } else if (orderRequest.getOrderType().equalsIgnoreCase("DINEIN")) {
+                } else if (orderRequest.getOrderType().equalsIgnoreCase("DINE IN")) {
                     Optional<TableMerchant> tableMerchant = null;
                     if(orderRequest.getTableId() != null && orderRequest.getTableId() != 0){
                         tableMerchant = TableMerchantRepository.findByIdAndAvailable(orderRequest.getTableId());

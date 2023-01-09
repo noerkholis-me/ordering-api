@@ -68,12 +68,12 @@ public class ProductMerchantRepository extends Model {
         }
 
         ExpressionList<ProductMerchant> exp = query.where();
-        exp = exp.disjunction();
-        exp = exp.ilike("t0.product_name", "%" + filter + "%");
-        exp = exp.ilike("t0.no_sku", "%" + filter + "%");
         query = exp.query();
         if (limit != 0) {
             query = query.setMaxRows(limit);
+        }
+        if (filter != "" && filter != null) {
+            offset = 0;
         }
         return query.findPagingList(limit).getPage(offset).getList();
     }
