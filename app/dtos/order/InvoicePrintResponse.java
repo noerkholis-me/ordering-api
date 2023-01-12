@@ -87,6 +87,9 @@ public class InvoicePrintResponse {
     @JsonProperty("customer_phone")
     private String customerPhone;
 
+    @JsonProperty("destination_address")
+    private String destinationAddress;
+
     @JsonProperty("cashier_name")
     private String cashierName;
 

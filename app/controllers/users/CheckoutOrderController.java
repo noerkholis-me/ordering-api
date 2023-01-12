@@ -216,6 +216,7 @@ public class CheckoutOrderController extends BaseController {
                 order.setStatus(OrderStatus.NEW_ORDER.getStatus());
                 order.setStore(store);
                 order.setDeviceType(orderRequest.getDeviceType());
+                order.setDestinationAddress(orderRequest.getDestinationAddress());
                 if (orderRequest.getDeviceType().equalsIgnoreCase("MINIPOS")) {
                     System.out.println("Out");
                     UserMerchant userMerchant = checkUserMerchantAccessAuthorization();

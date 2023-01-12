@@ -708,6 +708,8 @@ public class OrderMerchantController extends BaseController {
                 invoicePrintResponse.setStoreAddress(store.storeAddress);
                 invoicePrintResponse.setStorePhoneNumber(store.storePhone);
 
+                invoicePrintResponse.setDestinationAddress(getOrder.getDestinationAddress() == null ? "-" : getOrder.getDestinationAddress());
+                
                 OrderPayment orderPayment = getOrder.getOrderPayment();
                 invoicePrintResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
                 invoicePrintResponse.setOrderNumber(getOrder.getOrderNumber());
