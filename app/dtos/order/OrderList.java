@@ -24,6 +24,8 @@ public class OrderList {
 
     @JsonProperty("customer_name")
     private String customerName;
+    @JsonProperty("customer_phone")
+    private String customerPhone;
 
     @JsonProperty("merchant_name")
     private String merchantName;
@@ -51,6 +53,8 @@ public class OrderList {
         private Long productId;
         @JsonProperty("product_name")
         private String productName;
+        @JsonProperty("product_image")
+        private String productImage;
         @JsonProperty("product_price")
         @JsonSerialize(using = BigDecimalSerialize.class)
         private BigDecimal productPrice;

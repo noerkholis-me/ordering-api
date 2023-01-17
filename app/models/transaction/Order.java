@@ -55,6 +55,9 @@ public class Order extends BaseModel {
     @Column(name = "member_name")
     private String memberName;
 
+    @Column(name = "destination_address", columnDefinition = "TEXT")
+    private String destinationAddress;
+
     private String status;
 
     @Column(name = "approved_by")

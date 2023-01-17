@@ -31,6 +31,8 @@ public class OrderTransaction {
     private String customerName;
     @JsonProperty("customer_phone_number")
     private String customerPhoneNumber;
+    @JsonProperty("destination_address")
+    private String destinationAddress;
     @JsonProperty("sub_total")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal subTotal;
