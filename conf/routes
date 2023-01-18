@@ -410,6 +410,8 @@ DELETE    /merchant/store/:id                       controllers.merchants.StoreC
 GET    /merchant/store/:storeCode/detail            controllers.merchants.StoreController.getStoreByStoreCode(storeCode: String)
 GET    /merchant/allstore                           controllers.merchants.StoreController.getAllStoreMerchant()
 
+GET    /merchant/detail/:merchantCode				controllers.merchants.MerchantController.getMerchantDetail(merchantCode: String)
+
 #CONFIG SETTING
 GET    /master/config-setting/:key                  controllers.masters.ConfigSettingController.getConfigSettingByKey(key: String)
 
