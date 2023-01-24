@@ -509,27 +509,31 @@ public class BrandMerchantController extends BaseController {
                     //FOREACH PRODUCT INSIDE
 //                    Query<ProductMerchant> queryProduct = ProductMerchantRepository.find.where().eq("t0.subs_category_merchant_id", subsCategory.id).eq("t0.brand_merchant_id", id).eq("t0.is_deleted", false).eq("t0.is_active", true).eq("merchant", ownMerchant).order("t0.id");
 //                    List<ProductMerchant> dataProduct = ProductMerchantRepository.getDataProductStore(queryProduct);
-
+//                  List<ProductMerchantDetail> totalDataProductDetail = ProductMerchantDetailRepository.getTotalDataPage(query);
+                    
                     String queryProductDetail = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.subs_category_merchant_id = "+subsCategory.id+" and pm.brand_merchant_id = "+id+" and pm.is_active = "+true+" and pm.is_deleted = false)";
                     Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(queryProductDetail).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("random()");
-                    List<ProductMerchantDetail> totalDataProductDetail = ProductMerchantDetailRepository.getTotalDataPage(query);
                     List<ProductMerchantDetail> productMerchantDetails = ProductMerchantDetailRepository.forProductRecommendation(query);
                     List<BrandDetailResponse.SubsCategoryMerchant.ProductMerchant> productListResponses = new ArrayList<>();
                     for(ProductMerchantDetail productMerchantDetail : productMerchantDetails){
                         BrandDetailResponse.SubsCategoryMerchant.ProductMerchant productResponses = new BrandDetailResponse.SubsCategoryMerchant.ProductMerchant();
                         ProductMerchant productMerchant = ProductMerchantRepository.findByIdProductRecommend(productMerchantDetail.getProductMerchant().id, merchantId);
                         ProductStore productStore = ProductStoreRepository.findForCust(productMerchant.id, storeId, ownMerchant);
+                        List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchantDetail.getProductMerchant().id).orderBy().desc("t0.id").findList();
+                        
                         productResponses.setProductId(productMerchant.id);
                         productResponses.setProductName(productMerchant.getProductName());
                         productResponses.setProductType(productMerchantDetail.getProductType());
                         productResponses.setIsCustomizable(productMerchantDetail.getIsCustomizable());
                         
                         if(productStore != null) {
+                            productListResponses.add(productResponses);
                             productResponses.setProductPrice(productStore.getStorePrice());
                             productResponses.setDiscountType(productStore.getDiscountType());
                             productResponses.setDiscount(productStore.getDiscount());
                             productResponses.setProductPriceAfterDiscount(productStore.getFinalPrice());
-                        } else {
+                        } else if (!listProductStore.isEmpty()){
+                            productListResponses.add(productResponses);
                             productResponses.setProductPrice(productMerchantDetail.getProductPrice());
                             productResponses.setDiscountType(productMerchantDetail.getDiscountType());
                             productResponses.setDiscount(productMerchantDetail.getDiscount());
@@ -545,9 +549,8 @@ public class BrandMerchantController extends BaseController {
                         }
 
                         productResponses.setProductImageMain(productMerchantDetail.getProductImageMain());
-                        productListResponses.add(productResponses);
-                        categoryResponse.setProduct(productResponses != null ? productListResponses : null);
                     }
+                    categoryResponse.setProduct(productListResponses);
                 }
 
                 response.setBaseResponse(1,offset, 1, success + " menampilkan detail brand", brandDetailResponse);
