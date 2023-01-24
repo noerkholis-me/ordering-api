@@ -423,6 +423,8 @@ GET    /merchant/product/:id                        controllers.product.ProductM
 DELETE    /merchant/product/:id                     controllers.product.ProductMerchantController.deleteProduct(id: Long)
 PUT   /merchant/product/:id/status                  controllers.product.ProductMerchantController.updateStatusProduct(id: Long)
 GET     /merchant/product/list/additional           controllers.product.ProductMerchantController.listAdditionalProductMerchant()
+GET		/merchant/product/import/template			controllers.product.ProductMerchantController.getImportTemplate()
+POST	/merchant/product/import/save				controllers.product.ProductMerchantController.importProduct()
 
 GET     /product/detail                             controllers.product.ProductMerchantController.productDetail(product_id: Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0)
 GET     /product/additional                         controllers.product.ProductMerchantController.productAdditional(product_id: Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0)
