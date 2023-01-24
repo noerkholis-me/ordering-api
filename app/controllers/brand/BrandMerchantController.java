@@ -527,12 +527,14 @@ public class BrandMerchantController extends BaseController {
                         productResponses.setIsCustomizable(productMerchantDetail.getIsCustomizable());
                         
                         if(productStore != null) {
+                        	//if product with store target exist
                             productListResponses.add(productResponses);
                             productResponses.setProductPrice(productStore.getStorePrice());
                             productResponses.setDiscountType(productStore.getDiscountType());
                             productResponses.setDiscount(productStore.getDiscount());
                             productResponses.setProductPriceAfterDiscount(productStore.getFinalPrice());
-                        } else if (!listProductStore.isEmpty()){
+                        } else if (listProductStore.isEmpty()){
+                        	//if product doesn't assigned to any store (global product)
                             productListResponses.add(productResponses);
                             productResponses.setProductPrice(productMerchantDetail.getProductPrice());
                             productResponses.setDiscountType(productMerchantDetail.getDiscountType());
