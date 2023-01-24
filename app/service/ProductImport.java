@@ -294,6 +294,202 @@ public class ProductImport {
 		}
     }
 	
+	public static File getImportTemplateStore () {
+		String[] COLUMN = {"Product Id", "Store Id", "Store Price", "Disconut type", "Discount", "Final Price",
+				"Is Active", "Is Deleted", "Merchant Id"
+				}; 
+		String FILE_NAME = "ImportProductTemplate";
+    	String FILE_TYPE = ".xlsx";
+    	
+    	File file = null;
+    	try {
+			file = file.createTempFile(FILE_NAME, FILE_TYPE);
+			file.deleteOnExit();
+			FileOutputStream fileOut = new FileOutputStream(file);
+			Workbook workbook = new XSSFWorkbook();
+			CreationHelper createHelper = workbook.getCreationHelper();
+			Sheet sheetProduct = workbook.createSheet("Product-Import-Template");
+			
+			Font headerFont = workbook.createFont();
+			headerFont.setBold(true);
+            headerFont.setFontHeightInPoints((short) 12);
+            headerFont.setColor(IndexedColors.BLACK.getIndex());
+			
+			CellStyle titleCellStyle = workbook.createCellStyle();
+			titleCellStyle.setFont(headerFont);
+
+			CellStyle headerCellStyle = workbook.createCellStyle();
+			headerCellStyle.setFont(headerFont);
+			headerCellStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
+			headerCellStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
+			headerCellStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
+			headerCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
+			
+			CellStyle contentCellStyle = workbook.createCellStyle();
+			/* XLSX File borders now */
+			contentCellStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
+			contentCellStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
+			contentCellStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
+			contentCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
+			
+			Row headerRow = sheetProduct.createRow(0);
+			for (int i = 0; i < COLUMN.length; i++) {
+				Cell cell = headerRow.createCell(i);
+				cell.setCellValue(COLUMN[i]);
+				cell.setCellStyle(headerCellStyle);
+			}
+			for (int i = 0; i < COLUMN.length; i++) {
+				sheetProduct.autoSizeColumn(i);
+			}
+			workbook.write(fileOut);
+			fileOut.close();
+			// Closing the workbook
+			workbook.close();
+			return file;
+		} catch (Exception e) {
+			Logger.error("Download template error ", e);
+			return null;
+		}
+	}
+
+	public boolean importProductStore( FilePart file, Merchant merchant, BaseResponse<String> response) {
+		System.out.println("In Import Product");
+		String error = "";
+		Transaction txn = Ebean.beginTransaction();
+		int line = 0;
+		int cell = 0;
+		int countData = 0;
+		try {
+		String currentCellValue = "";
+		FileInputStream excelFile = new FileInputStream(file.getFile());
+		XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
+		XSSFSheet datatypeSheet = workbook.getSheetAt(0);
+		boolean isFirstLine = true;
+		try {
+			for (Row row : datatypeSheet) {
+				Iterator<Cell> cellIterator = row.cellIterator();
+				if (isFirstLine) {
+					isFirstLine = false;
+				} else {
+					line++;
+					System.out.println("line " + line);
+					
+					String product_id = "";
+					String store_id = "";
+					String store_price = "";
+					String discount_type = "";
+					String discount = "";
+					String final_price = "";
+					String is_active = "";
+					String is_deleted = "";
+					String merchant_id = "";
+					
+					cell = 0;
+					while(cellIterator.hasNext()) {
+						Cell currentCell = cellIterator.next();
+						if (currentCell.getCellType() == Cell.CELL_TYPE_NUMERIC)
+							currentCellValue = String.valueOf((int) currentCell.getNumericCellValue());
+						else if (currentCell.getCellType() == Cell.CELL_TYPE_BOOLEAN)
+							currentCellValue = String.valueOf(currentCell.getBooleanCellValue());
+						else
+							currentCellValue = currentCell.getStringCellValue();
+						
+						switch(cell) {
+						case 0:
+							System.out.println(currentCellValue);
+							product_id = currentCellValue;
+							break;
+						case 1:
+							store_id = currentCellValue;
+							break;
+						case 2:
+							store_price = currentCellValue;
+							break;
+						case 3:
+							discount_type = currentCellValue;
+							break;
+						case 4:
+							discount = currentCellValue;
+							break;
+						case 5:
+							final_price = currentCellValue;
+							break;
+						case 6:
+							is_active = currentCellValue;
+							break;
+						case 7:
+							is_deleted = currentCellValue;
+							break;
+						case 8:
+							merchant_id = currentCellValue;
+							break;
+						}
+						cell++;
+					}
+					if(product_id.trim().equals("")||store_id.trim().equals("")||store_price.trim().equals("")
+							||discount_type.trim().equals("")||discount.trim().equals("")||final_price.trim().equals("")
+							||is_active.trim().equals("")||is_deleted.trim().equals("")||merchant_id.trim().equals("")) {
+						error += ", Blank Cell In Line "+line;
+					}
+					ProductMerchant productMerchant = ProductMerchantRepository.findById(Long.valueOf(product_id),
+	                        merchant);
+	                if (productMerchant == null) {
+	                	error += ", Invalid Product Id in Line "+line;
+	                }
+	                Store store = Store.findById(Long.valueOf(store_id));
+	                if (store == null) {
+	                	error += ", Invalid Store Id in Line "+line;
+	                }
+	                ProductStore psQuery = ProductStoreRepository.find.where().eq("productMerchant", productMerchant)
+	                        .eq("store", store).eq("t0.is_deleted", false).findUnique();
+	                if (psQuery != null) {
+	                	error +=  ", Tidak dapat menambahkan " + productMerchant.getProductName() + " ke toko yang sama.";
+	                }
+	                if(error == "") {
+	                	ProductStore productStore = new ProductStore();
+	                	productStore.setStore(store);
+	                	productStore.setProductMerchant(productMerchant);
+	                	productStore.setMerchant(merchant);
+	                	if(is_active.equalsIgnoreCase("true"))
+	                		productStore.setActive(Boolean.TRUE);
+	                	else
+	                		productStore.setActive(Boolean.FALSE);
+	                	productStore.setStorePrice(new BigDecimal(store_price));
+	                	productStore.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode+"/"+store.id+"/"+merchant.id+"/product/"+productMerchant.id+"/detail"));
+                        if (discount_type != null) {
+                        	productStore.setDiscountType(discount_type);
+                        }
+                        if (discount != null) {
+                        	productStore.setDiscount(Double.valueOf((discount)));
+                        }
+                        if (final_price != null) {
+                        	productStore.setFinalPrice(new BigDecimal(final_price));
+                        }
+                        productStore.save();
+                        countData += 1;
+	                }
+				} 
+			}
+		}	catch (Exception e) {
+			workbook.close();
+			e.printStackTrace();
+				}
+		workbook.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			// TODO: handle exception
+		}
+		if (error == "") {
+			txn.commit();
+			txn.end();
+			response.setBaseResponse(0, 0, 0, "Success Importing Data", "Imported "+countData+"Product");
+			return true;
+		}
+		response.setBaseResponse(0, 0, 0, "Import Failed" +error, null);
+		txn.rollback();
+		txn.end();
+		return false;
+	}
 	
 	private static void constructProductEntityRequest(ProductMerchant newProductMerchant, Merchant merchant,
             String noSKU, String productName, CategoryMerchant categoryMerchant,
