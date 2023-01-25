@@ -227,7 +227,7 @@ public class ProductImportService {
 		if (error.isEmpty()) {
 			txn.commit();
 			txn.end();
-			response.setBaseResponse(0, 0, 0, "Success Importing Data", "Imported " + countData + " Product");
+			response.setBaseResponse(countData, 0, countData, "Success Importing Data", "Imported " + countData + " Product");
 			return true;
 		}
 		response.setBaseResponse(0, 0, 0, "Import Failed" + error, null);
@@ -482,7 +482,7 @@ public class ProductImportService {
 		if (error.isEmpty()) {
 			txn.commit();
 			txn.end();
-			response.setBaseResponse(0, 0, 0, "Success Importing Data", "Imported " + countData + " Product");
+			response.setBaseResponse(countData, 0, countData, "Success Importing Data", "Imported " + countData + " Product");
 			return true;
 		}
 		response.setBaseResponse(0, 0, 0, "Import Failed" + error, null);
