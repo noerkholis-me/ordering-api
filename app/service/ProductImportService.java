@@ -66,8 +66,8 @@ public class ProductImportService {
 			XSSFSheet datatypeSheet = workbook.getSheetAt(0);
 			boolean isFirstLine = true;
 			CategoryMerchant category = null;
-			SubCategoryMerchant sub_category_merchant = null;
-			SubsCategoryMerchant subs_category_merchant = null;
+			SubCategoryMerchant subCategoryMerchant = null;
+			SubsCategoryMerchant subsCategoryMerchant = null;
 			BrandMerchant brand = null;
 			try {
 				for (Row row : datatypeSheet) {
@@ -104,7 +104,6 @@ public class ProductImportService {
 							} else if (currentCell.getCellTypeEnum() == CellType.BOOLEAN) {
 								currentCellValue = String.valueOf(currentCell.getBooleanCellValue());
 							} else if (currentCell.getCellType() == Cell.CELL_TYPE_BLANK) {
-								System.out.println("null");
 								currentCellValue = "";
 							} else {
 								currentCellValue = currentCell.getStringCellValue();
@@ -180,25 +179,25 @@ public class ProductImportService {
 						if (category == null) {
 							error += ", invalid category id in line " + line;
 						}
-						sub_category_merchant = SubCategoryMerchantRepository
+						subCategoryMerchant = SubCategoryMerchantRepository
 								.findByIdAndMerchantId(Long.parseLong(subCategoryId), merchant);
-						if (sub_category_merchant == null) {
+						if (subCategoryMerchant == null) {
 							error += ", invalid sub category id in line " + line;
 						}
-						subs_category_merchant = SubsCategoryMerchantRepository
+						subsCategoryMerchant = SubsCategoryMerchantRepository
 								.findByIdAndMerchantId(Long.parseLong(subsCategoryId), merchant);
-						if (subs_category_merchant == null) {
+						if (subsCategoryMerchant == null) {
 							error += ", invalid Subs Category Id In Line " + line;
 						}
 						brand = BrandMerchantRepository.findByIdAndMerchantId(Long.parseLong(brandId), merchant);
 						if (brand == null) {
 							error += ", invalid Brand Id In Line " + line;
 						}
-						if (error.equals("")) {
+						if (error.isEmpty()) {
 							ProductDetailResponse productDetail = new ProductDetailResponse();
 							ProductMerchant newProductMerchant = new ProductMerchant();
 							constructProductEntityRequest(newProductMerchant, merchant, noSku, productName, category,
-									sub_category_merchant, subs_category_merchant, brand);
+									subCategoryMerchant, subsCategoryMerchant, brand);
 							newProductMerchant.save();
 
 							// do save to detail
@@ -225,7 +224,7 @@ public class ProductImportService {
 		} catch (IOException e) {
 			// TODO: handle exception
 		}
-		if (error == "") {
+		if (error.isEmpty()) {
 			txn.commit();
 			txn.end();
 			response.setBaseResponse(0, 0, 0, "Success Importing Data", "Imported " + countData + " Product");
@@ -448,15 +447,12 @@ public class ProductImportService {
 							error += ", tidak dapat menambahkan " + productMerchant.getProductName()
 									+ " ke toko yang sama.";
 						}
-						if (error == "") {
+						if (error.isEmpty()) {
 							ProductStore productStore = new ProductStore();
 							productStore.setStore(store);
 							productStore.setProductMerchant(productMerchant);
 							productStore.setMerchant(merchant);
-							if (isActive.equalsIgnoreCase("true"))
-								productStore.setActive(Boolean.TRUE);
-							else
-								productStore.setActive(Boolean.FALSE);
+							productStore.setActive(Boolean.parseBoolean(isActive));
 							productStore.setStorePrice(new BigDecimal(storePrice));
 							productStore.setProductStoreQrCode(
 									Constant.getInstance().getFrontEndUrl().concat(store.storeCode + "/" + store.id
@@ -482,7 +478,7 @@ public class ProductImportService {
 			e.printStackTrace();
 			// TODO: handle exception
 		}
-		if (error == "") {
+		if (error.isEmpty()) {
 			txn.commit();
 			txn.end();
 			response.setBaseResponse(0, 0, 0, "Success Importing Data", "Imported " + countData + " Product");
