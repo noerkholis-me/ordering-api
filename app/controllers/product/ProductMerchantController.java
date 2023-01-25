@@ -357,7 +357,6 @@ public class ProductMerchantController extends BaseController {
 			if(!productImport.importProductMerchant(file, merchant, response)) {
 				return badRequest(Json.toJson(response));
 			}
-			response.setBaseResponse(0, 0, 0, "Success Importing Data", null);
 			return ok(Json.toJson(response));
     	}
     	response.setBaseResponse(0, 0, 0, unauthorized, null);

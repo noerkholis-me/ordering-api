@@ -58,6 +58,7 @@ public class ProductImportService {
 		Transaction txn = Ebean.beginTransaction();
 		int line = 0;
 		int cell = 0;
+		int countData = 0;
 		try {
 		String currentCellValue = "";
 		FileInputStream excelFile = new FileInputStream(file.getFile());
@@ -166,12 +167,12 @@ public class ProductImportService {
 							}
 							cell++;
 						}
-						if (noSku.trim().isEmpty() || productName.isEmpty()||categoryId.isEmpty()||subCategoryId.isEmpty()
+						if (noSku.isEmpty() || productName.isEmpty()||categoryId.isEmpty()||subCategoryId.isEmpty()
 								||subsCategoryId.isEmpty()||brandId.isEmpty()||productType.isEmpty()||isCustomizeable.isEmpty()
 								||productPrize.isEmpty()||discountType.isEmpty()||discount.isEmpty()||priceAfterDiscount.isEmpty()
 								||image1.isEmpty()||image2.isEmpty()||image3.isEmpty()||image4.isEmpty()||shortDesc.isEmpty()
 								||longDesc.isEmpty()) {
-							error += ", blank data in line "+line;
+							error += ", Blank Cell in Line "+line;
 									
 						}
 						category = CategoryMerchantRepository.findByIdAndMerchantId(
@@ -212,6 +213,7 @@ public class ProductImportService {
 		                    newProductMerchantDescription.setLongDescription(longDesc);
 		                    newProductMerchantDescription.setProductMerchantDetail(newProductMerchantDetail);
 		                    newProductMerchantDescription.save();
+		                    countData += 1;
 						}
 					}
 				}
@@ -226,6 +228,7 @@ public class ProductImportService {
 		if (error == "") {
 			txn.commit();
 			txn.end();
+			response.setBaseResponse(0, 0, 0, "Success Importing Data", "Imported "+countData+" Product");
 			return true;
 		}
 		response.setBaseResponse(0, 0, 0, "Import Failed" +error, null);
@@ -374,15 +377,15 @@ public class ProductImportService {
 					line++;
 					System.out.println("line " + line);
 					
-					String product_id = "";
-					String store_id = "";
-					String store_price = "";
-					String discount_type = "";
+					String productId = "";
+					String storeId = "";
+					String storePrice = "";
+					String discountType = "";
 					String discount = "";
-					String final_price = "";
-					String is_active = "";
-					String is_deleted = "";
-					String merchant_id = "";
+					String finalPrice = "";
+					String isActive = "";
+					String isDeleted = "";
+					String merchantId = "";
 					
 					cell = 0;
 					while(cellIterator.hasNext()) {
@@ -397,73 +400,73 @@ public class ProductImportService {
 						switch(cell) {
 						case 0:
 							System.out.println(currentCellValue);
-							product_id = currentCellValue;
+							productId = currentCellValue;
 							break;
 						case 1:
-							store_id = currentCellValue;
+							storeId = currentCellValue;
 							break;
 						case 2:
-							store_price = currentCellValue;
+							storeId = currentCellValue;
 							break;
 						case 3:
-							discount_type = currentCellValue;
+							discountType = currentCellValue;
 							break;
 						case 4:
 							discount = currentCellValue;
 							break;
 						case 5:
-							final_price = currentCellValue;
+							finalPrice = currentCellValue;
 							break;
 						case 6:
-							is_active = currentCellValue;
+							isActive = currentCellValue;
 							break;
 						case 7:
-							is_deleted = currentCellValue;
+							isDeleted = currentCellValue;
 							break;
 						case 8:
-							merchant_id = currentCellValue;
+							merchantId = currentCellValue;
 							break;
 						}
 						cell++;
 					}
-					if(product_id.trim().equals("")||store_id.trim().equals("")||store_price.trim().equals("")
-							||discount_type.trim().equals("")||discount.trim().equals("")||final_price.trim().equals("")
-							||is_active.trim().equals("")||is_deleted.trim().equals("")||merchant_id.trim().equals("")) {
-						error += ", Blank Cell In Line "+line;
+					if(productId.isEmpty()||storeId.isEmpty()||storePrice.isEmpty()||discountType.isEmpty()||discount.isEmpty()
+							||finalPrice.isEmpty()||isActive.isEmpty()||isDeleted.isEmpty()
+							||merchantId.isEmpty()) {
+						error += ", Blank Cell in Line "+line;
 					}
-					ProductMerchant productMerchant = ProductMerchantRepository.findById(Long.valueOf(product_id),
+					ProductMerchant productMerchant = ProductMerchantRepository.findById(Long.valueOf(productId),
 	                        merchant);
 	                if (productMerchant == null) {
-	                	error += ", Invalid Product Id in Line "+line;
+	                	error += ", invalid Product Id in Line "+line;
 	                }
-	                Store store = Store.findById(Long.valueOf(store_id));
+	                Store store = Store.findById(Long.valueOf(storeId));
 	                if (store == null) {
-	                	error += ", Invalid Store Id in Line "+line;
+	                	error += ", invalid Store Id in Line "+line;
 	                }
 	                ProductStore psQuery = ProductStoreRepository.find.where().eq("productMerchant", productMerchant)
 	                        .eq("store", store).eq("t0.is_deleted", false).findUnique();
 	                if (psQuery != null) {
-	                	error +=  ", Tidak dapat menambahkan " + productMerchant.getProductName() + " ke toko yang sama.";
+	                	error +=  ", tidak dapat menambahkan " + productMerchant.getProductName() + " ke toko yang sama.";
 	                }
 	                if(error == "") {
 	                	ProductStore productStore = new ProductStore();
 	                	productStore.setStore(store);
 	                	productStore.setProductMerchant(productMerchant);
 	                	productStore.setMerchant(merchant);
-	                	if(is_active.equalsIgnoreCase("true"))
+	                	if(isActive.equalsIgnoreCase("true"))
 	                		productStore.setActive(Boolean.TRUE);
 	                	else
 	                		productStore.setActive(Boolean.FALSE);
-	                	productStore.setStorePrice(new BigDecimal(store_price));
+	                	productStore.setStorePrice(new BigDecimal(storePrice));
 	                	productStore.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl()
 	                			.concat(store.storeCode+"/"+store.id+"/"+merchant.id+"/product/"+productMerchant.id+"/detail"));
 	                	
-                        if (discount_type != null) 
-                        	productStore.setDiscountType(discount_type);
+                        if (discountType != null)
+                        	productStore.setDiscountType(discountType);
                         if (discount != null) 
                         	productStore.setDiscount(Double.valueOf((discount)));
-                        if (final_price != null) 
-                        	productStore.setFinalPrice(new BigDecimal(final_price));
+                        if (discountType != null) 
+                        	productStore.setFinalPrice(new BigDecimal(discountType));
                         productStore.save();
                         countData += 1;
 	                }
@@ -472,7 +475,7 @@ public class ProductImportService {
 		} catch (Exception e) {
 			workbook.close();
 			e.printStackTrace();
-				}
+		}
 		workbook.close();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -481,7 +484,7 @@ public class ProductImportService {
 		if (error == "") {
 			txn.commit();
 			txn.end();
-			response.setBaseResponse(0, 0, 0, "Success Importing Data", "Imported "+countData+"Product");
+			response.setBaseResponse(0, 0, 0, "Success Importing Data", "Imported "+countData+" Product");
 			return true;
 		}
 		response.setBaseResponse(0, 0, 0, "Import Failed" +error, null);
