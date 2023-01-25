@@ -403,7 +403,7 @@ public class ProductImportService {
 								storeId = currentCellValue;
 								break;
 							case 2:
-								storeId = currentCellValue;
+								storePrice = currentCellValue;
 								break;
 							case 3:
 								discountType = currentCellValue;
@@ -436,6 +436,7 @@ public class ProductImportService {
 						if (productMerchant == null) {
 							error += ", invalid Product Id in Line " + line;
 						}
+						System.out.println(storeId);
 						Store store = Store.findById(Long.valueOf(storeId));
 						if (store == null) {
 							error += ", invalid Store Id in Line " + line;
@@ -462,8 +463,8 @@ public class ProductImportService {
 								productStore.setDiscountType(discountType);
 							if (discount != null)
 								productStore.setDiscount(Double.valueOf((discount)));
-							if (discountType != null)
-								productStore.setFinalPrice(new BigDecimal(discountType));
+							if (finalPrice != null)
+								productStore.setFinalPrice(new BigDecimal(finalPrice));
 							productStore.save();
 							countData += 1;
 						}
