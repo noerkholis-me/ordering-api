@@ -20,7 +20,7 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import repository.*;
-import service.ProductImport;
+import service.ProductImportService;
 import service.DownloadOrderReport;
 import validator.ProductValidator;
 
@@ -353,7 +353,7 @@ public class ProductMerchantController extends BaseController {
 				return badRequest(Json.toJson(response));
 			}
 			System.out.println("file - "+file.getFilename());
-			ProductImport productImport = new ProductImport();
+			ProductImportService productImport = new ProductImportService();
 			if(!productImport.importProductMerchant(file, merchant, response)) {
 				return badRequest(Json.toJson(response));
 			}
@@ -367,8 +367,8 @@ public class ProductMerchantController extends BaseController {
     public static Result getImportTemplate() {
     	Merchant merchant = checkMerchantAccessAuthorization();
     	if(merchant != null) {
-    		File file = ProductImport.getImportTemplateMerchant();
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddhhmmss");
+    		File file = ProductImportService.getImportTemplateMerchant();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
             String filename = "ImportProductMerchantTemplate-"+simpleDateFormat.format(new Date()).toString() + ".xlsx";
     		response().setContentType("application/vnd.ms-excel");
 			response().setHeader("Content-disposition", "attachment; filename=" + filename);

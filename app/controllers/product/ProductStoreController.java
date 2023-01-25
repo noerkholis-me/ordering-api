@@ -33,7 +33,7 @@ import com.avaje.ebean.Query;
 import repository.ProductMerchantDetailRepository;
 import repository.ProductMerchantRepository;
 import repository.ProductStoreRepository;
-import service.ProductImport;
+import service.ProductImportService;
 
 import java.io.File;
 import java.io.IOException;
@@ -1733,12 +1733,10 @@ public class ProductStoreController extends BaseController {
 				response.setBaseResponse(0, 0, 0, "File Is Null", null);
 				return badRequest(Json.toJson(response));
 			}
-			System.out.println("file - "+file.getFilename());
-			ProductImport productImport = new ProductImport();
+			ProductImportService productImport = new ProductImportService();
 			if(!productImport.importProductStore(file, merchant, response)) {
 				return badRequest(Json.toJson(response));
 			}
-			response.setBaseResponse(0, 0, 0, "Success Importing Data", null);
 			return ok(Json.toJson(response));
     	}
     	response.setBaseResponse(0, 0, 0, unauthorized, null);
@@ -1748,7 +1746,7 @@ public class ProductStoreController extends BaseController {
     public static Result getImportTemplateStore() {
     	Merchant merchant = checkMerchantAccessAuthorization();
     	if(merchant != null) {
-    		File file = ProductImport.getImportTemplateStore();
+    		File file = ProductImportService.getImportTemplateStore();
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddhhmmss");
             String filename = "ImportProductStoreTemplate-"+simpleDateFormat.format(new Date()).toString() + ".xlsx";
     		response().setContentType("application/vnd.ms-excel");
