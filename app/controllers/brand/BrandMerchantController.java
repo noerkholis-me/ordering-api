@@ -504,7 +504,6 @@ public class BrandMerchantController extends BaseController {
                     categoryResponse.setImageMobile(subsCategory.getImageMobile());
                     categoryResponse.setIsDeleted(subsCategory.isDeleted());
                     categoryResponse.setIsActive(subsCategory.isActive());
-                    categoryListResponses.add(categoryResponse);
                 	
                     //FOREACH PRODUCT INSIDE
 //                    Query<ProductMerchant> queryProduct = ProductMerchantRepository.find.where().eq("t0.subs_category_merchant_id", subsCategory.id).eq("t0.brand_merchant_id", id).eq("t0.is_deleted", false).eq("t0.is_active", true).eq("merchant", ownMerchant).order("t0.id");
@@ -552,7 +551,10 @@ public class BrandMerchantController extends BaseController {
 
                         productResponses.setProductImageMain(productMerchantDetail.getProductImageMain());
                     }
-                    categoryResponse.setProduct(productListResponses);
+                    if (!productListResponses.isEmpty()) {
+	                    categoryResponse.setProduct(productListResponses);
+	                    categoryListResponses.add(categoryResponse);
+                    }
                 }
 
                 response.setBaseResponse(1,offset, 1, success + " menampilkan detail brand", brandDetailResponse);
