@@ -1747,7 +1747,7 @@ public class ProductStoreController extends BaseController {
     	Merchant merchant = checkMerchantAccessAuthorization();
     	if(merchant != null) {
     		File file = ProductImportService.getImportTemplateStore();
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddhhmmss");
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
             String filename = "ImportProductStoreTemplate-"+simpleDateFormat.format(new Date()).toString() + ".xlsx";
     		response().setContentType("application/vnd.ms-excel");
 			response().setHeader("Content-disposition", "attachment; filename=" + filename);
