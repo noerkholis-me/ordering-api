@@ -423,6 +423,8 @@ GET    /merchant/product/:id                        controllers.product.ProductM
 DELETE    /merchant/product/:id                     controllers.product.ProductMerchantController.deleteProduct(id: Long)
 PUT   /merchant/product/:id/status                  controllers.product.ProductMerchantController.updateStatusProduct(id: Long)
 GET     /merchant/product/list/additional           controllers.product.ProductMerchantController.listAdditionalProductMerchant()
+GET		/merchant/product/import/template			controllers.product.ProductMerchantController.getImportTemplate()
+POST	/merchant/product/import/save				controllers.product.ProductMerchantController.importProduct()
 
 GET     /product/detail                             controllers.product.ProductMerchantController.productDetail(product_id: Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0)
 GET     /product/additional                         controllers.product.ProductMerchantController.productAdditional(product_id: Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0)
@@ -453,6 +455,8 @@ GET    /merchant/productstore/:id                        controllers.product.Pro
 DELETE    /merchant/productstore/:id                     controllers.product.ProductStoreController.deleteProductStore(id: Long)
 PUT   /merchant/productstore/:id/status                  controllers.product.ProductStoreController.setStatus(id: Long)
 GET    /merchant/productstore/detail/v2/:id              controllers.product.ProductStoreController.viewProductStoreV2(id: Long, store_code: String ?= "")
+GET		/merchant/productstore/import/template			 controllers.product.ProductStoreController.getImportTemplateStore()
+POST	/merchant/productsotre/import/save				 controllers.product.ProductStoreController.importProductStore()
 
 GET    /merchant/productstore/pos/v2/list                controllers.product.ProductStoreController.listProductStorePOSV2(storeId:Long ?= 0, filter:String ?= "", keyword:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET    /merchant/productstore/kiosk/list                 controllers.product.ProductStoreController.listProductStoreForKiosk(merchant_id:Long ?= 0, store_id:Long ?= 0, keyword:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 30)
