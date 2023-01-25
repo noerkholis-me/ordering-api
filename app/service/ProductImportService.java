@@ -3,7 +3,6 @@ package service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOError;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Iterator;
@@ -26,13 +25,8 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.util.Constant;
-import com.sun.javafx.iio.ImageMetadata;
-
 import dtos.product.ProductDetailResponse;
-import dtos.product.ProductRequest;
-import models.Brand;
 import models.BrandMerchant;
-import models.Category;
 import models.CategoryMerchant;
 import models.Merchant;
 import models.ProductStore;
@@ -43,7 +37,6 @@ import models.merchant.ProductMerchant;
 import models.merchant.ProductMerchantDescription;
 import models.merchant.ProductMerchantDetail;
 import play.Logger;
-import play.libs.Json;
 import play.mvc.Http.MultipartFormData.FilePart;
 import repository.BrandMerchantRepository;
 import repository.CategoryMerchantRepository;
@@ -205,7 +198,7 @@ public class ProductImportService {
 							error += ", Is Customizable is Blank in Line " + line;
 						
 						if(productPrize.isEmpty())
-							error += ", Product Price Blank in Line " + line;
+							error += ", Product Price is Blank in Line " + line;
 						
 						if(discountType.isEmpty())
 							error += ", Discount Type is Blank in Line " + line;
@@ -213,12 +206,9 @@ public class ProductImportService {
 						if((!discount.isEmpty()) && Double.valueOf(discount).compareTo(0D) < 0 )
 							error += ", Discount Must Not Be Less Than 0 " + line;
 						
-						if (priceAfterDiscount.isEmpty()) {
-							error += ", Price After Discount is Blank in Line " + line;
-						} else {
-							if(new BigDecimal(priceAfterDiscount).compareTo(BigDecimal.ZERO) < 0)
+						if(!priceAfterDiscount.isEmpty() && new BigDecimal(priceAfterDiscount).compareTo(BigDecimal.ZERO) < 0)
 								error += ", Price After Discount Must Not Be Less Than 0 " + line;
-						}
+						
 						if(imageMain.isEmpty())
 							error += ", Image Main is Blank in Line " + line;
 						
@@ -230,12 +220,12 @@ public class ProductImportService {
 						
 						category = CategoryMerchantRepository.findByIdAndMerchantId(Long.valueOf(categoryId), merchant);
 						if (category == null) 
-							error += ", invalid category id in line " + line;
+							error += ", invalid Category Id in line " + line;
 						
 						subCategoryMerchant = SubCategoryMerchantRepository
 								.findByIdAndMerchantId(Long.parseLong(subCategoryId), merchant);
 						if (subCategoryMerchant == null) 
-							error += ", invalid sub category id in line " + line;
+							error += ", invalid Sub Category Id in line " + line;
 						
 						subsCategoryMerchant = SubsCategoryMerchantRepository
 								.findByIdAndMerchantId(Long.parseLong(subsCategoryId), merchant);
@@ -247,7 +237,6 @@ public class ProductImportService {
 							error += ", invalid Brand Id In Line " + line;
 						
 						if (error.isEmpty()) {
-							ProductDetailResponse productDetail = new ProductDetailResponse();
 							ProductMerchant newProductMerchant = new ProductMerchant();
 							constructProductEntityRequest(newProductMerchant, merchant, noSku, productName, category,
 									subCategoryMerchant, subsCategoryMerchant, brand);
@@ -301,7 +290,6 @@ public class ProductImportService {
 			file.deleteOnExit();
 			FileOutputStream fileOut = new FileOutputStream(file);
 			Workbook workbook = new XSSFWorkbook();
-			CreationHelper createHelper = workbook.getCreationHelper();
 			Sheet sheetProduct = workbook.createSheet("Product-Import-Template");
 
 			Font headerFont = workbook.createFont();
@@ -356,7 +344,6 @@ public class ProductImportService {
 			file.deleteOnExit();
 			FileOutputStream fileOut = new FileOutputStream(file);
 			Workbook workbook = new XSSFWorkbook();
-			CreationHelper createHelper = workbook.getCreationHelper();
 			Sheet sheetProduct = workbook.createSheet("Product-Import-Template");
 
 			Font headerFont = workbook.createFont();
@@ -416,7 +403,6 @@ public class ProductImportService {
 			boolean isFirstLine = true;
 			try {
 				for (Row row : datatypeSheet) {
-					Iterator<Cell> cellIterator = row.cellIterator();
 					if (isFirstLine) {
 						isFirstLine = false;
 					} else {
@@ -487,17 +473,14 @@ public class ProductImportService {
 							error += ", Store Price is Blank Cell in Line " + line;
 						
 						if (discountType.isEmpty())
-							error += ", Discount type is Blank Cell in Line " + line;
+							error += ", Discount Type is Blank Cell in Line " + line;
 						
 						if((!discount.isEmpty()) && Double.valueOf(discount).compareTo(0D) < 0 )
 							error += ", Discount Must Not Be Less Than 0 " + line;
 						
-						if (finalPrice.isEmpty()) {
-							error += ", Final Price is Blank in Line " + line;
-						} else {
-							if(new BigDecimal(finalPrice).compareTo(BigDecimal.ZERO) < 0)
+						if(!finalPrice.isEmpty() && new BigDecimal(finalPrice).compareTo(BigDecimal.ZERO) < 0)
 								error += ", Final Price Must Not Be Less Than 0 " + line;
-						}
+						
 						if (isActive.isEmpty())
 							error += ", Store Id is Blank Cell in Line " + line;
 						
@@ -535,7 +518,7 @@ public class ProductImportService {
 											+ "/" + merchant.id + "/product/" + productMerchant.id + "/detail"));
 							productStore.setDiscountType(discountType);
 							productStore.setDiscount(!discount.isEmpty() ? Double.valueOf(discount) : 0D);
-							productStore.setFinalPrice(new BigDecimal(finalPrice));
+							productStore.setFinalPrice(!finalPrice.isEmpty() ? new BigDecimal(finalPrice) : new BigDecimal(storePrice));
 							productStore.save();
 							countData += 1;
 						}
@@ -586,7 +569,7 @@ public class ProductImportService {
 		newProductMerchantDetail.setDiscountType(discountType);
 		newProductMerchantDetail.setDiscount(!discount.isEmpty() ? Double.valueOf(discount) : 0D);
 		newProductMerchantDetail.setProductPriceAfterDiscount(
-				priceAfterDisc != null ? new BigDecimal(priceAfterDisc) : new BigDecimal(productPrice));
+				!priceAfterDisc.isEmpty() ? new BigDecimal(priceAfterDisc) : new BigDecimal(productPrice));
 		newProductMerchantDetail.setProductImageMain(image1);
 		newProductMerchantDetail.setProductImage1(image1);
 		newProductMerchantDetail.setProductImage2(image2);
