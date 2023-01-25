@@ -17,6 +17,7 @@ import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -25,6 +26,7 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.util.Constant;
+import com.sun.javafx.iio.ImageMetadata;
 
 import dtos.product.ProductDetailResponse;
 import dtos.product.ProductRequest;
@@ -51,6 +53,13 @@ import repository.SubCategoryMerchantRepository;
 import repository.SubsCategoryMerchantRepository;
 
 public class ProductImportService {
+	
+	public static final String[] columnMerchant = { "no_Sku", "Product Name", "Category Id", "Sub Category Id", "Subs Category Id", "Brand Id",
+			"Porduct Type", "Cuztomizealbe", "Product Prize", "Discount Type", "Discount", "Price After Discount",
+			"Image Main", "Image 1", "Image 2", "Image 3", "Image 4", "Short Desc", "Long Desc" };
+	
+	public static final String[] columnStore = { "Product Id", "Store Id", "Store Price", "Disconut type", "Discount", "Final Price",
+			"Is Active", "Is Deleted", "Merchant Id" };
 
 	public boolean importProductMerchant(FilePart file, Merchant merchant, BaseResponse<String> response) {
 		String error = "";
@@ -62,6 +71,7 @@ public class ProductImportService {
 			String currentCellValue = "";
 			FileInputStream excelFile = new FileInputStream(file.getFile());
 			XSSFWorkbook workbook = new XSSFWorkbook(excelFile);
+			workbook.setMissingCellPolicy(Row.RETURN_NULL_AND_BLANK);
 			XSSFSheet datatypeSheet = workbook.getSheetAt(0);
 			boolean isFirstLine = true;
 			CategoryMerchant category = null;
@@ -70,7 +80,6 @@ public class ProductImportService {
 			BrandMerchant brand = null;
 			try {
 				for (Row row : datatypeSheet) {
-					Iterator<Cell> cellIterator = row.cellIterator();
 					if (isFirstLine) {
 						isFirstLine = false;
 					} else {
@@ -89,6 +98,7 @@ public class ProductImportService {
 						String discountType = "";
 						String discount = "";
 						String priceAfterDiscount = "";
+						String imageMain = "";
 						String image1 = "";
 						String image2 = "";
 						String image3 = "";
@@ -96,17 +106,19 @@ public class ProductImportService {
 						String shortDesc = "";
 						String longDesc = "";
 						cell = 0;
-						while (cellIterator.hasNext()) {
-							Cell currentCell = cellIterator.next();
-							if (currentCell.getCellTypeEnum() == CellType.NUMERIC) {
+						System.out.println(cell);
+						while (cell <= columnMerchant.length) {
+							Cell currentCell = row.getCell(cell, MissingCellPolicy.RETURN_BLANK_AS_NULL);
+							if (currentCell == null) {
+								currentCellValue = "";
+							} else if (currentCell.getCellTypeEnum() == CellType.NUMERIC) {
 								currentCellValue = String.valueOf((int) currentCell.getNumericCellValue());
 							} else if (currentCell.getCellTypeEnum() == CellType.BOOLEAN) {
 								currentCellValue = String.valueOf(currentCell.getBooleanCellValue());
-							} else if (currentCell.getCellType() == Cell.CELL_TYPE_BLANK) {
-								currentCellValue = "";
 							} else {
 								currentCellValue = currentCell.getStringCellValue();
 							}
+							System.out.println(currentCellValue);
 							switch (cell) {
 							case 0:
 								noSku = currentCellValue;
@@ -145,53 +157,95 @@ public class ProductImportService {
 								priceAfterDiscount = currentCellValue;
 								break;
 							case 12:
-								image1 = currentCellValue;
+								imageMain = currentCellValue;
 								break;
 							case 13:
-								image2 = currentCellValue;
+								image1 = currentCellValue;
 								break;
 							case 14:
-								image3 = currentCellValue;
+								image2 = currentCellValue;
 								break;
 							case 15:
-								image4 = currentCellValue;
+								image3 = currentCellValue;
 								break;
 							case 16:
-								shortDesc = currentCellValue;
+								image4 = currentCellValue;
 								break;
 							case 17:
+								shortDesc = currentCellValue;
+								break;
+							case 18:
 								longDesc = currentCellValue;
 								break;
 							}
 							cell++;
 						}
-						if (noSku.isEmpty() || productName.isEmpty() || categoryId.isEmpty() || subCategoryId.isEmpty()
-								|| subsCategoryId.isEmpty() || brandId.isEmpty() || productType.isEmpty()
-								|| isCustomizeable.isEmpty() || productPrize.isEmpty() || discountType.isEmpty()
-								|| discount.isEmpty() || priceAfterDiscount.isEmpty() || image1.isEmpty()
-								|| image2.isEmpty() || image3.isEmpty() || image4.isEmpty() || shortDesc.isEmpty()
-								|| longDesc.isEmpty()) {
-							error += ", Blank Cell in Line " + line;
-
+						if (noSku.isEmpty()) 
+							error += ", Sku Number is Blank in Line " + line;
+						
+						if(productName.isEmpty())
+							error += ", Product Name is Blank in Line " + line;
+						
+						if(categoryId.isEmpty())
+							error += ", Category Id is Blank in Line " + line;
+						
+						if(subCategoryId.isEmpty())
+							error += ", Sub Category is Blank in Line " + line;
+						
+						if(subsCategoryId.isEmpty())
+							error += ", Subs Category is Blank in Line " + line;
+						
+						if(brandId.isEmpty())
+							error += ", Brand Id is Blank in Line " + line;
+						
+						if(productType.isEmpty())
+							error += ", Product Type is Blank in Line " + line;
+						
+						if(isCustomizeable.isEmpty())
+							error += ", Is Customizable is Blank in Line " + line;
+						
+						if(productPrize.isEmpty())
+							error += ", Product Price Blank in Line " + line;
+						
+						if(discountType.isEmpty())
+							error += ", Discount Type is Blank in Line " + line;
+						
+						if((!discount.isEmpty()) && Double.valueOf(discount).compareTo(0D) < 0 )
+							error += ", Discount Must Not Be Less Than 0 " + line;
+						
+						if (priceAfterDiscount.isEmpty()) {
+							error += ", Price After Discount is Blank in Line " + line;
+						} else {
+							if(new BigDecimal(priceAfterDiscount).compareTo(BigDecimal.ZERO) < 0)
+								error += ", Price After Discount Must Not Be Less Than 0 " + line;
 						}
+						if(imageMain.isEmpty())
+							error += ", Image Main is Blank in Line " + line;
+						
+						if(shortDesc.isEmpty())
+							error += ", Short Desc is Blank in Line " + line;
+						
+						if(longDesc.isEmpty())
+							error += ", Long Desc is Blank in Line " + line;
+						
 						category = CategoryMerchantRepository.findByIdAndMerchantId(Long.valueOf(categoryId), merchant);
-						if (category == null) {
+						if (category == null) 
 							error += ", invalid category id in line " + line;
-						}
+						
 						subCategoryMerchant = SubCategoryMerchantRepository
 								.findByIdAndMerchantId(Long.parseLong(subCategoryId), merchant);
-						if (subCategoryMerchant == null) {
+						if (subCategoryMerchant == null) 
 							error += ", invalid sub category id in line " + line;
-						}
+						
 						subsCategoryMerchant = SubsCategoryMerchantRepository
 								.findByIdAndMerchantId(Long.parseLong(subsCategoryId), merchant);
-						if (subsCategoryMerchant == null) {
+						if (subsCategoryMerchant == null) 
 							error += ", invalid Subs Category Id In Line " + line;
-						}
+						
 						brand = BrandMerchantRepository.findByIdAndMerchantId(Long.parseLong(brandId), merchant);
-						if (brand == null) {
+						if (brand == null)
 							error += ", invalid Brand Id In Line " + line;
-						}
+						
 						if (error.isEmpty()) {
 							ProductDetailResponse productDetail = new ProductDetailResponse();
 							ProductMerchant newProductMerchant = new ProductMerchant();
@@ -203,7 +257,7 @@ public class ProductImportService {
 							ProductMerchantDetail newProductMerchantDetail = new ProductMerchantDetail();
 							constructProductDetailEntityRequest(newProductMerchantDetail, newProductMerchant,
 									productType, isCustomizeable, productPrize, discountType, discount,
-									priceAfterDiscount, image1, image2, image3, image4);
+									priceAfterDiscount,imageMain, image1, image2, image3, image4);
 							newProductMerchantDetail.save();
 
 							ProductMerchantDescription newProductMerchantDescription = new ProductMerchantDescription();
@@ -237,9 +291,7 @@ public class ProductImportService {
 	}
 
 	public static File getImportTemplateMerchant() {
-		String[] column = { "no_Sku", "Product Name", "Category Id", "Sub Category Id", "Subs Category Id", "Brand Id",
-				"Porduct Type", "Cuztomizealbe", "Product Prize", "Discount Type", "Discount", "Price After Discount",
-				"Image Main", "Image 1", "Image 2", "Image 3", "Image 4", "Short Desc", "Long Desc" };
+		
 		String FILE_NAME = "ImportProductTemplate";
 		String FILE_TYPE = ".xlsx";
 
@@ -275,12 +327,12 @@ public class ProductImportService {
 			contentCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
 
 			Row headerRow = sheetProduct.createRow(0);
-			for (int i = 0; i < column.length; i++) {
+			for (int i = 0; i < columnMerchant.length; i++) {
 				Cell cell = headerRow.createCell(i);
-				cell.setCellValue(column[i]);
+				cell.setCellValue(columnMerchant[i]);
 				cell.setCellStyle(headerCellStyle);
 			}
-			for (int i = 0; i < column.length; i++) {
+			for (int i = 0; i < columnMerchant.length; i++) {
 				sheetProduct.autoSizeColumn(i);
 			}
 			workbook.write(fileOut);
@@ -295,8 +347,6 @@ public class ProductImportService {
 	}
 
 	public static File getImportTemplateStore() {
-		String[] column = { "Product Id", "Store Id", "Store Price", "Disconut type", "Discount", "Final Price",
-				"Is Active", "Is Deleted", "Merchant Id" };
 		String FILE_NAME = "ImportProductTemplate";
 		String FILE_TYPE = ".xlsx";
 
@@ -332,12 +382,12 @@ public class ProductImportService {
 			contentCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
 
 			Row headerRow = sheetProduct.createRow(0);
-			for (int i = 0; i < column.length; i++) {
+			for (int i = 0; i < columnStore.length; i++) {
 				Cell cell = headerRow.createCell(i);
-				cell.setCellValue(column[i]);
+				cell.setCellValue(columnStore[i]);
 				cell.setCellStyle(headerCellStyle);
 			}
-			for (int i = 0; i < column.length; i++) {
+			for (int i = 0; i < columnStore.length; i++) {
 				sheetProduct.autoSizeColumn(i);
 			}
 			workbook.write(fileOut);
@@ -384,9 +434,11 @@ public class ProductImportService {
 						String merchantId = "";
 
 						cell = 0;
-						while (cellIterator.hasNext()) {
-							Cell currentCell = cellIterator.next();
-							if (currentCell.getCellType() == Cell.CELL_TYPE_NUMERIC)
+						while (cell <= columnStore.length) {
+							Cell currentCell = row.getCell(cell, MissingCellPolicy.RETURN_BLANK_AS_NULL);
+							if (currentCell == null)
+								currentCellValue = "";
+							else if (currentCell.getCellType() == Cell.CELL_TYPE_NUMERIC)
 								currentCellValue = String.valueOf((int) currentCell.getNumericCellValue());
 							else if (currentCell.getCellType() == Cell.CELL_TYPE_BOOLEAN)
 								currentCellValue = String.valueOf(currentCell.getBooleanCellValue());
@@ -425,11 +477,36 @@ public class ProductImportService {
 							}
 							cell++;
 						}
-						if (productId.isEmpty() || storeId.isEmpty() || storePrice.isEmpty() || discountType.isEmpty()
-								|| discount.isEmpty() || finalPrice.isEmpty() || isActive.isEmpty()
-								|| isDeleted.isEmpty() || merchantId.isEmpty()) {
-							error += ", Blank Cell in Line " + line;
+						if (productId.isEmpty()) 
+							error += ", Product Id is Blank in Line " + line;
+						
+						if (storeId.isEmpty())
+							error += ", Store Id is Blank Cell in Line " + line;
+						
+						if (storePrice.isEmpty())
+							error += ", Store Price is Blank Cell in Line " + line;
+						
+						if (discountType.isEmpty())
+							error += ", Discount type is Blank Cell in Line " + line;
+						
+						if((!discount.isEmpty()) && Double.valueOf(discount).compareTo(0D) < 0 )
+							error += ", Discount Must Not Be Less Than 0 " + line;
+						
+						if (finalPrice.isEmpty()) {
+							error += ", Final Price is Blank in Line " + line;
+						} else {
+							if(new BigDecimal(finalPrice).compareTo(BigDecimal.ZERO) < 0)
+								error += ", Final Price Must Not Be Less Than 0 " + line;
 						}
+						if (isActive.isEmpty())
+							error += ", Store Id is Blank Cell in Line " + line;
+						
+						if (isDeleted.isEmpty())
+							error += ", Store Id is Blank Cell in Line " + line;
+						
+						if (merchantId.isEmpty())
+							error += ", Store Id is Blank Cell in Line " + line;
+						
 						ProductMerchant productMerchant = ProductMerchantRepository.findById(Long.valueOf(productId),
 								merchant);
 						if (productMerchant == null) {
@@ -456,13 +533,9 @@ public class ProductImportService {
 							productStore.setProductStoreQrCode(
 									Constant.getInstance().getFrontEndUrl().concat(store.storeCode + "/" + store.id
 											+ "/" + merchant.id + "/product/" + productMerchant.id + "/detail"));
-
-							if (discountType != null)
-								productStore.setDiscountType(discountType);
-							if (discount != null)
-								productStore.setDiscount(Double.valueOf((discount)));
-							if (finalPrice != null)
-								productStore.setFinalPrice(new BigDecimal(finalPrice));
+							productStore.setDiscountType(discountType);
+							productStore.setDiscount(!discount.isEmpty() ? Double.valueOf(discount) : 0D);
+							productStore.setFinalPrice(new BigDecimal(finalPrice));
 							productStore.save();
 							countData += 1;
 						}
@@ -505,13 +578,13 @@ public class ProductImportService {
 
 	private static void constructProductDetailEntityRequest(ProductMerchantDetail newProductMerchantDetail,
 			ProductMerchant newProductMerchant, String productType, String customizeable, String productPrice,
-			String discountType, String discount, String priceAfterDisc, String image1, String image2, String image3,
+			String discountType, String discount, String priceAfterDisc,String imageMain, String image1, String image2, String image3,
 			String image4) {
 		newProductMerchantDetail.setProductType(productType);
 		newProductMerchantDetail.setIsCustomizable(Boolean.parseBoolean(customizeable));
 		newProductMerchantDetail.setProductPrice(new BigDecimal(productPrice));
 		newProductMerchantDetail.setDiscountType(discountType);
-		newProductMerchantDetail.setDiscount(discount != null ? Double.valueOf(discount) : 0D);
+		newProductMerchantDetail.setDiscount(!discount.isEmpty() ? Double.valueOf(discount) : 0D);
 		newProductMerchantDetail.setProductPriceAfterDiscount(
 				priceAfterDisc != null ? new BigDecimal(priceAfterDisc) : new BigDecimal(productPrice));
 		newProductMerchantDetail.setProductImageMain(image1);
