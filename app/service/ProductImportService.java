@@ -50,7 +50,7 @@ import repository.ProductStoreRepository;
 import repository.SubCategoryMerchantRepository;
 import repository.SubsCategoryMerchantRepository;
 
-public class ProductImport {
+public class ProductImportService {
 	
 	public boolean importProductMerchant(FilePart file, Merchant merchant, BaseResponse<String> response) {
 		System.out.println("In Import Product");
@@ -77,24 +77,24 @@ public class ProductImport {
 						line++;
 						System.out.println("line " + line);
 						
-						String no_sku = "";
-						String product_name = "";
-						String category_id = "";
-						String sub_category_id = "";
-						String subs_category_id = "";
-						String brand_id = "";
-						String product_type = "";
-						String is_customizeable = "";
-						String product_prize = "";
-						String discount_type = "";
+						String noSku = "";
+						String productName = "";
+						String categoryId = "";
+						String subCategoryId = "";
+						String subsCategoryId = "";
+						String brandId = "";
+						String productType = "";
+						String isCustomizeable = "";
+						String productPrize = "";
+						String discountType = "";
 						String discount = "";
-						String price_after_discount = "";
+						String priceAfterDiscount = "";
 						String image1 = "";
 						String image2 = "";
 						String image3 = "";
 						String image4 = "";
-						String short_desc = "";
-						String long_desc = "";
+						String shortDesc = "";
+						String longDesc = "";
 						cell = 0;
 						while (cellIterator.hasNext()) {
 							Cell currentCell = cellIterator.next();
@@ -110,40 +110,40 @@ public class ProductImport {
 							}
 							switch(cell) {
 								case 0 :
-									no_sku = currentCellValue;
+									noSku = currentCellValue;
 									break;
 								case 1 :
-									product_name = currentCellValue;
+									productName = currentCellValue;
 									break;
 								case 2 :
-									category_id = currentCellValue;
+									categoryId = currentCellValue;
 									break;
 								case 3 :
-									sub_category_id = currentCellValue;
+									subCategoryId = currentCellValue;
 									break;
 								case 4 :
-									subs_category_id = currentCellValue;
+									subsCategoryId = currentCellValue;
 									break;
 								case 5 :
-									brand_id = currentCellValue;
+									brandId = currentCellValue;
 									break;
 								case 6 :
-									product_type = currentCellValue;
+									productType = currentCellValue;
 									break;
 								case 7 :
-									is_customizeable = currentCellValue;
+									isCustomizeable = currentCellValue;
 									break;
 								case 8 :
-									product_prize = currentCellValue;
+									productPrize = currentCellValue;
 									break;
 								case 9 :
-									discount_type = currentCellValue;
+									discountType = currentCellValue;
 									break;
 								case 10 :
 									discount = currentCellValue;
 									break;
 								case 11 :
-									price_after_discount = currentCellValue;
+									priceAfterDiscount = currentCellValue;
 									break;
 								case 12 :
 									image1 = currentCellValue;
@@ -158,58 +158,58 @@ public class ProductImport {
 									image4 = currentCellValue;
 									break;
 								case 16 :
-									short_desc = currentCellValue;
+									shortDesc = currentCellValue;
 									break;
 								case 17 :
-									long_desc = currentCellValue;
+									longDesc = currentCellValue;
 									break;
 							}
 							cell++;
 						}
-						if (no_sku.trim().equals("") || product_name.trim().equals("")||category_id.trim().equals("")||sub_category_id.trim().equals("")
-								||subs_category_id.trim().equals("")||brand_id.trim().equals("")||product_type.trim().equals("")||is_customizeable.trim().equals("")
-								||product_prize.trim().equals("")||discount_type.trim().equals("")||discount.trim().equals("")||price_after_discount.trim().equals("")
-								||image1.trim().equals("")||image2.trim().equals("")||image3.trim().equals("")||image4.trim().equals("")
-								||short_desc.trim().equals("")||long_desc.trim().equals("")) {
+						if (noSku.trim().isEmpty() || productName.isEmpty()||categoryId.isEmpty()||subCategoryId.isEmpty()
+								||subsCategoryId.isEmpty()||brandId.isEmpty()||productType.isEmpty()||isCustomizeable.isEmpty()
+								||productPrize.isEmpty()||discountType.isEmpty()||discount.isEmpty()||priceAfterDiscount.isEmpty()
+								||image1.isEmpty()||image2.isEmpty()||image3.isEmpty()||image4.isEmpty()||shortDesc.isEmpty()
+								||longDesc.isEmpty()) {
 							error += ", blank data in line "+line;
 									
 						}
 						category = CategoryMerchantRepository.findByIdAndMerchantId(
-	                            Long.valueOf(category_id), merchant);
+	                            Long.valueOf(categoryId), merchant);
 	                    if (category == null) {
 	                    	error += ", invalid category id in line "+line;
 	                    }
 	                    sub_category_merchant = SubCategoryMerchantRepository.findByIdAndMerchantId(
-	                            Long.parseLong(sub_category_id), merchant);
+	                            Long.parseLong(subCategoryId), merchant);
 	                    if (sub_category_merchant == null) {
 	                    	error += ", invalid sub category id in line "+line;
 	                    }
 	                    subs_category_merchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(
-	                            Long.parseLong(subs_category_id), merchant);
+	                            Long.parseLong(subsCategoryId), merchant);
 	                    if (subs_category_merchant == null) {
 	                    	error += ", invalid Subs Category Id In Line "+line;
 	                    }
 	                    brand = BrandMerchantRepository.findByIdAndMerchantId(
-	                            Long.parseLong(brand_id), merchant);
+	                            Long.parseLong(brandId), merchant);
 	                    if (brand == null) {
 	                        error += ", invalid Brand Id In Line "+line;
 	                    }
-						if (error == "") {
+						if (error.equals("")) {
 							ProductDetailResponse productDetail = new ProductDetailResponse();
 		                    ProductMerchant newProductMerchant = new ProductMerchant();
-		                    constructProductEntityRequest(newProductMerchant, merchant, no_sku, product_name, category,
+		                    constructProductEntityRequest(newProductMerchant, merchant, noSku, productName, category,
 		                            sub_category_merchant, subs_category_merchant, brand);
 		                    newProductMerchant.save();
 
 		                    // do save to detail
 		                    ProductMerchantDetail newProductMerchantDetail = new ProductMerchantDetail();
-		                    constructProductDetailEntityRequest(newProductMerchantDetail, newProductMerchant, product_type, is_customizeable, product_prize, 
-		                    		discount_type, discount, price_after_discount, image1, image2, image3, image4);
+		                    constructProductDetailEntityRequest(newProductMerchantDetail, newProductMerchant, productType, isCustomizeable, productPrize, 
+		                    		discountType, discount, priceAfterDiscount, image1, image2, image3, image4);
 		                    newProductMerchantDetail.save();
 
 		                    ProductMerchantDescription newProductMerchantDescription = new ProductMerchantDescription();
-		                    newProductMerchantDescription.setShortDescription(short_desc);
-		                    newProductMerchantDescription.setLongDescription(long_desc);
+		                    newProductMerchantDescription.setShortDescription(shortDesc);
+		                    newProductMerchantDescription.setLongDescription(longDesc);
 		                    newProductMerchantDescription.setProductMerchantDetail(newProductMerchantDetail);
 		                    newProductMerchantDescription.save();
 						}
@@ -236,7 +236,7 @@ public class ProductImport {
 	}
 	
 	public static File getImportTemplateMerchant() {
-		String[] COLUMN = {
+		String[] column = {
 				"no_Sku", "Product Name", "Category Id", "Sub Category Id", "Subs Category Id", "Brand Id", "Porduct Type", "Cuztomizealbe", 
 				"Product Prize", "Discount Type", "Discount", "Price After Discount", "Image Main", "Image 1", "Image 2", "Image 3", "Image 4" ,"Short Desc", "Long Desc"
 		};
@@ -275,12 +275,12 @@ public class ProductImport {
 			contentCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
 			
 			Row headerRow = sheetProduct.createRow(0);
-			for (int i = 0; i < COLUMN.length; i++) {
+			for (int i = 0; i < column.length; i++) {
 				Cell cell = headerRow.createCell(i);
-				cell.setCellValue(COLUMN[i]);
+				cell.setCellValue(column[i]);
 				cell.setCellStyle(headerCellStyle);
 			}
-			for (int i = 0; i < COLUMN.length; i++) {
+			for (int i = 0; i < column.length; i++) {
 				sheetProduct.autoSizeColumn(i);
 			}
 			workbook.write(fileOut);
@@ -295,7 +295,7 @@ public class ProductImport {
     }
 	
 	public static File getImportTemplateStore () {
-		String[] COLUMN = {"Product Id", "Store Id", "Store Price", "Disconut type", "Discount", "Final Price",
+		String[] column = {"Product Id", "Store Id", "Store Price", "Disconut type", "Discount", "Final Price",
 				"Is Active", "Is Deleted", "Merchant Id"
 				}; 
 		String FILE_NAME = "ImportProductTemplate";
@@ -333,12 +333,12 @@ public class ProductImport {
 			contentCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
 			
 			Row headerRow = sheetProduct.createRow(0);
-			for (int i = 0; i < COLUMN.length; i++) {
+			for (int i = 0; i < column.length; i++) {
 				Cell cell = headerRow.createCell(i);
-				cell.setCellValue(COLUMN[i]);
+				cell.setCellValue(column[i]);
 				cell.setCellStyle(headerCellStyle);
 			}
-			for (int i = 0; i < COLUMN.length; i++) {
+			for (int i = 0; i < column.length; i++) {
 				sheetProduct.autoSizeColumn(i);
 			}
 			workbook.write(fileOut);
@@ -455,22 +455,21 @@ public class ProductImport {
 	                	else
 	                		productStore.setActive(Boolean.FALSE);
 	                	productStore.setStorePrice(new BigDecimal(store_price));
-	                	productStore.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode+"/"+store.id+"/"+merchant.id+"/product/"+productMerchant.id+"/detail"));
-                        if (discount_type != null) {
+	                	productStore.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl()
+	                			.concat(store.storeCode+"/"+store.id+"/"+merchant.id+"/product/"+productMerchant.id+"/detail"));
+	                	
+                        if (discount_type != null) 
                         	productStore.setDiscountType(discount_type);
-                        }
-                        if (discount != null) {
+                        if (discount != null) 
                         	productStore.setDiscount(Double.valueOf((discount)));
-                        }
-                        if (final_price != null) {
+                        if (final_price != null) 
                         	productStore.setFinalPrice(new BigDecimal(final_price));
-                        }
                         productStore.save();
                         countData += 1;
 	                }
 				} 
 			}
-		}	catch (Exception e) {
+		} catch (Exception e) {
 			workbook.close();
 			e.printStackTrace();
 				}
@@ -502,16 +501,13 @@ public class ProductImport {
 		newProductMerchant.setSubsCategoryMerchant(subsCategoryMerchant);
 		newProductMerchant.setBrandMerchant(brandMerchant);
 		newProductMerchant.setMerchant(merchant);
-		}
+	}
 
 	private static void constructProductDetailEntityRequest(ProductMerchantDetail newProductMerchantDetail, ProductMerchant newProductMerchant,
 			String productType, String customizeable, String productPrice, String discountType, String discount, 
 			String priceAfterDisc, String image1, String image2, String image3, String image4) {
 		newProductMerchantDetail.setProductType(productType);
-		if(customizeable.equalsIgnoreCase("true"))
-			newProductMerchantDetail.setIsCustomizable(Boolean.TRUE);
-		else
-			newProductMerchantDetail.setIsCustomizable(Boolean.FALSE);
+		newProductMerchantDetail.setIsCustomizable(Boolean.parseBoolean(customizeable));
 		newProductMerchantDetail.setProductPrice(new BigDecimal(productPrice));
 		newProductMerchantDetail.setDiscountType(discountType);
 		newProductMerchantDetail.setDiscount(discount != null ? Double.valueOf(discount) : 0D);
