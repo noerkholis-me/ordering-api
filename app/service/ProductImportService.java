@@ -53,7 +53,6 @@ import repository.SubsCategoryMerchantRepository;
 public class ProductImportService {
 
 	public boolean importProductMerchant(FilePart file, Merchant merchant, BaseResponse<String> response) {
-		System.out.println("In Import Product");
 		String error = "";
 		Transaction txn = Ebean.beginTransaction();
 		int line = 0;
@@ -76,7 +75,7 @@ public class ProductImportService {
 						isFirstLine = false;
 					} else {
 						line++;
-						System.out.println("line " + line);
+//						System.out.println("line " + line);
 
 						String noSku = "";
 						String productName = "";
@@ -353,7 +352,7 @@ public class ProductImportService {
 	}
 
 	public boolean importProductStore(FilePart file, Merchant merchant, BaseResponse<String> response) {
-		System.out.println("In Import Product");
+//		System.out.println("In Import Product");
 		String error = "";
 		Transaction txn = Ebean.beginTransaction();
 		int line = 0;
@@ -372,7 +371,7 @@ public class ProductImportService {
 						isFirstLine = false;
 					} else {
 						line++;
-						System.out.println("line " + line);
+//						System.out.println("line " + line);
 
 						String productId = "";
 						String storeId = "";
@@ -396,7 +395,7 @@ public class ProductImportService {
 
 							switch (cell) {
 							case 0:
-								System.out.println(currentCellValue);
+//								System.out.println(currentCellValue);
 								productId = currentCellValue;
 								break;
 							case 1:
@@ -436,7 +435,6 @@ public class ProductImportService {
 						if (productMerchant == null) {
 							error += ", invalid Product Id in Line " + line;
 						}
-						System.out.println(storeId);
 						Store store = Store.findById(Long.valueOf(storeId));
 						if (store == null) {
 							error += ", invalid Store Id in Line " + line;
