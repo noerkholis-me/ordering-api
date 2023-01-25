@@ -47,11 +47,11 @@ import repository.SubsCategoryMerchantRepository;
 
 public class ProductImportService {
 	
-	public static final String[] columnMerchant = { "no_Sku", "Product Name", "Category Id", "Sub Category Id", "Subs Category Id", "Brand Id",
-			"Porduct Type", "Cuztomizealbe", "Product Prize", "Discount Type", "Discount", "Price After Discount",
+	public static final String[] columnMerchant = { "No Sku", "Product Name", "Category Id", "Sub Category Id", "Subs Category Id", "Brand Id",
+			"Product Type", "Customizealbe", "Product Prize", "Discount Type", "Discount", "Price After Discount",
 			"Image Main", "Image 1", "Image 2", "Image 3", "Image 4", "Short Desc", "Long Desc" };
 	
-	public static final String[] columnStore = { "Product Id", "Store Id", "Store Price", "Disconut type", "Discount", "Final Price",
+	public static final String[] columnStore = { "Product Id", "Store Id", "Store Price", "Discount type", "Discount", "Final Price",
 			"Is Active", "Is Deleted", "Merchant Id" };
 
 	public boolean importProductMerchant(FilePart file, Merchant merchant, BaseResponse<String> response) {
@@ -77,102 +77,27 @@ public class ProductImportService {
 						isFirstLine = false;
 					} else {
 						line++;
-//						System.out.println("line " + line);
 
-						String noSku = "";
-						String productName = "";
-						String categoryId = "";
-						String subCategoryId = "";
-						String subsCategoryId = "";
-						String brandId = "";
-						String productType = "";
-						String isCustomizeable = "";
-						String productPrize = "";
-						String discountType = "";
-						String discount = "";
-						String priceAfterDiscount = "";
-						String imageMain = "";
-						String image1 = "";
-						String image2 = "";
-						String image3 = "";
-						String image4 = "";
-						String shortDesc = "";
-						String longDesc = "";
-						cell = 0;
-						System.out.println(cell);
-						while (cell <= columnMerchant.length) {
-							Cell currentCell = row.getCell(cell, MissingCellPolicy.RETURN_BLANK_AS_NULL);
-							if (currentCell == null) {
-								currentCellValue = "";
-							} else if (currentCell.getCellTypeEnum() == CellType.NUMERIC) {
-								currentCellValue = String.valueOf((int) currentCell.getNumericCellValue());
-							} else if (currentCell.getCellTypeEnum() == CellType.BOOLEAN) {
-								currentCellValue = String.valueOf(currentCell.getBooleanCellValue());
-							} else {
-								currentCellValue = currentCell.getStringCellValue();
-							}
-							System.out.println(currentCellValue);
-							switch (cell) {
-							case 0:
-								noSku = currentCellValue;
-								break;
-							case 1:
-								productName = currentCellValue;
-								break;
-							case 2:
-								categoryId = currentCellValue;
-								break;
-							case 3:
-								subCategoryId = currentCellValue;
-								break;
-							case 4:
-								subsCategoryId = currentCellValue;
-								break;
-							case 5:
-								brandId = currentCellValue;
-								break;
-							case 6:
-								productType = currentCellValue;
-								break;
-							case 7:
-								isCustomizeable = currentCellValue;
-								break;
-							case 8:
-								productPrize = currentCellValue;
-								break;
-							case 9:
-								discountType = currentCellValue;
-								break;
-							case 10:
-								discount = currentCellValue;
-								break;
-							case 11:
-								priceAfterDiscount = currentCellValue;
-								break;
-							case 12:
-								imageMain = currentCellValue;
-								break;
-							case 13:
-								image1 = currentCellValue;
-								break;
-							case 14:
-								image2 = currentCellValue;
-								break;
-							case 15:
-								image3 = currentCellValue;
-								break;
-							case 16:
-								image4 = currentCellValue;
-								break;
-							case 17:
-								shortDesc = currentCellValue;
-								break;
-							case 18:
-								longDesc = currentCellValue;
-								break;
-							}
-							cell++;
-						}
+						String noSku = getCellValue(row, 0);
+						String productName = getCellValue(row, 1);
+						String categoryId = getCellValue(row, 2);
+						String subCategoryId = getCellValue(row, 3);
+						String subsCategoryId = getCellValue(row, 4);
+						String brandId = getCellValue(row, 5);
+						String productType = getCellValue(row, 6);
+						String isCustomizeable = getCellValue(row, 7);
+						String productPrize = getCellValue(row, 8);
+						String discountType = getCellValue(row, 9);
+						String discount = getCellValue(row, 10);
+						String priceAfterDiscount = getCellValue(row, 11);
+						String imageMain = getCellValue(row, 12);
+						String image1 = getCellValue(row, 13);
+						String image2 = getCellValue(row, 14);
+						String image3 = getCellValue(row, 15);
+						String image4 = getCellValue(row, 16);
+						String shortDesc = getCellValue(row, 17);
+						String longDesc = getCellValue(row, 18);
+						
 						if (noSku.isEmpty()) 
 							error += ", Sku Number is Blank in Line " + line;
 						
@@ -389,7 +314,6 @@ public class ProductImportService {
 	}
 
 	public boolean importProductStore(FilePart file, Merchant merchant, BaseResponse<String> response) {
-//		System.out.println("In Import Product");
 		String error = "";
 		Transaction txn = Ebean.beginTransaction();
 		int line = 0;
@@ -407,62 +331,17 @@ public class ProductImportService {
 						isFirstLine = false;
 					} else {
 						line++;
-//						System.out.println("line " + line);
 
-						String productId = "";
-						String storeId = "";
-						String storePrice = "";
-						String discountType = "";
-						String discount = "";
-						String finalPrice = "";
-						String isActive = "";
-						String isDeleted = "";
-						String merchantId = "";
+						String productId = getCellValue(row, 0);
+						String storeId = getCellValue(row, 1);
+						String storePrice = getCellValue(row, 2);
+						String discountType = getCellValue(row, 3);
+						String discount = getCellValue(row, 4);
+						String finalPrice = getCellValue(row, 5);
+						String isActive = getCellValue(row, 6);
+						String isDeleted = getCellValue(row, 7);
+						String merchantId = getCellValue(row, 8);
 
-						cell = 0;
-						while (cell <= columnStore.length) {
-							Cell currentCell = row.getCell(cell, MissingCellPolicy.RETURN_BLANK_AS_NULL);
-							if (currentCell == null)
-								currentCellValue = "";
-							else if (currentCell.getCellType() == Cell.CELL_TYPE_NUMERIC)
-								currentCellValue = String.valueOf((int) currentCell.getNumericCellValue());
-							else if (currentCell.getCellType() == Cell.CELL_TYPE_BOOLEAN)
-								currentCellValue = String.valueOf(currentCell.getBooleanCellValue());
-							else
-								currentCellValue = currentCell.getStringCellValue();
-
-							switch (cell) {
-							case 0:
-//								System.out.println(currentCellValue);
-								productId = currentCellValue;
-								break;
-							case 1:
-								storeId = currentCellValue;
-								break;
-							case 2:
-								storePrice = currentCellValue;
-								break;
-							case 3:
-								discountType = currentCellValue;
-								break;
-							case 4:
-								discount = currentCellValue;
-								break;
-							case 5:
-								finalPrice = currentCellValue;
-								break;
-							case 6:
-								isActive = currentCellValue;
-								break;
-							case 7:
-								isDeleted = currentCellValue;
-								break;
-							case 8:
-								merchantId = currentCellValue;
-								break;
-							}
-							cell++;
-						}
 						if (productId.isEmpty()) 
 							error += ", Product Id is Blank in Line " + line;
 						
@@ -580,4 +459,19 @@ public class ProductImportService {
 				Constant.getInstance().getFrontEndUrl().concat("product/" + newProductMerchant.id + "/detail"));
 	}
 
+	private static String getCellValue (Row excelRow, int cellNum) {
+		String value;
+		Cell cell = excelRow.getCell(cellNum, MissingCellPolicy.RETURN_BLANK_AS_NULL);
+		if (cell == null)
+			value = "";
+		else if (cell.getCellType() == Cell.CELL_TYPE_NUMERIC)
+			value = String.valueOf((int) cell.getNumericCellValue());
+		else if (cell.getCellType() == Cell.CELL_TYPE_BOOLEAN)
+			value = String.valueOf(cell.getBooleanCellValue());
+		else
+			value = cell.getStringCellValue(); 
+		
+		return value;
+			
+	}
 }
