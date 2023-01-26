@@ -54,22 +54,22 @@ public class ProductValidator {
                     return "Product Store is null";
         		}
                 if (productStoreRequest.getStoreId() == null) {
-                    return "Store tidak boleh nol atau kosong";
+                    return "Product Store - Id Store tidak boleh nol atau kosong";
                 }
                 if (productStoreRequest.getStorePrice() == null || productStoreRequest.getStorePrice() == BigDecimal.ZERO) {
-                    return "Harga tidak boleh nol atau kosong";
+                    return "Product Store - Harga tidak boleh nol atau kosong";
                 }
                 if (productStoreRequest.getProductId() == null) {
-                    return "Id Produk tidak boleh nol atau kosong";
+                    return "Product Store - Id Produk tidak boleh nol atau kosong";
                 }
                 if (productStoreRequest.getStorePrice().compareTo(BigDecimal.ZERO) < 0) {
-                    return "Harga tidak boleh kurang dari 0";
+                    return "Product Store - Harga tidak boleh kurang dari 0";
                 }
                 if (productStoreRequest.getDiscount().compareTo(0D) < 0) {
-                    return "Nilai Discount tidak boleh kurang dari 0";
+                    return "Product Store - Nilai Discount tidak boleh kurang dari 0";
                 }
                 if (productStoreRequest.getFinalPrice().compareTo(BigDecimal.ZERO) < 0) {
-                    return "Harga Final tidak boleh kurang dari 0";
+                    return "Product Store - Harga Final tidak boleh kurang dari 0";
                 }
 			}
         }

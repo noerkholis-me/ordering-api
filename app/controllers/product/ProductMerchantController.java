@@ -55,6 +55,7 @@ public class ProductMerchantController extends BaseController {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    //TODO new create
     public static Result createProductWithProductStore() {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant == null) {
@@ -150,10 +151,7 @@ public class ProductMerchantController extends BaseController {
                                 null);
                         return badRequest(Json.toJson(response));
                     }
-                    String validate = validateCreateProductStore(productStoreRequest);
-                    if (validate != null) {
-                    	
-                    }
+                    
                     ProductStore newProductStore = new ProductStore();
                     newProductStore.setStore(store);
                     newProductStore.setProductMerchant(newProductMerchant);
@@ -196,6 +194,7 @@ public class ProductMerchantController extends BaseController {
     }
     
     
+    //TODO old create
     public static Result createProduct() {
 
         Merchant ownMerchant = checkMerchantAccessAuthorization();
