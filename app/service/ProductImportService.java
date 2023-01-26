@@ -48,7 +48,7 @@ import repository.SubsCategoryMerchantRepository;
 public class ProductImportService {
 	
 	public static final String[] columnMerchant = { "No Sku", "Product Name", "Category Id", "Sub Category Id", "Subs Category Id", "Brand Id",
-			"Product Type", "Customizealbe", "Product Prize", "Discount Type", "Discount", "Price After Discount",
+			"Product Type", "Customizeable", "Product Prize", "Discount Type", "Discount", "Price After Discount",
 			"Image Main", "Image 1", "Image 2", "Image 3", "Image 4", "Short Desc", "Long Desc" };
 	
 	public static final String[] columnStore = { "Product Id", "Store Id", "Store Price", "Discount type", "Discount", "Final Price",
