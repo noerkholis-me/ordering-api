@@ -96,6 +96,11 @@ public class ProductMerchantController extends BaseController {
                     response.setBaseResponse(0, 0, 0, " Brand not found.", null);
                     return badRequest(Json.toJson(response));
                 }
+                if (ownMerchant.productStoreRequired && 
+                		(productRequest.getProductStoreRequests() == null || productRequest.getProductStoreRequests().isEmpty())) {
+                	response.setBaseResponse(0, 0, 0, " Product needs to be assigned to store", null);
+                    return badRequest(Json.toJson(response));
+                }
 
                 //create main product merchant
                 ProductMerchant newProductMerchant = new ProductMerchant();
@@ -140,12 +145,14 @@ public class ProductMerchantController extends BaseController {
                 for (ProductStoreResponse productStoreRequest : productRequest.getProductStoreRequests()) {
                     Store store = Store.findById(productStoreRequest.getStoreId());
                     if (store == null) {
+                    	trx.rollback();
                         response.setBaseResponse(0, 0, 0, " Store not found.", null);
                         return badRequest(Json.toJson(response));
                     }
                     ProductStore psQuery = ProductStoreRepository.find.where().eq("productMerchant", newProductMerchant)
                             .eq("store", store).eq("t0.is_deleted", false).findUnique();
                     if (psQuery != null) {
+                    	trx.rollback();
                         response.setBaseResponse(0, 0, 0,
                                 "Tidak dapat menambahkan " + newProductMerchant.getProductName() + " ke toko yang sama.",
                                 null);
@@ -156,7 +163,8 @@ public class ProductMerchantController extends BaseController {
                     newProductStore.setStore(store);
                     newProductStore.setProductMerchant(newProductMerchant);
                     newProductStore.setMerchant(ownMerchant);
-                    newProductStore.setActive(productStoreRequest.getIsActive());
+                    newProductStore.setActive(true);
+//                    newProductStore.setActive(productStoreRequest.getIsActive());
                     newProductStore.setStorePrice(productStoreRequest.getStorePrice());
                     newProductStore.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode+"/"+store.id+"/"+ownMerchant.id+"/product/"+newProductMerchant.id+"/detail"));
                     if (productStoreRequest.getDiscountType() != null) {
