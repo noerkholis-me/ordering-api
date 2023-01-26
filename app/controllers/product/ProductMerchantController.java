@@ -352,7 +352,7 @@ public class ProductMerchantController extends BaseController {
 				response.setBaseResponse(0, 0, 0, "File Is Null", null);
 				return badRequest(Json.toJson(response));
 			}
-			System.out.println("file - "+file.getFilename());
+//			System.out.println("file - "+file.getFilename());
 			ProductImportService productImport = new ProductImportService();
 			if(!productImport.importProductMerchant(file, merchant, response)) {
 				return badRequest(Json.toJson(response));
