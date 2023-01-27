@@ -1,19 +1,18 @@
-@(customerName: String, nameStore: String, phoneStore: String, addressStore: String)
+@(customerName: String, nameStore: String, phoneStore: String, addressStore: String, harga: String, path: String)
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>Notifikasi Email - Desain 3</title>
-    <!-- CSS -->
-    <link rel="stylesheet" href="../../public/design3.css" />
+    <link rel="stylesheet" href="@path/assets/email-invoice/email-invoice.css" />
   </head>
   <body>
     <div class="container">
       <!-- header -->
       <div class="header">
-        <img src="../../public/images/hellobisnisnewlogo.png" alt="" />
+        <img src="@path/assets/email-invoice/hellobisnisnewlogo.png" alt="" />
       </div>
 
       <div class="customer">
@@ -37,13 +36,13 @@
           <p>Detail Pembayaran</p>
           <div class="desc-pembayaran">
             <p>Total Bayar</p>
-            <p>@Rp. 50.000</p>
+            <p>@harga</p>
           </div>
           <div class="desc-pembayaran">
             <p>Metode Pembayaran</p>
             <div class="icon-pembayaran">
-              <img src="../../public/images/Gopay_logo 1.svg" alt="" />
-              <p>@Rp. 50.000</p>
+              <img src="@path/assets/email-invoice/Gopay_logo 1.svg" alt="" />
+              <p>@harga</p>
             </div>
           </div>
           <div class="desc-pembayaran">
@@ -62,7 +61,7 @@
           <div class="desc-pembayaran">
             <p>Metode Pembayaran</p>
             <div class="icon-pembayaran">
-              <img src="../../public/images/download.svg" alt="" />
+              <img src="@path/assets/email-invoice/download.svg" alt="" />
               <p>Reciept Attached</p>
             </div>
           </div>
@@ -73,7 +72,7 @@
       <!-- container toko -->
       <div class="container-toko">
         <div class="header-toko">
-          <img src="../../public/images/toko.svg" alt="" />
+          <img src="@path/assets/email-invoice/toko.svg" alt="" />
           <p>Detail Toko</p>
         </div>
         <div class="pembayaran">
