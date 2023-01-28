@@ -36,12 +36,14 @@ public class InvoiceMailService {
         System.out.println("email >>> " + email);
         Store store = order.getStore();
 
-        String urlLogo = store.getMerchant().logo;
+        String urlLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/hellobisnisnewlogo.png";
         String urlEmailLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/email.png";
 
         Thread thread = new Thread(() -> {
             try {
-                MailConfig.sendmail(email, MailConfig.subjectInvoice, MailConfig.renderMailInvoiceTemplate(urlLogo, urlEmailLogo, order));
+                MailConfig.sendmail(email, MailConfig.subjectInvoice, MailConfig.renderMailInvoiceTemplateNew(order.getMemberName(),
+                		order.getStore().storeName, order.getStore().storePhone, order.getStore().storeAddress, order.getTotalBayar(),
+                		Constant.getInstance().getImageUrl()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
