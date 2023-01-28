@@ -1,0 +1,210 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #cccc;
+  font-family: D-DIN Exp, sans-serif;
+}
+
+.container {
+  width: 600px;
+  height: auto;
+  background-color: #f8faff;
+  margin: auto;
+}
+
+/* header */
+.header {
+  width: 600px;
+  height: 115px;
+  padding: 28px 20px;
+  background-image: url(../Assets/bg-header.svg);
+}
+
+.customer {
+  margin: 55px 0;
+  padding: 0 20px;
+}
+
+.customer p {
+  font-size: 28px;
+  font-weight: bold;
+}
+/* header */
+
+/* container verifikasi */
+.container-verifikasi {
+  width: 570px;
+  height: 588px;
+  margin: auto;
+  padding: 50px 20px;
+  background-image: url(../Assets/bg-verifikasi.svg);
+}
+
+.title-verifikasi p:nth-child(1) {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.title-verifikasi p:nth-child(2) {
+  font-size: 18px;
+  font-weight: 100;
+  color: #636b78;
+  margin-top: 5px;
+}
+
+.line {
+  width: 520px;
+  border: 1px dashed #ccc;
+  margin: 30px 0;
+}
+
+/* .pembayaran {
+} */
+
+.pembayaran p:nth-child(1) {
+  font-size: 22px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.desc-pembayaran {
+  width: 520px;
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+}
+
+.desc-pembayaran p:nth-child(1) {
+  font-size: 18px;
+  color: #636b78;
+  font-weight: 100;
+}
+.desc-pembayaran p:nth-child(2) {
+  font-size: 18px;
+  color: #636b78;
+  font-weight: bold;
+}
+
+.icon-pembayaran {
+  display: flex;
+}
+
+.icon-pembayaran img {
+  margin-right: 5px;
+}
+/* container verifikasi */
+
+/* container toko */
+.container-toko {
+  width: 560px;
+  height: 444px;
+  border-radius: 20px;
+  background-color: #fff;
+  margin: 50px auto;
+  padding: 30px 20px;
+}
+
+.header-toko {
+  display: flex;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.header-toko img {
+  width: 25px;
+  height: 25px;
+  margin-right: 10px;
+}
+
+.header-toko p {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.toko {
+  width: 240px;
+  text-align: justify;
+}
+
+.line-2 {
+  width: 520px;
+  border: 1px solid #ccc;
+  margin: 30px auto;
+}
+
+.btn {
+  width: 235px;
+  height: 70px;
+  margin: auto;
+}
+
+button {
+  width: 235px;
+  height: 70px;
+  border-radius: 10px;
+  border: 2px solid #0075ff;
+  background-color: #fff;
+  font-size: 24px;
+  font-weight: bold;
+  color: #0075ff;
+  cursor: pointer;
+}
+
+
+footer {
+  width: 600px;
+  height: auto;
+  background-color: #d6e9ff;
+}
+
+.service {
+  width: 524px;
+  display: flex;
+  justify-content: space-between;
+  margin: auto;
+  padding: 30px 0;
+}
+
+.us p:nth-child(1) {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #16479c;
+}
+
+.us p:nth-child(2) {
+  font-size: 18px;
+  font-weight: 100;
+  color: #16479c;
+}
+
+.cs p:nth-child(1) {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #16479c;
+  text-align: right;
+}
+
+.cs .phone p {
+  font-size: 18px;
+  font-weight: 100;
+  color: #16479c;
+  text-align: right;
+}
+
+.title-footer p {
+  font-size: 18px;
+  color: #16479c;
+  text-align: center;
+  margin-bottom: 20px;
+}
+/* container toko */
+
+footer {
+  padding: 0 0 10px 0;
+}

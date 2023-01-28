@@ -1,0 +1,130 @@
+@(customerName: String, nameStore: String, phoneStore: String, addressStore: String, harga: String, path: String)
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Notifikasi Email - Desain 3</title>
+    <link rel="stylesheet" href="@path/assets/email-invoice/email-invoice.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- header -->
+      <div class="header">
+        <img src="@path/assets/email-invoice/hellobisnisnewlogo.png" alt="" />
+      </div>
+
+      <div class="customer">
+        <p>Hello, @customerName</p>
+      </div>
+      <!-- header -->
+
+      <!-- container verifikasi -->
+      <div class="container-verifikasi">
+        <div class="title-verifikasi">
+          <p>Verifikasi Pembayaran</p>
+          <p>
+            Pembayaran telah terverifikasi dan pesanan telah diteruskan ke
+            Penjual
+          </p>
+        </div>
+
+        <div class="line"></div>
+
+        <div class="pembayaran">
+          <p>Detail Pembayaran</p>
+          <div class="desc-pembayaran">
+            <p>Total Bayar</p>
+            <p>@harga</p>
+          </div>
+          <div class="desc-pembayaran">
+            <p>Metode Pembayaran</p>
+            <div class="icon-pembayaran">
+              <img src="@path/assets/email-invoice/Gopay_logo 1.svg" alt="" />
+              <p>@harga</p>
+            </div>
+          </div>
+          <div class="desc-pembayaran">
+            <p>Waktu Pembayaran</p>
+            <p>Selasa, 12 Oktober 2023 - 11 : 09 : 56</p>
+          </div>
+        </div>
+
+        <div class="line"></div>
+
+        <div class="pembayaran">
+          <div class="desc-pembayaran">
+            <p>Cek Status Pesanan Anda</p>
+            <p>Lihat Pesanan</p>
+          </div>
+          <div class="desc-pembayaran">
+            <p>Metode Pembayaran</p>
+            <div class="icon-pembayaran">
+              <img src="@path/assets/email-invoice/download.svg" alt="" />
+              <p>Reciept Attached</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- container verifikasi -->
+
+      <!-- container toko -->
+      <div class="container-toko">
+        <div class="header-toko">
+          <img src="@path/assets/email-invoice/toko.svg" alt="" />
+          <p>Detail Toko</p>
+        </div>
+        <div class="pembayaran">
+          <div class="desc-pembayaran">
+            <p>Nama Toko</p>
+            <p>@nameStore</p>
+          </div>
+          <div class="desc-pembayaran">
+            <p>Nomor Telepon</p>
+            <p>@phoneStore</p>
+          </div>
+          <div class="desc-pembayaran">
+            <p>Alamat Toko</p>
+            <p class="toko">
+              @addressStore
+            </p>
+          </div>
+        </div>
+
+        <div class="line-2"></div>
+
+        <div class="btn">
+          <button>Lihat Toko</button>
+        </div>
+      </div>
+      <!-- container toko -->
+
+      <!-- Footer -->
+      <footer>
+        <div class="service">
+          <div class="us">
+            <p>Kunjungi Kami</p>
+            <p>www.sandbox.com</p>
+          </div>
+          <div class="cs">
+            <p>Customer Services</p>
+            <div class="phone">
+              <p>021 - 2345 2345</p>
+              <p>0823 2345 6789</p>
+            </div>
+          </div>
+        </div>
+        <div class="line-2"></div>
+        <div class="title-footer">
+          <p>
+            Email ini di buat Otomatis, jika anda membutuhkan bantuan silahkan
+            hubungi Customer Service.
+          </p>
+          <p>2023 HelloBisnis.com | All Rights Reserved.</p>
+        </div>
+      </footer>
+      <!-- Footer -->
+    </div>
+  </body>
+</html>

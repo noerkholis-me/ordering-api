@@ -1,15 +1,18 @@
 package com.hokeba.util;
 
+import java.util.Properties;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+
 import models.Member;
 import models.Merchant;
 import models.SalesOrder;
-import models.UserCms;
-
-import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-import java.util.Properties;
-
 import models.transaction.Order;
 import play.data.Form;
 
@@ -91,6 +94,12 @@ public class MailConfig {
 	public static String renderMailInvoiceTemplate(String url, String urlEmailLogo, Order order) {
 		return views.html.invoiceMail.render(url, urlEmailLogo, order)
 				.toString();
+	}
+	
+	public static String renderMailInvoiceTemplateNew(String customerName, String nameStore, String phoneStore, String addressStore, String amount,
+			String url) {
+		String html = views.html.invoiceMailNew.render(customerName, nameStore, phoneStore, addressStore, amount, url).toString();
+		return html;
 	}
 
     public static String renderMailForgotPasswordTemplate(Member member, String url) {
