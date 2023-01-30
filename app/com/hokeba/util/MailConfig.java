@@ -97,8 +97,8 @@ public class MailConfig {
 	}
 	
 	public static String renderMailInvoiceTemplateNew(String orderDate,String customerName, String nameStore, String phoneStore, String addressStore, String amount,
-			String url) {
-		String html = views.html.invoiceMailNew.render(orderDate, customerName, nameStore, phoneStore, addressStore, amount, url).toString();
+			String url, String storeUrl) {
+		String html = views.html.invoiceMailNew.render(orderDate, customerName, nameStore, phoneStore, addressStore, amount, url, storeUrl).toString();
 		return html;
 	}
 
