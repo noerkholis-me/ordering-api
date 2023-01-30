@@ -10,6 +10,8 @@ import models.transaction.OrderPayment;
 import play.Logger;
 import repository.OrderRepository;
 
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.Optional;
 
 public class InvoiceMailService {
@@ -36,12 +38,15 @@ public class InvoiceMailService {
         System.out.println("email >>> " + email);
         Store store = order.getStore();
 
-        String urlLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/hellobisnisnewlogo.png";
-        String urlEmailLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/email.png";
+//        String urlLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/hellobisnisnewlogo.png";
+//        String urlEmailLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/email.png";
+        SimpleDateFormat formatter = new SimpleDateFormat("EEEE, dd MMMM yyyy - HH : mm : ss", new Locale("id", "ID"));
+        String orderDate = formatter.format(order.getOrderDate());
+        
 
         Thread thread = new Thread(() -> {
             try {
-                MailConfig.sendmail(email, MailConfig.subjectInvoice, MailConfig.renderMailInvoiceTemplateNew(order.getMember().fullName,
+                MailConfig.sendmail(email, MailConfig.subjectInvoice, MailConfig.renderMailInvoiceTemplateNew(orderDate, order.getMember().fullName,
                 		order.getStore().storeName, order.getStore().storePhone, order.getStore().storeAddress, order.getTotalBayar(),
                 		Constant.getInstance().getImageUrl()));
             } catch (Exception e) {
