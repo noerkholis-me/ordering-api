@@ -41,7 +41,7 @@ public class InvoiceMailService {
 
         Thread thread = new Thread(() -> {
             try {
-                MailConfig.sendmail(email, MailConfig.subjectInvoice, MailConfig.renderMailInvoiceTemplateNew(order.getMemberName(),
+                MailConfig.sendmail(email, MailConfig.subjectInvoice, MailConfig.renderMailInvoiceTemplateNew(order.getMember().fullName,
                 		order.getStore().storeName, order.getStore().storePhone, order.getStore().storeAddress, order.getTotalBayar(),
                 		Constant.getInstance().getImageUrl()));
             } catch (Exception e) {
