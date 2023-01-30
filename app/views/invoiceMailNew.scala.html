@@ -1,20 +1,26 @@
-@(orderDate: String, customerName: String, nameStore: String, phoneStore: String, addressStore: String, harga: String, path: String)
+@(orderDate: String, customerName: String, nameStore: String, phoneStore: String, addressStore: String, harga: String,
+path: String, storeUrl: String)
 <!DOCTYPE html>
 <html lang="en" style="margin: 0;padding: 0;box-sizing: border-box;">
 
 <head style="margin: 0;padding: 0;box-sizing: border-box;">
-  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8" style="margin: 0;padding: 0;box-sizing: border-box;">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" style="margin: 0;padding: 0;box-sizing: border-box;">
+  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8"
+    style="margin: 0;padding: 0;box-sizing: border-box;">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    style="margin: 0;padding: 0;box-sizing: border-box;">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" style="margin: 0;padding: 0;box-sizing: border-box;">
   <title style="margin: 0;padding: 0;box-sizing: border-box;">Notifikasi Email - Desain 3</title>
-  
+
 </head>
 
 <body style="margin: 0;padding: 0;box-sizing: border-box;background-color: #cccc;font-family: D-DIN Exp, sans-serif;">
-  <div class="container" style="margin: auto;padding: 0;box-sizing: border-box;width: 600px;height: auto;background-color: #f8faff;">
+  <div class="container"
+    style="margin: auto;padding: 0;box-sizing: border-box;width: 600px;height: auto;background-color: #f8faff;">
     <!-- header -->
-    <div class="header" style="margin: 0;padding: 28px 20px;box-sizing: border-box;width: 600px;height: 115px;background-image: url(@path/assets/bg-header.jpg);">
-      <img src="@path/assets/email-Invoice/hellobisnisnewlogo.png" alt="" style="margin: 0;padding: 0;box-sizing: border-box;">
+    <div class="header"
+      style="margin: 0;padding: 28px 20px;box-sizing: border-box;width: 600px;height: 115px;background-image: url(@path/assets/bg-header.jpg);">
+      <img src="@path/assets/email-Invoice/hellobisnisnewlogo.png" alt=""
+        style="margin: 0;padding: 0;box-sizing: border-box;">
     </div>
 
     <div class="customer" style="margin: 55px 0;padding: 0 20px;box-sizing: border-box;">
@@ -23,49 +29,91 @@
     <!-- header -->
 
     <!-- container verifikasi -->
-    <div class="container-verifikasi" style="margin: auto;padding: 50px 20px;box-sizing: border-box;width: 570px;height: 588px;background-image: url(@path/assets/bg-verifikasi.jpg);">
+    <div class="container-verifikasi"
+      style="margin: auto;padding: 50px 20px;box-sizing: border-box;width: 570px;height: 588px;background-image: url(@path/assets/bg-verifikasi.jpg);">
       <div class="title-verifikasi" style="margin: 0;padding: 0;box-sizing: border-box;">
-        <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;">Verifikasi Pembayaran</p>
-        <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636b78;margin-top: 5px;">
+        <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;">Verifikasi Pembayaran
+        </p>
+        <p
+          style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636b78;margin-top: 5px;">
           Pembayaran telah terverifikasi dan pesanan telah diteruskan ke
           Penjual
         </p>
       </div>
 
-      <div class="line" style="margin: 30px 0;padding: 0;box-sizing: border-box;width: 520px;border: 1px dashed #ccc;"></div>
+      <div class="line" style="margin: 30px 0;padding: 0;box-sizing: border-box;width: 520px;border: 1px dashed #ccc;">
+      </div>
 
       <div class="pembayaran" style="margin: 0;padding: 0;box-sizing: border-box;">
-        <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;text-align: center;">Detail Pembayaran</p>
-        <div class="desc-pembayaran" style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;">Total Bayar</p>
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;">@harga</p>
+        <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;text-align: center;">
+          Detail Pembayaran</p>
+        <div
+          style="
+          margin: 20px 0;
+          padding: 0;
+          box-sizing: border-box;
+          width: 520px;
+          display: flex;
+          justify-content: space-between;
+          ">
+          <p
+            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;">
+            Total Bayar : </p>
+          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;">
+            Rp. @harga</p>
         </div>
-        <div class="desc-pembayaran" style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;">Metode Pembayaran</p>
+        <div class="desc-pembayaran"
+          style="
+          margin: 20px 0;
+          padding: 0;
+          box-sizing: border-box;
+          width: 520px;
+          display: flex;
+          justify-content: space-between;
+          ">
+          <p
+            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;">
+            Metode Pembayaran : </p>
           <div class="icon-pembayaran" style="margin: 0;padding: 0;box-sizing: border-box;display: flex;">
-            <img src="@path/assets/email-Invoice/Gopay_logo 1.png" alt="" style="margin: 0;padding: 0;box-sizing: border-box;margin-right: 5px;">
-            <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;">@harga</p>
+            <img src="@path/assets/email-Invoice/Gopay_logo_1.png" alt=""
+              style="margin: 0;padding: 0;box-sizing: border-box;margin-right: 5px;">
+            <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;">
+              Rp. @harga</p>
           </div>
         </div>
-        <div class="desc-pembayaran" style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;">Waktu Pembayaran</p>
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;">@orderDate</p>
+        <div class="desc-pembayaran"
+          style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
+          <p
+            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;">
+            Waktu Pembayaran : </p>
+          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;">
+            @orderDate</p>
         </div>
       </div>
       <!-- Selasa, 12 Oktober 2023 - 11 : 09 : 56 -->
 
-      <div class="line" style="margin: 30px 0;padding: 0;box-sizing: border-box;width: 520px;border: 1px dashed #ccc;"></div>
+      <div class="line" style="margin: 30px 0;padding: 0;box-sizing: border-box;width: 520px;border: 1px dashed #ccc;">
+      </div>
 
       <div class="pembayaran" style="margin: 0;padding: 0;box-sizing: border-box;">
-        <div class="desc-pembayaran" style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;">Cek Status Pesanan Anda</p>
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;">Lihat Pesanan</p>
+        <div class="desc-pembayaran"
+          style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
+          <p
+            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;">
+            Cek Status Pesanan Anda</p>
+          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;">Lihat
+            Pesanan</p>
         </div>
-        <div class="desc-pembayaran" style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;">Metode Pembayaran</p>
+        <div class="desc-pembayaran"
+          style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
+          <p
+            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;">
+            Metode Pembayaran : </p>
           <div class="icon-pembayaran" style="margin: 0;padding: 0;box-sizing: border-box;display: flex;">
-            <img src="@path/assets/email-Invoice/download.png" alt="" style="margin: 0;padding: 0;box-sizing: border-box;margin-right: 5px;">
-            <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;">Reciept Attached</p>
+            <img src="@path/assets/email-Invoice/download.png" alt=""
+              style="margin: 0;padding: 0;box-sizing: border-box;margin-right: 5px;">
+            <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;">
+              Reciept Attached</p>
           </div>
         </div>
       </div>
@@ -73,58 +121,112 @@
     <!-- container verifikasi -->
 
     <!-- container toko -->
-    <div class="container-toko" style="margin: 50px auto;padding: 30px 20px;box-sizing: border-box;width: 560px;height: 444px;border-radius: 20px;background-color: #fff;">
-      <div class="header-toko" style="margin: 0;padding: 0;box-sizing: border-box;display: flex;align-items: center;margin-bottom: 30px;">
-        <img src="@path/assets/email-Invoice/toko.png" alt="" style="margin: 0;padding: 0;box-sizing: border-box;width: 25px;height: 25px;margin-right: 10px;">
+    <div class="container-toko"
+      style="margin: 50px auto;padding: 30px 20px;box-sizing: border-box;width: 560px;height: 444px;border-radius: 20px;background-color: #fff;">
+      <div class="header-toko"
+        style="margin: 0;padding: 0;box-sizing: border-box;display: flex;align-items: center;margin-bottom: 30px;">
+        <img src="@path/assets/email-Invoice/toko.png" alt=""
+          style="margin: 0;padding: 0;box-sizing: border-box;width: 25px;height: 25px;margin-right: 10px;">
         <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;">Detail Toko</p>
       </div>
       <div class="pembayaran" style="margin: 0;padding: 0;box-sizing: border-box;">
-        <div class="desc-pembayaran" style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;">Nama Toko</p>
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;">@nameStore</p>
+        <div class="desc-pembayaran"
+          style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
+          <p
+            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;">
+            Nama Toko : </p>
+          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;">
+            @nameStore</p>
         </div>
-        <div class="desc-pembayaran" style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;">Nomor Telepon</p>
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;">@phoneStore</p>
+        <div class="desc-pembayaran"
+          style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
+          <p
+            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;">
+            Nomor Telepon : </p>
+          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;">
+            @phoneStore</p>
         </div>
-        <div class="desc-pembayaran" style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;">Alamat Toko</p>
-          <p class="toko" style="margin: 0;padding: 0;box-sizing: border-box;width: 240px;text-align: justify;font-size: 18px;color: #636b78;font-weight: bold;">
+        <div class="desc-pembayaran"
+          style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
+          <p
+            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;">
+            Alamat Toko : </p>
+          <p class="toko"
+            style="margin: 0;padding: 0;box-sizing: border-box;width: 240px;text-align: justify;font-size: 18px;color: #636b78;font-weight: bold;">
             @addressStore
           </p>
         </div>
       </div>
 
-      <div class="line-2" style="margin: 30px auto;padding: 0;box-sizing: border-box;width: 520px;border: 1px solid #ccc;"></div>
+      <div class="line-2"
+        style="margin: 30px auto;padding: 0;box-sizing: border-box;width: 520px;border: 1px solid #ccc;"></div>
 
-      <div class="btn" style="margin: auto;padding: 0;box-sizing: border-box;width: 235px;height: 70px;">
-        <button style="margin: 0;padding: 0;box-sizing: border-box;width: 235px;height: 70px;border-radius: 10px;border: 2px solid #0075ff;background-color: #fff;font-size: 24px;font-weight: bold;color: #0075ff;cursor: pointer;">Lihat Toko</button>
+      <div class="btn" style="
+      margin: auto;
+      margin-top: 10px;
+      padding: 0;
+      box-sizing: border-box;
+      width: 235px;
+      height: 70px;
+      text-align: center;
+      ">
+        <a type="button" href="@storeUrl" target="_blank">
+          <input type="button" value="Lihat Toko" style="
+          text-align: center;
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          width: 235px;
+          height: 70px;
+          border-radius: 10px;
+          border: 2px solid #0075ff;
+          background-color: #fff;
+          font-size: 24px;
+          font-weight: bold;
+          color: #0075ff;
+          cursor: pointer;" />
+        </a>
       </div>
     </div>
     <!-- container toko -->
 
     <!-- Footer -->
-    <footer style="margin: 0;padding: 0 0 10px 0;box-sizing: border-box;width: 600px;height: auto;background-color: #d6e9ff;">
-      <div class="service" style="margin: auto;padding: 30px 0;box-sizing: border-box;width: 524px;display: flex;justify-content: space-between;">
+    <footer
+      style="margin: 0;padding: 0 0 10px 0;box-sizing: border-box;width: 600px;height: auto;background-color: #d6e9ff;">
+      <div class="service"
+        style="margin: auto;padding: 30px 0;box-sizing: border-box;width: 524px;display: flex;justify-content: space-between;">
         <div class="us" style="margin: 0;padding: 0;box-sizing: border-box;">
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;margin-bottom: 10px;color: #16479c;">Kunjungi Kami</p>
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #16479c;">www.sandbox.com</p>
+          <p
+            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;margin-bottom: 10px;color: #16479c;">
+            Kunjungi Kami</p>
+          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #16479c;">
+            www.sandbox.com</p>
         </div>
         <div class="cs" style="margin: 0;padding: 0;box-sizing: border-box;">
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;margin-bottom: 10px;color: #16479c;text-align: right;">Customer Services</p>
+          <p
+            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;margin-bottom: 10px;color: #16479c;text-align: right;">
+            Customer Services</p>
           <div class="phone" style="margin: 0;padding: 0;box-sizing: border-box;">
-            <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;margin-bottom: 10px;color: #16479c;text-align: right;">021 - 2345 2345</p>
-            <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #16479c;text-align: right;">0823 2345 6789</p>
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;margin-bottom: 10px;color: #16479c;text-align: right;">
+              021 - 2345 2345</p>
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #16479c;text-align: right;">
+              0823 2345 6789</p>
           </div>
         </div>
       </div>
-      <div class="line-2" style="margin: 30px auto;padding: 0;box-sizing: border-box;width: 520px;border: 1px solid #ccc;"></div>
+      <div class="line-2"
+        style="margin: 30px auto;padding: 0;box-sizing: border-box;width: 520px;border: 1px solid #ccc;"></div>
       <div class="title-footer" style="margin: 0;padding: 0;box-sizing: border-box;">
-        <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #16479c;text-align: center;margin-bottom: 20px;">
+        <p
+          style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #16479c;text-align: center;margin-bottom: 20px;">
           Email ini di buat Otomatis, jika anda membutuhkan bantuan silahkan
           hubungi Customer Service.
         </p>
-        <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #16479c;text-align: center;margin-bottom: 20px;">2023 HelloBisnis.com | All Rights Reserved.</p>
+        <p
+          style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #16479c;text-align: center;margin-bottom: 20px;">
+          2023 HelloBisnis.com | All Rights Reserved.</p>
       </div>
     </footer>
     <!-- Footer -->
