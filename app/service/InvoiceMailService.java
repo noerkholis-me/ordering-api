@@ -26,17 +26,27 @@ public class InvoiceMailService {
         }
         return instance;
     }
+    
 
-    public static void handleCallbackAndSendEmail(Order order) {
+    public static String email = "";
+    public static String subject = "";
+
+    public static void handleCallbackAndSendEmail(Order order, Boolean toAdmin) {
 
         logger.info(">>> incoming requet...  ");
         System.out.println("order >>> " + order.id);
 
         System.out.println("order member " + order.getMember().id);
-
-        String email = order.getMember().email;
+        if (toAdmin) {
+        	email = order.getStore().getMerchant().email;
+        	subject = MailConfig.subjectInvoiceAdmin;
+        } else {
+        	email = order.getMember().email;
+        	subject = MailConfig.subjectInvoice;
+        }
+        
         System.out.println("email >>> " + email);
-        Store store = order.getStore();
+        System.out.println("subject >>> " + subject);
 
 //        String urlLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/hellobisnisnewlogo.png";
 //        String urlEmailLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/email.png";
@@ -47,7 +57,7 @@ public class InvoiceMailService {
 
         Thread thread = new Thread(() -> {
             try {
-                MailConfig.sendmail(email, MailConfig.subjectInvoice, MailConfig.renderMailInvoiceTemplateNew(orderDate, order.getMember().fullName,
+                MailConfig.sendmail(email, subject, MailConfig.renderMailInvoiceTemplateNew(orderDate, order.getMember().fullName,
                 		order.getStore().storeName, order.getStore().storePhone, order.getStore().storeAddress, order.getTotalBayar(),
                 		Constant.getInstance().getImageUrl(), storeUrl));
             } catch (Exception e) {
@@ -59,11 +69,18 @@ public class InvoiceMailService {
         Transaction trx = Ebean.beginTransaction();
         try {
             OrderPayment orderPayment = OrderRepository.findDataOrderPayment(order.id);
-            orderPayment.setMailStatusCode("200");
-            orderPayment.setMailStatus("Success");
-            orderPayment.setMailMessage("SENT");
-            orderPayment.update();
-
+            if(toAdmin) {
+            	orderPayment.setMailStatusCode("200");
+	            orderPayment.setMailStatus("Success [ADMIN]");
+	            orderPayment.setMailMessage("SENT TO ADMIN");
+	            orderPayment.update();
+            } else {
+	            orderPayment.setMailStatusCode("200");
+	            orderPayment.setMailStatus("Success");
+	            orderPayment.setMailMessage("SENT");
+	            orderPayment.update();
+            }
+            
             trx.commit();
         } catch (Exception e) {
             logger.error("Error saat mengirim invoice ke customer", e);
@@ -73,5 +90,5 @@ public class InvoiceMailService {
             trx.end();
         }
     }
-
+    
 }
