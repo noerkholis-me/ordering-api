@@ -47,7 +47,7 @@ import repository.SubsCategoryMerchantRepository;
 
 public class ProductImportService {
 	
-	public static final String[] columnMerchant = { "No Sku", "Product Name", "Category Id", "Sub Category Id", "Subs Category Id", "Brand Id",
+	public static final String[] columnMerchant = { "No Sku", "Product Name", "Category", "Sub Category", "Subs Category", "Brand Id",
 			"Product Type", "Customizable", "Product Prize", "Discount Type", "Discount", "Price After Discount",
 			"Image Main", "Image 1", "Image 2", "Image 3", "Image 4", "Short Desc", "Long Desc" };
 	
@@ -67,7 +67,7 @@ public class ProductImportService {
 			workbook.setMissingCellPolicy(Row.RETURN_NULL_AND_BLANK);
 			XSSFSheet datatypeSheet = workbook.getSheetAt(0);
 			boolean isFirstLine = true;
-			CategoryMerchant category = null;
+			CategoryMerchant categoryMerchant = null;
 			SubCategoryMerchant subCategoryMerchant = null;
 			SubsCategoryMerchant subsCategoryMerchant = null;
 			BrandMerchant brand = null;
@@ -80,9 +80,9 @@ public class ProductImportService {
 
 						String noSku = getCellValue(row, 0);
 						String productName = getCellValue(row, 1);
-						String categoryId = getCellValue(row, 2);
-						String subCategoryId = getCellValue(row, 3);
-						String subsCategoryId = getCellValue(row, 4);
+						String category = getCellValue(row, 2);
+						String subCategory = getCellValue(row, 3);
+						String subsCategory = getCellValue(row, 4);
 						String brandId = getCellValue(row, 5);
 						String productType = getCellValue(row, 6);
 						String isCustomizeable = getCellValue(row, 7);
@@ -104,13 +104,13 @@ public class ProductImportService {
 						if(productName.isEmpty())
 							error += ", Product Name is Blank in Line " + line;
 						
-						if(categoryId.isEmpty())
+						if(category.isEmpty())
 							error += ", Category Id is Blank in Line " + line;
 						
-						if(subCategoryId.isEmpty())
+						if(subCategory.isEmpty())
 							error += ", Sub Category is Blank in Line " + line;
 						
-						if(subsCategoryId.isEmpty())
+						if(subsCategory.isEmpty())
 							error += ", Subs Category is Blank in Line " + line;
 						
 						if(brandId.isEmpty())
@@ -143,17 +143,18 @@ public class ProductImportService {
 						if(longDesc.isEmpty())
 							error += ", Long Desc is Blank in Line " + line;
 						
-						category = CategoryMerchantRepository.findByIdAndMerchantId(Long.valueOf(categoryId), merchant);
+						categoryMerchant = CategoryMerchantRepository.
+								findByNameAndMerchantId(category, merchant);
 						if (category == null) 
 							error += ", invalid Category Id in line " + line;
 						
-						subCategoryMerchant = SubCategoryMerchantRepository
-								.findByIdAndMerchantId(Long.parseLong(subCategoryId), merchant);
+						subCategoryMerchant = SubCategoryMerchantRepository.
+								findByNameAndMerchantId(subsCategory, merchant);
 						if (subCategoryMerchant == null) 
 							error += ", invalid Sub Category Id in line " + line;
 						
 						subsCategoryMerchant = SubsCategoryMerchantRepository
-								.findByIdAndMerchantId(Long.parseLong(subsCategoryId), merchant);
+								.findByNameAndMerchantId(subsCategory, merchant);
 						if (subsCategoryMerchant == null) 
 							error += ", invalid Subs Category Id In Line " + line;
 						
@@ -163,7 +164,7 @@ public class ProductImportService {
 						
 						if (error.isEmpty()) {
 							ProductMerchant newProductMerchant = new ProductMerchant();
-							constructProductEntityRequest(newProductMerchant, merchant, noSku, productName, category,
+							constructProductEntityRequest(newProductMerchant, merchant, noSku, productName, categoryMerchant,
 									subCategoryMerchant, subsCategoryMerchant, brand);
 							newProductMerchant.save();
 
@@ -449,7 +450,7 @@ public class ProductImportService {
 		newProductMerchantDetail.setDiscount(!discount.isEmpty() ? Double.valueOf(discount) : 0D);
 		newProductMerchantDetail.setProductPriceAfterDiscount(
 				!priceAfterDisc.isEmpty() ? new BigDecimal(priceAfterDisc) : new BigDecimal(productPrice));
-		newProductMerchantDetail.setProductImageMain(image1);
+		newProductMerchantDetail.setProductImageMain(imageMain);
 		newProductMerchantDetail.setProductImage1(image1);
 		newProductMerchantDetail.setProductImage2(image2);
 		newProductMerchantDetail.setProductImage3(image3);

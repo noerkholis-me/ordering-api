@@ -8,6 +8,7 @@ import models.Store;
 import models.transaction.Order;
 import models.transaction.OrderPayment;
 import play.Logger;
+import repository.OrderPaymentRepository;
 import repository.OrderRepository;
 
 import java.text.SimpleDateFormat;
@@ -30,6 +31,8 @@ public class InvoiceMailService {
 
     public static String email = "";
     public static String subject = "";
+    public static String metodePembayaran = "";
+    public static String logoPembayaran = "";
 
     public static void handleCallbackAndSendEmail(Order order, Boolean toAdmin) {
 
@@ -53,13 +56,34 @@ public class InvoiceMailService {
         SimpleDateFormat formatter = new SimpleDateFormat("EEEE, dd MMMM yyyy - HH : mm : ss", new Locale("id", "ID"));
         String orderDate = formatter.format(order.getOrderDate());
         String storeUrl = Constant.getInstance().getFrontEndUrl().concat(order.getStore().storeCode);
+        String invoiceUrl = Constant.getInstance().getFrontEndUrl().concat(order.getStore().storeCode).concat("/")
+        		.concat(order.getOrderNumber());
+        Optional<OrderPayment> optionalOrderPayment = OrderPaymentRepository.findByOrderId(order.id);
+        OrderPayment orderPayment = optionalOrderPayment.get();
+        if (orderPayment.getPaymentType().equalsIgnoreCase("virtual_account")) {
+        	metodePembayaran = "Virtual Account";
+        	logoPembayaran = "VA.png";
+        } else if(orderPayment.getPaymentType().equalsIgnoreCase("qr_code")) {
+        	metodePembayaran = "QRIS";
+        	logoPembayaran = "QRIS.png";
+        } else if(orderPayment.getPaymentType().equalsIgnoreCase("gopay")) {
+        	metodePembayaran = "Gopay";
+        	logoPembayaran = "Gopay.png";
+        }
+        
         
 
         Thread thread = new Thread(() -> {
             try {
-                MailConfig.sendmail(email, subject, MailConfig.renderMailInvoiceTemplateNew(orderDate, order.getMember().fullName,
-                		order.getStore().storeName, order.getStore().storePhone, order.getStore().storeAddress, order.getTotalBayar(),
-                		Constant.getInstance().getImageUrl(), storeUrl));
+            	if(toAdmin) {
+                    MailConfig.sendmail(email, subject, MailConfig.renderMailInvoiceTemplateAdmin(orderDate, order.getStore().storeName,
+                    		order.getStore().storeName, order.getStore().storePhone, order.getStore().storeAddress, order.getTotalBayar(),
+                    		Constant.getInstance().getImageUrl(), storeUrl, metodePembayaran, logoPembayaran, order.getStore().getMerchant().fullName, invoiceUrl));
+            	} else {
+                    MailConfig.sendmail(email, subject, MailConfig.renderMailInvoiceTemplateNew(orderDate, order.getMember().fullName,
+                    		order.getStore().storeName, order.getStore().storePhone, order.getStore().storeAddress, order.getTotalBayar(),
+                    		Constant.getInstance().getImageUrl(), storeUrl, metodePembayaran, logoPembayaran, invoiceUrl));
+            	}
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -68,7 +92,6 @@ public class InvoiceMailService {
 
         Transaction trx = Ebean.beginTransaction();
         try {
-            OrderPayment orderPayment = OrderRepository.findDataOrderPayment(order.id);
             if(toAdmin) {
             	orderPayment.setMailStatusCode("200");
 	            orderPayment.setMailStatus("Success [ADMIN]");
