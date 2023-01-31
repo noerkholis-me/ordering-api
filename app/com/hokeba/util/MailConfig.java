@@ -27,6 +27,7 @@ public class MailConfig {
 	public static final String subjectActivation = "[Sandbox] Email Activation";
 	public static final String subjectConfirmOrder = "[Sandbox] Order Confirmation";
 	public static final String subjectInvoice = "[Sandbox] Invoice";
+	public static final String subjectInvoiceAdmin = "[Sandbox] New Order Succcessfull";
 
 	// Using send grid api
 	public static boolean sendmail2(String recipients, String subject, String contentTemplate) {
@@ -96,9 +97,9 @@ public class MailConfig {
 				.toString();
 	}
 	
-	public static String renderMailInvoiceTemplateNew(String customerName, String nameStore, String phoneStore, String addressStore, String amount,
-			String url) {
-		String html = views.html.invoiceMailNew.render(customerName, nameStore, phoneStore, addressStore, amount, url).toString();
+	public static String renderMailInvoiceTemplateNew(String orderDate,String customerName, String nameStore, String phoneStore, String addressStore, String amount,
+			String url, String storeUrl) {
+		String html = views.html.invoiceMailNew.render(orderDate, customerName, nameStore, phoneStore, addressStore, amount, url, storeUrl).toString();
 		return html;
 	}
 
