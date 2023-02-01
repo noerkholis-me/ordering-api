@@ -1,5 +1,5 @@
 @(orderDate: String, customerName: String, nameStore: String, phoneStore: String, addressStore: String, harga: String,
-path: String, storeUrl: String, metodePembayaran: String, metodePembayaranLogo: String, invoiceUrl: String)
+path: String, storeUrl: String, metodePembayaran: String, metodePembayaranLogo: String, merchantName: String, invoiceUrl: String)
 <!DOCTYPE html>
 <html lang="en" style="margin: 0;padding: 0;box-sizing: border-box;">
 
@@ -25,6 +25,7 @@ path: String, storeUrl: String, metodePembayaran: String, metodePembayaranLogo: 
 
     <div class="customer" style="margin: 55px 0;padding: 0 20px;box-sizing: border-box;">
       <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 28px;font-weight: bold;">Hello, @customerName</p>
+      <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 28px;font-weight: bold;">@merchantName</p>
     </div>
     <!-- header -->
 
@@ -36,8 +37,7 @@ path: String, storeUrl: String, metodePembayaran: String, metodePembayaranLogo: 
         </p>
         <p
           style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636b78;margin-top: 5px;">
-          Pembayaran telah terverifikasi dan pesanan telah diteruskan ke
-          Penjual
+          Pembayaran telah terverifikasi. Mohon segera proses Orderan
         </p>
       </div>
 
@@ -107,19 +107,19 @@ path: String, storeUrl: String, metodePembayaran: String, metodePembayaranLogo: 
           <p
             style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;margin-right: auto;">
             Cek Status Pesanan Anda </p>
-          <a href="@invoiceUrl" type="button">
-            <input 
-            style="
-            text-decoration: none;
-            padding: 0;
-            box-sizing: border-box;
-            font-size: 18px;
-            color: #121ebe;
-            font-weight: bold;
-            border: none;
-            background: none;" 
-            type="button" value="Lihat Pesanan">
-          </a>
+            <a href="@invoiceUrl" type="button">
+              <input 
+              style="
+              text-decoration: none;
+              padding: 0;
+              box-sizing: border-box;
+              font-size: 18px;
+              color: #121ebe;
+              font-weight: bold;
+              border: none;
+              background: none;" 
+              type="button" value="Lihat Pesanan">
+            </a>
         </div>
         <div class="desc-pembayaran"
           style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
