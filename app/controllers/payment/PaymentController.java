@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.http.response.global.ServiceResponse;
+
 import controllers.BaseController;
 import dtos.payment.OrderPaymentResponse;
 import dtos.payment.ShowQrCodeResponse;
@@ -19,6 +20,7 @@ import repository.OrderPaymentRepository;
 import repository.OrderRepository;
 import service.InvoiceMailService;
 import service.PaymentService;
+import service.firebase.FirebaseService;
 
 import javax.swing.text.html.Option;
 import java.util.Optional;
@@ -165,6 +167,8 @@ public class PaymentController extends BaseController {
             
             if(Boolean.parseBoolean(toAdmin)) {
             	InvoiceMailService.handleCallbackAndSendEmail(order.get(), true);
+            	
+            	FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order.get());
             	
             	response.setBaseResponse(1, 0, 0, success, "SENT");
                 return ok(Json.toJson(response));

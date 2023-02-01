@@ -26,6 +26,7 @@ libraryDependencies ++= Seq(
   "javax.xml.ws" % "jaxws-api" % "2.3.1",
   "org.projectlombok" % "lombok" % "1.16.16",
   "org.json" % "json" % "20210307",
+  "org.apache.httpcomponents" % "httpasyncclient" % "4.1.1",
   ("com.clever-age" % "play2-elasticsearch" % "1.4-SNAPSHOT")
           .exclude("com.typesafe.play", "play-functional_2.4.6")
           .exclude("com.typesafe.akka", "akka-actor_2.10")
