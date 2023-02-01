@@ -908,10 +908,13 @@ public class ProductStoreController extends BaseController {
                         List<ProductMerchantDetail> dataProductDetail = ProductMerchantDetailRepository.getDataByPagination(query, offset, limit);
 
                         List<ProductSpecificStoreResponse> responses = new ArrayList<>();
+                        List<ProductSpecificStoreResponse> responsesMainProduct = new ArrayList<>();
+                        boolean isProductStore = false;
                         for (ProductMerchantDetail productMerchantDetail : dataProductDetail) {
                             ProductSpecificStoreResponse responseProd = new ProductSpecificStoreResponse();
                             List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchantDetail.getProductMerchant().id).orderBy().desc("t0.id").findList();
                             if (listProductStore.size() > 0) {
+                                isProductStore = true;
                                 for (ProductStore productStore : listProductStore) {
                                     if (productStore.getStore().id.equals(store.id)) {
                                         responseProd.setProductId(productMerchantDetail.getProductMerchant().id);
@@ -967,7 +970,7 @@ public class ProductStoreController extends BaseController {
 
                                         responseProd.setProductStore(responseStore != null ? responseStore : null);
 
-                                        responses.add(responseProd);
+                                        responsesMainProduct.add(responseProd);
                                     }
                                 }
                             } else {
@@ -1014,8 +1017,8 @@ public class ProductStoreController extends BaseController {
                             }
                         }
                         response.setBaseResponse(
-                                responses.size(), offset, limit,
-                                success + " menampilkan data", responses
+                                isProductStore ? responsesMainProduct.size() : responses.size(), offset, limit,
+                                success + " menampilkan data", isProductStore ? responsesMainProduct : responses
                         );
                     } else if (store == null) {
                         response.setBaseResponse(0, 0, 0, "Store tidak ditemukan.", null);
