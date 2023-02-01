@@ -91,6 +91,56 @@ public class MailConfig {
 		}
 		return false;
 	}
+	
+	public static boolean sendmail(String recipients, String subject, String contentTemplate, String emailCC) {
+		Properties props = new Properties();
+		props.setProperty("mail.smtp.host", smtp);
+		props.setProperty("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+		props.setProperty("mail.smtp.socketFactory.fallback", "false");
+		props.setProperty("mail.smtp.port", "465");
+		props.setProperty("mail.smtp.socketFactory.port", "465");
+		props.put("mail.smtp.starttls.enable", "true");
+		props.put("mail.smtp.auth", "true");
+		props.put("mail.debug", "true");
+		props.put("mail.store.protocol", "pop3");
+		props.put("mail.transport.protocol", "smtp");
+		props.put("mail.debug.auth", "true");
+		props.setProperty( "mail.pop3.socketFactory.fallback", "false");
+//		props.put("mail.smtp.auth", "true");
+//		props.put("mail.smtp.starttls.enable", "true");
+//		props.put("mail.smtp.host", smtp);
+//		props.put("mail.smtp.port", "465");
+//		props.put("mail.debug", "true");
+//		props.put("mail.smtp.sendpartial", "true");
+		props.put("mail.smtp.ssl.enable", "true");
+		props.put("mail.smtp.ssl.trust", "*");
+		props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+
+		Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+			@Override
+			protected PasswordAuthentication getPasswordAuthentication() {
+				return new PasswordAuthentication(user, pass);
+			}
+		});
+
+		try {
+
+			Message message = new MimeMessage(session);
+			message.setFrom(new InternetAddress(sender));
+			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipients));
+			message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(emailCC));
+			message.setSubject(subject);
+			message.setContent(contentTemplate, "text/html; charset=utf-8");
+			Transport.send(message, message.getAllRecipients());
+
+			return true;
+		} catch (MessagingException e) {
+			throw new RuntimeException(e);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 	public static String renderMailInvoiceTemplate(String url, String urlEmailLogo, Order order) {
 		return views.html.invoiceMail.render(url, urlEmailLogo, order)
