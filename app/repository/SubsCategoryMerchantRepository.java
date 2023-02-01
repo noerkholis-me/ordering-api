@@ -39,7 +39,7 @@ public class SubsCategoryMerchantRepository extends Model {
     public static SubsCategoryMerchant findByNameAndMerchantId(String name, Merchant merchant) {
     	try {
 			return find.where()
-					.eq("t0.subscategoryName".toLowerCase(), name.toLowerCase())
+					.eq("t0.subscategory_name".toLowerCase(), name.toLowerCase())
 					.eq("merchant", merchant)
 					.eq("t0.is_deleted", Boolean.FALSE)
 					.findUnique();

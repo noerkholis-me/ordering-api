@@ -32,7 +32,7 @@ public class CategoryMerchantRepository extends Model {
     public static CategoryMerchant findByNameAndMerchantId(String name, Merchant merchant) {
     	try {
 			return find.where()
-					.eq("t0.categoryName".toLowerCase(), name.toLowerCase())
+					.eq("t0.category_name".toLowerCase(), name.toLowerCase())
 					.eq("merchant", merchant)
 					.eq("t0.is_deleted", Boolean.FALSE)
 					.findUnique();

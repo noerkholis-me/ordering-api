@@ -47,7 +47,7 @@ import repository.SubsCategoryMerchantRepository;
 
 public class ProductImportService {
 	
-	public static final String[] columnMerchant = { "No Sku", "Product Name", "Category", "Sub Category", "Subs Category", "Brand Id",
+	public static final String[] columnMerchant = { "No Sku", "Product Name", "Category", "Sub Category", "Subs Category", "Brand",
 			"Product Type", "Customizable", "Product Prize", "Discount Type", "Discount", "Price After Discount",
 			"Image Main", "Image 1", "Image 2", "Image 3", "Image 4", "Short Desc", "Long Desc" };
 	
@@ -70,7 +70,7 @@ public class ProductImportService {
 			CategoryMerchant categoryMerchant = null;
 			SubCategoryMerchant subCategoryMerchant = null;
 			SubsCategoryMerchant subsCategoryMerchant = null;
-			BrandMerchant brand = null;
+			BrandMerchant brandMerchant = null;
 			try {
 				for (Row row : datatypeSheet) {
 					if (isFirstLine) {
@@ -83,7 +83,7 @@ public class ProductImportService {
 						String category = getCellValue(row, 2);
 						String subCategory = getCellValue(row, 3);
 						String subsCategory = getCellValue(row, 4);
-						String brandId = getCellValue(row, 5);
+						String brand = getCellValue(row, 5);
 						String productType = getCellValue(row, 6);
 						String isCustomizeable = getCellValue(row, 7);
 						String productPrize = getCellValue(row, 8);
@@ -113,7 +113,7 @@ public class ProductImportService {
 						if(subsCategory.isEmpty())
 							error += ", Subs Category is Blank in Line " + line;
 						
-						if(brandId.isEmpty())
+						if(brand.isEmpty())
 							error += ", Brand Id is Blank in Line " + line;
 						
 						if(productType.isEmpty())
@@ -158,14 +158,15 @@ public class ProductImportService {
 						if (subsCategoryMerchant == null) 
 							error += ", invalid Subs Category Id In Line " + line;
 						
-						brand = BrandMerchantRepository.findByIdAndMerchantId(Long.parseLong(brandId), merchant);
-						if (brand == null)
+						brandMerchant = BrandMerchantRepository.findByNameAndMerchantId
+								(brand, merchant);
+						if (brandMerchant == null)
 							error += ", invalid Brand Id In Line " + line;
 						
 						if (error.isEmpty()) {
 							ProductMerchant newProductMerchant = new ProductMerchant();
 							constructProductEntityRequest(newProductMerchant, merchant, noSku, productName, categoryMerchant,
-									subCategoryMerchant, subsCategoryMerchant, brand);
+									subCategoryMerchant, subsCategoryMerchant, brandMerchant);
 							newProductMerchant.save();
 
 							// do save to detail
