@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import models.transaction.Order;
 import play.Play;
 import service.firebase.request.FirebaseDataRequest;
 import service.firebase.request.FirebaseNotificationRequest;
@@ -49,10 +50,9 @@ public class FirebaseService {
     
     //TODO services method
     public FirebaseRequest buildFirebaseRequest(String to, String title, String message) {
-    	String topic = buildFirebaseTopic(to);
     	FirebaseDataRequest data = new FirebaseDataRequest(message, title);
     	FirebaseNotificationRequest notification = new FirebaseNotificationRequest(message, title);
-    	return new FirebaseRequest(topic, notification, data);
+    	return new FirebaseRequest(to, notification, data);
     }
     
     public void sendPushNotif(FirebaseRequest request) throws Exception {
@@ -76,4 +76,19 @@ public class FirebaseService {
 			client.close();
 		}
     }
+    
+    //TODO custom method
+    public void sendFirebaseNotifOrderToStore(Order orderData) {
+    	try {
+    		String storeCode = orderData.getStore().storeCode;
+    		String title = "Pesanan Baru";
+    		String message = "Pesanan baru atas nama " + orderData.getMemberName();
+    		String to = buildFirebaseTopic("store-" + storeCode);
+        	FirebaseRequest request = buildFirebaseRequest(to, title, message);
+        	sendPushNotif(request);
+    	} catch (Exception e) {
+    		logger.error(e.getMessage());
+    	}
+    }
+    
 }
