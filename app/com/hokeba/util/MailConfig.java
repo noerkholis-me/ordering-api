@@ -161,10 +161,15 @@ public class MailConfig {
 		return html;
 	}
 	
-	public static String renderMailInvoiceTemplateAdmin(String orderDate,String customerName, String nameStore, String phoneStore, String addressStore, String amount,
-			String url, String storeUrl, String metodePembayaran, String logoPembayaran, String merchantName, String invoiceUrl) {
-		String html = views.html.invoiceMailNewAdmin.render(orderDate, customerName, nameStore, phoneStore, addressStore, amount, url, 
-				storeUrl, metodePembayaran, logoPembayaran, merchantName, invoiceUrl).toString();
+//	public static String renderMailInvoiceTemplateAdmin(String orderDate,String customerName, String nameStore, String phoneStore, String addressStore, String amount,
+//			String url, String storeUrl, String metodePembayaran, String logoPembayaran, String merchantName, String invoiceUrl) {
+//		String html = views.html.invoiceMailNewAdmin.render(orderDate, customerName, nameStore, phoneStore, addressStore, amount, url, 
+//				storeUrl, metodePembayaran, logoPembayaran, merchantName, invoiceUrl).toString();
+//		return html;
+//	}
+	
+	public static String renderMailInvoiceTemplateAdmin(String imagePath,Order order, OrderPayment orderPayment) {
+		String html = views.html.invoiceMailNewAdmin.render(imagePath,order, orderPayment).toString();
 		return html;
 	}
 
