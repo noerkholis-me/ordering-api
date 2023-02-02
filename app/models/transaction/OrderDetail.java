@@ -5,8 +5,13 @@ import lombok.EqualsAndHashCode;
 import models.BaseModel;
 import models.ProductStore;
 import models.merchant.ProductMerchant;
+import models.merchant.ProductMerchantDetail;
+import repository.ProductMerchantDetailRepository;
 
 import javax.persistence.*;
+
+import com.hokeba.util.Helper;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -52,9 +57,22 @@ public class OrderDetail extends BaseModel {
     public String getNamaProduk() {
         return this.productName;
     }
+    
+    public String fetchQuantity() {
+    	return this.quantity.toString();
+    }
 
     public List<OrderDetailAddOn> getProductDetailAddOn() {
         return this.orderDetailAddOns;
+    }
+    
+    public String fetchPrice () {
+    	return Helper.getRupiahFormat(this.productPrice.doubleValue());
+    }
+    
+    public String fetchMainImage() {
+    	ProductMerchantDetail productDetail = ProductMerchantDetailRepository.findByProduct(this.productMerchant);
+    	return productDetail.getProductImageMain();
     }
 
 }

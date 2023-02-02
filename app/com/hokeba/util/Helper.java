@@ -10,6 +10,8 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -302,5 +304,32 @@ public class Helper {
                 return "";
             }
         }).collect(Collectors.joining());
+    }
+    
+    public static String getRupiahFormat (Double value) {
+    	DecimalFormat rupiah = (DecimalFormat) DecimalFormat.getCurrencyInstance();
+	    DecimalFormatSymbols formatRp = new DecimalFormatSymbols();
+	
+	    formatRp.setCurrencySymbol("Rp. ");
+	    formatRp.setMonetaryDecimalSeparator(',');
+	    formatRp.setGroupingSeparator('.');
+	
+	    rupiah.setDecimalFormatSymbols(formatRp);
+	    
+	    return rupiah.format(value);
+    }
+    
+    public static String formatPhoneNumber(String phoneNumber) {
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+        for (int i = 0; i < phoneNumber.length(); i++) {
+            if (count == 4) {
+                sb.append("-");
+                count = 0;
+            }
+            sb.append(phoneNumber.charAt(i));
+            count++;
+        }
+        return sb.toString();
     }
 }
