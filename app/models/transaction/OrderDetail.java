@@ -5,6 +5,8 @@ import lombok.EqualsAndHashCode;
 import models.BaseModel;
 import models.ProductStore;
 import models.merchant.ProductMerchant;
+import models.merchant.ProductMerchantDetail;
+import repository.ProductMerchantDetailRepository;
 
 import javax.persistence.*;
 
@@ -66,6 +68,11 @@ public class OrderDetail extends BaseModel {
     
     public String fetchPrice () {
     	return Helper.getRupiahFormat(this.productPrice.doubleValue());
+    }
+    
+    public String fetchMainImage() {
+    	ProductMerchantDetail productDetail = ProductMerchantDetailRepository.findByProduct(this.productMerchant);
+    	return productDetail.getProductImageMain();
     }
 
 }

@@ -19,7 +19,7 @@
     style="margin: auto;padding: 0;box-sizing: border-box;width: 600px;height: 1923px;background-color: #E6F2FF;">
     <!-- header -->
     <div class="header"
-      style="margin: 0;padding: 28px 20px;box-sizing: border-box;width: 600px;height: 115px;background-image: url(D:/project/Sandbox/assets-notifikasi-email/design-new/Assets/Assets/bg-header.svg);">
+      style="margin: 0;padding: 28px 20px;box-sizing: border-box;width: 600px;height: 115px;background-image: url(@path/assets/email-Invocie/bg-header.png);">
       <img src="@path/assets/email-Inovice/hellobisnisnewlogo.png" alt="" style="margin: 0;padding: 0;box-sizing: border-box;">
     </div>
 
@@ -47,7 +47,8 @@
         <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 20px;font-weight: bold;color: #636B78; margin-right: auto;">Nomor
           Antrian</p>
         <div class="no-antrian"
-          style="margin: 0;padding: 0;box-sizing: border-box;width: 75px;height: 45px;border-radius: 10px;background-color: #D6E9FF;display: flex;justify-content: center;align-items: center;">
+          style="margin: 0;padding: 0;box-sizing: border-box;width: 75px;height: 45px;border-radius: 10px;background-color: #D6E9FF;display: flex;
+          justify-content: center;align-items: center; align-items: center;">
           <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 25px;font-weight: bold;color: #636B78;">
             @order.scalaFetchOrderQueue()
           </p>
@@ -122,7 +123,7 @@
           </div>
           @for(o <- order.getProductDetail()){
           <div class="item-produk"
-            style="margin: 20px auto;padding: 0;box-sizing: border-box;width: 479px;height: 20px;display: flex;">
+            style="margin: 40px auto;padding: 0;box-sizing: border-box;width: 479px;height: 20px;display: flex;">
             
             <p
               style="
@@ -238,7 +239,13 @@
       <!-- End Pembayaran -->
 
       <!-- Start QR -->
-      <div class="qr-code"
+      <div class="qr-code" style="margin: 40px auto;padding: 0;box-sizing: border-box;width: 500px;display: flex;align-items: center;">
+        <p style="margin: 0;padding: 0;box-sizing: border-box;text-align: center;font-size: 18px;line-height: 20px;color: #636B78;margin-right: auto;">Cek Status Pesanan Anda</p>
+        <a href="@order.scalaFetchStoreQrUrl()"
+        style="color: #16479C;
+        margin: 0;padding: 0;box-sizing: border-box;text-align: center;font-size: 18px;line-height: 20px;">Lihat Pesanan</a>
+    </div>
+      <!-- <div class="qr-code"
         style="margin: 40px auto;padding: 0;box-sizing: border-box;width: 500px;display: flex;align-items: center;">
         <div style="margin: 0;padding: 0;box-sizing: border-box;">
           <img src="@path/assets/QR.png" alt="">
@@ -248,7 +255,7 @@
           Untuk cek informasi pesanan kamu, Silahkan <span
             style="margin: 0;padding: 0;box-sizing: border-box;font-weight: bold;"> Scan QR Code </span>di
           sebelah.Terima Kasih.</p>
-      </div>
+      </div> -->
       <!-- End QR -->
     </div>
     <!-- Container Reciept  -->
@@ -257,13 +264,11 @@
     <div class="detail-toko" style="margin: 50px;padding: 0;box-sizing: border-box;width: auto;">
       <p
         style="margin: 0;padding: 0;box-sizing: border-box;font-size: 30px;text-align: center;font-weight: bold;color: #000;">
-        Home Center Store Berkah</p>
+        @order.scalaFetchStoreName()</p>
       <p
         style="margin: 0;padding: 0;box-sizing: border-box;font-size: 20px;text-align: center;font-weight: 100;color: #636B78;margin-top: 10px;">
-        Kawasan Niaga Terpadu Sudirman (SCBD, Jalan Tulodong Atas 2 No. Lot 12 RT 05 RW 02, Senayan. Kec Kebayoran Baru
-        Kota Jakarta Selatan. Daerah Khusus Ibukota Jakarta 12190 <span
-          style="margin: 0;padding: 0;box-sizing: border-box;font-weight: bold;">Nomor Telepon : 0823 - 4561 -
-          7890</span> </p>
+        @order.scalaFetchStoreAddress() <br><span
+          style="margin: 0;padding: 0;box-sizing: border-box;font-weight: bold;">Nomor Telepon : @order.scalaFetchStorePhone()</span> </p>
     </div>
     <!-- End Detail Toko -->
 

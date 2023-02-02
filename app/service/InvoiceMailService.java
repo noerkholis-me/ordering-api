@@ -111,9 +111,8 @@ public class InvoiceMailService {
             try {
             	if(toAdmin) {
             		for(int i = 0; i < emails.size(); i++) {
-                    MailConfig.sendmail(emails.get(i), subject, MailConfig.renderMailInvoiceTemplateAdmin(orderDate, order.getStore().storeName,
-                    		order.getStore().storeName, order.getStore().storePhone, order.getStore().storeAddress, order.getTotalBayar(),
-                    		Constant.getInstance().getImageUrl(), storeUrl, metodePembayaran, logoPembayaran, order.getStore().getMerchant().fullName, invoiceUrl), emailCC);
+                    MailConfig.sendmail(emails.get(i), subject, MailConfig.renderMailInvoiceTemplateAdmin(Constant.getInstance().getImageUrl()
+                    		,order, orderPayment), emailCC);
             		}
             	} else {
                     MailConfig.sendmail(email, subject, MailConfig.renderMailInvoiceTemplateNew(Constant.getInstance().getImageUrl(),order, orderPayment));
