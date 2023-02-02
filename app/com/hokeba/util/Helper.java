@@ -318,4 +318,18 @@ public class Helper {
 	    
 	    return rupiah.format(value);
     }
+    
+    public static String formatPhoneNumber(String phoneNumber) {
+        StringBuilder sb = new StringBuilder();
+        int count = 0;
+        for (int i = 0; i < phoneNumber.length(); i++) {
+            if (count == 4) {
+                sb.append("-");
+                count = 0;
+            }
+            sb.append(phoneNumber.charAt(i));
+            count++;
+        }
+        return sb.toString();
+    }
 }

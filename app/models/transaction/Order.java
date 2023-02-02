@@ -181,6 +181,18 @@ public class Order extends BaseModel {
     	return this.member.fullName;
     }
     
+    public String scalaFetchMemberPhoneNumber () {
+    	return this.member.phone;
+    }
+    
+    public String scalaFetchMemberEmail() {
+    	return this.member.email;
+    }
+    
+    public String scalaFetchAddress() {
+    	return this.destinationAddress;
+    }
+    
     public String scalaFetchOrderDate () {
     	SimpleDateFormat formatter = new SimpleDateFormat("EEEE, dd MMMM yyyy - HH : mm : ss", new Locale("id", "ID"));
     	return formatter.format(this.orderDate);
@@ -206,8 +218,21 @@ public class Order extends BaseModel {
     	return this.orderQueue.toString();
     }
     
+    public String scalaFetchStoreName() {
+    	return this.store.storeName;
+    }
     
+    public String scalaFetchStoreAddress() {
+    	return this.store.storeAddress;
+    }
 
+    public String scalaFetchStorePhone() {
+    	return this.store.storePhone;
+    }
+    
+    public String scalaFetchStoreQrUrl() {
+    	return this.getStore().storeQrCode;
+    }
 
 
 }
