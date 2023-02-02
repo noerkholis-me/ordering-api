@@ -7,6 +7,9 @@ import models.ProductStore;
 import models.merchant.ProductMerchant;
 
 import javax.persistence.*;
+
+import com.hokeba.util.Helper;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -55,6 +58,10 @@ public class OrderDetail extends BaseModel {
 
     public List<OrderDetailAddOn> getProductDetailAddOn() {
         return this.orderDetailAddOns;
+    }
+    
+    public String fetchPrice () {
+    	return Helper.getRupiahFormat(this.productPrice.doubleValue());
     }
 
 }

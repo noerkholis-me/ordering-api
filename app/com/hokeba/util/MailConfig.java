@@ -14,7 +14,9 @@ import models.Member;
 import models.Merchant;
 import models.SalesOrder;
 import models.transaction.Order;
+import models.transaction.OrderPayment;
 import play.data.Form;
+import repository.OrderPaymentRepository;
 
 public class MailConfig {
 
@@ -147,10 +149,15 @@ public class MailConfig {
 				.toString();
 	}
 	
-	public static String renderMailInvoiceTemplateNew(String orderDate,String customerName, String nameStore, String phoneStore, String addressStore, String amount,
-			String url, String storeUrl, String metodePembayaran, String logoPembayaran, String invoiceUrl) {
-		String html = views.html.invoiceMailNew.render(orderDate, customerName, nameStore, phoneStore, addressStore, amount, url, 
-				storeUrl, metodePembayaran, logoPembayaran,invoiceUrl).toString();
+//	public static String renderMailInvoiceTemplateNew(String orderDate,String customerName, String nameStore, String phoneStore, String addressStore, String amount,
+//			String url, String storeUrl, String metodePembayaran, String logoPembayaran, String invoiceUrl) {
+//		String html = views.html.invoiceMailNew.render(orderDate, customerName, nameStore, phoneStore, addressStore, amount, url, 
+//				storeUrl, metodePembayaran, logoPembayaran,invoiceUrl).toString();
+//		return html;
+//	}
+	
+	public static String renderMailInvoiceTemplateNew(String imagePath,Order order, OrderPayment orderPayment) {
+		String html = views.html.invoiceMailNew.render(imagePath,order, orderPayment).toString();
 		return html;
 	}
 	
