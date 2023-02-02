@@ -55,6 +55,10 @@ public class OrderDetail extends BaseModel {
     public String getNamaProduk() {
         return this.productName;
     }
+    
+    public String fetchQuantity() {
+    	return this.quantity.toString();
+    }
 
     public List<OrderDetailAddOn> getProductDetailAddOn() {
         return this.orderDetailAddOns;
