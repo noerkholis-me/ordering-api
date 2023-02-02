@@ -80,6 +80,7 @@ public class InvoiceMailService {
         	logoPembayaran = "Gopay.png";
         }
         
+        
         if(toAdmin) {
         	Query<StoreAccessDetail> queryDetail = StoreAccessRepository.findDetail.where().
                     eq("t0.store_id", order.getStore().id).eq("t0.is_deleted", false).order("t0.id");
@@ -115,9 +116,7 @@ public class InvoiceMailService {
                     		Constant.getInstance().getImageUrl(), storeUrl, metodePembayaran, logoPembayaran, order.getStore().getMerchant().fullName, invoiceUrl), emailCC);
             		}
             	} else {
-                    MailConfig.sendmail(email, subject, MailConfig.renderMailInvoiceTemplateNew(orderDate, order.getMember().fullName,
-                    		order.getStore().storeName, order.getStore().storePhone, order.getStore().storeAddress, order.getTotalBayar(),
-                    		Constant.getInstance().getImageUrl(), storeUrl, metodePembayaran, logoPembayaran, invoiceUrl));
+                    MailConfig.sendmail(email, subject, MailConfig.renderMailInvoiceTemplateNew(Constant.getInstance().getImageUrl(),order, orderPayment));
             	}
             } catch (Exception e) {
                 e.printStackTrace();
