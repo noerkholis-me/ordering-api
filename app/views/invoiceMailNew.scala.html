@@ -1,251 +1,307 @@
-@(orderDate: String, customerName: String, nameStore: String, phoneStore: String, addressStore: String, harga: String,
-path: String, storeUrl: String, metodePembayaran: String, metodePembayaranLogo: String, invoiceUrl: String)
+@import models.transaction.Order
+@import models.transaction.OrderPayment
+@(path: String, order: Order, orderPayment: OrderPayment)
 <!DOCTYPE html>
 <html lang="en" style="margin: 0;padding: 0;box-sizing: border-box;">
 
 <head style="margin: 0;padding: 0;box-sizing: border-box;">
-  <meta http-equiv="Content-Type" content="text/html" charset="UTF-8"
+  <meta charset="UTF-8" style="margin: 0;padding: 0;box-sizing: border-box;">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" style="margin: 0;padding: 0;box-sizing: border-box;">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"
     style="margin: 0;padding: 0;box-sizing: border-box;">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    style="margin: 0;padding: 0;box-sizing: border-box;">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" style="margin: 0;padding: 0;box-sizing: border-box;">
-  <title style="margin: 0;padding: 0;box-sizing: border-box;">Notifikasi Email - Desain 3</title>
+  <title style="margin: 0;padding: 0;box-sizing: border-box;">Notifikasi Email - Customer</title>
+
 
 </head>
 
-<body style="margin: 0;padding: 0;box-sizing: border-box;background-color: #cccc;font-family: D-DIN Exp, sans-serif;">
+<body style="margin: 0;padding: 0;box-sizing: border-box;background-color: #cccc;font-family: D-DIN Exp;">
   <div class="container"
-    style="margin: auto;padding: 0;box-sizing: border-box;width: 600px;height: auto;background-color: #f8faff;">
+    style="margin: auto;padding: 0;box-sizing: border-box;width: 600px;height: 1923px;background-color: #E6F2FF;">
     <!-- header -->
     <div class="header"
-      style="margin: 0;padding: 28px 20px;box-sizing: border-box;width: 600px;height: 115px;background-image: url(@path/assets/bg-header.jpg);">
-      <img src="@path/assets/email-Invoice/hellobisnisnewlogo.png" alt=""
-        style="margin: 0;padding: 0;box-sizing: border-box;">
+      style="margin: 0;padding: 28px 20px;box-sizing: border-box;width: 600px;height: 115px;background-image: url(D:/project/Sandbox/assets-notifikasi-email/design-new/Assets/Assets/bg-header.svg);">
+      <img src="@path/assets/email-Inovice/hellobisnisnewlogo.png" alt="" style="margin: 0;padding: 0;box-sizing: border-box;">
     </div>
 
-    <div class="customer" style="margin: 55px 0;padding: 0 20px;box-sizing: border-box;">
-      <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 28px;font-weight: bold;">Hello, @customerName</p>
+    <div class="customer" style="margin: 40px 0;padding: 0 20px;box-sizing: border-box;">
+      <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 28px;font-weight: bold;text-align: center;">
+        Hello, @order.scalaFetchMemberFullname() </p>
+
+    </div>
+
+    <div class="title-header" style="margin: 40px 23px;padding: 0;box-sizing: border-box;">
+      <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;margin-bottom: 5px;">
+        Verifikasi Pembayaran</p>
+      <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636B78;">Pembayaran telah
+        terverifikasi dan pesanan telah diteruskan ke <span
+          style="margin: 0;padding: 0;box-sizing: border-box;font-weight: bold;">Penjual</span></p>
     </div>
     <!-- header -->
 
-    <!-- container verifikasi -->
-    <div class="container-verifikasi"
-      style="margin: auto;padding: 50px 20px;box-sizing: border-box;width: 570px;height: 588px;background-image: url(@path/assets/bg-verifikasi.jpg);">
-      <div class="title-verifikasi" style="margin: 0;padding: 0;box-sizing: border-box;">
-        <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;">Verifikasi Pembayaran
-        </p>
-        <p
-          style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636b78;margin-top: 5px;">
-          Pembayaran telah terverifikasi dan pesanan telah diteruskan ke
-          Penjual
-        </p>
-      </div>
-
-      <div class="line" style="margin: 30px 0;padding: 0;box-sizing: border-box;width: 520px;border: 1px dashed #ccc;">
-      </div>
-
-      <div class="pembayaran" style="margin: 0;padding: 0;box-sizing: border-box;">
-        <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;text-align: center;">
-          Detail Pembayaran</p>
-        <div class="desc-pembayaran" style="
-          margin: 20px 0;
-          padding: 0;
-          box-sizing: border-box;
-          width: 520px;
-          display: flex;
-          justify-content: space-between;
-          ">
-          <p
-            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;margin-right: auto;">
-            Total Bayar : </p>
-          <div>
-            <p
-              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;margin-right: auto;">
-              Rp. @harga</p>
-          </div>
-        </div>
-        <div class="desc-pembayaran" style="
-          margin: 20px 0;
-          padding: 0;
-          box-sizing: border-box;
-          width: 520px;
-          display: flex;
-          justify-content: space-between;
-          ">
-          <p
-            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;margin-right: auto;">
-            Metode Pembayaran : </p>
-          <div class="icon-pembayaran" style="margin: 0;padding: 0;box-sizing: border-box;display: flex;">
-            <img src="@path/assets/email-Invoice/@metodePembayaranLogo" alt=""
-              style="margin: 0;padding: 0;box-sizing: border-box;margin-right: 5px; width: 30px; height: 30px; margin-top: -5px;">
-            <p
-              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;margin-right: auto;">
-              @metodePembayaran</p>
-          </div>
-
-        </div>
-        <div class="desc-pembayaran"
-          style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
-          <p
-            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;margin-right: auto;">
-            Waktu Pembayaran : </p>
-          <div>
-            <p
-              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;margin-right: auto;">
-              @orderDate</p>
-          </div>
-        </div>
-      </div>
-      <!-- Selasa, 12 Oktober 2023 - 11 : 09 : 56 -->
-
-      <div class="line" style="margin: 30px 0;padding: 0;box-sizing: border-box;width: 520px;border: 1px dashed #ccc;">
-      </div>
-
-      <div class="pembayaran" style="margin: 0;padding: 0;box-sizing: border-box;">
-        <div class="desc-pembayaran"
-          style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
-          <p
-            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;margin-right: auto;">
-            Cek Status Pesanan Anda </p>
-          <a href="@invoiceUrl" type="button">
-            <input 
-            style="
-            text-decoration: none;
-            padding: 0;
-            box-sizing: border-box;
-            font-size: 18px;
-            color: #121ebe;
-            font-weight: bold;
-            border: none;
-            background: none;" 
-            type="button" value="Lihat Pesanan">
-          </a>
-        </div>
-        <div class="desc-pembayaran"
-          style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
-          <p
-            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;margin-right: auto;">
-            Metode Pembayaran : </p>
-          <div class="icon-pembayaran" style="margin: 0;padding: 0;box-sizing: border-box;display: flex;">
-            <img src="@path/assets/email-Invoice/download.png" alt=""
-              style="margin: 0;padding: 0;box-sizing: border-box;margin-right: 5px;">
-            <p
-              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #121ebe;font-weight: bold;margin-right: auto;">
-              Reciept Attached</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- container verifikasi -->
-
-    <!-- container toko -->
-    <div class="container-toko"
-      style="margin: 50px auto;padding: 30px 20px;box-sizing: border-box;width: 560px;height: 444px;border-radius: 20px;background-color: #fff;">
-      <div class="header-toko"
-        style="margin: 0;padding: 0;box-sizing: border-box;display: flex;align-items: center;margin-bottom: 30px;">
-        <img src="@path/assets/email-Invoice/toko.png" alt=""
-          style="margin: 0;padding: 0;box-sizing: border-box;width: 25px;height: 25px;margin-right: 10px;">
-        <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;">Detail Toko</p>
-      </div>
-      <div class="pembayaran" style="margin: 0;padding: 0;box-sizing: border-box;">
-        <div class="desc-pembayaran"
-          style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
-          <p
-            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;margin-right: auto;">
-            Nama Toko : </p>
-          <p
-            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;">
-            @nameStore</p>
-        </div>
-        <div class="desc-pembayaran"
-          style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
-          <p
-            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;margin-right: auto;">
-            Nomor Telepon : </p>
-          <p
-            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #636b78;font-weight: bold;">
-            @phoneStore</p>
-        </div>
-        <div class="desc-pembayaran"
-          style="margin: 20px 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;">
-          <p
-            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;text-align: center;color: #636b78;margin-right: auto;">
-            Alamat Toko : </p>
-          <p class="toko"
-            style="margin: 0;padding: 0;box-sizing: border-box;width: 240px;text-align: right;font-size: 18px;color: #636b78;font-weight: bold;">
-            @addressStore
+    <!-- Container Reciept  -->
+    <div class="container-reciept"
+      style="margin: auto;padding: 40px 20px;box-sizing: border-box;width: 570px;height: 1022px;background-image: url(@path/assets/email-Invoice/bg-reciept.png);">
+      <!-- Start No Antrian -->
+      <div class="antrian"
+        style="margin: 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;align-items: center;">
+        <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 20px;font-weight: bold;color: #636B78; margin-right: auto;">Nomor
+          Antrian</p>
+        <div class="no-antrian"
+          style="margin: 0;padding: 0;box-sizing: border-box;width: 75px;height: 45px;border-radius: 10px;background-color: #D6E9FF;display: flex;justify-content: center;align-items: center;">
+          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 25px;font-weight: bold;color: #636B78;">
+            @order.scalaFetchOrderQueue()
           </p>
         </div>
       </div>
+      <!-- End No Antrian -->
 
-      <div class="line-2"
-        style="margin: 30px auto;padding: 0;box-sizing: border-box;width: 520px;border: 1px solid #ccc;"></div>
+      <!-- Start Pembayaran -->
+      <div class="pembayaran"
+        style="margin: auto;padding: 0;box-sizing: border-box;width: 520px;height: 616px;margin-top: 25px;">
+        <p
+          style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;color: #000;text-align: center;">
+          Detail Pembayaran</p>
 
-      <div class="btn" style="
-      margin: auto;
-      margin-top: 10px;
-      padding: 0;
-      box-sizing: border-box;
-      width: 235px;
-      height: 70px;
-      text-align: center;
-      ">
-        <a type="button" href="@storeUrl" target="_blank">
-          <input type="button" value="Lihat Toko" style="
-          text-align: center;
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          width: 235px;
-          height: 70px;
-          border-radius: 10px;
-          border: 2px solid #0075ff;
-          background-color: #fff;
-          font-size: 24px;
-          font-weight: bold;
-          color: #0075ff;
-          cursor: pointer;">
-        </a>
+        <!-- Start Detail -->
+        <div class="detail" style="margin: 0;padding: 0;box-sizing: border-box;margin-top: 30px;">
+          <div class="title-pembayaran"
+            style="margin: 0;padding: 0;box-sizing: border-box;width: 520px;margin-bottom: 20px;">
+            <div class="title-pembayaran-detail"
+              style="margin: 0;padding: 0;box-sizing: border-box;width: 100%;display: flex;justify-content: space-between;align-items: center;">
+              <p
+                style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: center;
+                margin-right: auto;">
+                No. Trx</p>
+              <p
+                style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: bold;color: #636B78;text-align: center;">
+                @order.scalaFetchOrderNumber()</p>
+            </div>
+          </div>
+          <div class="title-pembayaran"
+            style="margin: 0;padding: 0;box-sizing: border-box;width: 520px;margin-bottom: 20px;">
+            <div class="title-pembayaran-detail"
+              style="margin: 0;padding: 0;box-sizing: border-box;width: 100%;display: flex;justify-content: space-between;align-items: center;">
+              <p
+                style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: center;
+                margin-right: auto;">
+                Waktu Pembayaran</p>
+              <p
+                style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: bold;color: #636B78;text-align: center;">
+                @order.scalaFetchOrderDate() </p>
+            </div>
+          </div>
+          <div class="title-pembayaran"
+            style="margin: 0;padding: 0;box-sizing: border-box;width: 520px;margin-bottom: 20px;">
+            <div class="title-pembayaran-detail"
+              style="margin: 0;padding: 0;box-sizing: border-box;width: 100%;display: flex;justify-content: space-between;align-items: center;">
+              <p
+                style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: center;
+                margin-right: auto;">
+                Tipe Pesanan</p>
+              <p
+                style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: bold;color: #636B78;text-align: center;">
+                @order.scalaFetchOrderType()</p>
+            </div>
+          </div>
+        </div>
+        <!-- End Detail -->
+
+        <!-- Start Item -->
+        <div class="item" style="margin: 0;padding: 0;box-sizing: border-box;margin-top: 40px;">
+          <div class="title-item"
+            style="margin: 0;padding: 0;box-sizing: border-box;width: 520px;height: 45px;background-color: #D6E9FF;padding-left: 10px;display: flex;text-align: center;">
+            <p
+              style="margin: 13px 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: bold;color: #080551;text-align: center;margin-right: 52px;">
+              QTY</p>
+            <p
+              style="margin: 13px 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: bold;color: #080551;text-align: left;width: 260px;margin-right: 60px;">
+              Item</p>
+            <p
+              style="margin: 13px 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: bold;color: #080551;text-align: center;">
+              Harga</p>
+          </div>
+          @for(o <- order.getProductDetail()){
+          <div class="item-produk"
+            style="margin: 20px auto;padding: 0;box-sizing: border-box;width: 479px;height: 20px;display: flex;">
+            
+            <p
+              style="
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;
+              text-align: center;
+              margin-right: 68px;">
+              @o.getQuantity()</p>
+            
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: left;
+              width: 260px;
+              height: auto;
+              margin-right: auto;">
+              @o.getNamaProduk()</p>
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;
+              text-align: center;">
+              @o.fetchPrice()</p>
+          </div>
+        }
+          <!-- <div class="item-produk"
+            style="margin: 20px auto;padding: 0;box-sizing: border-box;width: 479px;height: 20px;display: flex;">
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: center;margin-right: 68px;">
+              1</p>
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: left;width: 260px;height: auto;margin-right: 60px;">
+              Keripik Kaca Pedas 300gr</p>
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: center;">
+              Rp. 17.000</p>
+          </div>
+          <div class="item-produk"
+            style="margin: 20px auto;padding: 0;box-sizing: border-box;width: 479px;height: 20px;display: flex;">
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: center;margin-right: 68px;">
+              1</p>
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: left;width: 260px;height: auto;margin-right: 60px;">
+              Cadbury Coklat Cashew Whole Nut Regular 90g</p>
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: center;">
+              Rp. 30.000</p>
+          </div> -->
+        </div>
+        <!-- End Item -->
+
+        <div class="line-dot"
+          style="margin: 40px auto;padding: 0;box-sizing: border-box;width: 500px;border: 2px dashed #ccc;"></div>
+
+        <!-- Start Detail Harga -->
+        <div class="detail-harga" style="margin: auto;padding: 0;box-sizing: border-box;width: 520px;">
+          <div class="harga"
+            style="margin: auto;padding: 0;box-sizing: border-box;width: 491px;display: flex;justify-content: space-between;margin-bottom: 15px;">
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: center;
+              margin-right: auto;">
+              Sub Total</p>
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: left;
+              width: auto;">
+              @order.scalaFetchSubTotal() </p>
+          </div>
+          <div class="harga"
+            style="margin: auto;padding: 0;box-sizing: border-box;width: 491px;display: flex;justify-content: space-between;margin-bottom: 15px;">
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: center;
+              margin-right: auto;">
+              Pajak (@orderPayment.scalaFetchTaxPercentage()%)</p>
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: left;
+              width: auto;">
+              @orderPayment.scalaFetchTaxPrice() </p>
+          </div>
+          <div class="harga"
+            style="margin: auto;padding: 0;box-sizing: border-box;width: 491px;display: flex;justify-content: space-between;margin-bottom: 15px;">
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: center;
+              margin-right: auto;">
+              Services (@orderPayment.scalaFetchServicePercentage()%)</p>
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: left;
+              width: auto;">
+              @orderPayment.scalaFetchServicePrice() </p>
+          </div>
+          <div class="harga"
+            style="margin: auto;padding: 0;box-sizing: border-box;width: 491px;display: flex;justify-content: space-between;margin-bottom: 15px;">
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: center;
+              margin-right: auto;">
+              Biaya Layanan</p>
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: left;
+              width: auto;">
+              @orderPayment.scalaFetchFeeCustomer() </p>
+          </div>
+          <div class="harga-total"
+            style="margin: auto;padding: 0;box-sizing: border-box;width: 491px;display: flex;justify-content: space-between;">
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 25px;font-weight: bold;color: #000;text-align: center;
+              margin-right: auto;">
+              Total</p>
+            <p
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 25px;font-weight: bold;color: #000;text-align: center;">
+              @order.scalaFetchTotalPrice() </p>
+          </div>
+        </div>
+        <!-- End Detail Harga -->
+
       </div>
+      <!-- End Pembayaran -->
+
+      <!-- Start QR -->
+      <div class="qr-code"
+        style="margin: 40px auto;padding: 0;box-sizing: border-box;width: 500px;display: flex;align-items: center;">
+        <div style="margin: 0;padding: 0;box-sizing: border-box;">
+          <img src="@path/assets/QR.png" alt="">
+        </div>
+        <p
+          style="margin: 0;padding: 0;box-sizing: border-box;text-align: center;font-size: 18px;line-height: 20px;color: #636B78;">
+          Untuk cek informasi pesanan kamu, Silahkan <span
+            style="margin: 0;padding: 0;box-sizing: border-box;font-weight: bold;"> Scan QR Code </span>di
+          sebelah.Terima Kasih.</p>
+      </div>
+      <!-- End QR -->
     </div>
-    <!-- container toko -->
+    <!-- Container Reciept  -->
+
+    <!-- Start Detail Toko -->
+    <div class="detail-toko" style="margin: 50px;padding: 0;box-sizing: border-box;width: auto;">
+      <p
+        style="margin: 0;padding: 0;box-sizing: border-box;font-size: 30px;text-align: center;font-weight: bold;color: #000;">
+        Home Center Store Berkah</p>
+      <p
+        style="margin: 0;padding: 0;box-sizing: border-box;font-size: 20px;text-align: center;font-weight: 100;color: #636B78;margin-top: 10px;">
+        Kawasan Niaga Terpadu Sudirman (SCBD, Jalan Tulodong Atas 2 No. Lot 12 RT 05 RW 02, Senayan. Kec Kebayoran Baru
+        Kota Jakarta Selatan. Daerah Khusus Ibukota Jakarta 12190 <span
+          style="margin: 0;padding: 0;box-sizing: border-box;font-weight: bold;">Nomor Telepon : 0823 - 4561 -
+          7890</span> </p>
+    </div>
+    <!-- End Detail Toko -->
 
     <!-- Footer -->
     <footer
-      style="margin: 0;padding: 0 0 10px 0;box-sizing: border-box;width: 600px;height: auto;background-color: #d6e9ff;">
+      style="margin: 0;padding: 0;box-sizing: border-box;width: 600px;height: 291px;background-color: #D6E9FF;margin-top: 100px;">
       <div class="service"
         style="margin: auto;padding: 30px 0;box-sizing: border-box;width: 524px;display: flex;justify-content: space-between;">
-        <div class="us" style="margin: 0;padding: 0;box-sizing: border-box;">
+        <div class="us" style="margin: 0;padding: 0;box-sizing: border-box; margin-right: auto;">
           <p
-            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;margin-bottom: 10px;color: #16479c;">
+            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;margin-bottom: 10px;color: #16479C;">
             Kunjungi Kami</p>
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #16479c;">
+          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #16479C;">
             www.sandbox.com</p>
         </div>
         <div class="cs" style="margin: 0;padding: 0;box-sizing: border-box;">
           <p
-            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;margin-bottom: 10px;color: #16479c;text-align: right;">
+            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;margin-bottom: 10px;color: #16479C;text-align: right;">
             Customer Services</p>
           <div class="phone" style="margin: 0;padding: 0;box-sizing: border-box;">
             <p
-              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;margin-bottom: 10px;color: #16479c;text-align: right;">
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;margin-bottom: 10px;color: #16479C;text-align: right;">
               021 - 2345 2345</p>
             <p
-              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #16479c;text-align: right;">
+              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #16479C;text-align: right;">
               0823 2345 6789</p>
           </div>
         </div>
       </div>
       <div class="line-2"
-        style="margin: 30px auto;padding: 0;box-sizing: border-box;width: 520px;border: 1px solid #ccc;"></div>
+        style="margin: auto;padding: 0;box-sizing: border-box;width: 500px;border: 1px solid #16479C;margin-bottom: 30px;">
+      </div>
       <div class="title-footer" style="margin: 0;padding: 0;box-sizing: border-box;">
         <p
-          style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #16479c;text-align: center;margin-bottom: 20px;">
-          Email ini di buat Otomatis, jika anda membutuhkan bantuan silahkan
-          hubungi Customer Service.
-        </p>
+          style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #16479C;text-align: center;margin-bottom: 20px;">
+          Email ini di buat Otomatis, jika anda membutuhkan bantuan silahkan hubungi Customer Service.</p>
         <p
-          style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #16479c;text-align: center;margin-bottom: 20px;">
+          style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #16479C;text-align: center;margin-bottom: 20px;">
           2023 HelloBisnis.com | All Rights Reserved.</p>
       </div>
     </footer>
