@@ -28,6 +28,19 @@ public class BrandMerchantRepository extends Model {
 			return null;
 		}
     }
+    
+    public static BrandMerchant findByNameAndMerchantId(String name, Merchant merchant) {
+    	try {
+			return find.where()
+					.eq("t0.brand_name".toLowerCase(), name.toLowerCase())
+					.eq("merchant", merchant)
+					.eq("t0.is_deleted", Boolean.FALSE)
+					.findUnique();
+		} catch (PersistenceException e) {
+			e.printStackTrace();
+			return null;
+		}
+    }
 
     public static List<BrandMerchant> getDataBrand(Query<BrandMerchant> reqQuery, String sort, String filter, int offset, int limit)
 			throws IOException {

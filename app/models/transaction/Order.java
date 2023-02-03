@@ -2,6 +2,9 @@ package models.transaction;
 
 import com.avaje.ebean.annotation.CreatedTimestamp;
 import com.hokeba.util.CommonFunction;
+import com.hokeba.util.Constant;
+import com.hokeba.util.Helper;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import models.*;
@@ -12,9 +15,12 @@ import models.pupoint.PickUpPointMerchant;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 @Entity
@@ -167,6 +173,69 @@ public class Order extends BaseModel {
 
     public List<OrderDetail> getProductDetail() {
         return this.orderDetails;
+    }
+    
+ // ============================================================== //
+			// Custom getter for Scala template//
+    
+    public String scalaFetchMemberFullname() {
+    	return this.member.fullName;
+    }
+    
+    public String scalaFetchMemberPhoneNumber () {
+    	return this.member.phone;
+    }
+    
+    public String scalaFetchMemberEmail() {
+    	return this.member.email;
+    }
+    
+    public String scalaFetchAddress() {
+    	return this.destinationAddress;
+    }
+    
+    public String scalaFetchOrderDate () {
+    	SimpleDateFormat formatter = new SimpleDateFormat("EEEE, dd MMMM yyyy - HH : mm : ss", new Locale("id", "ID"));
+    	return formatter.format(this.orderDate);
+    }
+    
+    public String scalaFetchSubTotal () {
+    	return Helper.getRupiahFormat(this.subTotal.doubleValue());
+    }
+    
+    public String scalaFetchTotalPrice () {
+    	return Helper.getRupiahFormat(this.totalPrice.doubleValue());
+    }
+    
+    public String scalaFetchOrderType() {
+    	return this.orderType;
+    }
+    
+    public String scalaFetchOrderNumber() {
+    	return this.orderNumber;
+    }
+    
+    public String scalaFetchOrderQueue() {
+    	return this.orderQueue.toString();
+    }
+    
+    public String scalaFetchStoreName() {
+    	return this.store.storeName;
+    }
+    
+    public String scalaFetchStoreAddress() {
+    	return this.store.storeAddress;
+    }
+
+    public String scalaFetchStorePhone() {
+    	return this.store.storePhone;
+    }
+    
+    public String scalaFetchStoreQrUrl() {
+    	String feUrl = Constant.getInstance().getFrontEndUrl();
+    	String url = feUrl.concat(this.store.storeCode).concat("/").concat(this.orderNumber);
+    	System.out.println("URL Link Cek Order >>> "+url);
+    	return url;
     }
 
 

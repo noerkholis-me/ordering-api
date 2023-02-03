@@ -5,6 +5,7 @@ import com.hokeba.api.BaseResponse;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
+import dtos.merchant.MerchantDetailResponse;
 import dtos.merchant.MerchantResponse;
 import models.Merchant;
 import models.UserMerchant;
@@ -82,4 +83,31 @@ public class MerchantController extends BaseController {
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
     }
+    
+    @ApiOperation(value = "Get merchant detail", notes = "Return details of merchant with specific merchant code.\n" + swaggerInfo
+            + "", response = MerchantDetailResponse.class, responseContainer = "object", httpMethod = "GET")
+    public static Result getMerchantDetail(String merchantCode) {
+        int authority = checkAccessAuthorization("all");
+        if (authority == 200 || authority == 203) {
+	    	try {
+	            Merchant merchantTarget = Merchant.findByMerchantCode(merchantCode, false);
+	            if (merchantTarget == null) {
+	                response.setBaseResponse(0, 0, 0, " Merchant target not found.", null);
+	                return badRequest(Json.toJson(response));
+	            }
+	            MerchantDetailResponse merchantTargetResponse = new MerchantDetailResponse(merchantTarget);
+	            response.setBaseResponse(1, 0, 0, success + " Showing merchant data", merchantTargetResponse);
+	            return ok(Json.toJson(response));
+	        } catch (Exception e) {
+	            Logger.info("Error: " + e.getMessage());
+	        }
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+    
+    
 }

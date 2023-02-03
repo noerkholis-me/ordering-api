@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.http.response.global.ServiceResponse;
+
 import controllers.BaseController;
 import dtos.payment.OrderPaymentResponse;
 import dtos.payment.ShowQrCodeResponse;
@@ -19,6 +20,7 @@ import repository.OrderPaymentRepository;
 import repository.OrderRepository;
 import service.InvoiceMailService;
 import service.PaymentService;
+import service.firebase.FirebaseService;
 
 import javax.swing.text.html.Option;
 import java.util.Optional;
@@ -144,12 +146,14 @@ public class PaymentController extends BaseController {
 
     public static Result sendMailInvoice() {
         Boolean checkService = checkInternalServiceKey();
-        if (checkService == Boolean.FALSE) {
+        if (checkService == Boolean.TRUE) {
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         } else {
             JsonNode json = request().body().asJson();
             String orderNumber = json.get("order_number").asText();
+            String toAdmin = json.get("admin").asText();
+            System.out.println(toAdmin);
             if (orderNumber == null) {
                 response.setBaseResponse(0, 0, 0, "order number tidak boleh kosong", null);
                 return badRequest(Json.toJson(response));
@@ -160,11 +164,22 @@ public class PaymentController extends BaseController {
                 response.setBaseResponse(0, 0, 0, "order number tidak ditemukan", null);
                 return badRequest(Json.toJson(response));
             }
+            
+            if(Boolean.parseBoolean(toAdmin)) {
+            	InvoiceMailService.handleCallbackAndSendEmail(order.get(), true);
+            	
+            	FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order.get());
+            	
+            	response.setBaseResponse(1, 0, 0, success, "SENT");
+                return ok(Json.toJson(response));
+            } else {
+            	InvoiceMailService.handleCallbackAndSendEmail(order.get(), false);
+            	
+            	response.setBaseResponse(1, 0, 0, success, "SENT");
+                return ok(Json.toJson(response));
+            }
 
-            InvoiceMailService.handleCallbackAndSendEmail(order.get());
-
-            response.setBaseResponse(1, 0, 0, success, "SENT");
-            return ok(Json.toJson(response));
+            
         }
 
     }

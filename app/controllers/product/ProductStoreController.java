@@ -23,17 +23,22 @@ import models.merchant.ProductMerchant;
 import models.merchant.ProductMerchantDetail;
 import play.Logger;
 import play.libs.Json;
+import play.mvc.Http;
 import play.mvc.Result;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 
 import com.avaje.ebean.Query;
 import repository.ProductMerchantDetailRepository;
 import repository.ProductMerchantRepository;
 import repository.ProductStoreRepository;
+import service.ProductImportService;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Api(value = "/merchants/productstore", description = "Product Store")
@@ -1719,4 +1724,37 @@ public class ProductStoreController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
+    public static Result importProductStore() {
+    	Merchant merchant = checkMerchantAccessAuthorization();
+    	if (merchant != null) {
+    		Http.MultipartFormData body = request().body().asMultipartFormData();
+			Http.MultipartFormData.FilePart file = body.getFile("import");
+			if(file == null) {
+				response.setBaseResponse(0, 0, 0, "File Is Null", null);
+				return badRequest(Json.toJson(response));
+			}
+			ProductImportService productImport = new ProductImportService();
+			if(!productImport.importProductStore(file, merchant, response)) {
+				return badRequest(Json.toJson(response));
+			}
+			return ok(Json.toJson(response));
+    	}
+    	response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+    
+    public static Result getImportTemplateStore() {
+    	Merchant merchant = checkMerchantAccessAuthorization();
+    	if(merchant != null) {
+    		File file = ProductImportService.getImportTemplateStore();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+            String filename = "ImportProductStoreTemplate-"+simpleDateFormat.format(new Date()).toString() + ".xlsx";
+    		response().setContentType("application/vnd.ms-excel");
+			response().setHeader("Content-disposition", "attachment; filename=" + filename);
+			return ok(file);
+    	}
+    	response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+    
 }

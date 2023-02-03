@@ -301,18 +301,21 @@ public class StoreController extends BaseController {
     private static StoreResponse toResponse(Store store, List<ProductMerchant> productMerchantList) {
         List<ProductStoreResponseForStore> list = new ArrayList<>();
         for (ProductMerchant productMerchant : productMerchantList) {
-            ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productMerchant);
-            String linkQrProductMerchant = productMerchantDetail.getProductMerchantQrCode();
-            String qrProductMerchantUrl = null;
-            if (linkQrProductMerchant != null) {
-                String[] parts = linkQrProductMerchant.split("/");
-                qrProductMerchantUrl = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+"home/"+store.storeCode+"/"+store.id+"/"+productMerchant.getMerchant().id+"/"+parts[4]+"/"+parts[5];
+        	ProductStore productStore = ProductStoreRepository.findForCust(productMerchant.id, store.id, productMerchant.merchant);
+            if (productStore != null) {
+	            ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productMerchant);
+	            String linkQrProductMerchant = productMerchantDetail.getProductMerchantQrCode();
+	            String qrProductMerchantUrl = null;
+	            if (linkQrProductMerchant != null) {
+	                String[] parts = linkQrProductMerchant.split("/");
+	                qrProductMerchantUrl = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+"home/"+store.storeCode+"/"+store.id+"/"+productMerchant.getMerchant().id+"/"+parts[4]+"/"+parts[5];
+	            }
+	            ProductStoreResponseForStore productStoreResponse = new ProductStoreResponseForStore();
+	            productStoreResponse.setProductId(productMerchant.id);
+	            productStoreResponse.setProductName(productMerchant.getProductName());
+	            productStoreResponse.setProductStoreQrCode(qrProductMerchantUrl);
+	            list.add(productStoreResponse);
             }
-            ProductStoreResponseForStore productStoreResponse = new ProductStoreResponseForStore();
-            productStoreResponse.setProductId(productMerchant.id);
-            productStoreResponse.setProductName(productMerchant.getProductName());
-            productStoreResponse.setProductStoreQrCode(qrProductMerchantUrl);
-            list.add(productStoreResponse);
         }
         return StoreResponse.builder()
                 .id(store.id)

@@ -17,14 +17,34 @@ import models.merchant.ProductMerchantDetail;
 import models.productaddon.*;
 import play.Logger;
 import play.libs.Json;
+import play.mvc.Http;
 import play.mvc.Result;
 import repository.*;
+import service.ProductImportService;
+import service.DownloadOrderReport;
 import validator.ProductValidator;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+
 import com.avaje.ebean.SqlQuery;
 import java.util.List;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ProductMerchantController extends BaseController {
@@ -323,9 +343,41 @@ public class ProductMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-
+    public static Result importProduct () {
+    	Merchant merchant = checkMerchantAccessAuthorization();
+    	if (merchant != null) {
+    		Http.MultipartFormData body = request().body().asMultipartFormData();
+			Http.MultipartFormData.FilePart file = body.getFile("import");
+			if(file == null) {
+				response.setBaseResponse(0, 0, 0, "File Is Null", null);
+				return badRequest(Json.toJson(response));
+			}
+//			System.out.println("file - "+file.getFilename());
+			ProductImportService productImport = new ProductImportService();
+			if(!productImport.importProductMerchant(file, merchant, response)) {
+				return badRequest(Json.toJson(response));
+			}
+			return ok(Json.toJson(response));
+    	}
+    	response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+    
+    public static Result getImportTemplate() {
+    	Merchant merchant = checkMerchantAccessAuthorization();
+    	if(merchant != null) {
+    		File file = ProductImportService.getImportTemplateMerchant();
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+            String filename = "ImportProductMerchantTemplate-"+simpleDateFormat.format(new Date()).toString() + ".xlsx";
+    		response().setContentType("application/vnd.ms-excel");
+			response().setHeader("Content-disposition", "attachment; filename=" + filename);
+			return ok(file);
+    	}
+    	response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+    
     // =============================================== construct =====================================================//
-
     private static ProductResponse toResponse(ProductMerchant productMerchant) {
         ProductResponse productResponse = new ProductResponse();
         productResponse.setProductId(productMerchant.id);
