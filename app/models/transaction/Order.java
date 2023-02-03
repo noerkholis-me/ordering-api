@@ -2,6 +2,7 @@ package models.transaction;
 
 import com.avaje.ebean.annotation.CreatedTimestamp;
 import com.hokeba.util.CommonFunction;
+import com.hokeba.util.Constant;
 import com.hokeba.util.Helper;
 
 import lombok.Data;
@@ -203,7 +204,7 @@ public class Order extends BaseModel {
     }
     
     public String scalaFetchTotalPrice () {
-    	return Helper.getRupiahFormat(this.subTotal.doubleValue());
+    	return Helper.getRupiahFormat(this.totalPrice.doubleValue());
     }
     
     public String scalaFetchOrderType() {
@@ -231,7 +232,10 @@ public class Order extends BaseModel {
     }
     
     public String scalaFetchStoreQrUrl() {
-    	return this.getStore().storeQrCode;
+    	String feUrl = Constant.getInstance().getFrontEndUrl();
+    	String url = feUrl.concat(this.store.storeCode).concat("/").concat(this.orderNumber);
+    	System.out.println("URL Link Cek Order >>> "+url);
+    	return url;
     }
 
 
