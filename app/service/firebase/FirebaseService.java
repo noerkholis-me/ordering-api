@@ -80,10 +80,10 @@ public class FirebaseService {
     //TODO custom method
     public void sendFirebaseNotifOrderToStore(Order orderData) {
     	try {
-    		Long storeId = orderData.getStore().id;
+    		String storeCode = orderData.getStore().storeCode;
     		String title = "Pesanan Baru";
     		String message = "Pesanan baru atas nama " + orderData.getMemberName();
-    		String to = buildFirebaseTopic("store" + storeId.toString());
+    		String to = buildFirebaseTopic("store" + storeCode);
         	FirebaseRequest request = buildFirebaseRequest(to, title, message);
         	sendPushNotif(request);
     	} catch (Exception e) {
