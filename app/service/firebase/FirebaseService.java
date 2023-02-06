@@ -83,7 +83,7 @@ public class FirebaseService {
     		String storeCode = orderData.getStore().storeCode;
     		String title = "Pesanan Baru";
     		String message = "Pesanan baru atas nama " + orderData.getMemberName();
-    		String to = buildFirebaseTopic("store" + storeCode.toString());
+    		String to = buildFirebaseTopic("store" + storeCode);
         	FirebaseRequest request = buildFirebaseRequest(to, title, message);
         	sendPushNotif(request);
     	} catch (Exception e) {
