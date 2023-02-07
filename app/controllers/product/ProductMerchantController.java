@@ -20,7 +20,7 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 import repository.*;
-import service.ProductImportService;
+import service.ProductExcelService;
 import service.DownloadOrderReport;
 import validator.ProductValidator;
 
@@ -353,7 +353,7 @@ public class ProductMerchantController extends BaseController {
 				return badRequest(Json.toJson(response));
 			}
 //			System.out.println("file - "+file.getFilename());
-			ProductImportService productImport = new ProductImportService();
+			ProductExcelService productImport = new ProductExcelService();
 			if(!productImport.importProductMerchant(file, merchant, response)) {
 				return badRequest(Json.toJson(response));
 			}
@@ -366,7 +366,7 @@ public class ProductMerchantController extends BaseController {
     public static Result getImportTemplate() {
     	Merchant merchant = checkMerchantAccessAuthorization();
     	if(merchant != null) {
-    		File file = ProductImportService.getImportTemplateMerchant();
+    		File file = ProductExcelService.getImportTemplateMerchant();
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
             String filename = "ImportProductMerchantTemplate-"+simpleDateFormat.format(new Date()).toString() + ".xlsx";
     		response().setContentType("application/vnd.ms-excel");
@@ -380,7 +380,7 @@ public class ProductMerchantController extends BaseController {
     public static Result exportProduct() {
     	Merchant merchant = checkMerchantAccessAuthorization();
     	if(merchant != null) {
-    		File file = ProductImportService.exportProduct(merchant);
+    		File file = ProductExcelService.exportProduct(merchant);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
             String filename = "ExportProduct-"+simpleDateFormat.format(new Date()).toString() + ".xlsx";
     		response().setContentType("application/vnd.ms-excel");
