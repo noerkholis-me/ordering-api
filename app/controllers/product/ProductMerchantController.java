@@ -377,6 +377,20 @@ public class ProductMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
     
+    public static Result exportProduct() {
+    	Merchant merchant = checkMerchantAccessAuthorization();
+    	if(merchant != null) {
+    		File file = ProductImportService.exportProduct(merchant);
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+            String filename = "ExportProduct-"+simpleDateFormat.format(new Date()).toString() + ".xlsx";
+    		response().setContentType("application/vnd.ms-excel");
+			response().setHeader("Content-disposition", "attachment; filename=" + filename);
+			return ok(file);
+    	}
+    	response.setBaseResponse(0, 0, 0, unauthorized, null);
+    	return unauthorized(Json.toJson(response));
+    }
+    
     // =============================================== construct =====================================================//
     private static ProductResponse toResponse(ProductMerchant productMerchant) {
         ProductResponse productResponse = new ProductResponse();
