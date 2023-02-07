@@ -474,13 +474,13 @@ public class OrderMerchantController extends BaseController {
                 
                 if(statusOrder != null && statusOrder != ""){
                     if(startDate != null && startDate != ""){
-                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
+                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + " 00:00:00' and '" + endDate + " 23:59:00'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                     } else {
                         query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                     }
                 } else {
                     if(startDate != null && startDate != ""){
-                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
+                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + " 00:00:00' and '" + endDate + " 23:59:00'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
                     } else {
                         query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
                     }
@@ -497,13 +497,13 @@ public class OrderMerchantController extends BaseController {
                     
                     if(statusOrder != null && statusOrder != ""){
                         if(startDate != null && startDate != ""){
-                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
+                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + " 00:00:00' and '" + endDate + " 23:59:00'").ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
                         } else {
                             query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
                         } 
                     } else {
                         if(startDate != null && startDate != ""){
-                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
+                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + " 00:00:00' and '" + endDate + " 23:59:00'").ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
                         } else {
                             query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
                         }
@@ -615,17 +615,18 @@ public class OrderMerchantController extends BaseController {
                     if(startDate != null && startDate != ""){
                         query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                     } else {
-                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
+                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + " 00:00:00' and '" + endDate + " 23:59:00'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                     }
                 } else {
                     if(startDate != null && startDate != ""){
-                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
+                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + " 00:00:00' and '" + endDate + " 23:59:00'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
                     } else {
                         query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
                     }
 
                 }
                 // check store id --> mandatory
+                String storeName = "";
                 if (storeId != null && storeId != 0L) {
                     query = null;
                     Store store = Store.findById(storeId);
@@ -633,16 +634,17 @@ public class OrderMerchantController extends BaseController {
                         response.setBaseResponse(0, 0, 0, "store id does not exists", null);
                         return badRequest(Json.toJson(response));
                     }
+                    storeName = store.storeName;
                     
                     if(statusOrder != null && statusOrder != ""){
                         if(startDate != null && startDate != ""){
-                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
+                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + " 00:00:00' and '" + endDate + " 23:59:00'").ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
                         } else {
                             query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
                         } 
                     } else {
                         if(startDate != null && startDate != ""){
-                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
+                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + " 00:00:00' and '" + endDate + " 23:59:00'").ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
                         } else {
                             query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
                         }
@@ -661,8 +663,14 @@ public class OrderMerchantController extends BaseController {
                 }
 
                 File file = DownloadOrderReport.downloadOrderReport(orders);
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddhhmmss");
-                String filenameOrderReport = "OrderReport-" + simpleDateFormat.format(new Date()).toString() + ".xlsx";
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String dateOrderReport = "";
+                if(startDate != null && startDate != "") {
+                    dateOrderReport = startDate + "-" + endDate;
+                }else {
+                    dateOrderReport = simpleDateFormat.format(new Date());
+                }
+                String filenameOrderReport = "LaporanOrder-" + storeName.replaceAll(" ", "") + "-" + merchant.name + "-" + dateOrderReport + ".xlsx";
                 response().setContentType("application/vnd.ms-excel");
                 response().setHeader("Content-disposition", "attachment; filename=" + filenameOrderReport);
                 return ok(file);
