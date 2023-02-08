@@ -469,25 +469,37 @@ public class OrderMerchantController extends BaseController {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
-                Calendar calStartDate = Calendar.getInstance();
-                Calendar calEndDate = Calendar.getInstance();
 
                 if(startDate != null && !startDate.equals("")) {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    calStartDate.setTime(sdf.parse(startDate + " 00:00:00"));
-                    calEndDate.setTime(sdf.parse(endDate + " 23:59:59"));
+                    Calendar calStartDate = Calendar.getInstance();
+                    Calendar calEndDate = Calendar.getInstance();
+                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                    calStartDate.setTime(simpleDateFormat.parse(startDate));
+                    calStartDate.set(Calendar.HOUR_OF_DAY, 0);
+                    calStartDate.set(Calendar.MINUTE, 0);
+                    calStartDate.set(Calendar.SECOND, 0);
+                    calStartDate.set(Calendar.MILLISECOND, 0);
+
+                    calEndDate.setTime(simpleDateFormat.parse(endDate));
+                    calEndDate.set(Calendar.HOUR_OF_DAY, 23);
+                    calEndDate.set(Calendar.MINUTE, 59);
+                    calEndDate.set(Calendar.SECOND, 59);
+                    calEndDate.set(Calendar.MILLISECOND, 59);
+
+                    startDate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SS").format(calStartDate.getTime());
+                    endDate = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SS").format(calEndDate.getTime());
                 }
 
                 Query<Order> query = null;
                 if(statusOrder != null && statusOrder != ""){
                     if(startDate != null && startDate != ""){
-                        query = OrderRepository.find.where().raw("t0.order_date between '" + calStartDate.getTime() + "' and '" + calEndDate.getTime() + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
+                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                     } else {
                         query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                     }
                 } else {
                     if(startDate != null && startDate != ""){
-                        query = OrderRepository.find.where().raw("t0.order_date between '" + calStartDate.getTime() + "' and '" + calEndDate.getTime() + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
+                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
                     } else {
                         query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
                     }
@@ -504,13 +516,13 @@ public class OrderMerchantController extends BaseController {
                     
                     if(statusOrder != null && statusOrder != ""){
                         if(startDate != null && startDate != ""){
-                            query = OrderRepository.find.where().raw("t0.order_date between '" + calStartDate.getTime() + "' and '" + calEndDate.getTime() + "'").ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
+                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
                         } else {
                             query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
                         } 
                     } else {
                         if(startDate != null && startDate != ""){
-                            query = OrderRepository.find.where().raw("t0.order_date between '" + calStartDate.getTime() + "' and '" + calEndDate.getTime() + "'").ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
+                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDate + "' and '" + endDate + "'").ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
                         } else {
                             query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
                         }
@@ -615,13 +627,27 @@ public class OrderMerchantController extends BaseController {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
-                Calendar calStartDate = Calendar.getInstance();
-                Calendar calEndDate = Calendar.getInstance();
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String startDateFormat = "";
+                String endDateFormat = "";
 
                 if(startDate != null && !startDate.equals("")) {
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    calStartDate.setTime(sdf.parse(startDate + " 00:00:00"));
-                    calEndDate.setTime(sdf.parse(endDate + " 23:59:59"));
+                    Calendar calStartDate = Calendar.getInstance();
+                    Calendar calEndDate = Calendar.getInstance();
+                    calStartDate.setTime(simpleDateFormat.parse(startDate));
+                    calStartDate.set(Calendar.HOUR_OF_DAY, 0);
+                    calStartDate.set(Calendar.MINUTE, 0);
+                    calStartDate.set(Calendar.SECOND, 0);
+                    calStartDate.set(Calendar.MILLISECOND, 0);
+
+                    calEndDate.setTime(simpleDateFormat.parse(endDate));
+                    calEndDate.set(Calendar.HOUR_OF_DAY, 23);
+                    calEndDate.set(Calendar.MINUTE, 59);
+                    calEndDate.set(Calendar.SECOND, 59);
+                    calEndDate.set(Calendar.MILLISECOND, 59);
+
+                    startDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SS").format(calStartDate.getTime());
+                    endDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SS").format(calEndDate.getTime());
                 }
 
                 Query<Order> query = null;
@@ -630,11 +656,11 @@ public class OrderMerchantController extends BaseController {
                     if(startDate != null && startDate != ""){
                         query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                     } else {
-                        query = OrderRepository.find.where().raw("t0.order_date between '" + calStartDate.getTime() + "' and '" + calEndDate.getTime() + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
+                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDateFormat + "' and '" + endDateFormat + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
                     }
                 } else {
                     if(startDate != null && startDate != ""){
-                        query = OrderRepository.find.where().raw("t0.order_date between '" + calStartDate.getTime() + "' and '" + calEndDate.getTime() + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
+                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDateFormat + "' and '" + endDateFormat + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
                     } else {
                         query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
                     }
@@ -653,13 +679,13 @@ public class OrderMerchantController extends BaseController {
                     
                     if(statusOrder != null && statusOrder != ""){
                         if(startDate != null && startDate != ""){
-                            query = OrderRepository.find.where().raw("t0.order_date between '" + calStartDate.getTime() + "' and '" + calEndDate.getTime() + "'").ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
+                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDateFormat + "' and '" + endDateFormat + "'").ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
                         } else {
                             query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
                         } 
                     } else {
                         if(startDate != null && startDate != ""){
-                            query = OrderRepository.find.where().raw("t0.order_date between '" + calStartDate.getTime() + "' and '" + calEndDate.getTime() + "'").ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
+                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDateFormat + "' and '" + endDateFormat + "'").ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
                         } else {
                             query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
                         }
@@ -678,7 +704,6 @@ public class OrderMerchantController extends BaseController {
                 }
 
                 File file = DownloadOrderReport.downloadOrderReport(orders);
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 String dateOrderReport = "";
                 if(startDate != null && !startDate.equals("")) {
                     dateOrderReport = startDate + "_" + endDate;
