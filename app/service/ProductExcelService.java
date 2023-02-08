@@ -536,27 +536,27 @@ public class ProductExcelService {
 				row.getCell(11).setCellStyle(contentCellStyle);
 				
 				row.createCell(12);
-				if(detail.getProductImageMain() != null)
+				if(!detail.getProductImageMain().isEmpty())
 					printImage(workbook, sheetProduct, rowNum, 12, detail.getProductImageMain());
 				row.getCell(12).setCellStyle(contentCellStyle);
 				
 				row.createCell(13);
-				if(detail.getProductImage1() != null)
+				if(!detail.getProductImage1().isEmpty())
 					printImage(workbook, sheetProduct, rowNum, 13, detail.getProductImage1());
 				row.getCell(13).setCellStyle(contentCellStyle);
 
 				row.createCell(14);
-				if(detail.getProductImage2() != null)
+				if(!detail.getProductImage2().isEmpty())
 					printImage(workbook, sheetProduct, rowNum, 14, detail.getProductImage2());
 				row.getCell(14).setCellStyle(contentCellStyle);
 				
 				row.createCell(15);
-				if(detail.getProductImage3() != null)
+				if(!detail.getProductImage3().isEmpty())
 					printImage(workbook, sheetProduct, rowNum, 15, detail.getProductImage3());
 				row.getCell(15).setCellStyle(contentCellStyle);
 				
 				row.createCell(16);
-				if(detail.getProductImage4() != null)
+				if(!detail.getProductImage4().isEmpty())
 					printImage(workbook, sheetProduct, rowNum, 16, detail.getProductImage4());
 				row.getCell(16).setCellStyle(contentCellStyle);
 				
@@ -685,7 +685,10 @@ public class ProductExcelService {
 
 	private static void printImage (Workbook workbook ,Sheet sheetProduct, int row, int column, String path){
 		try {
-			String extension = path.substring(path.length() - 3);
+			String extension = "";
+			if(!path.isEmpty()) {
+				extension = path.substring(path.length() - 3);
+			}
 			URL url = new URL(path);
 			InputStream is = url.openStream();
 			
