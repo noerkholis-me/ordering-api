@@ -10,20 +10,20 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import controllers.store.StoreAccessController;
 import models.transaction.Order;
+import play.Logger;
 import play.Play;
 import service.firebase.request.FirebaseDataRequest;
 import service.firebase.request.FirebaseNotificationRequest;
 import service.firebase.request.FirebaseRequest;
 
 public class FirebaseService {
-	private final Logger logger = LoggerFactory.getLogger(getClass());
+    private final static Logger.ALogger logger = Logger.of(FirebaseService.class);
 	private static String pushNotifUrl = Play.application().configuration().getString("firebase.push-notif.url");
 	private static String pushNotifKey = Play.application().configuration().getString("firebase.push-notif.key");
 	
@@ -45,7 +45,7 @@ public class FirebaseService {
 	}
 	
     public String buildFirebaseTopic(String topicName) {
-    	return "//topics//" + topicName;
+    	return "/topics/" + topicName;
     }
     
     //TODO services method
@@ -62,6 +62,7 @@ public class FirebaseService {
 		firebaseRequest.setHeader("Authorization", getPushNotifAuthorization());
 		firebaseRequest.setHeader("Content-Type", "application/json");
 		firebaseRequest.setEntity(new StringEntity(jsonRequest.toString()));
+		logger.info("Firebase Request : " + jsonRequest.toString());
 		
 		CloseableHttpAsyncClient client = HttpAsyncClients.createDefault();
 		try {
@@ -71,7 +72,7 @@ public class FirebaseService {
 	
 			HttpEntity entity = response.getEntity();
 			String responseString = EntityUtils.toString(entity, "UTF-8");		
-			logger.info("Response : " + responseString);
+			logger.info("Firebase Response : " + responseString);
 		} finally {
 			client.close();
 		}
@@ -87,7 +88,7 @@ public class FirebaseService {
         	FirebaseRequest request = buildFirebaseRequest(to, title, message);
         	sendPushNotif(request);
     	} catch (Exception e) {
-    		logger.error(e.getMessage());
+    		logger.error("Firebase ERROR : " +e.getMessage());
     	}
     }
     
