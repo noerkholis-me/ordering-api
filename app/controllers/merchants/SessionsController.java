@@ -782,7 +782,7 @@ public class SessionsController extends BaseController {
                 
                 Thread thread = new Thread( () -> {
                 	try {
-                        MailConfig.sendmail(member.email, "Selamat Akun Sandbox Kamu telah di aktivasi",
+                        MailConfig.sendmail(member.email, MailConfig.subjectSuccessActivation,
                         		MailConfig.renderMailResendActivation(member));
 					} catch (Exception e) {
 						e.printStackTrace();

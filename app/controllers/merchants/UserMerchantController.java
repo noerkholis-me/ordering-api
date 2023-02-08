@@ -422,7 +422,7 @@ public class UserMerchantController extends BaseController {
                         
                         Thread thread = new Thread( () -> {
                         	try {
-                                MailConfig.sendmail(userMerchant.getEmail(), "Selamat Akun Sandbox Kamu telah di aktivasi",
+                                MailConfig.sendmail(userMerchant.getEmail(), MailConfig.subjectSuccessActivation,
                                 		MailConfig.renderMailResendActivation(userMerchant));
 							} catch (Exception e) {
 								e.printStackTrace();

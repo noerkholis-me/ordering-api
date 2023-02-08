@@ -31,6 +31,7 @@ public class MailConfig {
 	public static final String subjectConfirmOrder = "[Sandbox] Order Confirmation";
 	public static final String subjectInvoice = "[Sandbox] Invoice";
 	public static final String subjectInvoiceAdmin = "[Sandbox] New Order Succcessfull";
+	public static final String subjectSuccessActivation = "[Sandbox] Account Activation Success";
 
 	// Using send grid api
 	public static boolean sendmail2(String recipients, String subject, String contentTemplate) {

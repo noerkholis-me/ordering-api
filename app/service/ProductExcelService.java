@@ -141,10 +141,6 @@ public class ProductExcelService {
 						String shortDesc = getCellValue(row, 17);
 						String longDesc = getCellValue(row, 18);
 						
-						System.out.println(subCategory.toLowerCase());
-						System.out.println(subsCategory.toLowerCase());
-						System.out.println(brand.toLowerCase());
-						
 						if (noSku.isEmpty()) 
 							error += ", Sku Number is Blank in Line " + line;
 						
@@ -684,18 +680,15 @@ public class ProductExcelService {
 		                	String extension = picturedata.suggestFileExtension();
 		                	byte[] data = picturedata.getData();
 
-		                	String path = "public/images/" + key;
-//		                	Constant.getInstance().getImagePath()
+		                	String path = Constant.getInstance().getImagePath() + key;
+//		                	
 		        			File dir = new File(path);
 		        	        if (!dir.exists())
 		        	            dir.mkdirs();
 		        	        
-		        	        System.out.println("path dir - "+dir.getPath());
 		        			String targetLocation = dir.getAbsolutePath() + "/" + filename + "." + extension;
 		        			
-		        			String finalUrl = "http://localhost:9000/assets/images/" + key + "/" + filename + "." + extension;
-//		        			ImageUtil.createImageUrl(key, filename + "." + extension)
-//		        			
+		        			String finalUrl = ImageUtil.createImageUrl(key, filename + "." + extension);
 		        	        
 		        	        response = finalUrl;
 		                	try {
