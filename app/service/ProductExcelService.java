@@ -6,46 +6,24 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLConnection;
-import java.nio.channels.Channel;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.imageio.ImageIO;
-
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFClientAnchor;
-import org.apache.poi.hssf.usermodel.HSSFPicture;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFShape;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
-import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.PictureData;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.util.IOUtils;
-import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
-import org.apache.poi.xssf.usermodel.XSSFAnchor;
+import org.apache.poi.util.Units;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
@@ -53,16 +31,13 @@ import org.apache.poi.xssf.usermodel.XSSFPicture;
 import org.apache.poi.xssf.usermodel.XSSFShape;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.poi.ss.usermodel.Hyperlink;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.util.CommonFunction;
 import com.hokeba.util.Constant;
-import com.sun.javafx.print.Units;
 
-import dtos.product.ProductDetailResponse;
 import models.BrandMerchant;
 import models.CategoryMerchant;
 import models.Images;
@@ -84,8 +59,6 @@ import repository.ProductMerchantRepository;
 import repository.ProductStoreRepository;
 import repository.SubCategoryMerchantRepository;
 import repository.SubsCategoryMerchantRepository;
-import scala.collection.immutable.Stream.Cons;
-import utils.ImageDirectory;
 import utils.ImageUtil;
 
 public class ProductExcelService {
@@ -563,27 +536,27 @@ public class ProductExcelService {
 				row.getCell(11).setCellStyle(contentCellStyle);
 				
 				row.createCell(12);
-				if(detail.getProductImageMain() != null)
+				if(!detail.getProductImageMain().isEmpty())
 					printImage(workbook, sheetProduct, rowNum, 12, detail.getProductImageMain());
 				row.getCell(12).setCellStyle(contentCellStyle);
 				
 				row.createCell(13);
-				if(detail.getProductImage1() != null)
+				if(!detail.getProductImage1().isEmpty())
 					printImage(workbook, sheetProduct, rowNum, 13, detail.getProductImage1());
 				row.getCell(13).setCellStyle(contentCellStyle);
 
 				row.createCell(14);
-				if(detail.getProductImage2() != null)
+				if(!detail.getProductImage2().isEmpty())
 					printImage(workbook, sheetProduct, rowNum, 14, detail.getProductImage2());
 				row.getCell(14).setCellStyle(contentCellStyle);
 				
 				row.createCell(15);
-				if(detail.getProductImage3() != null)
+				if(!detail.getProductImage3().isEmpty())
 					printImage(workbook, sheetProduct, rowNum, 15, detail.getProductImage3());
 				row.getCell(15).setCellStyle(contentCellStyle);
 				
 				row.createCell(16);
-				if(detail.getProductImage4() != null)
+				if(!detail.getProductImage4().isEmpty())
 					printImage(workbook, sheetProduct, rowNum, 16, detail.getProductImage4());
 				row.getCell(16).setCellStyle(contentCellStyle);
 				
@@ -712,7 +685,10 @@ public class ProductExcelService {
 
 	private static void printImage (Workbook workbook ,Sheet sheetProduct, int row, int column, String path){
 		try {
-			String extension = path.substring(path.length() - 3);
+			String extension = "";
+			if(!path.isEmpty()) {
+				extension = path.substring(path.length() - 3);
+			}
 			URL url = new URL(path);
 			InputStream is = url.openStream();
 			
@@ -723,8 +699,8 @@ public class ProductExcelService {
 			anchor.setRow1(row);
 			anchor.setCol2(column);
 			anchor.setRow2(row);
-			anchor.setDx2(org.apache.poi.util.Units.toEMU(new Double(200)));
-			anchor.setDy2(org.apache.poi.util.Units.toEMU(new Double(200)));
+			anchor.setDx2(Units.toEMU(new Double(200)));
+			anchor.setDy2(Units.toEMU(new Double(200)));
 			
 			byte[] pictureData = IOUtils.toByteArray(is);
 			int pictureIdx = 0;
