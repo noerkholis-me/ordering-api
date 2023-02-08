@@ -13,6 +13,7 @@ import javax.mail.internet.MimeMessage;
 import models.Member;
 import models.Merchant;
 import models.SalesOrder;
+import models.UserMerchant;
 import models.transaction.Order;
 import models.transaction.OrderPayment;
 import play.data.Form;
@@ -30,6 +31,7 @@ public class MailConfig {
 	public static final String subjectConfirmOrder = "[Sandbox] Order Confirmation";
 	public static final String subjectInvoice = "[Sandbox] Invoice";
 	public static final String subjectInvoiceAdmin = "[Sandbox] New Order Succcessfull";
+	public static final String subjectSuccessActivation = "[Sandbox] Account Activation Success";
 
 	// Using send grid api
 	public static boolean sendmail2(String recipients, String subject, String contentTemplate) {
@@ -171,6 +173,18 @@ public class MailConfig {
 	public static String renderMailInvoiceTemplateAdmin(String imagePath,Order order, OrderPayment orderPayment) {
 		String html = views.html.invoiceMailNewAdmin.render(imagePath,order, orderPayment).toString();
 		return html;
+	}
+	
+	public static String renderMailResendActivation(UserMerchant user) {
+		String url = Constant.getInstance().getMerchantUrl();
+		String imageUrl = Constant.getInstance().getImageUrl() + "/assets/images/logo-sandbox.png";
+		return views.html.aktivationMailResend.render(user.getFullName(), user.getEmail(), url, imageUrl).toString();
+	}
+	
+	public static String renderMailResendActivation(Merchant user) {
+		String url = Constant.getInstance().getMerchantUrl();
+		String imageUrl = Constant.getInstance().getImageUrl() + "/assets/images/logo-sandbox.png";
+		return views.html.aktivationMailResend.render(user.fullName, user.email, url, imageUrl).toString();
 	}
 
     public static String renderMailForgotPasswordTemplate(Member member, String url) {
