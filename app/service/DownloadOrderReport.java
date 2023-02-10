@@ -86,11 +86,10 @@ public class DownloadOrderReport {
                 }
                 
                 if(getOrderPayment.getStatus().equalsIgnoreCase("PAID") || getOrderPayment.getStatus().equalsIgnoreCase("CANCEL") || getOrderPayment.getStatus().equalsIgnoreCase("CANCELED")){
-                    Row rowSheet = sheet.createRow(row++);
                     // GET PRODUCT DETAIL ORDER ON MAIN PRODUCT
                     List<OrderDetail> orderDetails = OrderRepository.findOrderDetailByOrderId(data.id);
                     for(OrderDetail oDetail : orderDetails) {
-                        // rowSheet = sheet.createRow(row++);
+                        Row rowSheet = sheet.createRow(row++);
                         rowSheet.createCell(0).setCellValue(number++);
                         rowSheet.getCell(0).setCellStyle(cellStyle);
                         
@@ -180,7 +179,7 @@ public class DownloadOrderReport {
                         rowSheet.getCell(19).setCellStyle(cellStyle);
 
                         //Metode Pembayaran
-                        rowSheet.createCell(20).setCellValue(data.getOrderPayment().getPaymentType());
+                        rowSheet.createCell(20).setCellValue(data.getJenisTransaksi());
                         rowSheet.getCell(20).setCellStyle(cellStyle);
 
                         // GET PRODUCT ADD ON FROM PRODUCT MAIN
@@ -275,7 +274,7 @@ public class DownloadOrderReport {
                             rowSheet.getCell(19).setCellStyle(cellStyle);
 
                             //Metode Pembayaran
-                            rowSheet.createCell(20).setCellValue(data.getOrderPayment().getPaymentType());
+                            rowSheet.createCell(20).setCellValue(data.getJenisTransaksi());
                             rowSheet.getCell(20).setCellStyle(cellStyle);
                         }
                     }
