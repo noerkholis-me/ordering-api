@@ -13,8 +13,11 @@ import javax.mail.internet.MimeMessage;
 import models.Member;
 import models.Merchant;
 import models.SalesOrder;
+import models.UserMerchant;
 import models.transaction.Order;
+import models.transaction.OrderPayment;
 import play.data.Form;
+import repository.OrderPaymentRepository;
 
 public class MailConfig {
 
@@ -28,6 +31,7 @@ public class MailConfig {
 	public static final String subjectConfirmOrder = "[Sandbox] Order Confirmation";
 	public static final String subjectInvoice = "[Sandbox] Invoice";
 	public static final String subjectInvoiceAdmin = "[Sandbox] New Order Succcessfull";
+	public static final String subjectSuccessActivation = "[Sandbox] Account Activation Success";
 
 	// Using send grid api
 	public static boolean sendmail2(String recipients, String subject, String contentTemplate) {
@@ -91,16 +95,96 @@ public class MailConfig {
 		}
 		return false;
 	}
+	
+	public static boolean sendmail(String recipients, String subject, String contentTemplate, String emailCC) {
+		Properties props = new Properties();
+		props.setProperty("mail.smtp.host", smtp);
+		props.setProperty("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+		props.setProperty("mail.smtp.socketFactory.fallback", "false");
+		props.setProperty("mail.smtp.port", "465");
+		props.setProperty("mail.smtp.socketFactory.port", "465");
+		props.put("mail.smtp.starttls.enable", "true");
+		props.put("mail.smtp.auth", "true");
+		props.put("mail.debug", "true");
+		props.put("mail.store.protocol", "pop3");
+		props.put("mail.transport.protocol", "smtp");
+		props.put("mail.debug.auth", "true");
+		props.setProperty( "mail.pop3.socketFactory.fallback", "false");
+//		props.put("mail.smtp.auth", "true");
+//		props.put("mail.smtp.starttls.enable", "true");
+//		props.put("mail.smtp.host", smtp);
+//		props.put("mail.smtp.port", "465");
+//		props.put("mail.debug", "true");
+//		props.put("mail.smtp.sendpartial", "true");
+		props.put("mail.smtp.ssl.enable", "true");
+		props.put("mail.smtp.ssl.trust", "*");
+		props.put("mail.smtp.ssl.protocols", "TLSv1.2");
+
+		Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+			@Override
+			protected PasswordAuthentication getPasswordAuthentication() {
+				return new PasswordAuthentication(user, pass);
+			}
+		});
+
+		try {
+
+			Message message = new MimeMessage(session);
+			message.setFrom(new InternetAddress(sender));
+			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipients));
+			message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(emailCC));
+			message.setSubject(subject);
+			message.setContent(contentTemplate, "text/html; charset=utf-8");
+			Transport.send(message, message.getAllRecipients());
+
+			return true;
+		} catch (MessagingException e) {
+			throw new RuntimeException(e);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
 
 	public static String renderMailInvoiceTemplate(String url, String urlEmailLogo, Order order) {
 		return views.html.invoiceMail.render(url, urlEmailLogo, order)
 				.toString();
 	}
 	
-	public static String renderMailInvoiceTemplateNew(String orderDate,String customerName, String nameStore, String phoneStore, String addressStore, String amount,
-			String url, String storeUrl) {
-		String html = views.html.invoiceMailNew.render(orderDate, customerName, nameStore, phoneStore, addressStore, amount, url, storeUrl).toString();
+//	public static String renderMailInvoiceTemplateNew(String orderDate,String customerName, String nameStore, String phoneStore, String addressStore, String amount,
+//			String url, String storeUrl, String metodePembayaran, String logoPembayaran, String invoiceUrl) {
+//		String html = views.html.invoiceMailNew.render(orderDate, customerName, nameStore, phoneStore, addressStore, amount, url, 
+//				storeUrl, metodePembayaran, logoPembayaran,invoiceUrl).toString();
+//		return html;
+//	}
+	
+	public static String renderMailInvoiceTemplateNew(String imagePath,Order order, OrderPayment orderPayment) {
+		String html = views.html.invoiceMailNew.render(imagePath,order, orderPayment).toString();
 		return html;
+	}
+	
+//	public static String renderMailInvoiceTemplateAdmin(String orderDate,String customerName, String nameStore, String phoneStore, String addressStore, String amount,
+//			String url, String storeUrl, String metodePembayaran, String logoPembayaran, String merchantName, String invoiceUrl) {
+//		String html = views.html.invoiceMailNewAdmin.render(orderDate, customerName, nameStore, phoneStore, addressStore, amount, url, 
+//				storeUrl, metodePembayaran, logoPembayaran, merchantName, invoiceUrl).toString();
+//		return html;
+//	}
+	
+	public static String renderMailInvoiceTemplateAdmin(String imagePath,Order order, OrderPayment orderPayment) {
+		String html = views.html.invoiceMailNewAdmin.render(imagePath,order, orderPayment).toString();
+		return html;
+	}
+	
+	public static String renderMailResendActivation(UserMerchant user) {
+		String url = Constant.getInstance().getMerchantUrl();
+		String imageUrl = Constant.getInstance().getImageUrl() + "/assets/images/logo-sandbox.png";
+		return views.html.aktivationMailResend.render(user.getFullName(), user.getEmail(), url, imageUrl).toString();
+	}
+	
+	public static String renderMailResendActivation(Merchant user) {
+		String url = Constant.getInstance().getMerchantUrl();
+		String imageUrl = Constant.getInstance().getImageUrl() + "/assets/images/logo-sandbox.png";
+		return views.html.aktivationMailResend.render(user.fullName, user.email, url, imageUrl).toString();
 	}
 
     public static String renderMailForgotPasswordTemplate(Member member, String url) {

@@ -1,14 +1,20 @@
 package models.transaction;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.hokeba.util.Helper;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import models.BaseModel;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 @Entity
 @Table(name = "order_payment")
@@ -99,5 +105,28 @@ public class OrderPayment extends BaseModel {
         code += simpleDateFormat.format(new Date()) + seqNum;
         return code;
     }
-
+    
+    // ============================================================== //
+    			// Custom getter for Scala template//
+    
+    public int scalaFetchTaxPercentage () {
+    	return this.taxPercentage.intValue();
+    }
+    
+    public String scalaFetchTaxPrice () {
+    	return Helper.getRupiahFormat(this.taxPrice.doubleValue());
+    }
+    
+    public int scalaFetchServicePercentage () {
+    	return this.servicePercentage.intValue();
+    }
+    
+    public String scalaFetchServicePrice () {
+    	return Helper.getRupiahFormat(this.servicePrice.doubleValue());
+    }
+    
+    public String scalaFetchFeeCustomer () {
+    	return Helper.getRupiahFormat(this.paymentFeeCustomer.doubleValue());
+    }
+    
 }

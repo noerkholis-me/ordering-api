@@ -419,6 +419,16 @@ public class UserMerchantController extends BaseController {
                         userMerchant.setActive(true);
                         userMerchant.setActivationCode("");
                         userMerchant.update();
+                        
+                        Thread thread = new Thread( () -> {
+                        	try {
+                                MailConfig.sendmail(userMerchant.getEmail(), MailConfig.subjectSuccessActivation,
+                                		MailConfig.renderMailResendActivation(userMerchant));
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+                        });
+                        thread.start();
 
                         trx.commit();
 

@@ -19,7 +19,7 @@ import repository.*;
 
 public class DownloadOrderReport {
 
-    private static final String[] COLUMNS = {"No", "Tanggal Order", "No Order", "Tipe Order", "Nama Customer", "Nama Toko", "Antrian", "Nama Produk", "Tipe Produk", "Harga Produk", "Quantity", "Total Harga Produk", "Tax", "Service", "Payment Fee Owner", "Payment Fee Customer", "Total Harga", "Payment Fee Type", "Status", "Kategori Produk" };
+    private static final String[] COLUMNS = {"No", "Tanggal Order", "No Order", "Tipe Order", "Nama Customer", "Nama Toko", "Antrian", "Nama Produk", "Tipe Produk", "Harga Produk", "Quantity", "Total Harga Produk", "Tax", "Service", "Payment Fee Owner", "Payment Fee Customer", "Total Harga", "Payment Fee Type", "Status", "Kategori Produk", "Metode Pembayaran" };
 
     private static final String FILE_NAME = "Order";
     private static final String FILE_TYPE = ".xlsx";
@@ -86,11 +86,10 @@ public class DownloadOrderReport {
                 }
                 
                 if(getOrderPayment.getStatus().equalsIgnoreCase("PAID") || getOrderPayment.getStatus().equalsIgnoreCase("CANCEL") || getOrderPayment.getStatus().equalsIgnoreCase("CANCELED")){
-                    Row rowSheet = sheet.createRow(row++);
                     // GET PRODUCT DETAIL ORDER ON MAIN PRODUCT
                     List<OrderDetail> orderDetails = OrderRepository.findOrderDetailByOrderId(data.id);
                     for(OrderDetail oDetail : orderDetails) {
-                        // rowSheet = sheet.createRow(row++);
+                        Row rowSheet = sheet.createRow(row++);
                         rowSheet.createCell(0).setCellValue(number++);
                         rowSheet.getCell(0).setCellStyle(cellStyle);
                         
@@ -178,6 +177,10 @@ public class DownloadOrderReport {
                         //Kategori Produk
                         rowSheet.createCell(19).setCellValue(oDetail.getProductMerchant().getCategoryMerchant().getCategoryName());
                         rowSheet.getCell(19).setCellStyle(cellStyle);
+
+                        //Metode Pembayaran
+                        rowSheet.createCell(20).setCellValue(data.getJenisTransaksi());
+                        rowSheet.getCell(20).setCellStyle(cellStyle);
 
                         // GET PRODUCT ADD ON FROM PRODUCT MAIN
                         for(OrderDetailAddOn orderDetailAddOn: oDetail.getOrderDetailAddOns()) {
@@ -269,6 +272,10 @@ public class DownloadOrderReport {
                             //Kategori Produk
                             rowSheet.createCell(19).setCellValue(oDetail.getProductMerchant().getCategoryMerchant().getCategoryName());
                             rowSheet.getCell(19).setCellStyle(cellStyle);
+
+                            //Metode Pembayaran
+                            rowSheet.createCell(20).setCellValue(data.getJenisTransaksi());
+                            rowSheet.getCell(20).setCellStyle(cellStyle);
                         }
                     }
                 }

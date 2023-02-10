@@ -34,6 +34,19 @@ public class SubCategoryMerchantRepository extends Model {
 			return null;
 		}
     }
+    
+    public static SubCategoryMerchant findByNameAndMerchantId(String name, Merchant merchant) {
+    	try {
+    		return find.where()
+    				.ieq("t0.subcategory_name", name)
+    				.eq("merchant", merchant)
+					.eq("t0.is_deleted", Boolean.FALSE)
+    				.findUnique();
+    	} catch (PersistenceException e) {
+    		e.printStackTrace();
+    		return null;
+    	}
+    }
 
     public static List<SubCategoryMerchant> getDataSubCategory(Query<SubCategoryMerchant> reqQuery, String sort, String filter, int offset, int limit)
 			throws IOException {
