@@ -297,7 +297,7 @@ public class ProductExcelService {
 			row.createCell(5).setCellValue("Brand Name");
 			row.getCell(5).setCellStyle(contentCellStyle);
 			
-			row.createCell(6).setCellValue("Main / Addinitional");
+			row.createCell(6).setCellValue("Main / Additional");
 			row.getCell(6).setCellStyle(contentCellStyle);
 			
 			row.createCell(7).setCellValue("True / False");
