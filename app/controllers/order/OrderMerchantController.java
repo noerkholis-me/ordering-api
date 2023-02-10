@@ -7,6 +7,7 @@ import com.hokeba.api.BaseResponse;
 import com.hokeba.util.Constant;
 import controllers.BaseController;
 import dtos.order.*;
+import models.ProductStore;
 import repository.BrandMerchantRepository;
 import models.Address;
 import models.BrandMerchant;
@@ -28,6 +29,7 @@ import repository.OrderRepository;
 import repository.ProductMerchantDetailRepository;
 // TableMerchant
 import models.merchant.TableMerchant;
+import repository.ProductStoreRepository;
 import repository.TableMerchantRepository;
 
 // TableMerchant
@@ -53,7 +55,7 @@ public class OrderMerchantController extends BaseController {
 
     private static BaseResponse response = new BaseResponse();
 
-    public static Result getOrderList(Long storeId, int offset, int limit, String statusOrder, String filter) throws Exception {
+    public static Result getOrderList(Long storeId, int offset, int limit, String statusOrder, String filter, String productType) throws Exception {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
@@ -150,35 +152,44 @@ public class OrderMerchantController extends BaseController {
 
                         // System.out.println(">>>>> loop order detail <<<<<");
                         for (OrderDetail orderDetail : orderDetails) {
-                            // System.out.println(">>>>> order detail in : " + orderDetail.id);
-                            OrderList.ProductOrderDetail productDetail = new OrderList.ProductOrderDetail();
-                            productDetail.setProductId(orderDetail.getProductMerchant().id);
-                            productDetail.setProductName(orderDetail.getProductName());
-                            ProductMerchantDetail pMD = ProductMerchantDetailRepository.findMainProduct(orderDetail.getProductMerchant());
-                            productDetail.setProductImage(pMD == null ? null : pMD.getProductImageMain());
-                            productDetail.setProductPrice(orderDetail.getProductPrice());
-                            productDetail.setProductQty(orderDetail.getQuantity());
-                            productDetail.setNotes(orderDetail.getNotes());
+                            List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.product_id", orderDetail.getProductMerchant().id).orderBy().desc("t0.id").findList();
+                            if (productType.equalsIgnoreCase("STORE")
+                                ? listProductStore.size() > 0 // if size > 0 then show product store
+                                : productType.equalsIgnoreCase("GLOBAL")
+                                    ? listProductStore.size() == 0 // if size = 0 then show product global
+                                    : listProductStore.size() >= 0 // if size >= 0 then show product store & global
+                            ) {
+                                // System.out.println(">>>>> order detail in : " + orderDetail.id);
+                                OrderList.ProductOrderDetail productDetail = new OrderList.ProductOrderDetail();
+                                productDetail.setProductId(orderDetail.getProductMerchant().id);
+                                productDetail.setProductName(orderDetail.getProductName());
+                                ProductMerchantDetail pMD = ProductMerchantDetailRepository.findMainProduct(orderDetail.getProductMerchant());
+                                productDetail.setProductImage(pMD == null ? null : pMD.getProductImageMain());
+                                productDetail.setProductPrice(orderDetail.getProductPrice());
+                                productDetail.setProductQty(orderDetail.getQuantity());
+                                productDetail.setNotes(orderDetail.getNotes());
 
-                            // System.out.println(">>>>> loop order detail add on <<<<<<");
-                            List<OrderList.ProductOrderDetail.ProductOrderDetailAddOn> productDetailAddOns = new ArrayList<>();
-                            for (OrderDetailAddOn orderDetailAddOn : orderDetail.getOrderDetailAddOns()) {
-                                // System.out.println(">>>>> order detail add on in : " + orderDetailAddOn.id);
-                                OrderList.ProductOrderDetail.ProductOrderDetailAddOn productAddOn = new OrderList.ProductOrderDetail.ProductOrderDetailAddOn();
-                                productAddOn.setProductId(orderDetailAddOn.getProductAddOn().getProductAssignId());
-                                productAddOn.setProductName(orderDetailAddOn.getProductName());
-                                productAddOn.setProductPrice(orderDetailAddOn.getProductPrice());
-                                productAddOn.setProductQty(orderDetailAddOn.getQuantity());
-                                productAddOn.setNotes(orderDetailAddOn.getNotes());
-                                productDetailAddOns.add(productAddOn);
+                                // System.out.println(">>>>> loop order detail add on <<<<<<");
+                                List<OrderList.ProductOrderDetail.ProductOrderDetailAddOn> productDetailAddOns = new ArrayList<>();
+                                for (OrderDetailAddOn orderDetailAddOn : orderDetail.getOrderDetailAddOns()) {
+                                    // System.out.println(">>>>> order detail add on in : " + orderDetailAddOn.id);
+                                    OrderList.ProductOrderDetail.ProductOrderDetailAddOn productAddOn = new OrderList.ProductOrderDetail.ProductOrderDetailAddOn();
+                                    productAddOn.setProductId(orderDetailAddOn.getProductAddOn().getProductAssignId());
+                                    productAddOn.setProductName(orderDetailAddOn.getProductName());
+                                    productAddOn.setProductPrice(orderDetailAddOn.getProductPrice());
+                                    productAddOn.setProductQty(orderDetailAddOn.getQuantity());
+                                    productAddOn.setNotes(orderDetailAddOn.getNotes());
+                                    productDetailAddOns.add(productAddOn);
+                                }
+                                productDetail.setProductAddOn(productDetailAddOns);
+                                productOrderDetails.add(productDetail);
                             }
-                            productDetail.setProductAddOn(productDetailAddOns);
-                            productOrderDetails.add(productDetail);
                         }
+
                         orderRes.setProductOrderDetail(productOrderDetails);
-                        orderLists.add(orderRes);
-                    // }
-                    
+                        if (productOrderDetails.size() > 0 ) { // if order detail not empty add data to order list respon
+                            orderLists.add(orderRes);
+                        }
                 }
 
                 // System.out.println(">>>>> Total Data : " + totalData);

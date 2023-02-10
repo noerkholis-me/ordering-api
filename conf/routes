@@ -575,7 +575,7 @@ GET         /merchant/finance/withdraw/download                 controllers.fina
 GET         /merchant/finance/transaction/active-balance                 controllers.finance.FinanceTransactionController.getActiveBalance(store_id:Long ?= 0)
 
 # ORDER LIST
-GET         /merchant/orders/list                 controllers.order.OrderMerchantController.getOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="", filter:String?="")
+GET         /merchant/orders/list                 controllers.order.OrderMerchantController.getOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="", filter:String?="", product_type:String  ?= "ALL")
 GET         /orders/status                       controllers.order.OrderMerchantController.statusOrderMQ(order_number:String ?= "")
 # UPDATE PROFILE
 PUT         /merchant/update/profile              controllers.users.UpdateProfileController.updateMerchantData()
