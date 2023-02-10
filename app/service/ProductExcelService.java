@@ -64,7 +64,7 @@ import utils.ImageUtil;
 public class ProductExcelService {
 	
 	public static final String[] columnMerchant = { "No Sku", "Product Name", "Category", "Sub Category", "Subs Category", "Brand",
-			"Product Type", "Customizable", "Product Prize", "Discount Type", "Discount", "Price After Discount",
+			"Product Type", "Customizable", "Product Price", "Discount Type", "Discount",
 			"Image Main", "Image 1", "Image 2", "Image 3", "Image 4", "Short Desc", "Long Desc" };
 	
 	public static final String[] columnStore = { "Product Id", "Store Id", "Store Price", "Discount type", "Discount", "Final Price",
@@ -83,6 +83,7 @@ public class ProductExcelService {
 			workbook.setMissingCellPolicy(Row.RETURN_NULL_AND_BLANK);
 			XSSFSheet datatypeSheet = workbook.getSheetAt(0);
 			boolean isFirstLine = true;
+			boolean isDummyLine = true;
 			CategoryMerchant categoryMerchant = null;
 			SubCategoryMerchant subCategoryMerchant = null;
 			SubsCategoryMerchant subsCategoryMerchant = null;
@@ -91,6 +92,8 @@ public class ProductExcelService {
 				for (Row row : datatypeSheet) {
 					if (isFirstLine) {
 						isFirstLine = false;
+					} else if (isDummyLine) {
+						isDummyLine = false;
 					} else {
 						line++;
 
@@ -102,17 +105,16 @@ public class ProductExcelService {
 						String brand = getCellValue(row, 5);
 						String productType = getCellValue(row, 6);
 						String isCustomizeable = getCellValue(row, 7);
-						String productPrize = getCellValue(row, 8);
+						String productPrice = getCellValue(row, 8);
 						String discountType = getCellValue(row, 9);
 						String discount = getCellValue(row, 10);
-						String priceAfterDiscount = getCellValue(row, 11);
-						String imageMain = getCellPicture(row, 12, datatypeSheet, line);
-						String image1 = getCellPicture(row, 13, datatypeSheet, line);
-						String image2 = getCellPicture(row, 14, datatypeSheet, line);
-						String image3 = getCellPicture(row, 15, datatypeSheet, line);
-						String image4 = getCellPicture(row, 16, datatypeSheet,line);
-						String shortDesc = getCellValue(row, 17);
-						String longDesc = getCellValue(row, 18);
+						String imageMain = getCellPicture(row, 11, datatypeSheet, line);
+						String image1 = getCellPicture(row, 12, datatypeSheet, line);
+						String image2 = getCellPicture(row, 13, datatypeSheet, line);
+						String image3 = getCellPicture(row, 14, datatypeSheet, line);
+						String image4 = getCellPicture(row, 15, datatypeSheet,line);
+						String shortDesc = getCellValue(row, 16);
+						String longDesc = getCellValue(row, 17);
 						
 						if (noSku.isEmpty()) 
 							error += ", Sku Number is Blank in Line " + line;
@@ -138,7 +140,7 @@ public class ProductExcelService {
 						if(isCustomizeable.isEmpty())
 							error += ", Is Customizable is Blank in Line " + line;
 						
-						if(productPrize.isEmpty())
+						if(productPrice.isEmpty())
 							error += ", Product Price is Blank in Line " + line;
 						
 						if(discountType.isEmpty())
@@ -147,8 +149,8 @@ public class ProductExcelService {
 						if((!discount.isEmpty()) && Double.valueOf(discount).compareTo(0D) < 0 )
 							error += ", Discount Must Not Be Less Than 0 " + line;
 						
-						if(!priceAfterDiscount.isEmpty() && new BigDecimal(priceAfterDiscount).compareTo(BigDecimal.ZERO) < 0)
-								error += ", Price After Discount Must Not Be Less Than 0 " + line;
+//						if(!priceAfterDiscount.isEmpty() && new BigDecimal(priceAfterDiscount).compareTo(BigDecimal.ZERO) < 0)
+//								error += ", Price After Discount Must Not Be Less Than 0 " + line;
 //						
 //						if(imageMain.isEmpty())
 //							error += ", Image Main is Blank in Line " + line;
@@ -180,6 +182,9 @@ public class ProductExcelService {
 							error += ", invalid Brand In Line " + line;
 						
 						if (error.isEmpty()) {
+							Double price = Double.valueOf(productPrice);
+							Double disc = Double.valueOf(discount);
+							String priceAfterDiscount = String.valueOf(price - (price * disc));
 							ProductMerchant newProductMerchant = new ProductMerchant();
 							constructProductEntityRequest(newProductMerchant, merchant, noSku, productName, categoryMerchant,
 									subCategoryMerchant, subsCategoryMerchant, brandMerchant);
@@ -188,7 +193,7 @@ public class ProductExcelService {
 							// do save to detail
 							ProductMerchantDetail newProductMerchantDetail = new ProductMerchantDetail();
 							constructProductDetailEntityRequest(newProductMerchantDetail, newProductMerchant,
-									productType, isCustomizeable, productPrize, discountType, discount,
+									productType, isCustomizeable, productPrice, discountType, discount,
 									priceAfterDiscount,imageMain, image1, image2, image3, image4);
 							newProductMerchantDetail.save();
 
@@ -258,11 +263,77 @@ public class ProductExcelService {
 			contentCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
 
 			Row headerRow = sheetProduct.createRow(0);
+			int a = 10;
+			int b = 16;
 			for (int i = 0; i < columnMerchant.length; i++) {
 				Cell cell = headerRow.createCell(i);
-				cell.setCellValue(columnMerchant[i]);
+				if(i > a & i < b) {
+					cell.setCellValue(columnMerchant[i]);
+				} else {
+					cell.setCellValue(columnMerchant[i] + " *");
+				}
 				cell.setCellStyle(headerCellStyle);
 			}
+			
+			//Dummy Row
+			Row row = sheetProduct.createRow(1);
+			row.setHeight((short)500);
+			
+			row.createCell(0).setCellValue(00000000);
+			row.getCell(0).setCellStyle(contentCellStyle);
+			
+			row.createCell(1).setCellValue("Dummy Product");
+			row.getCell(1).setCellStyle(contentCellStyle);
+
+			row.createCell(2).setCellValue("Category Name");
+			row.getCell(2).setCellStyle(contentCellStyle);
+			
+			row.createCell(3).setCellValue("Sub Category Name");
+			row.getCell(3).setCellStyle(contentCellStyle);
+			
+			row.createCell(4).setCellValue("Subs Category Name");
+			row.getCell(4).setCellStyle(contentCellStyle);
+			
+			row.createCell(5).setCellValue("Brand Name");
+			row.getCell(5).setCellStyle(contentCellStyle);
+			
+			row.createCell(6).setCellValue("Main / Addinitional");
+			row.getCell(6).setCellStyle(contentCellStyle);
+			
+			row.createCell(7).setCellValue("True / False");
+			row.getCell(7).setCellStyle(contentCellStyle);
+			
+			row.createCell(8).setCellValue("Dalam Rupiah ex- 700000 ");
+			row.getCell(8).setCellStyle(contentCellStyle);
+			
+			row.createCell(9).setCellValue("Discount Type ex- none");
+			row.getCell(9).setCellStyle(contentCellStyle);
+			
+			row.createCell(10).setCellValue("10% ditulis 10 saja");
+			row.getCell(10).setCellStyle(contentCellStyle);
+			
+			row.createCell(11).setCellValue("Sama Seperti Image Main");
+			row.getCell(11).setCellStyle(contentCellStyle);
+			
+			row.createCell(12).setCellValue("Sama Seperti Image Main");
+			row.getCell(12).setCellStyle(contentCellStyle);
+			
+			row.createCell(13).setCellValue("Sama Seperti Image Main");
+			row.getCell(13).setCellStyle(contentCellStyle);
+			
+			row.createCell(14).setCellValue("Sama Seperti Image Main");
+			row.getCell(14).setCellStyle(contentCellStyle);
+			
+			row.createCell(15).setCellValue("Sama Seperti Image Main");
+			row.getCell(15).setCellStyle(contentCellStyle);
+			
+			row.createCell(16).setCellValue("Deskripsi Pendek Barang");
+			row.getCell(16).setCellStyle(contentCellStyle);
+			
+			row.createCell(17).setCellValue("Deskripsi Barang, Dummy Product Adalah Barang Dummy Sebagai Contoh");
+			row.getCell(17).setCellStyle(contentCellStyle);
+			
+
 			for (int i = 0; i < columnMerchant.length; i++) {
 				sheetProduct.autoSizeColumn(i);
 			}
@@ -483,7 +554,8 @@ public class ProductExcelService {
 				cell.setCellStyle(headerCellStyle);
 			}
 			int rowNum = 0;
-			List<ProductMerchant> products = ProductMerchantRepository.find.where().eq("merchant", merchant).findList();
+			List<ProductMerchant> products = ProductMerchantRepository.find.where().eq("merchant", merchant).
+					eq("isActive", Boolean.TRUE).findList();
 			
 			for(ProductMerchant data : products) {
 //				System.out.println(rowNum);
