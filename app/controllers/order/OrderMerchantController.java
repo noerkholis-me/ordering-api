@@ -785,6 +785,7 @@ public class OrderMerchantController extends BaseController {
                     orderDetailResponse.setProductName(orderDetail.getProductName());
                     orderDetailResponse.setQty(orderDetail.getQuantity());
                     orderDetailResponse.setTotal(orderDetail.getSubTotal());
+                    orderDetailResponse.setNotes(orderDetail.getNotes());
                     orderDetailResponse.setNoSku(orderDetail.getProductMerchant().getNoSKU());
                     List<OrderDetailAddOnResponse> orderDetailAddOns = new ArrayList<>();
                     List<OrderDetailAddOn> orderDetailAddOnList = orderDetail.getOrderDetailAddOns();
