@@ -179,9 +179,11 @@ public class ProductExcelService {
 							error += ", Merek Salah di Baris " + line;
 						
 						if (error.isEmpty()) {
-							Double price = Double.valueOf(productPrice);
-							Double disc = Double.valueOf(discount);
-							String priceAfterDiscount = String.valueOf(price - (price * disc));
+							//counting final price after discount
+							Double price = Double.parseDouble(productPrice);
+							Double disc = Double.parseDouble(discount) / 100D;
+							Double priceAfterDiscount = price - (price * disc);
+							
 							ProductMerchant newProductMerchant = new ProductMerchant();
 							constructProductEntityRequest(newProductMerchant, merchant, noSku, productName, categoryMerchant,
 									subCategoryMerchant, subsCategoryMerchant, brandMerchant);
