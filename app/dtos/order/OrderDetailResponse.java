@@ -24,6 +24,8 @@ public class OrderDetailResponse {
     private BigDecimal total;
     @JsonProperty("no_sku")
     private String noSku;
+    @JsonProperty("notes")
+    private String notes;
     @JsonProperty("order_detail_add_on")
     private List<OrderDetailAddOnResponse> orderDetailAddOns;
 
