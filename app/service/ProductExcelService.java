@@ -63,9 +63,9 @@ import utils.ImageUtil;
 
 public class ProductExcelService {
 	
-	public static final String[] columnMerchant = { "No Sku", "Product Name", "Category", "Sub Category", "Subs Category", "Brand",
-			"Product Type", "Customizable", "Product Price", "Discount Type", "Discount",
-			"Image Main", "Image 1", "Image 2", "Image 3", "Image 4", "Short Desc", "Long Desc" };
+	public static final String[] columnMerchant = { "Nomor Sku", "Nama Produk", "Kategori Produk", "Sub Kategori Produk", "Subs Kategori Produk", "Merek Produk",
+			"Tipe Produk", "Dapat Disesuaikan", "Harga Produk", "Tipe Diskon", "Diskon",
+			"Gambar Main", "Gambar 1", "Gambar 2", "Gambar 3", "Gambar 4", "Deskripsi Pendek", "Deskripsi Panjang" };
 	
 	public static final String[] columnStore = { "Product Id", "Store Id", "Store Price", "Discount type", "Discount", "Final Price",
 			"Is Active", "Is Deleted", "Merchant Id" };
@@ -83,7 +83,6 @@ public class ProductExcelService {
 			workbook.setMissingCellPolicy(Row.RETURN_NULL_AND_BLANK);
 			XSSFSheet datatypeSheet = workbook.getSheetAt(0);
 			boolean isFirstLine = true;
-			boolean isDummyLine = true;
 			CategoryMerchant categoryMerchant = null;
 			SubCategoryMerchant subCategoryMerchant = null;
 			SubsCategoryMerchant subsCategoryMerchant = null;
@@ -92,8 +91,6 @@ public class ProductExcelService {
 				for (Row row : datatypeSheet) {
 					if (isFirstLine) {
 						isFirstLine = false;
-					} else if (isDummyLine) {
-						isDummyLine = false;
 					} else {
 						line++;
 
@@ -117,37 +114,37 @@ public class ProductExcelService {
 						String longDesc = getCellValue(row, 17);
 						
 						if (noSku.isEmpty()) 
-							error += ", Sku Number is Blank in Line " + line;
+							error += ", Nomor SKU Kosong di Baris " + line;
 						
 						if(productName.isEmpty())
-							error += ", Product Name is Blank in Line " + line;
+							error += ", Nama Produk Kosong di Baris " + line;
 						
 						if(category.isEmpty())
-							error += ", Category Id is Blank in Line " + line;
+							error += ", Kategori Produk Kosong di Baris " + line;
 						
 						if(subCategory.isEmpty())
-							error += ", Sub Category is Blank in Line " + line;
+							error += ", Sub Kategori Kosong di Baris " + line;
 						
 						if(subsCategory.isEmpty())
-							error += ", Subs Category is Blank in Line " + line;
+							error += ", Subs Kategori Kosong di Baris " + line;
 						
 						if(brand.isEmpty())
-							error += ", Brand Id is Blank in Line " + line;
+							error += ", Brand Kosong di Baris " + line;
 						
 						if(productType.isEmpty())
-							error += ", Product Type is Blank in Line " + line;
+							error += ", Tipe Produk Kosong di Baris " + line;
 						
 						if(isCustomizeable.isEmpty())
-							error += ", Is Customizable is Blank in Line " + line;
+							error += ", Dapat Disesuaikan Kosong di Baris " + line;
 						
 						if(productPrice.isEmpty())
-							error += ", Product Price is Blank in Line " + line;
+							error += ", Harga Product Kosong di Baris " + line;
 						
 						if(discountType.isEmpty())
-							error += ", Discount Type is Blank in Line " + line;
+							error += ", Tipe Diskon Kosong di Baris " + line;
 						
 						if((!discount.isEmpty()) && Double.valueOf(discount).compareTo(0D) < 0 )
-							error += ", Discount Must Not Be Less Than 0 " + line;
+							error += ", Diskon Tidak Boleh Kurang dari 0 " + line;
 						
 //						if(!priceAfterDiscount.isEmpty() && new BigDecimal(priceAfterDiscount).compareTo(BigDecimal.ZERO) < 0)
 //								error += ", Price After Discount Must Not Be Less Than 0 " + line;
@@ -156,35 +153,37 @@ public class ProductExcelService {
 //							error += ", Image Main is Blank in Line " + line;
 //						
 						if(shortDesc.isEmpty())
-							error += ", Short Desc is Blank in Line " + line;
+							error += ", Deskripsi Pendek Kosong di Baris " + line;
 						
 						if(longDesc.isEmpty())
-							error += ", Long Desc is Blank in Line " + line;
+							error += ", Deskripsi Panjang Kosong di Baris " + line;
 						
 						categoryMerchant = CategoryMerchantRepository.
 								findByNameAndMerchantId(category, merchant);
 						if (categoryMerchant == null) 
-							error += ", invalid Category in line " + line;
+							error += ", Kategori Salah di Baris " + line;
 						
 						subCategoryMerchant = SubCategoryMerchantRepository.
 								findByNameAndMerchantId(subCategory, merchant);
 						if (subCategoryMerchant == null) 
-							error += ", invalid Sub Category in line " + line;
+							error += ", Sub Kategori Salah di Baris " + line;
 						
 						subsCategoryMerchant = SubsCategoryMerchantRepository
 								.findByNameAndMerchantId(subsCategory, merchant);
 						if (subsCategoryMerchant == null) 
-							error += ", invalid Subs Category In Line " + line;
+							error += ", Subs Kategori Salah di Baris " + line;
 						
 						brandMerchant = BrandMerchantRepository.findByNameAndMerchantId
 								(brand, merchant);
 						if (brandMerchant == null)
-							error += ", invalid Brand In Line " + line;
+							error += ", Merek Salah di Baris " + line;
 						
 						if (error.isEmpty()) {
-							Double price = Double.valueOf(productPrice);
-							Double disc = Double.valueOf(discount);
-							String priceAfterDiscount = String.valueOf(price - (price * disc));
+							//counting final price after discount
+							Double price = Double.parseDouble(productPrice);
+							Double disc = Double.parseDouble(discount) / 100D;
+							Double priceAfterDiscount = price - (price * disc);
+							
 							ProductMerchant newProductMerchant = new ProductMerchant();
 							constructProductEntityRequest(newProductMerchant, merchant, noSku, productName, categoryMerchant,
 									subCategoryMerchant, subsCategoryMerchant, brandMerchant);
@@ -194,7 +193,7 @@ public class ProductExcelService {
 							ProductMerchantDetail newProductMerchantDetail = new ProductMerchantDetail();
 							constructProductDetailEntityRequest(newProductMerchantDetail, newProductMerchant,
 									productType, isCustomizeable, productPrice, discountType, discount,
-									priceAfterDiscount,imageMain, image1, image2, image3, image4);
+									String.valueOf(priceAfterDiscount),imageMain, image1, image2, image3, image4);
 							newProductMerchantDetail.save();
 
 							ProductMerchantDescription newProductMerchantDescription = new ProductMerchantDescription();
@@ -312,7 +311,8 @@ public class ProductExcelService {
 			row.createCell(10).setCellValue("10% ditulis 10 saja");
 			row.getCell(10).setCellStyle(contentCellStyle);
 			
-			row.createCell(11).setCellValue("Sama Seperti Image Main");
+			row.createCell(11);
+			printImage(workbook, sheetProduct, 1, 11, Constant.getInstance().getImageUrl()+"/assets/images/HelloBisnis.png");
 			row.getCell(11).setCellStyle(contentCellStyle);
 			
 			row.createCell(12).setCellValue("Sama Seperti Image Main");

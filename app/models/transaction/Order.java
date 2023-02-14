@@ -63,6 +63,9 @@ public class Order extends BaseModel {
 
     @Column(name = "destination_address", columnDefinition = "TEXT")
     private String destinationAddress;
+    
+    @Column(name = "reference_number")
+    private String referenceNumber;
 
     private String status;
 
