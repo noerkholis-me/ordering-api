@@ -38,6 +38,7 @@ POST    /users/session/login/google     			controllers.users.SessionsController.
 POST    /users/session/login/facebook_v2     		controllers.users.SessionsController.signInFacebookOld()
 POST    /users/session/login/google_v2     			controllers.users.SessionsController.signInGoogleOld()
 POST    /users/session/login/apple     			    controllers.users.SessionsController.signInAppleId()
+POST    /users/session/login/sandbox/google 		controllers.users.SessionsController.signInGoogleSandbox()
 GET     /users/session/logout              			controllers.users.SessionsController.signOut()
 POST    /users/session/refresh						controllers.users.SessionsController.refreshToken()
 POST    /users/session/forgot_password				controllers.users.SessionsController.forgetPassword()

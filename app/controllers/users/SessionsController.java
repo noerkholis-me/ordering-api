@@ -21,6 +21,7 @@ import com.hokeba.social.response.AppleIdUserOauth;
 import com.hokeba.social.requests.MailchimpCustomerRequest;
 import com.hokeba.social.requests.MailchimpSubscriberRequest;
 import com.hokeba.social.response.FacebookUser;
+import com.hokeba.social.response.GoogleOauthUserinfoResponse;
 import com.hokeba.social.response.GooglePlusUser;
 import com.hokeba.social.response.GooglePlusUserOauth;
 import com.hokeba.social.service.FacebookService;
@@ -1831,16 +1832,15 @@ public class SessionsController extends BaseController {
 
 	public static Result signInGoogleSandbox() {
 		JsonNode json = request().body().asJson();
-		if (checkAccessAuthorization("guest") == 200 && json.has("google_user_id") && json.has("access_token")
-				&& json.has("device_model") && json.has("device_type")) {
+		if (checkAccessAuthorization("guest") == 200 && json.has("google_user_id") && json.has("access_token")) {
 			String googleUserId = json.findPath("google_user_id").asText();
 			String accessToken = json.findPath("access_token").asText();
 			String firstName = json.has("first_name") ? json.findPath("first_name").asText() : "";
 			ObjectMapper mapper = new ObjectMapper();
 			ServiceResponse sresponse = GooglePlusService.getInstance().getGooglePlusUserData(accessToken);
 			if (sresponse.getCode() == 200) {
-				GooglePlusUser guser = mapper.convertValue(sresponse.getData(), GooglePlusUser.class);
-				if (googleUserId != null && !googleUserId.equals("") && googleUserId.equals(guser.getId())) {
+				GoogleOauthUserinfoResponse guser = mapper.convertValue(sresponse.getData(), GoogleOauthUserinfoResponse.class);
+				if (googleUserId != null && !googleUserId.isEmpty() && googleUserId.equals(guser.getSub())) {
 					Transaction txn = Ebean.beginTransaction();
 					try {
 						Member target = Member.find.where().eq("google_user_id", googleUserId).findUnique();
@@ -1849,14 +1849,13 @@ public class SessionsController extends BaseController {
 							return badRequest(Json.toJson(response));
 						} else if (target == null) {
 							target = new Member();
-							target.fullName = (firstName != null && !firstName.trim().isEmpty()) ? firstName : guser.getDisplayName();
-							target.email = guser.getEmails()[0].getValue();
+							target.fullName = (firstName != null && !firstName.trim().isEmpty()) ? firstName : guser.getName();
+							target.email = guser.getEmail();
 							target.phone = null;
-							target.googleUserId = guser.getId();
+							target.googleUserId = guser.getSub();
 							target.save();
+							txn.commit();
 						}
-						
-						txn.commit();
 						response.setBaseResponse(1, 0, 1, success, null);
 						return ok(Json.toJson(response));
 					} catch (Exception e) {
@@ -1881,4 +1880,5 @@ public class SessionsController extends BaseController {
 		response.setBaseResponse(0, 0, 0, unauthorized, null);
 		return unauthorized(Json.toJson(response));
 	}
+	
 }
