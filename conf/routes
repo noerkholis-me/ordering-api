@@ -296,7 +296,7 @@ PUT    /merchant/users/edit/:id                         controllers.merchants.Us
 PATCH   /merchant/users/update-password             controllers.merchants.SessionsController.updatePassword()
 
 POST    /users/createpassword/:activationcode/updatepassword     controllers.merchants.UserMerchantController.createNewPassword(activationcode: String)
-
+POST	/merchant/callbackActivation/:id				controllers.merchants.SessionsController.sendCallbackEmailActivation(id: Long)
 
 
 
