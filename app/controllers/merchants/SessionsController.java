@@ -779,6 +779,16 @@ public class SessionsController extends BaseController {
                 member.activationCode = "";
                 member.isActive = true;
                 member.save();
+                
+                Thread thread = new Thread( () -> {
+                	try {
+                        MailConfig.sendmail(member.email, MailConfig.subjectSuccessActivation,
+                        		MailConfig.renderMailResendActivation(member));
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+                });
+                thread.start();
                 response.setBaseResponse(1, 0, 1, success, null);
                 return ok(Json.toJson(response));
             }

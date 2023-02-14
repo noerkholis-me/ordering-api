@@ -229,7 +229,7 @@ public class AppSettingsController extends BaseController {
                         appSettingResponse.setPrimaryColor(appSetting.getPrimaryColor());
                         appSettingResponse.setSecondaryColor(appSetting.getSecondaryColor());
                         appSettingResponse.setAppLogo(appSetting.getAppLogo());
-                        appSettingResponse.setFavicon(appSetting.getAppLogo());
+                        appSettingResponse.setFavicon(appSetting.getFavicon());
                         appSettingResponse.setThreshold(appSetting.getThreshold());
                         appSettingResponse.setIsDeleted(appSetting.isDeleted);
                         response.setBaseResponse(1, 0, 1, success + " menampilkan data", appSettingResponse);

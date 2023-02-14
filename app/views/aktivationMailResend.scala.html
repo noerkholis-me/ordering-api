@@ -1,4 +1,4 @@
-@(name: String, email: String, url: String)
+@(name: String, email: String, url: String, imagePath: String)
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,7 +20,10 @@
             padding-top: 20px;
             padding-bottom: 20px;
         }
-        .text{
+        .text div{
+            display: flex;
+            margin: 0 215px;
+            height: 45px;
         }
         .card {
             box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
@@ -36,20 +39,30 @@
         #copy-right{
             font-size: small;
         }
+        .left-text{
+            margin-right: 5px;
+        }
     </style>
 </head>
 <body>
     
     <center>
         <div id="BannerImage">
-            <img src="file:///D:/project/Sandbox/api/public/images/logo-sandbox.png" alt="">
+            <img src="@imagePath" alt="">
         </div>
         <hr>
         <div class="card">
         <div class="text">
             <p id="line1">Selamat akun Sandbox anda berhasil di aktifkan,</p>
-            <p>Email : @email</p>
-            <p>Nama : @name</p>
+            <div>
+                <p class="left-text">Email : </p>
+                <p>@email</p>
+            </div>
+            <div>
+                
+                <p class="left-text">Nama : </p>
+                <p>@name</p>
+            </div>
         </div>
 
         <div id="linkLogin" class="text">
