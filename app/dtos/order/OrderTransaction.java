@@ -54,5 +54,8 @@ public class OrderTransaction {
     @JsonProperty("loyalty_usage")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal loyaltyUsage;
+    
+    @JsonProperty("reference_number")
+    private String referenceNumber;
 
 }
