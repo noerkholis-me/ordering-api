@@ -283,7 +283,7 @@ public class ProductExcelService {
 			contentCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
 
 			Row headerRow = sheetProduct.createRow(0);
-			int a = 10;
+			int a = 8;
 			int b = 16;
 			for (int i = 0; i < columnMerchant.length; i++) {
 				Cell cell = headerRow.createCell(i);
@@ -326,10 +326,10 @@ public class ProductExcelService {
 			row.createCell(8).setCellValue("Dalam Rupiah ex- 700000 ");
 			row.getCell(8).setCellStyle(contentCellStyle);
 			
-			row.createCell(9).setCellValue("Discount Type ex- none");
+			row.createCell(9).setCellValue("Tipe Diskon ex - discount (Kosongkan jika tidak ada)");
 			row.getCell(9).setCellStyle(contentCellStyle);
 			
-			row.createCell(10).setCellValue("10% ditulis 10 saja");
+			row.createCell(10).setCellValue("10% ditulis 10 saja (Kosongan jika tidak ada)");
 			row.getCell(10).setCellStyle(contentCellStyle);
 			
 			row.createCell(11);
