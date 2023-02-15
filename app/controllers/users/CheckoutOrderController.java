@@ -200,6 +200,17 @@ public class CheckoutOrderController extends BaseController {
                 }
                 if(member != null) {
                     member.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
+                    if (member.email == null && email != null && !email.trim().isEmpty()) {
+                    	member.email = email; 
+                    }
+                    if (member.phone == null && phone != null && !phone.trim().isEmpty()) {
+                    	Member memberDuplicate = Member.find.where().eq("t0.phone", phone).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
+                    	if (memberDuplicate == null) {
+                    		member.phone = phone;
+                    	} else {
+                    		//currently do nothing, can throw error here
+                    	}
+                    }
                     member.update();
                     order.setMember(member);
                     order.setPhoneNumber(member.phone);
