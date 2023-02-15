@@ -21,6 +21,8 @@ import com.hokeba.social.response.AppleIdUserOauth;
 import com.hokeba.social.requests.MailchimpCustomerRequest;
 import com.hokeba.social.requests.MailchimpSubscriberRequest;
 import com.hokeba.social.response.FacebookUser;
+import com.hokeba.social.response.GoogleOauthUserinfoResponse;
+import com.hokeba.social.response.GoogleOauthUserinfoSandboxResponse;
 import com.hokeba.social.response.GooglePlusUser;
 import com.hokeba.social.response.GooglePlusUserOauth;
 import com.hokeba.social.service.FacebookService;
@@ -1829,5 +1831,55 @@ public class SessionsController extends BaseController {
 		return null;
 	}
 
-
+	public static Result signInGoogleSandbox() {
+		JsonNode json = request().body().asJson();
+		if (checkAccessAuthorization("guest") == 200 && json.has("google_user_id") && json.has("access_token")) {
+			String googleUserId = json.findPath("google_user_id").asText();
+			String accessToken = json.findPath("access_token").asText();
+			String firstName = json.has("first_name") ? json.findPath("first_name").asText() : "";
+			ObjectMapper mapper = new ObjectMapper();
+			ServiceResponse sresponse = GooglePlusService.getInstance().getGooglePlusUserData(accessToken);
+			if (sresponse.getCode() == 200) {
+				GoogleOauthUserinfoResponse guser = mapper.convertValue(sresponse.getData(), GoogleOauthUserinfoResponse.class);
+				if (googleUserId != null && !googleUserId.isEmpty() && googleUserId.equals(guser.getSub())) {
+					Transaction txn = Ebean.beginTransaction();
+					try {
+						Member target = Member.find.where().eq("google_user_id", googleUserId).findUnique();
+						if (target != null && !target.isActive) {
+							response.setBaseResponse(0, 0, 0, "Your account was disabled", null);
+							return badRequest(Json.toJson(response));
+						} else if (target == null) {
+							target = new Member();
+							target.fullName = (firstName != null && !firstName.trim().isEmpty()) ? firstName : guser.getName();
+							target.email = guser.getEmail();
+							target.phone = null;
+							target.googleUserId = guser.getSub();
+							target.save();
+							txn.commit();
+						}
+						response.setBaseResponse(1, 0, 1, success, new GoogleOauthUserinfoSandboxResponse(target.googleUserId, target.fullName, target.email));
+						return ok(Json.toJson(response));
+					} catch (Exception e) {
+						e.printStackTrace();
+						txn.rollback();
+					} finally {
+						txn.end();
+					}
+					response.setBaseResponse(0, 0, 0, error, null);
+					return internalServerError(Json.toJson(response));
+				}
+				response.setBaseResponse(0, 0, 0, "Token didn't match Google user ID", null);
+				return badRequest(Json.toJson(response));
+			} else if (sresponse.getCode() == 408) {
+				response.setBaseResponse(0, 0, 0, timeOut, null);
+				return badRequest(Json.toJson(response));
+			} else {
+				response.setBaseResponse(0, 0, 0, sresponse.getCode() + " " + error, null);
+				return badRequest(Json.toJson(response));
+			}
+		}
+		response.setBaseResponse(0, 0, 0, unauthorized, null);
+		return unauthorized(Json.toJson(response));
+	}
+	
 }
