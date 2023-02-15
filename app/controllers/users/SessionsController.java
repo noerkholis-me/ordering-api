@@ -22,6 +22,7 @@ import com.hokeba.social.requests.MailchimpCustomerRequest;
 import com.hokeba.social.requests.MailchimpSubscriberRequest;
 import com.hokeba.social.response.FacebookUser;
 import com.hokeba.social.response.GoogleOauthUserinfoResponse;
+import com.hokeba.social.response.GoogleOauthUserinfoSandboxResponse;
 import com.hokeba.social.response.GooglePlusUser;
 import com.hokeba.social.response.GooglePlusUserOauth;
 import com.hokeba.social.service.FacebookService;
@@ -1856,7 +1857,7 @@ public class SessionsController extends BaseController {
 							target.save();
 							txn.commit();
 						}
-						response.setBaseResponse(1, 0, 1, success, null);
+						response.setBaseResponse(1, 0, 1, success, new GoogleOauthUserinfoSandboxResponse(target.googleUserId, target.fullName, target.email));
 						return ok(Json.toJson(response));
 					} catch (Exception e) {
 						e.printStackTrace();
