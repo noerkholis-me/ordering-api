@@ -70,7 +70,7 @@ public class ProductExcelService {
 	public static final String[] columnStore = { "Product Id", "Store Id", "Store Price", "Discount type", "Discount", "Final Price",
 			"Is Active", "Is Deleted", "Merchant Id" };
 
-	public boolean importProductMerchant(FilePart file, Merchant merchant, BaseResponse<String> response) {
+	public boolean importProductMerchant(FilePart file, Merchant merchant, BaseResponse<?> response) {
 		String error = "";
 		Transaction txn = Ebean.beginTransaction();
 		int line = 0;
@@ -138,13 +138,24 @@ public class ProductExcelService {
 							error += ", Dapat Disesuaikan Kosong di Baris " + line;
 						
 						if(productPrice.isEmpty())
-							error += ", Harga Product Kosong di Baris " + line;
+							error += ", Harga Produk Kosong di Baris " + line;
 						
-						if(discountType.isEmpty())
-							error += ", Tipe Diskon Kosong di Baris " + line;
+						if((!productPrice.isEmpty()) && Double.valueOf(productPrice).compareTo(0D) < 0 )
+							error += ", Harga Produk Tidak Boleh Kurang dari 0 " + line;
 						
+						if(discountType.isEmpty()) {
+							if(discount.isEmpty()) {
+								discount = "0";
+								discountType = "none";
+							} else {
+								error += ", Tipe Diskon Kosong di Baris " + line;
+							}
+						}
 						if((!discount.isEmpty()) && Double.valueOf(discount).compareTo(0D) < 0 )
 							error += ", Diskon Tidak Boleh Kurang dari 0 " + line;
+						
+						if(!discountType.isEmpty() && discount.isEmpty())
+							error += ", Diskon Kosong di Baris " + line;
 						
 //						if(!priceAfterDiscount.isEmpty() && new BigDecimal(priceAfterDiscount).compareTo(BigDecimal.ZERO) < 0)
 //								error += ", Price After Discount Must Not Be Less Than 0 " + line;
@@ -184,34 +195,44 @@ public class ProductExcelService {
 							Double disc = Double.parseDouble(discount) / 100D;
 							Double priceAfterDiscount = price - (price * disc);
 							
-							ProductMerchant newProductMerchant = new ProductMerchant();
-							constructProductEntityRequest(newProductMerchant, merchant, noSku, productName, categoryMerchant,
-									subCategoryMerchant, subsCategoryMerchant, brandMerchant);
-							newProductMerchant.save();
+							try {
+								ProductMerchant newProductMerchant = new ProductMerchant();
+								constructProductEntityRequest(newProductMerchant, merchant, noSku, productName, categoryMerchant,
+										subCategoryMerchant, subsCategoryMerchant, brandMerchant);
+								newProductMerchant.save();
 
-							// do save to detail
-							ProductMerchantDetail newProductMerchantDetail = new ProductMerchantDetail();
-							constructProductDetailEntityRequest(newProductMerchantDetail, newProductMerchant,
-									productType, isCustomizeable, productPrice, discountType, discount,
-									String.valueOf(priceAfterDiscount),imageMain, image1, image2, image3, image4);
-							newProductMerchantDetail.save();
+								// do save to detail
+								ProductMerchantDetail newProductMerchantDetail = new ProductMerchantDetail();
+								constructProductDetailEntityRequest(newProductMerchantDetail, newProductMerchant,
+										productType, isCustomizeable, productPrice, discountType, discount,
+										String.valueOf(priceAfterDiscount),imageMain, image1, image2, image3, image4);
+								newProductMerchantDetail.save();
 
-							ProductMerchantDescription newProductMerchantDescription = new ProductMerchantDescription();
-							newProductMerchantDescription.setShortDescription(shortDesc);
-							newProductMerchantDescription.setLongDescription(longDesc);
-							newProductMerchantDescription.setProductMerchantDetail(newProductMerchantDetail);
-							newProductMerchantDescription.save();
-							countData += 1;
+								ProductMerchantDescription newProductMerchantDescription = new ProductMerchantDescription();
+								newProductMerchantDescription.setShortDescription(shortDesc);
+								newProductMerchantDescription.setLongDescription(longDesc);
+								newProductMerchantDescription.setProductMerchantDetail(newProductMerchantDetail);
+								newProductMerchantDescription.save();
+								countData += 1;
+							} catch (Exception e) {
+								e.printStackTrace();
+								error += ", Internal Server Error";
+								System.out.println("Error Save to DB");
+							}
 						}
 					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
+				error += " Ada masalah saat import produk, Detail : "+e.getMessage().replaceAll("\\\\", "");
+				System.out.println("catch message "+e.getMessage());
 				workbook.close();
 			}
 			workbook.close();
 		} catch (IOException e) {
-			// TODO: handle exception
+			e.printStackTrace();
+			error += " Ada masalah saat import produk, Detail : "+e.getMessage().replaceAll("\\\\", "");
+			System.out.println("catch message "+e.getMessage());
 		}
 		if (error.isEmpty()) {
 			txn.commit();
