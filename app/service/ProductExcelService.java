@@ -62,6 +62,10 @@ import repository.SubsCategoryMerchantRepository;
 import utils.ImageUtil;
 
 public class ProductExcelService {
+	enum typeDiscount {
+		DISCOUNT,
+		POTONGAN
+	}
 	
 	public static final String[] columnMerchant = { "Nomor Sku", "Nama Produk", "Kategori Produk", "Sub Kategori Produk", "Subs Kategori Produk", "Merek Produk",
 			"Tipe Produk", "Dapat Disesuaikan", "Harga Produk", "Tipe Diskon", "Diskon",
@@ -113,6 +117,8 @@ public class ProductExcelService {
 						String shortDesc = getCellValue(row, 16);
 						String longDesc = getCellValue(row, 17);
 						
+						Double priceAfterDiscount;
+						
 						if (noSku.isEmpty()) 
 							error += ", Nomor SKU Kosong di Baris " + line;
 						
@@ -151,8 +157,13 @@ public class ProductExcelService {
 								error += ", Tipe Diskon Kosong di Baris " + line;
 							}
 						}
-						if((!discount.isEmpty()) && Double.valueOf(discount).compareTo(0D) < 0 )
-							error += ", Diskon Tidak Boleh Kurang dari 0 " + line;
+						
+						if((!discount.isEmpty()) && discountType.equalsIgnoreCase(typeDiscount.DISCOUNT.toString())) {
+							if (Double.valueOf(discount).compareTo(0D) < 0 )
+								error += ", Diskon Tidak Boleh Kurang dari 0 di Baris" + line;
+							else if (Double.valueOf(discount).compareTo(100D) > 0 )
+								error += ", Diskon Tidak Boleh Lebih dari 100 di Baris " + line;
+						} 
 						
 						if(!discountType.isEmpty() && discount.isEmpty())
 							error += ", Diskon Kosong di Baris " + line;
@@ -189,12 +200,22 @@ public class ProductExcelService {
 						if (brandMerchant == null)
 							error += ", Merek Salah di Baris " + line;
 						
+						//counting final price after discount
+						
+						
+						
 						if (error.isEmpty()) {
-							//counting final price after discount
-							Double price = Double.parseDouble(productPrice);
-							Double disc = Double.parseDouble(discount) / 100D;
-							Double priceAfterDiscount = price - (price * disc);
-							
+							if (discountType.equalsIgnoreCase(typeDiscount.DISCOUNT.toString())) {
+								Double price = Double.parseDouble(productPrice);
+								Double disc = Double.parseDouble(discount) / 100D;
+								priceAfterDiscount = price - (price * disc);
+							} else if(discountType.equalsIgnoreCase(typeDiscount.POTONGAN.toString())) {
+								Double price = Double.parseDouble(productPrice);
+								Double disc = Double.parseDouble(discount);
+								priceAfterDiscount = price - disc;
+							} else {
+								priceAfterDiscount = Double.parseDouble(productPrice);
+							}
 							try {
 								ProductMerchant newProductMerchant = new ProductMerchant();
 								constructProductEntityRequest(newProductMerchant, merchant, noSku, productName, categoryMerchant,
@@ -326,10 +347,10 @@ public class ProductExcelService {
 			row.createCell(8).setCellValue("Dalam Rupiah ex- 700000 ");
 			row.getCell(8).setCellStyle(contentCellStyle);
 			
-			row.createCell(9).setCellValue("Tipe Diskon ex - discount (Kosongkan jika tidak ada)");
+			row.createCell(9).setCellValue("discount / potongan (Kosongkan jika tidak ada)");
 			row.getCell(9).setCellStyle(contentCellStyle);
 			
-			row.createCell(10).setCellValue("10% ditulis 10 saja (Kosongan jika tidak ada)");
+			row.createCell(10).setCellValue("Tipe - discount = 10 (tanpa %), Tipe - potongan = 1000  (Kosongan jika tidak ada)");
 			row.getCell(10).setCellStyle(contentCellStyle);
 			
 			row.createCell(11);
