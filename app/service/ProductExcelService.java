@@ -313,7 +313,7 @@ public class ProductExcelService {
 			int b = 17;
 			for (int i = 0; i < columnMerchant.length; i++) {
 				Cell cell = headerRow.createCell(i);
-				if(i > a & i < b) {
+				if((i > a & i < b) || i == 0 || i == 1) {
 					cell.setCellValue(columnMerchant[i]);
 				} else {
 					cell.setCellValue(columnMerchant[i] + " *");
@@ -738,7 +738,7 @@ public class ProductExcelService {
 		newProductMerchantDetail.setProductType(productType.toUpperCase());
 		newProductMerchantDetail.setIsCustomizable(Boolean.parseBoolean(customizeable));
 		newProductMerchantDetail.setProductPrice(new BigDecimal(productPrice));
-		newProductMerchantDetail.setDiscountType(discountType);
+		newProductMerchantDetail.setDiscountType(!discountType.isEmpty() ? discountType : "none");
 		newProductMerchantDetail.setDiscount(!discount.isEmpty() ? Double.valueOf(discount) : 0D);
 		newProductMerchantDetail.setProductPriceAfterDiscount(priceAfterDiscount);
 		newProductMerchantDetail.setProductImageMain(imageMain);
@@ -794,10 +794,10 @@ public class ProductExcelService {
 		        	        if (!dir.exists())
 		        	            dir.mkdirs();
 		        	        
-		        			String targetLocation = dir.getAbsolutePath() + "/" + filename + "." + extension;
+		        			String targetLocation = dir.getAbsolutePath() + "/" + finalName + "." + extension;
 		        			
-		        			String finalUrl = "http://localhost:9000/images/"+key+"/"+filename+"."+extension;
-//		        			ImageUtil.createImageUrl(key, filename + "." + extension)
+		        			String finalUrl = ImageUtil.createImageUrl(key, finalName + "." + extension);
+		        			
 		        	        
 		        	        response = finalUrl;
 		                	try {
@@ -865,8 +865,8 @@ public class ProductExcelService {
 	private static String validateImportRequest (String idProduk, String noSku, String productName, String category, String subCategory,
 	String subsCategory, String brand, String productType, String isCustomizeable, String productPrice, String discountType, String discount,
 	String shortDesc, String longDesc, String error, int line) {
-		if (noSku.isEmpty())
-			error += ", Nomor SKU Kosong di Baris " + line;
+//		if (noSku.isEmpty())
+//			error += ", Nomor SKU Kosong di Baris " + line;
 		
 		if(productName.isEmpty())
 			error += ", Nama Produk Kosong di Baris " + line;
