@@ -564,7 +564,7 @@ DELETE       /merchant/bankaccount/:id                          controllers.merc
 GET          /merchant/bankaccount/:id                          controllers.merchants.BankAccountMerchantController.getBankAccountById(id: Long)
 
 #ORDER REPORT MERCHANTS
-GET         /merchant/order/reports/data                controllers.order.OrderMerchantController.orderReportMerchant(start_date:String ?= "", end_date:String ?= "", offset:Int ?= 0, limit:Int ?= 0, status_order:String ?= "", store_id:Long ?= 0)
+GET         /merchant/order/reports/data                controllers.order.OrderMerchantController.orderReportMerchant(start_date:String ?= "", end_date:String ?= "", offset:Int ?= 0, limit:Int ?= 0, status_order:String ?= "", store_id:Long ?= 0, product_type:String  ?= "ALL")
 GET         /merchant/order/reports/data/download       controllers.order.OrderMerchantController.downloadTransaction(start_date:String ?= "", end_date:String ?= "", offset:Int ?= 0, limit:Int ?= 0, status_order:String ?= "", store_id:Long ?= 0)
 
 #FINANCE TRANSACTION
