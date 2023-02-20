@@ -22,6 +22,7 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.UserMerchantRepository;
+import service.CallbackActivationService;
 import repository.RoleMerchantRepository;
 import repository.StoreAccessRepository;
 
@@ -420,15 +421,7 @@ public class UserMerchantController extends BaseController {
                         userMerchant.setActivationCode("");
                         userMerchant.update();
                         
-                        Thread thread = new Thread( () -> {
-                        	try {
-                                MailConfig.sendmail(userMerchant.getEmail(), MailConfig.subjectSuccessActivation,
-                                		MailConfig.renderMailResendActivation(userMerchant));
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
-                        });
-                        thread.start();
+                        CallbackActivationService.renderCallbackActivationMail(userMerchant);
 
                         trx.commit();
 

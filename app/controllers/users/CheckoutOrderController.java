@@ -168,12 +168,22 @@ public class CheckoutOrderController extends BaseController {
 
                 Member member = null;
                 Member memberData = new Member();
-                if (orderRequest.getCustomerEmail() != null && !orderRequest.getCustomerEmail().equalsIgnoreCase("")) {
-                    member = Member.find.where().eq("t0.email", orderRequest.getCustomerEmail()).eq("merchant", store.merchant).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
+                String email = orderRequest.getCustomerEmail();
+                String phone = orderRequest.getCustomerPhoneNumber();
+                String gguid = orderRequest.getCustomerGoogleId();
+                if (gguid != null && !gguid.trim().isEmpty()) {
+                	member = Member.find.where().eq("t0.google_user_id", gguid)
+                			.eq("merchant", store.merchant).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
                 }
-                if (orderRequest.getCustomerEmail().isEmpty() && orderRequest.getCustomerPhoneNumber() != null && !orderRequest.getCustomerPhoneNumber().equalsIgnoreCase("")) {
-                    member = Member.find.where().eq("t0.phone", orderRequest.getCustomerPhoneNumber()).eq("merchant", store.merchant).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
+                if (member == null && phone != null && !phone.trim().isEmpty()) {
+                	member = Member.find.where().eq("t0.phone", phone)
+                			.eq("merchant", store.merchant).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
                 }
+                if (member == null && email != null && !email.trim().isEmpty()) {
+                	member = Member.find.where().eq("t0.email", email)
+                			.eq("merchant", store.merchant).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
+                }
+                
                 if(member == null){
                     if (orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != ""){
                         memberData.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
@@ -190,6 +200,17 @@ public class CheckoutOrderController extends BaseController {
                 }
                 if(member != null) {
                     member.fullName = orderRequest.getCustomerName() != null && orderRequest.getCustomerName() != "" ? orderRequest.getCustomerName() : null;
+                    if (member.email == null && email != null && !email.trim().isEmpty()) {
+                    	member.email = email; 
+                    }
+                    if (member.phone == null && phone != null && !phone.trim().isEmpty()) {
+                    	Member memberDuplicate = Member.find.where().eq("t0.phone", phone).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
+                    	if (memberDuplicate == null) {
+                    		member.phone = phone;
+                    	} else {
+                    		//currently do nothing, can throw error here
+                    	}
+                    }
                     member.update();
                     order.setMember(member);
                     order.setPhoneNumber(member.phone);
@@ -217,6 +238,7 @@ public class CheckoutOrderController extends BaseController {
                 order.setStore(store);
                 order.setDeviceType(orderRequest.getDeviceType());
                 order.setDestinationAddress(orderRequest.getDestinationAddress());
+                order.setReferenceNumber(orderRequest.getReferenceNumber());
                 if (orderRequest.getDeviceType().equalsIgnoreCase("MINIPOS")) {
                     System.out.println("Out");
                     UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
