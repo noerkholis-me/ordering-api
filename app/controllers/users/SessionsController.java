@@ -1854,6 +1854,7 @@ public class SessionsController extends BaseController {
 							target.email = guser.getEmail();
 							target.phone = null;
 							target.googleUserId = guser.getSub();
+							target.isActive = true;
 							target.save();
 							txn.commit();
 						}
