@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.ClientAnchor;
@@ -38,6 +39,7 @@ import com.hokeba.api.BaseResponse;
 import com.hokeba.util.CommonFunction;
 import com.hokeba.util.Constant;
 
+import controllers.product.ProductMerchantController;
 import models.BrandMerchant;
 import models.CategoryMerchant;
 import models.Images;
@@ -63,19 +65,29 @@ import utils.ImageUtil;
 
 public class ProductExcelService {
 	
-	public static final String[] columnMerchant = { "No Sku", "Product Name", "Category", "Sub Category", "Subs Category", "Brand",
-			"Product Type", "Customizable", "Product Price", "Discount Type", "Discount",
-			"Image Main", "Image 1", "Image 2", "Image 3", "Image 4", "Short Desc", "Long Desc" };
+	private final static Logger.ALogger logger = Logger.of(ProductExcelService.class);
+	
+	enum typeDiscount {
+		DISCOUNT,
+		POTONGAN
+	}
+	
+	public static final String[] columnMerchant = { "Id Produk", "No SKU" , "Nama Produk", "Kategori Produk", "Sub Kategori Produk", "Subs Kategori Produk", "Merek Produk",
+			"Tipe Produk", "Dapat Disesuaikan", "Harga Produk", "Tipe Diskon", "Diskon",
+			"Gambar Main", "Gambar 1", "Gambar 2", "Gambar 3", "Gambar 4", "Deskripsi Pendek", "Deskripsi Panjang" };
 	
 	public static final String[] columnStore = { "Product Id", "Store Id", "Store Price", "Discount type", "Discount", "Final Price",
 			"Is Active", "Is Deleted", "Merchant Id" };
 
-	public boolean importProductMerchant(FilePart file, Merchant merchant, BaseResponse<String> response) {
+	public boolean importProductMerchant(FilePart file, Merchant merchant, BaseResponse<?> response) {
 		String error = "";
+		String errorValidation = "";
 		Transaction txn = Ebean.beginTransaction();
-		int line = 0;
+		int line = 1;
 		int cell = 0;
-		int countData = 0;
+		int countDataImport = 0;
+		int countDataUpdate = 0;
+		String typeImport = "";
 		try {
 			String currentCellValue = "";
 			FileInputStream excelFile = new FileInputStream(file.getFile());
@@ -83,7 +95,6 @@ public class ProductExcelService {
 			workbook.setMissingCellPolicy(Row.RETURN_NULL_AND_BLANK);
 			XSSFSheet datatypeSheet = workbook.getSheetAt(0);
 			boolean isFirstLine = true;
-			boolean isDummyLine = true;
 			CategoryMerchant categoryMerchant = null;
 			SubCategoryMerchant subCategoryMerchant = null;
 			SubsCategoryMerchant subsCategoryMerchant = null;
@@ -92,132 +103,167 @@ public class ProductExcelService {
 				for (Row row : datatypeSheet) {
 					if (isFirstLine) {
 						isFirstLine = false;
-					} else if (isDummyLine) {
-						isDummyLine = false;
 					} else {
 						line++;
+						String idProduk = getCellValue(row, 0);
+						String noSku = getCellValue(row, 1);
+						String productName = getCellValue(row, 2);
+						String category = getCellValue(row, 3);
+						String subCategory = getCellValue(row, 4);
+						String subsCategory = getCellValue(row, 5);
+						String brand = getCellValue(row, 6);
+						String productType = getCellValue(row, 7);
+						String isCustomizeable = getCellValue(row, 8);
+						String productPrice = getCellValue(row, 9);
+						String discountType = getCellValue(row, 10);
+						String discount = getCellValue(row, 11);
+						String imageMain = getCellPicture(row, 12, datatypeSheet, line);
+						String image1 = getCellPicture(row, 13, datatypeSheet, line);
+						String image2 = getCellPicture(row, 14, datatypeSheet, line);
+						String image3 = getCellPicture(row, 15, datatypeSheet, line);
+						String image4 = getCellPicture(row, 16, datatypeSheet,line);
+						String shortDesc = getCellValue(row, 17);
+						String longDesc = getCellValue(row, 18);
+						
+						if (idProduk.isEmpty()) {
+							
+							typeImport = "Import";
+							logger.info("Add New Product");
+							
+							error = validateImportRequest(idProduk, noSku, 
+									productName, category, subCategory, subsCategory, brand, productType, isCustomizeable, 
+									productPrice, discountType, discount, shortDesc, longDesc, error, line);
+							
+							error += errorValidation;
+							
+							if(errorValidation.isEmpty()) {
+								categoryMerchant = CategoryMerchantRepository.
+										findByNameAndMerchantId(category, merchant);
+								if (categoryMerchant == null) 
+									error += ", Kategori Salah di Baris " + line;
+								
+								subCategoryMerchant = SubCategoryMerchantRepository.
+										findByNameAndMerchantId(subCategory, merchant);
+								if (subCategoryMerchant == null) 
+									error += ", Sub Kategori Salah di Baris " + line;
+								
+								subsCategoryMerchant = SubsCategoryMerchantRepository
+										.findByNameAndMerchantId(subsCategory, merchant);
+								if (subsCategoryMerchant == null) 
+									error += ", Subs Kategori Salah di Baris " + line;
+								
+								brandMerchant = BrandMerchantRepository.findByNameAndMerchantId
+										(brand, merchant);
+								if (brandMerchant == null)
+									error += ", Merek Salah di Baris " + line;
+							}
+							if (error.isEmpty()) {
+								
+								try {
+									ProductMerchant newProductMerchant = new ProductMerchant();
+									constructProductEntityRequest(newProductMerchant, merchant, noSku, productName, categoryMerchant,
+											subCategoryMerchant, subsCategoryMerchant, brandMerchant);
+									newProductMerchant.save();
 
-						String noSku = getCellValue(row, 0);
-						String productName = getCellValue(row, 1);
-						String category = getCellValue(row, 2);
-						String subCategory = getCellValue(row, 3);
-						String subsCategory = getCellValue(row, 4);
-						String brand = getCellValue(row, 5);
-						String productType = getCellValue(row, 6);
-						String isCustomizeable = getCellValue(row, 7);
-						String productPrice = getCellValue(row, 8);
-						String discountType = getCellValue(row, 9);
-						String discount = getCellValue(row, 10);
-						String imageMain = getCellPicture(row, 11, datatypeSheet, line);
-						String image1 = getCellPicture(row, 12, datatypeSheet, line);
-						String image2 = getCellPicture(row, 13, datatypeSheet, line);
-						String image3 = getCellPicture(row, 14, datatypeSheet, line);
-						String image4 = getCellPicture(row, 15, datatypeSheet,line);
-						String shortDesc = getCellValue(row, 16);
-						String longDesc = getCellValue(row, 17);
-						
-						if (noSku.isEmpty()) 
-							error += ", Sku Number is Blank in Line " + line;
-						
-						if(productName.isEmpty())
-							error += ", Product Name is Blank in Line " + line;
-						
-						if(category.isEmpty())
-							error += ", Category Id is Blank in Line " + line;
-						
-						if(subCategory.isEmpty())
-							error += ", Sub Category is Blank in Line " + line;
-						
-						if(subsCategory.isEmpty())
-							error += ", Subs Category is Blank in Line " + line;
-						
-						if(brand.isEmpty())
-							error += ", Brand Id is Blank in Line " + line;
-						
-						if(productType.isEmpty())
-							error += ", Product Type is Blank in Line " + line;
-						
-						if(isCustomizeable.isEmpty())
-							error += ", Is Customizable is Blank in Line " + line;
-						
-						if(productPrice.isEmpty())
-							error += ", Product Price is Blank in Line " + line;
-						
-						if(discountType.isEmpty())
-							error += ", Discount Type is Blank in Line " + line;
-						
-						if((!discount.isEmpty()) && Double.valueOf(discount).compareTo(0D) < 0 )
-							error += ", Discount Must Not Be Less Than 0 " + line;
-						
-//						if(!priceAfterDiscount.isEmpty() && new BigDecimal(priceAfterDiscount).compareTo(BigDecimal.ZERO) < 0)
-//								error += ", Price After Discount Must Not Be Less Than 0 " + line;
-//						
-//						if(imageMain.isEmpty())
-//							error += ", Image Main is Blank in Line " + line;
-//						
-						if(shortDesc.isEmpty())
-							error += ", Short Desc is Blank in Line " + line;
-						
-						if(longDesc.isEmpty())
-							error += ", Long Desc is Blank in Line " + line;
-						
-						categoryMerchant = CategoryMerchantRepository.
-								findByNameAndMerchantId(category, merchant);
-						if (categoryMerchant == null) 
-							error += ", invalid Category in line " + line;
-						
-						subCategoryMerchant = SubCategoryMerchantRepository.
-								findByNameAndMerchantId(subCategory, merchant);
-						if (subCategoryMerchant == null) 
-							error += ", invalid Sub Category in line " + line;
-						
-						subsCategoryMerchant = SubsCategoryMerchantRepository
-								.findByNameAndMerchantId(subsCategory, merchant);
-						if (subsCategoryMerchant == null) 
-							error += ", invalid Subs Category In Line " + line;
-						
-						brandMerchant = BrandMerchantRepository.findByNameAndMerchantId
-								(brand, merchant);
-						if (brandMerchant == null)
-							error += ", invalid Brand In Line " + line;
-						
-						if (error.isEmpty()) {
-							Double price = Double.valueOf(productPrice);
-							Double disc = Double.valueOf(discount);
-							String priceAfterDiscount = String.valueOf(price - (price * disc));
-							ProductMerchant newProductMerchant = new ProductMerchant();
-							constructProductEntityRequest(newProductMerchant, merchant, noSku, productName, categoryMerchant,
-									subCategoryMerchant, subsCategoryMerchant, brandMerchant);
-							newProductMerchant.save();
+									// do save to detail
+									ProductMerchantDetail newProductMerchantDetail = new ProductMerchantDetail();
+									constructProductDetailEntityRequest(newProductMerchantDetail, newProductMerchant,
+											productType, isCustomizeable, productPrice, discountType, discount,imageMain, image1, image2, image3, image4);
+									newProductMerchantDetail.save();
 
-							// do save to detail
-							ProductMerchantDetail newProductMerchantDetail = new ProductMerchantDetail();
-							constructProductDetailEntityRequest(newProductMerchantDetail, newProductMerchant,
-									productType, isCustomizeable, productPrice, discountType, discount,
-									priceAfterDiscount,imageMain, image1, image2, image3, image4);
-							newProductMerchantDetail.save();
-
-							ProductMerchantDescription newProductMerchantDescription = new ProductMerchantDescription();
-							newProductMerchantDescription.setShortDescription(shortDesc);
-							newProductMerchantDescription.setLongDescription(longDesc);
-							newProductMerchantDescription.setProductMerchantDetail(newProductMerchantDetail);
-							newProductMerchantDescription.save();
-							countData += 1;
+									ProductMerchantDescription newProductMerchantDescription = new ProductMerchantDescription();
+									newProductMerchantDescription.setShortDescription(shortDesc);
+									newProductMerchantDescription.setLongDescription(longDesc);
+									newProductMerchantDescription.setProductMerchantDetail(newProductMerchantDetail);
+									newProductMerchantDescription.save();
+									countDataImport += 1;
+								} catch (Exception e) {
+									e.printStackTrace();
+									error += ", Internal Server Error";
+									System.out.println("Error Save to DB");
+								}
+							}
+							
+						} else {
+							 error = validateImportRequest(idProduk, noSku, 
+									productName, category, subCategory, subsCategory, brand, productType, isCustomizeable, 
+									productPrice, discountType, discount, shortDesc, longDesc, error, line);
+							
+							ProductMerchant productMerchant = ProductMerchantRepository.findById(Long.parseLong(idProduk));
+							if (productMerchant == null) 
+								error += "Tidak Ditemukan Produk Dengan id - " + idProduk +" di Baris - " + line;
+							
+							ProductMerchantDetail productDetail = 
+									ProductMerchantDetailRepository.findByProduct(productMerchant);
+							if (productDetail == null) 
+								error += "Terjadi Kesalahan Update Produk Dengan id - " + idProduk + " di Baris - " + line;
+							
+							ProductMerchantDescription productDescription = 
+									ProductMerchantDescriptionRepository.findByProductMerchantDetail(productDetail);
+							if (productDescription == null) 
+								error += "Terjadi Kesalahan Update Produk Dengan id - " + idProduk + " di Baris - " + line;
+							
+							categoryMerchant = CategoryMerchantRepository.
+									findByNameAndMerchantId(category, merchant);
+							if (categoryMerchant == null) 
+								error += ", Kategori Salah di Baris " + line;
+							
+							subCategoryMerchant = SubCategoryMerchantRepository.
+									findByNameAndMerchantId(subCategory, merchant);
+							if (subCategoryMerchant == null) 
+								error += ", Sub Kategori Salah di Baris " + line;
+							
+							subsCategoryMerchant = SubsCategoryMerchantRepository
+									.findByNameAndMerchantId(subsCategory, merchant);
+							if (subsCategoryMerchant == null) 
+								error += ", Subs Kategori Salah di Baris " + line;
+							
+							brandMerchant = BrandMerchantRepository.findByNameAndMerchantId
+									(brand, merchant);
+							if (brandMerchant == null)
+								error += ", Merek Salah di Baris " + line;
+									
+							typeImport = "Update";
+							
+							
+							if (error.isEmpty()) {
+								
+								logger.info("Updating Product");
+								constructProductEntityRequest(productMerchant, merchant, noSku, productName, categoryMerchant,
+										subCategoryMerchant, subsCategoryMerchant, brandMerchant);
+								productMerchant.update();
+								
+								constructProductDetailEntityRequest(productDetail, productMerchant,
+										productType, isCustomizeable, productPrice ,discountType, discount, imageMain, image1, image2, image3, image4);
+								productDetail.update();
+								
+								productDescription.setShortDescription(shortDesc);
+								productDescription.setLongDescription(longDesc);
+								productDescription.update();
+								
+								countDataUpdate += 1;
+								
+							}
 						}
 					}
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
+				error += " Ada masalah saat import produk, Detail : "+e.getMessage().replaceAll("\\\\", "");
+				System.out.println("catch message "+e.getMessage());
 				workbook.close();
 			}
 			workbook.close();
 		} catch (IOException e) {
-			// TODO: handle exception
+			e.printStackTrace();
+			error += " Ada masalah saat import produk, Detail : "+e.getMessage().replaceAll("\\\\", "");
+			System.out.println("catch message "+e.getMessage());
 		}
 		if (error.isEmpty()) {
 			txn.commit();
 			txn.end();
-			response.setBaseResponse(countData, 0, countData, "Success Importing Data", "Imported " + countData + " Product");
+			response.setBaseResponse(countDataImport + countDataUpdate, 0, countDataImport + countDataUpdate,
+					"Success Importing Data", "Imported " + countDataImport + " New Product, Updated " + countDataUpdate + " Product");
 			return true;
 		}
 		response.setBaseResponse(0, 0, 0, "Import Failed" + error, null);
@@ -263,11 +309,11 @@ public class ProductExcelService {
 			contentCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
 
 			Row headerRow = sheetProduct.createRow(0);
-			int a = 10;
-			int b = 16;
+			int a = 9;
+			int b = 17;
 			for (int i = 0; i < columnMerchant.length; i++) {
 				Cell cell = headerRow.createCell(i);
-				if(i > a & i < b) {
+				if((i > a & i < b) || i == 0 || i == 1) {
 					cell.setCellValue(columnMerchant[i]);
 				} else {
 					cell.setCellValue(columnMerchant[i] + " *");
@@ -279,43 +325,44 @@ public class ProductExcelService {
 			Row row = sheetProduct.createRow(1);
 			row.setHeight((short)500);
 			
-			row.createCell(0).setCellValue(00000000);
+			row.createCell(0).setCellValue("Kosong Kan Kolom ID");
 			row.getCell(0).setCellStyle(contentCellStyle);
 			
-			row.createCell(1).setCellValue("Dummy Product");
+			row.createCell(1).setCellValue(00000000);
 			row.getCell(1).setCellStyle(contentCellStyle);
-
-			row.createCell(2).setCellValue("Category Name");
-			row.getCell(2).setCellStyle(contentCellStyle);
 			
-			row.createCell(3).setCellValue("Sub Category Name");
+			row.createCell(2).setCellValue("Dummy Product");
+			row.getCell(2).setCellStyle(contentCellStyle);
+
+			row.createCell(3).setCellValue("Category Name");
 			row.getCell(3).setCellStyle(contentCellStyle);
 			
-			row.createCell(4).setCellValue("Subs Category Name");
+			row.createCell(4).setCellValue("Sub Category Name");
 			row.getCell(4).setCellStyle(contentCellStyle);
 			
-			row.createCell(5).setCellValue("Brand Name");
+			row.createCell(5).setCellValue("Subs Category Name");
 			row.getCell(5).setCellStyle(contentCellStyle);
 			
-			row.createCell(6).setCellValue("Main / Additional");
+			row.createCell(6).setCellValue("Brand Name");
 			row.getCell(6).setCellStyle(contentCellStyle);
 			
-			row.createCell(7).setCellValue("True / False");
+			row.createCell(7).setCellValue("Main / Additional");
 			row.getCell(7).setCellStyle(contentCellStyle);
 			
-			row.createCell(8).setCellValue("Dalam Rupiah ex- 700000 ");
+			row.createCell(8).setCellValue("True / False");
 			row.getCell(8).setCellStyle(contentCellStyle);
 			
-			row.createCell(9).setCellValue("Discount Type ex- none");
+			row.createCell(9).setCellValue("Dalam Rupiah ex- 700000 ");
 			row.getCell(9).setCellStyle(contentCellStyle);
 			
-			row.createCell(10).setCellValue("10% ditulis 10 saja");
+			row.createCell(10).setCellValue("discount / potongan (Kosongkan jika tidak ada)");
 			row.getCell(10).setCellStyle(contentCellStyle);
 			
-			row.createCell(11).setCellValue("Sama Seperti Image Main");
+			row.createCell(11).setCellValue("Tipe - discount = 10 (tanpa %), Tipe - potongan = 1000  (Kosongan jika tidak ada)");
 			row.getCell(11).setCellStyle(contentCellStyle);
 			
-			row.createCell(12).setCellValue("Sama Seperti Image Main");
+			row.createCell(12);
+			printImage(workbook, sheetProduct, 1, 12, Constant.getInstance().getImageUrl()+"/assets/images/HelloBisnis.png");
 			row.getCell(12).setCellStyle(contentCellStyle);
 			
 			row.createCell(13).setCellValue("Sama Seperti Image Main");
@@ -327,11 +374,14 @@ public class ProductExcelService {
 			row.createCell(15).setCellValue("Sama Seperti Image Main");
 			row.getCell(15).setCellStyle(contentCellStyle);
 			
-			row.createCell(16).setCellValue("Deskripsi Pendek Barang");
+			row.createCell(16).setCellValue("Sama Seperti Image Main");
 			row.getCell(16).setCellStyle(contentCellStyle);
 			
-			row.createCell(17).setCellValue("Deskripsi Barang, Dummy Product Adalah Barang Dummy Sebagai Contoh");
+			row.createCell(17).setCellValue("Deskripsi Pendek Barang");
 			row.getCell(17).setCellStyle(contentCellStyle);
+			
+			row.createCell(18).setCellValue("Deskripsi Barang, Dummy Product Adalah Barang Dummy Sebagai Contoh");
+			row.getCell(18).setCellStyle(contentCellStyle);
 			
 
 			for (int i = 0; i < columnMerchant.length; i++) {
@@ -569,42 +619,42 @@ public class ProductExcelService {
 				
 				Row row = sheetProduct.createRow(rowNum+=1);
 
-				row.setHeight((short)500);
+				row.setHeight((short)1050);
 				
-				row.createCell(0).setCellValue(data.getNoSKU());
+				row.createCell(0).setCellValue(data.id);
 				row.getCell(0).setCellStyle(contentCellStyle);
 				
-				row.createCell(1).setCellValue(data.getProductName());
+				row.createCell(1).setCellValue(data.getNoSKU());
 				row.getCell(1).setCellStyle(contentCellStyle);
 				
-				row.createCell(2).setCellValue(data.getCategoryMerchant().getCategoryName());
+				row.createCell(2).setCellValue(data.getProductName());
 				row.getCell(2).setCellStyle(contentCellStyle);
 				
-				row.createCell(3).setCellValue(data.getSubCategoryMerchant().getSubcategoryName());
+				row.createCell(3).setCellValue(data.getCategoryMerchant().getCategoryName());
 				row.getCell(3).setCellStyle(contentCellStyle);
 				
-				row.createCell(4).setCellValue(data.getSubsCategoryMerchant().getSubscategoryName());
+				row.createCell(4).setCellValue(data.getSubCategoryMerchant().getSubcategoryName());
 				row.getCell(4).setCellStyle(contentCellStyle);
-
-				row.createCell(5).setCellValue(data.getBrandMerchant().getBrandName());
-				row.getCell(5).setCellStyle(contentCellStyle);
 				
-				row.createCell(6).setCellValue(detail.getProductType());
+				row.createCell(5).setCellValue(data.getSubsCategoryMerchant().getSubscategoryName());
+				row.getCell(5).setCellStyle(contentCellStyle);
+
+				row.createCell(6).setCellValue(data.getBrandMerchant().getBrandName());
 				row.getCell(6).setCellStyle(contentCellStyle);
 				
-				row.createCell(7).setCellValue(detail.getIsCustomizable().toString());
+				row.createCell(7).setCellValue(detail.getProductType());
 				row.getCell(7).setCellStyle(contentCellStyle);
 				
-				row.createCell(8).setCellValue(detail.getProductPrice().toString());
+				row.createCell(8).setCellValue(detail.getIsCustomizable().toString());
 				row.getCell(8).setCellStyle(contentCellStyle);
 				
-				row.createCell(9).setCellValue(detail.getDiscountType());
+				row.createCell(9).setCellValue(detail.getProductPrice().toString());
 				row.getCell(9).setCellStyle(contentCellStyle);
-
-				row.createCell(10).setCellValue(detail.getDiscount().toString());
+				
+				row.createCell(10).setCellValue(detail.getDiscountType());
 				row.getCell(10).setCellStyle(contentCellStyle);
 
-				row.createCell(11).setCellValue(detail.getProductPriceAfterDiscount().toString());
+				row.createCell(11).setCellValue(detail.getDiscount().toString());
 				row.getCell(11).setCellStyle(contentCellStyle);
 				
 				row.createCell(12);
@@ -670,15 +720,27 @@ public class ProductExcelService {
 
 	private static void constructProductDetailEntityRequest(ProductMerchantDetail newProductMerchantDetail,
 			ProductMerchant newProductMerchant, String productType, String customizeable, String productPrice,
-			String discountType, String discount, String priceAfterDisc,String imageMain, String image1, String image2, String image3,
+			String discountType, String discount,String imageMain, String image1, String image2, String image3,
 			String image4) {
+		BigDecimal priceAfterDiscount;
+		if (discountType.equalsIgnoreCase(typeDiscount.DISCOUNT.toString())) {
+			Double price = Double.parseDouble(productPrice);
+			Double disc = Double.parseDouble(discount) / 100D;
+			priceAfterDiscount = new BigDecimal (price - (price * disc));
+		} else if(discountType.equalsIgnoreCase(typeDiscount.POTONGAN.toString())) {
+			Double price = Double.parseDouble(productPrice);
+			Double disc = Double.parseDouble(discount);
+			priceAfterDiscount = new BigDecimal(price - disc);
+		} else {
+			priceAfterDiscount = new BigDecimal(productPrice);
+		}
+		
 		newProductMerchantDetail.setProductType(productType.toUpperCase());
 		newProductMerchantDetail.setIsCustomizable(Boolean.parseBoolean(customizeable));
 		newProductMerchantDetail.setProductPrice(new BigDecimal(productPrice));
-		newProductMerchantDetail.setDiscountType(discountType);
+		newProductMerchantDetail.setDiscountType(!discountType.isEmpty() ? discountType : "none");
 		newProductMerchantDetail.setDiscount(!discount.isEmpty() ? Double.valueOf(discount) : 0D);
-		newProductMerchantDetail.setProductPriceAfterDiscount(
-				!priceAfterDisc.isEmpty() ? new BigDecimal(priceAfterDisc) : new BigDecimal(productPrice));
+		newProductMerchantDetail.setProductPriceAfterDiscount(priceAfterDiscount);
 		newProductMerchantDetail.setProductImageMain(imageMain);
 		newProductMerchantDetail.setProductImage1(image1);
 		newProductMerchantDetail.setProductImage2(image2);
@@ -719,7 +781,8 @@ public class ProductExcelService {
 		        	Row pictureRow = sheet.getRow(anchor.getRow1());
 		            if (pictureRow == excelRow) {
 		            		String key = "product";
-		        			String filename = CommonFunction.getCurrentTime("ddMMYY-HHmmss") + "_" + key + "_" + "image-" + String.valueOf(line);
+		        			String filename = "image-" + String.valueOf(line);
+		        			String finalName = CommonFunction.getCurrentTime("ddMMYY-HHmmss") + "_" + key + "_" + filename;
 		        			
 		                	PictureData picturedata = picture.getPictureData();
 		                	String extension = picturedata.suggestFileExtension();
@@ -731,9 +794,10 @@ public class ProductExcelService {
 		        	        if (!dir.exists())
 		        	            dir.mkdirs();
 		        	        
-		        			String targetLocation = dir.getAbsolutePath() + "/" + filename + "." + extension;
+		        			String targetLocation = dir.getAbsolutePath() + "/" + finalName + "." + extension;
 		        			
-		        			String finalUrl = ImageUtil.createImageUrl(key, filename + "." + extension);
+		        			String finalUrl = ImageUtil.createImageUrl(key, finalName + "." + extension);
+		        			
 		        	        
 		        	        response = finalUrl;
 		                	try {
@@ -759,14 +823,14 @@ public class ProductExcelService {
 		try {
 			String extension = "";
 			if(!path.isEmpty()) {
-				extension = path.substring(path.length() - 3);
+				extension = FilenameUtils.getExtension(path);
 			}
 			URL url = new URL(path);
 			InputStream is = url.openStream();
 			
 			Drawing drawing = sheetProduct.createDrawingPatriarch();
 			ClientAnchor anchor = sheetProduct.getWorkbook().getCreationHelper().createClientAnchor();
-			anchor.setAnchorType(AnchorType.DONT_MOVE_AND_RESIZE);
+			anchor.setAnchorType(AnchorType.MOVE_AND_RESIZE);
 			anchor.setCol1(column);
 			anchor.setRow1(row);
 			anchor.setCol2(column);
@@ -796,5 +860,71 @@ public class ProductExcelService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static String validateImportRequest (String idProduk, String noSku, String productName, String category, String subCategory,
+	String subsCategory, String brand, String productType, String isCustomizeable, String productPrice, String discountType, String discount,
+	String shortDesc, String longDesc, String error, int line) {
+//		if (noSku.isEmpty())
+//			error += ", Nomor SKU Kosong di Baris " + line;
+		
+		if(productName.isEmpty())
+			error += ", Nama Produk Kosong di Baris " + line;
+		
+		if(category.isEmpty())
+			error += ", Kategori Produk Kosong di Baris " + line;
+		
+		if(subCategory.isEmpty())
+			error += ", Sub Kategori Kosong di Baris " + line;
+		
+		if(subsCategory.isEmpty())
+			error += ", Subs Kategori Kosong di Baris " + line;
+		
+		if(brand.isEmpty())
+			error += ", Brand Kosong di Baris " + line;
+		
+		if(productType.isEmpty())
+			error += ", Tipe Produk Kosong di Baris " + line;
+		
+		if(isCustomizeable.isEmpty())
+			error += ", Dapat Disesuaikan Kosong di Baris " + line;
+		
+		if(productPrice.isEmpty())
+			error += ", Harga Produk Kosong di Baris " + line;
+		
+		if((!productPrice.isEmpty()) && Double.valueOf(productPrice).compareTo(0D) < 0 )
+			error += ", Harga Produk Tidak Boleh Kurang dari 0 " + line;
+		
+		if(discountType.isEmpty()) {
+			if(discount.isEmpty()) {
+				discount = "0";
+				discountType = "none";
+			} else {
+				error += ", Tipe Diskon Kosong di Baris " + line;
+			}
+		}
+		
+		if((!discount.isEmpty()) && discountType.equalsIgnoreCase(typeDiscount.DISCOUNT.toString())) {
+			if (Double.valueOf(discount).compareTo(0D) < 0 )
+				error += ", Diskon Tidak Boleh Kurang dari 0 di Baris" + line;
+			else if (Double.valueOf(discount).compareTo(100D) > 0 )
+				error += ", Diskon Tidak Boleh Lebih dari 100 di Baris " + line;
+		}
+		
+		if((!discount.isEmpty()) && discountType.equalsIgnoreCase(typeDiscount.POTONGAN.toString())) {
+			if (Double.valueOf(discount).compareTo(Double.parseDouble(productPrice)) > 0 )
+				error += ", Potongan Harga Tidak Boleh Melebihi Harga Produk di Baris " + line;
+		} 
+		
+		if(!discountType.isEmpty() && discount.isEmpty())
+			error += ", Diskon Kosong di Baris " + line;
+		
+		if(shortDesc.isEmpty())
+			error += ", Deskripsi Pendek Kosong di Baris " + line;
+		
+		if(longDesc.isEmpty())
+			error += ", Deskripsi Panjang Kosong di Baris " + line;
+		
+		return error;
 	}
 }

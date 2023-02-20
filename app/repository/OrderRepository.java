@@ -4,10 +4,13 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Expr;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
+import com.avaje.ebean.RawSql;
+import com.avaje.ebean.RawSqlBuilder;
 import models.internal.DeviceType;
 import models.transaction.*;
 import models.*;
 import play.db.ebean.Model;
+import play.libs.Json;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -353,6 +356,197 @@ public class OrderRepository extends Model {
         query = exp.query();
         return query.findPagingList(0).getPage(0).getList().size();
     }
+
+    public static List<OrderDetail> findOrderDetail(Long orderId, String productType) {
+        String querySql;
+        if (productType.equalsIgnoreCase("STORE")) {
+            querySql = "SELECT od.id FROM order_detail od "
+                + "WHERE od.order_id = " + orderId + " "
+                + "AND od.product_id in (SELECT ps.product_id FROM product_store ps) ";
+        } else if (productType.equalsIgnoreCase("GLOBAL")) {
+            querySql = "SELECT od.id FROM order_detail od "
+                + "LEFT JOIN product_store ps ON od.product_id = ps.product_id "
+                + "WHERE od.order_id = " + orderId + " "
+                + "AND ps.product_id IS NULL ";
+        } else {
+            querySql = "SELECT od.id FROM order_detail od "
+                + "WHERE od.order_id = " + orderId + " ";
+        }
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<OrderDetail> query = Ebean.find(OrderDetail.class).setRawSql(rawSql);
+        return query.findList();
+    }
+
+    public static String checkProductType(String productType, String whereCondition) {
+        String querySql;
+
+        if (productType.equalsIgnoreCase("STORE")) {
+            querySql = "SELECT ord.id, ord.order_number FROM orders ord "
+                + "JOIN store str ON ord.store_id = str.id "
+                + "JOIN order_payment op ON ord.id = op.order_id "
+                + "JOIN order_detail od ON ord.id = od.order_id "
+                + "LEFT JOIN member mbr ON ord.user_id = mbr.id "
+                + whereCondition
+                + "AND od.product_id in (SELECT ps.product_id FROM product_store ps) "
+                + "GROUP BY ord.id, ord.order_number "
+                + "ORDER BY ord.id DESC ";
+        } else if (productType.equalsIgnoreCase("GLOBAL")) {
+            querySql = "SELECT ord.id, ord.order_number FROM orders ord "
+                + "JOIN store str ON ord.store_id = str.id "
+                + "JOIN order_payment op ON ord.id = op.order_id "
+                + "JOIN order_detail od ON ord.id = od.order_id "
+                + "LEFT JOIN member mbr ON ord.user_id = mbr.id "
+                + "LEFT JOIN product_store ps ON od.product_id = ps.product_id "
+                + whereCondition
+                + "AND ps.product_id IS NULL "
+                + "GROUP BY ord.id, ord.order_number "
+                + "ORDER BY ord.id DESC ";
+        } else {
+            querySql = "SELECT ord.id, ord.order_number FROM orders ord "
+                + "JOIN store str ON ord.store_id = str.id "
+                + "JOIN order_payment op ON ord.id = op.order_id "
+                + "JOIN order_detail od ON ord.id = od.order_id "
+                + "LEFT JOIN member mbr ON ord.user_id = mbr.id "
+                + whereCondition
+                + "GROUP BY ord.id, ord.order_number "
+                + "ORDER BY ord.id DESC ";
+        }
+
+        return querySql;
+    }
+
+    public static Query<Order> queryGetOrderListWithFilter(Long merchantId, Long storeId, String statusOrder, String filter, String productType) {
+        String whereCondition;
+
+        // default query find by merchant id
+        if (statusOrder.equalsIgnoreCase("CANCELED")) {
+            whereCondition = "WHERE str.merchant_id = " + merchantId + " "
+                + "AND ord.status = '" + statusOrder + "' ";
+        } else if (statusOrder.equalsIgnoreCase("PENDING")) {
+            whereCondition = "WHERE (ord.device_type != 'MINIPOS' OR ord.user_merchant_id IS NULL) "
+                + "AND (ord.status != 'CANCELLED' OR ord.status != 'CANCELED') "
+                + "AND str.merchant_id = " + merchantId + " "
+                + "AND op.status = '" + statusOrder + "' ";
+        } else {
+            whereCondition = "WHERE op.status = 'PAID' "
+                + "AND str.merchant_id = " + merchantId + " "
+                + "AND ord.status = '" + statusOrder + "' ";
+        }
+
+        // check store id --> mandatory
+        if (storeId != null && storeId != 0L) {
+            if (statusOrder.equalsIgnoreCase("CANCELED")) {
+                whereCondition = "WHERE str.id = " + storeId + " "
+                    + "AND ord.status = '" + statusOrder + "' ";
+            } else if (statusOrder.equalsIgnoreCase("PENDING")) {
+                whereCondition = "WHERE (ord.device_type != 'MINIPOS' OR ord.user_merchant_id IS NULL) "
+                    + "AND (ord.status != 'CANCELLED' OR ord.status != 'CANCELED') "
+                    + "AND str.id = " + storeId + " "
+                    + "AND op.status = '" + statusOrder + "' ";
+            } else {
+                whereCondition = "WHERE op.status = 'PAID' "
+                    + "AND str.id = " + storeId + " "
+                    + "AND ord.status = '" + statusOrder + "' ";
+            }
+        }
+
+        String querySql = checkProductType(productType, whereCondition);
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<Order> query = Ebean.find(Order.class).setRawSql(rawSql);
+
+        ExpressionList<Order> exp = query.where();
+        exp = exp.disjunction();
+        exp = exp.ilike("order_number", "%" + filter + "%");
+        exp = exp.ilike("member_name", "%" + filter + "%");
+        exp = exp.ilike("mbr.full_name", "%" + filter + "%");
+        exp = exp.ilike("mbr.first_name", "%" + filter + "%");
+        exp = exp.ilike("mbr.last_name", "%" + filter + "%");
+        exp = exp.endJunction();
+        query = exp.query();
+
+        return query;
+    }
+
+    public static List<Order> getOrderListWithFilter(Long merchantId, Long storeId, int offset, int limit, String statusOrder, String filter, String productType) {
+        Query<Order> query = queryGetOrderListWithFilter(merchantId, storeId, statusOrder, filter, productType);
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static Integer getTotalOrderListWithFilter(Long merchantId, Long storeId, String statusOrder, String filter, String productType) {
+        Query<Order> query = queryGetOrderListWithFilter(merchantId, storeId, statusOrder, filter, productType);
+        return query.findList().size();
+    }
+
+    public static Query<Order> queryOrderReportMerchant(Long merchantId, Long storeId, String statusOrder, String productType, String startDate, String endDate) {
+        String whereCondition;
+
+        // default query find by merchant id
+        if(statusOrder != null && !statusOrder.trim().isEmpty()){
+            if(startDate != null && !startDate.trim().isEmpty()){
+                whereCondition = "WHERE ord.order_date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                    + "AND op.status != 'PENDING' "
+                    + "AND str.merchant_id = " + merchantId + " "
+                    + "AND ord.status = '" + statusOrder + "' ";
+            } else {
+                whereCondition = "WHERE op.status != 'PENDING' "
+                    + "AND str.merchant_id = " + merchantId + " "
+                    + "AND ord.status = '" + statusOrder + "' ";
+            }
+        } else {
+            if(startDate != null && !startDate.trim().isEmpty()){
+                whereCondition = "WHERE ord.order_date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                    + "AND op.status != 'PENDING' "
+                    + "AND str.merchant_id = " + merchantId + " ";
+            } else {
+                whereCondition = "WHERE op.status != 'PENDING' "
+                    + "AND str.merchant_id = " + merchantId + " ";
+            }
+
+        }
+
+        // check store id --> mandatory
+        if (storeId != null && storeId != 0L) {
+            if(statusOrder != null && !statusOrder.trim().isEmpty()){
+                if(startDate != null && !startDate.trim().isEmpty()){
+                    whereCondition = "WHERE ord.order_date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                        + "AND op.status != 'PENDING' "
+                        + "AND str.id = " + storeId + " "
+                        + "AND ord.status = '" + statusOrder + "' ";
+                } else {
+                    whereCondition = "WHERE op.status != 'PENDING' "
+                        + "AND str.id = " + storeId + " "
+                        + "AND ord.status = '" + statusOrder + "' ";
+                }
+            } else {
+                if(startDate != null && !startDate.trim().isEmpty()){
+                    whereCondition = "WHERE ord.order_date BETWEEN '" + startDate + "' AND '" + endDate + "' "
+                        + "AND op.status != 'PENDING' "
+                        + "AND str.id = " + storeId + " ";
+                } else {
+                    whereCondition = "WHERE op.status != 'PENDING' "
+                        + "AND str.id = " + storeId + " ";
+                }
+            }
+        }
+
+        String querySql = checkProductType(productType, whereCondition);
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        return Ebean.find(Order.class).setRawSql(rawSql);
+    }
+    public static List<Order> getReportOrderMerchant(Long merchantId, Long storeId, int offset, int limit, String statusOrder, String productType, String startDate, String endDate) {
+        Query<Order> query = queryOrderReportMerchant(merchantId, storeId, statusOrder, productType, startDate, endDate);
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static Integer getTotalOrderReportMerchant(Long merchantId, Long storeId, String statusOrder, String productType, String startDate, String endDate) {
+        Query<Order> query = queryOrderReportMerchant(merchantId, storeId, statusOrder, productType, startDate, endDate);
+        return query.findList().size();
+    }
+
+
 
 
 }
