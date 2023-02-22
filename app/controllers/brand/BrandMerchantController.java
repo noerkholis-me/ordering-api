@@ -137,10 +137,16 @@ public class BrandMerchantController extends BaseController {
 
     @ApiOperation(value = "Get all brand list.", notes = "Returns list of brand.\n" + swaggerInfo
             + "", response = BrandMerchant.class, responseContainer = "List", httpMethod = "GET")
-    public static Result listBrand(String filter, String sort, int offset, int limit) {
+    public static Result listBrand(String filter, String sort, int offset, int limit, String isActive) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<BrandMerchant> query = BrandMerchantRepository.find.where().eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
+            Query<BrandMerchant> query = null;
+            if (isActive == "" || isActive.isEmpty()) {
+                query = BrandMerchantRepository.find.where().eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
+            } else {
+                System.out.println(isActive == "true" ? true : false);
+                query = BrandMerchantRepository.find.where().eq("t0.is_deleted", false).eq("merchant", ownMerchant).eq("is_active", isActive.equals("true") ? true : false).order("t0.id");
+            }
             try {
                 List<BrandMerchantResponse> responses = new ArrayList<>();
                 List<BrandMerchant> totalData = BrandMerchantRepository.getTotalData(query);
