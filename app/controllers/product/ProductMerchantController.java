@@ -921,9 +921,9 @@ public class ProductMerchantController extends BaseController {
                 String querySql;
                 String searchQuery = keyword != null && keyword.length() > 0 ? " and lower(pm.product_name) like '%"+keyword+"%'" : "";
                 if (categoryId > 0 ) {
-                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.subs_category_merchant_id = "+categoryId+" and pm.brand_merchant_id = "+brandId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
+                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm, brand_merchant bm where pm.merchant_id = "+merchantId+" and pm.subs_category_merchant_id = "+categoryId+" and bm.is_active = "+true+" and pm.brand_merchant_id = "+brandId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
                 } else {
-                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.brand_merchant_id = "+brandId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
+                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm, brand_merchant bm where pm.merchant_id = "+merchantId+" and bm.is_active = "+true+" and pm.brand_merchant_id = "+brandId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
                 }
                 Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.id asc");
                 List<ProductMerchantDetail> dataProductDetail = ProductMerchantDetailRepository.getAllDataKiosK(query);
