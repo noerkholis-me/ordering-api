@@ -648,13 +648,13 @@ public class ProductExcelService {
 				row.createCell(8).setCellValue(detail.getIsCustomizable().toString());
 				row.getCell(8).setCellStyle(contentCellStyle);
 				
-				row.createCell(9).setCellValue(detail.getProductPrice().toString());
+				row.createCell(9).setCellValue(detail.getProductPrice().intValue());
 				row.getCell(9).setCellStyle(contentCellStyle);
 				
 				row.createCell(10).setCellValue(detail.getDiscountType());
 				row.getCell(10).setCellStyle(contentCellStyle);
 
-				row.createCell(11).setCellValue(detail.getDiscount().toString());
+				row.createCell(11).setCellValue(detail.getDiscount().intValue());
 				row.getCell(11).setCellStyle(contentCellStyle);
 				
 				row.createCell(12);
@@ -869,61 +869,72 @@ public class ProductExcelService {
 //			error += ", Nomor SKU Kosong di Baris " + line;
 		
 		if(productName.isEmpty())
-			error += ", Nama Produk Kosong di Baris " + line;
+			error += ", Kolom Nama Produk Kosong di Baris " + line;
 		
 		if(category.isEmpty())
-			error += ", Kategori Produk Kosong di Baris " + line;
+			error += ", Kolom Kategori Produk Kosong di Baris " + line;
 		
 		if(subCategory.isEmpty())
-			error += ", Sub Kategori Kosong di Baris " + line;
+			error += ", Kolom Sub Kategori Kosong di Baris " + line;
 		
 		if(subsCategory.isEmpty())
-			error += ", Subs Kategori Kosong di Baris " + line;
+			error += ", Kolom Subs Kategori Kosong di Baris " + line;
 		
 		if(brand.isEmpty())
-			error += ", Brand Kosong di Baris " + line;
+			error += ", Kolom Brand Kosong di Baris " + line;
 		
 		if(productType.isEmpty())
-			error += ", Tipe Produk Kosong di Baris " + line;
+			error += ", Kolom Tipe Produk Kosong di Baris " + line;
+		else {
+			if (!productType.equalsIgnoreCase("main") && !productType.equalsIgnoreCase("additional")) {
+				error += ", mohon isi Kolom Tipe Produk dengan salah satu dari main atau additional di Baris " + line;
+			}
+		}
 		
-		if(isCustomizeable.isEmpty())
-			error += ", Dapat Disesuaikan Kosong di Baris " + line;
+		if(isCustomizeable.isEmpty()) {
+			error += ", Kolom Dapat Disesuaikan Kosong di Baris " + line;
+		} else {
+			if (!isCustomizeable.equalsIgnoreCase(Boolean.TRUE.toString()) && !isCustomizeable.equalsIgnoreCase(Boolean.FALSE.toString())) {
+				error += ", mohon isi Kolom Dapat Disesuaikan dengan salah satu dari true atau false di Baris " + line ;
+			}
+		}
 		
 		if(productPrice.isEmpty())
-			error += ", Harga Produk Kosong di Baris " + line;
+			error += ", Kolom Harga Produk Kosong di Baris " + line;
 		
 		if((!productPrice.isEmpty()) && Double.valueOf(productPrice).compareTo(0D) < 0 )
 			error += ", Harga Produk Tidak Boleh Kurang dari 0 " + line;
 		
 		if(discountType.isEmpty()) {
-			if(discount.isEmpty()) {
+			if(discount.isEmpty() || discount.equals("0")) {
 				discount = "0";
 				discountType = "none";
 			} else {
-				error += ", Tipe Diskon Kosong di Baris " + line;
+				error += ", Kolom Tipe Diskon Kosong di Baris " + line;
+			}
+		} else {
+			if (discountType.equalsIgnoreCase(typeDiscount.DISCOUNT.toString())) {
+				if (Double.valueOf(discount).compareTo(0D) < 0 )
+					error += ", Diskon Tidak Boleh Kurang dari 0 di Baris" + line;
+				else if (Double.valueOf(discount).compareTo(100D) > 0 )
+					error += ", Diskon Tidak Boleh Lebih dari 100 di Baris " + line;
+			} else if (discountType.equalsIgnoreCase(typeDiscount.POTONGAN.toString())) {
+				if (Double.valueOf(discount).compareTo(Double.parseDouble(productPrice)) > 0 )
+					error += ", Potongan Harga Tidak Boleh Melebihi Harga Produk di Baris " + line;
+			} else {
+				if (!discountType.equalsIgnoreCase("none"))
+					error += ", Tipe Diskon tidak didukung mohon isi dengan salah satu dari discount atau potongan di Baris " + line;
 			}
 		}
 		
-		if((!discount.isEmpty()) && discountType.equalsIgnoreCase(typeDiscount.DISCOUNT.toString())) {
-			if (Double.valueOf(discount).compareTo(0D) < 0 )
-				error += ", Diskon Tidak Boleh Kurang dari 0 di Baris" + line;
-			else if (Double.valueOf(discount).compareTo(100D) > 0 )
-				error += ", Diskon Tidak Boleh Lebih dari 100 di Baris " + line;
-		}
-		
-		if((!discount.isEmpty()) && discountType.equalsIgnoreCase(typeDiscount.POTONGAN.toString())) {
-			if (Double.valueOf(discount).compareTo(Double.parseDouble(productPrice)) > 0 )
-				error += ", Potongan Harga Tidak Boleh Melebihi Harga Produk di Baris " + line;
-		} 
-		
 		if(!discountType.isEmpty() && discount.isEmpty())
-			error += ", Diskon Kosong di Baris " + line;
+			error += ", Kolom Diskon Kosong di Baris " + line;
 		
 		if(shortDesc.isEmpty())
-			error += ", Deskripsi Pendek Kosong di Baris " + line;
+			error += ", Kolom Deskripsi Pendek Kosong di Baris " + line;
 		
 		if(longDesc.isEmpty())
-			error += ", Deskripsi Panjang Kosong di Baris " + line;
+			error += ", Kolom Deskripsi Panjang Kosong di Baris " + line;
 		
 		return error;
 	}
