@@ -55,6 +55,154 @@ public class ProductMerchantController extends BaseController {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
+    //TODO new create
+    public static Result createProductWithProductStore() {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant == null) {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+        JsonNode json = request().body().asJson();
+        try {
+        	ProductWithProductStoreRequest productRequest = objectMapper.readValue(json.toString(), ProductWithProductStoreRequest.class);
+            String validateRequest = ProductValidator.validateRequest(productRequest);
+            if (validateRequest != null) {
+                response.setBaseResponse(0, 0, 0, validateRequest, null);
+                return badRequest(Json.toJson(response));
+            }
+            Transaction trx = Ebean.beginTransaction();
+            try {
+                CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(
+                        productRequest.getCategoryId(), ownMerchant);
+                if (categoryMerchant == null) {
+                    response.setBaseResponse(0, 0, 0, " Category not found.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(
+                        productRequest.getSubCategoryId(), ownMerchant);
+                if (subCategoryMerchant == null) {
+                    response.setBaseResponse(0, 0, 0, " Sub Category not found.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(
+                        productRequest.getSubsCategoryId(), ownMerchant);
+                if (subsCategoryMerchant == null) {
+                    response.setBaseResponse(0, 0, 0, " Subs Category not found.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(
+                        productRequest.getBrandId(), ownMerchant);
+                if (brandMerchant == null) {
+                    response.setBaseResponse(0, 0, 0, " Brand not found.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                if (ownMerchant.productStoreRequired &&
+                		(productRequest.getProductStoreRequests() == null || productRequest.getProductStoreRequests().isEmpty())) {
+                	response.setBaseResponse(0, 0, 0, " Product needs to be assigned to store", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                //create main product merchant
+                ProductMerchant newProductMerchant = new ProductMerchant();
+                newProductMerchant.setNoSKU(productRequest.getNoSKU());
+                newProductMerchant.setProductName(productRequest.getProductName());
+                newProductMerchant.setIsActive(Boolean.TRUE);
+                newProductMerchant.setCategoryMerchant(categoryMerchant);
+                newProductMerchant.setSubCategoryMerchant(subCategoryMerchant);
+                newProductMerchant.setSubsCategoryMerchant(subsCategoryMerchant);
+                newProductMerchant.setBrandMerchant(brandMerchant);
+                newProductMerchant.setMerchant(ownMerchant);
+//                constructProductEntityRequest(newProductMerchant, ownMerchant, productRequest, categoryMerchant,
+//                        subCategoryMerchant, subsCategoryMerchant, brandMerchant);
+                newProductMerchant.save();
+
+                // create product merchant detail
+                ProductMerchantDetail newProductMerchantDetail = new ProductMerchantDetail();
+                newProductMerchantDetail.setProductType(productRequest.getProductDetailRequest().getProductType());
+                newProductMerchantDetail.setIsCustomizable(productRequest.getProductDetailRequest().getIsCustomizable());
+                newProductMerchantDetail.setProductPrice(productRequest.getProductDetailRequest().getProductPrice());
+                newProductMerchantDetail.setDiscountType(productRequest.getProductDetailRequest().getDiscountType());
+                newProductMerchantDetail.setDiscount(productRequest.getProductDetailRequest().getDiscount() != null ? productRequest.getProductDetailRequest().getDiscount() : 0D);
+                newProductMerchantDetail.setProductPriceAfterDiscount(productRequest.getProductDetailRequest().getProductPriceAfterDiscount() != null ? productRequest.getProductDetailRequest().getProductPriceAfterDiscount() : productRequest.getProductDetailRequest().getProductPrice());
+                newProductMerchantDetail.setProductImageMain(productRequest.getProductDetailRequest().getProductImageMain());
+                newProductMerchantDetail.setProductImage1(productRequest.getProductDetailRequest().getProductImage1());
+                newProductMerchantDetail.setProductImage2(productRequest.getProductDetailRequest().getProductImage2());
+                newProductMerchantDetail.setProductImage3(productRequest.getProductDetailRequest().getProductImage3());
+                newProductMerchantDetail.setProductImage4(productRequest.getProductDetailRequest().getProductImage4());
+                newProductMerchantDetail.setProductMerchant(newProductMerchant);
+                newProductMerchantDetail.setProductMerchantQrCode(Constant.getInstance().getFrontEndUrl().concat("product/"+newProductMerchant.id+"/detail"));
+//                constructProductDetailEntityRequest(newProductMerchantDetail, newProductMerchant, productRequest);
+                newProductMerchantDetail.save();
+
+                //create product merchant description
+                ProductMerchantDescription newProductMerchantDescription = new ProductMerchantDescription();
+                newProductMerchantDescription.setShortDescription(productRequest.getProductDescriptionRequest().getShortDescription());
+                newProductMerchantDescription.setLongDescription(productRequest.getProductDescriptionRequest().getLongDescription());
+                newProductMerchantDescription.setProductMerchantDetail(newProductMerchantDetail);
+                newProductMerchantDescription.save();
+                
+                //create product store (if any)
+                for (ProductStoreResponse productStoreRequest : productRequest.getProductStoreRequests()) {
+                    Store store = Store.findById(productStoreRequest.getStoreId());
+                    if (store == null) {
+                    	trx.rollback();
+                        response.setBaseResponse(0, 0, 0, " Store not found.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    ProductStore psQuery = ProductStoreRepository.find.where().eq("productMerchant", newProductMerchant)
+                            .eq("store", store).eq("t0.is_deleted", false).findUnique();
+                    if (psQuery != null) {
+                    	trx.rollback();
+                        response.setBaseResponse(0, 0, 0,
+                                "Tidak dapat menambahkan " + newProductMerchant.getProductName() + " ke toko yang sama.",
+                                null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    
+                    ProductStore newProductStore = new ProductStore();
+                    newProductStore.setStore(store);
+                    newProductStore.setProductMerchant(newProductMerchant);
+                    newProductStore.setMerchant(ownMerchant);
+                    newProductStore.setActive(true);
+//                    newProductStore.setActive(productStoreRequest.getIsActive());
+                    newProductStore.setStorePrice(productStoreRequest.getStorePrice());
+                    newProductStore.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode+"/"+store.id+"/"+ownMerchant.id+"/product/"+newProductMerchant.id+"/detail"));
+                    if (productStoreRequest.getDiscountType() != null) {
+                        newProductStore.setDiscountType(productStoreRequest.getDiscountType());
+                    }
+                    if (productStoreRequest.getDiscount() != null) {
+                        newProductStore.setDiscount(productStoreRequest.getDiscount());
+                    }
+                    if (productStoreRequest.getFinalPrice() != null) {
+                        newProductStore.setFinalPrice(productStoreRequest.getFinalPrice());
+                    }
+                    newProductStore.save();
+				}
+                
+                trx.commit();
+
+                response.setBaseResponse(1,offset, 1, success + " Product created successfully", newProductMerchant.id);
+                return ok(Json.toJson(response));
+
+            } catch (Exception e) {
+                logger.error("Error while creating product", e);
+                e.printStackTrace();
+                trx.rollback();
+                response.setBaseResponse(0, 0, 0, "Error while creating product" + e.toString(), null);
+                return badRequest(Json.toJson(response));
+            } finally {
+                trx.end();
+            }
+        } catch (Exception e) {
+            logger.error("Error while parsing json", e);
+            e.printStackTrace();
+            response.setBaseResponse(0, 0, 0, "Error while creating product" + e.toString(), null);
+            return badRequest(Json.toJson(response));
+        }
+    }
+    
+    
+    //TODO old create
     public static Result createProduct() {
 
         Merchant ownMerchant = checkMerchantAccessAuthorization();
@@ -151,6 +299,179 @@ public class ProductMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
+    // TODO new update
+    public static Result editProductWithProductStore(Long id) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if(ownMerchant != null) {
+            JsonNode json = request().body().asJson();
+            try {
+                ProductWithProductStoreRequest productRequest = objectMapper.readValue(json.toString(), ProductWithProductStoreRequest.class);
+                if(productRequest.getProductName().length() > 50) {
+                    response.setBaseResponse(0, 0, 0, "Jumlah karakter tidak boleh melebihi 50 karakter", null);
+                    return badRequest(Json.toJson(response));
+                }
+                if ((productRequest.getProductDetailRequest().getProductPrice() != null) && productRequest.getProductDetailRequest().getProductPrice().compareTo(BigDecimal.ZERO) < 0){
+                    response.setBaseResponse(0, 0, 0, "Harga tidak boleh kurang dari 0", null);
+                    return badRequest(Json.toJson(response));
+                }
+                if ((productRequest.getProductDetailRequest().getDiscount() != null) && productRequest.getProductDetailRequest().getDiscount().compareTo(0D) < 0){
+                    response.setBaseResponse(0, 0, 0, "Diskon tidak boleh kurang dari 0", null);
+                    return badRequest(Json.toJson(response));
+                }
+                if ((productRequest.getProductDetailRequest().getProductPriceAfterDiscount() != null) && productRequest.getProductDetailRequest().getProductPriceAfterDiscount().compareTo(BigDecimal.ZERO) < 0){
+                    response.setBaseResponse(0, 0, 0, "Harga Product Setelah Diskon Cashback tidak boleh kurang dari 0", null);
+                    return badRequest(Json.toJson(response));
+                }
+                String validateRequest = ProductValidator.validateRequest(productRequest);
+                if (validateRequest != null) {
+                    response.setBaseResponse(0, 0, 0, validateRequest, null);
+                    return badRequest(Json.toJson(response));
+                }
+                ProductMerchant productMerchant = ProductMerchantRepository.findById(id, ownMerchant);
+                if (productMerchant == null) {
+                    response.setBaseResponse(0, 0, 0, " Product not found.", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                Transaction trx = Ebean.beginTransaction();
+                try {
+                    CategoryMerchant categoryMerchant = CategoryMerchantRepository.findByIdAndMerchantId(
+                        productRequest.getCategoryId(), ownMerchant);
+                    if (categoryMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, " Category not found.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    SubCategoryMerchant subCategoryMerchant = SubCategoryMerchantRepository.findByIdAndMerchantId(
+                        productRequest.getSubCategoryId(), ownMerchant);
+                    if (subCategoryMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, " Sub Category not found.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    SubsCategoryMerchant subsCategoryMerchant = SubsCategoryMerchantRepository.findByIdAndMerchantId(
+                        productRequest.getSubsCategoryId(), ownMerchant);
+                    if (subsCategoryMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, " Subs Category not found.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    BrandMerchant brandMerchant = BrandMerchantRepository.findByIdAndMerchantId(
+                        productRequest.getBrandId(), ownMerchant);
+                    if (brandMerchant == null) {
+                        response.setBaseResponse(0, 0, 0, " Brand not found.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    if (ownMerchant.productStoreRequired &&
+                        (productRequest.getProductStoreRequests() == null || productRequest.getProductStoreRequests().isEmpty())) {
+                        response.setBaseResponse(0, 0, 0, " Product needs to be assigned to store", null);
+                        return badRequest(Json.toJson(response));
+                    }
+
+                    productMerchant.setNoSKU(productRequest.getNoSKU());
+                    productMerchant.setProductName(productRequest.getProductName());
+                    productMerchant.setIsActive(Boolean.TRUE);
+                    productMerchant.setCategoryMerchant(categoryMerchant);
+                    productMerchant.setSubCategoryMerchant(subCategoryMerchant);
+                    productMerchant.setSubsCategoryMerchant(subsCategoryMerchant);
+                    productMerchant.setBrandMerchant(brandMerchant);
+                    productMerchant.setMerchant(ownMerchant);
+                    productMerchant.update();
+
+                    // update product merchant detail
+                    ProductMerchantDetail getProductMerchantDetail = ProductMerchantDetailRepository.findByProduct(productMerchant);
+                    getProductMerchantDetail.setProductType(productRequest.getProductDetailRequest().getProductType());
+                    getProductMerchantDetail.setIsCustomizable(productRequest.getProductDetailRequest().getIsCustomizable());
+                    getProductMerchantDetail.setProductPrice(productRequest.getProductDetailRequest().getProductPrice());
+                    getProductMerchantDetail.setDiscountType(productRequest.getProductDetailRequest().getDiscountType());
+                    getProductMerchantDetail.setDiscount(productRequest.getProductDetailRequest().getDiscount() != null ? productRequest.getProductDetailRequest().getDiscount() : 0D);
+                    getProductMerchantDetail.setProductPriceAfterDiscount(productRequest.getProductDetailRequest().getProductPriceAfterDiscount() != null ? productRequest.getProductDetailRequest().getProductPriceAfterDiscount() : productRequest.getProductDetailRequest().getProductPrice());
+                    getProductMerchantDetail.setProductImageMain(productRequest.getProductDetailRequest().getProductImageMain());
+                    getProductMerchantDetail.setProductImage1(productRequest.getProductDetailRequest().getProductImage1());
+                    getProductMerchantDetail.setProductImage2(productRequest.getProductDetailRequest().getProductImage2());
+                    getProductMerchantDetail.setProductImage3(productRequest.getProductDetailRequest().getProductImage3());
+                    getProductMerchantDetail.setProductImage4(productRequest.getProductDetailRequest().getProductImage4());
+                    getProductMerchantDetail.setProductMerchant(productMerchant);
+                    getProductMerchantDetail.setProductMerchantQrCode(Constant.getInstance().getFrontEndUrl().concat("product/"+productMerchant.id+"/detail"));
+                    getProductMerchantDetail.update();
+
+                    // update product merchant description
+                    ProductMerchantDescription getProductMerchantDescription = ProductMerchantDescriptionRepository.findByProductMerchantDetail(getProductMerchantDetail);
+                    getProductMerchantDescription.setShortDescription(productRequest.getProductDescriptionRequest().getShortDescription());
+                    getProductMerchantDescription.setLongDescription(productRequest.getProductDescriptionRequest().getLongDescription());
+                    getProductMerchantDescription.setProductMerchantDetail(getProductMerchantDetail);
+                    getProductMerchantDescription.update();
+
+                    // delete old product store
+                    List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.product_id", id).eq("merchant", ownMerchant).findList();
+                    for (ProductStore productStore : listProductStore) {
+                        ProductStore getProductStore = ProductStoreRepository.find.byId(productStore.id);
+                        if (getProductStore == null) {
+                            response.setBaseResponse(0, 0, 0, error + " product store tidak tersedia.", null);
+                            return badRequest(Json.toJson(response));
+                        } else {
+                            getProductStore.delete();
+                        }
+                    }
+
+                    // update product store (if any)
+                    for (ProductStoreResponse productStoreRequest : productRequest.getProductStoreRequests()) {
+                        Store store = Store.findById(productStoreRequest.getStoreId());
+                        if (store == null) {
+                            trx.rollback();
+                            response.setBaseResponse(0, 0, 0, " Store not found.", null);
+                            return badRequest(Json.toJson(response));
+                        }
+
+                        ProductStore psQuery = ProductStoreRepository.find.where().eq("productMerchant", productMerchant)
+                            .eq("store", store).eq("t0.is_deleted", false).findUnique();
+                        if (psQuery != null) {
+                            trx.rollback();
+                            response.setBaseResponse(0, 0, 0,
+                                "Tidak dapat menambahkan " + productMerchant.getProductName() + " ke toko yang sama.",
+                                null);
+                            return badRequest(Json.toJson(response));
+                        }
+
+                        // insert new product store
+                        ProductStore newProductStore = new ProductStore();
+                        newProductStore.setStore(store);
+                        newProductStore.setProductMerchant(productMerchant);
+                        newProductStore.setMerchant(ownMerchant);
+                        newProductStore.setActive(productStoreRequest.getIsActive());
+                        newProductStore.setStorePrice(productStoreRequest.getStorePrice());
+                        newProductStore.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode+"/"+store.id+"/"+ownMerchant.id+"/product/"+productMerchant.id+"/detail"));
+                        if (productStoreRequest.getDiscountType() != null) {
+                            newProductStore.setDiscountType(productStoreRequest.getDiscountType());
+                        }
+                        if (productStoreRequest.getDiscount() != null) {
+                            newProductStore.setDiscount(productStoreRequest.getDiscount());
+                        }
+                        if (productStoreRequest.getFinalPrice() != null) {
+                            newProductStore.setFinalPrice(productStoreRequest.getFinalPrice());
+                        }
+                        newProductStore.save();
+                    }
+
+                    trx.commit();
+
+                    response.setBaseResponse(1,offset, 1, success + " Product updated successfully", productMerchant.id);
+                    return ok(Json.toJson(response));
+                } catch (Exception e) {
+                    logger.error("Error while creating product", e);
+                    e.printStackTrace();
+                    trx.rollback();
+                } finally {
+                    trx.end();
+                }
+            } catch (Exception e) {
+                logger.error("Error while parsing json", e);
+                e.printStackTrace();
+            }
+        }
+
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    // TODO old update
     public static Result editProduct(Long id) {
 
         Merchant ownMerchant = checkMerchantAccessAuthorization();
@@ -519,6 +840,8 @@ public class ProductMerchantController extends BaseController {
         newProductMerchantDetail.setProductMerchant(newProductMerchant);
         newProductMerchantDetail.setProductMerchantQrCode(Constant.getInstance().getFrontEndUrl().concat("product/"+newProductMerchant.id+"/detail"));
     }
+
+
 
     // PRODUK REKOMENDASI
 
@@ -921,9 +1244,9 @@ public class ProductMerchantController extends BaseController {
                 String querySql;
                 String searchQuery = keyword != null && keyword.length() > 0 ? " and lower(pm.product_name) like '%"+keyword+"%'" : "";
                 if (categoryId > 0 ) {
-                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.subs_category_merchant_id = "+categoryId+" and pm.brand_merchant_id = "+brandId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
+                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm, brand_merchant bm where pm.merchant_id = "+merchantId+" and pm.subs_category_merchant_id = "+categoryId+" and bm.is_active = "+true+" and pm.brand_merchant_id = "+brandId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
                 } else {
-                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.brand_merchant_id = "+brandId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
+                    querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm, brand_merchant bm where pm.merchant_id = "+merchantId+" and bm.is_active = "+true+" and pm.brand_merchant_id = "+brandId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
                 }
                 Query<ProductMerchantDetail> query = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.id asc");
                 List<ProductMerchantDetail> dataProductDetail = ProductMerchantDetailRepository.getAllDataKiosK(query);

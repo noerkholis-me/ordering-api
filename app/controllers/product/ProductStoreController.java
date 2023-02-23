@@ -903,7 +903,7 @@ public class ProductStoreController extends BaseController {
                     Store store = Store.find.byId(storeId);
                     if (store != null) {
                         String searchQuery = keyword != null && keyword.length() > 0 ? " and lower(pm.product_name) like '%"+keyword+"%'" : "";
-                        String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
+                        String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm, brand_merchant bm where pm.merchant_id = "+merchantId+" and pm.brand_merchant_id = bm.id and bm.is_active = "+true+" and pm.is_active = "+true+" and pm.is_deleted = false"+searchQuery+")";
                         List<ProductMerchantDetail> dataProductDetail = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.id desc").findList();
                         List<ProductMerchantDetail> pmd = new ArrayList<>();
                         List<ProductStore> ps = new ArrayList<>();
