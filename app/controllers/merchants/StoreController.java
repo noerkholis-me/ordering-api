@@ -380,7 +380,7 @@ public class StoreController extends BaseController {
     private static String validateRequest(StoreRequest storeRequest) {
         if (storeRequest == null)
             return "Request is null or empty";
-        if (storeRequest.getStoreName() == null)
+        if (storeRequest.getStoreName() == null || storeRequest.getStoreName().length() == 0)
             return "Name is null or empty";
         if (storeRequest.getStorePhone() == null)
             return "Name is null or empty";
@@ -396,32 +396,36 @@ public class StoreController extends BaseController {
             return "Address is null or empty";
 
         // ========== Validate Shipper ========== //
+        if (storeRequest.getStoreName().length() > 50) {
+            return "Nama toko tidak boleh lebih dari 50 karakter";
+        }
+
         if (storeRequest.getProvinceId() != null) {
             ShipperProvince province = ShipperProvince.findById(storeRequest.getProvinceId());
             if (province == null) {
-                return "Province is not found";
+                return "Provinsi tidak ditemukan";
             }
         }
         if (storeRequest.getCityId() != null) {
             ShipperCity shipperCity = ShipperCity.findById(storeRequest.getCityId());
             if (shipperCity == null) {
-                return "City is not found";
+                return "Kota tidak ditemukan";
             }
         }
         if (storeRequest.getSuburbId() != null) {
             ShipperSuburb shipperSuburb = ShipperSuburb.findById(storeRequest.getSuburbId());
             if (shipperSuburb == null) {
-                return "Suburb is not found";
+                return "Kecamatan tidak ditemukan";
             }
         }
         if (storeRequest.getAreaId() != null) {
             ShipperArea shipperArea = ShipperArea.findById(storeRequest.getAreaId());
             if (shipperArea == null) {
-                return "Area is not found";
+                return "Kelurahan tidak ditemukan";
             }
         }
         if (!storeRequest.getStorePhone().matches(CommonFunction.phoneRegex)){
-            return "Phone format not valid.";
+            return "Format nomor telepon tidak valid.";
         }
         return null;
     }
