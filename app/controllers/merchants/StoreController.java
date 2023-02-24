@@ -380,10 +380,10 @@ public class StoreController extends BaseController {
     private static String validateRequest(StoreRequest storeRequest) {
         if (storeRequest == null)
             return "Request is null or empty";
-        if (storeRequest.getStoreName() == null || storeRequest.getStoreName().length() == 0)
+        if (storeRequest.getStoreName().trim().isEmpty())
             return "Name is null or empty";
-        if (storeRequest.getStorePhone() == null)
-            return "Name is null or empty";
+        if (storeRequest.getStorePhone().trim().isEmpty())
+            return "Phone is null or empty";
         if (storeRequest.getProvinceId() == null)
             return "Province is null or empty";
         if (storeRequest.getCityId() == null)
@@ -392,7 +392,7 @@ public class StoreController extends BaseController {
             return "Suburb is null or empty";
         if (storeRequest.getAreaId() == null)
             return "Area is null or empty";
-        if (storeRequest.getAddress() == null)
+        if (storeRequest.getAddress().trim().isEmpty())
             return "Address is null or empty";
 
         // ========== Validate Shipper ========== //
