@@ -77,6 +77,9 @@ public class PickUpPointSetupRepository extends Model {
 		if (limit != 0) {
 			query = query.setMaxRows(limit);
 		}
+        if (filter != "" && filter != null) {
+            offset = 0;
+        }
 
 		List<PickUpPointSetup> resData = query.findPagingList(limit).getPage(offset).getList();
 

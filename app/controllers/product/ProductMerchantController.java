@@ -577,10 +577,7 @@ public class ProductMerchantController extends BaseController {
                 Query<ProductMerchant> query = ProductMerchantRepository.find.where()
                                                 .eq("isDeleted", false)
                                                 .eq("isActive", isActive)
-                                                .eq("merchant", ownMerchant)
-                                                .or(
-                                                Expr.ilike("t0.product_name", "%" + filter + "%"),
-                                                Expr.ilike("t0.no_sku", "%" + filter + "%")).order("id");
+                                                .eq("merchant", ownMerchant).order("id");
                 List<ProductMerchant> totalData = ProductMerchantRepository.getTotalDataPage(query);
                 List<ProductMerchant> productMerchants = ProductMerchantRepository.findProductWithPaging(query, sort, filter, offset, limit);
                 List<ProductResponse> productMerchantResponse = toResponses(productMerchants);
