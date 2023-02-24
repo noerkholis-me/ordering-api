@@ -62,7 +62,7 @@ public class ProductStoreRepository extends Model {
 
 
 		exp = exp.disjunction();
-		exp = exp.ilike("t0.category_name", "%" + filter + "%");
+		exp = exp.ilike("t0.product_name", "%" + filter + "%");
         // exp = exp.endjunction();
 
 		query = exp.query();
@@ -72,6 +72,9 @@ public class ProductStoreRepository extends Model {
 		if (limit != 0) {
 			query = query.setMaxRows(limit);
 		}
+        if (filter != "" && filter != null) {
+            offset = 0;
+        }
 
 		List<ProductStore> resData = query.findPagingList(limit).getPage(offset).getList();
 

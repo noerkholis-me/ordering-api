@@ -67,6 +67,9 @@ public class BrandMerchantRepository extends Model {
 		if (limit != 0) {
 			query = query.setMaxRows(limit);
 		}
+        if (filter != "" && filter != null) {
+            offset = 0;
+        }
 
 		List<BrandMerchant> resData = query.findPagingList(limit).getPage(offset).getList();
 

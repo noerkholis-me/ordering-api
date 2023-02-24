@@ -112,6 +112,9 @@ public class MemberRepository extends Model {
         if (limit != 0) {
             query = query.setMaxRows(limit);
         }
+        if (keyword != "" && keyword != null) {
+            offset = 0;
+        }
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
