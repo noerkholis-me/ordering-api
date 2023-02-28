@@ -38,6 +38,7 @@ POST    /users/session/login/google     			controllers.users.SessionsController.
 POST    /users/session/login/facebook_v2     		controllers.users.SessionsController.signInFacebookOld()
 POST    /users/session/login/google_v2     			controllers.users.SessionsController.signInGoogleOld()
 POST    /users/session/login/apple     			    controllers.users.SessionsController.signInAppleId()
+POST    /users/session/login/sandbox/google 		controllers.users.SessionsController.signInGoogleSandbox()
 GET     /users/session/logout              			controllers.users.SessionsController.signOut()
 POST    /users/session/refresh						controllers.users.SessionsController.refreshToken()
 POST    /users/session/forgot_password				controllers.users.SessionsController.forgetPassword()
@@ -296,7 +297,7 @@ PUT    /merchant/users/edit/:id                         controllers.merchants.Us
 PATCH   /merchant/users/update-password             controllers.merchants.SessionsController.updatePassword()
 
 POST    /users/createpassword/:activationcode/updatepassword     controllers.merchants.UserMerchantController.createNewPassword(activationcode: String)
-
+GET	/merchant/callbackActivation/:id				controllers.merchants.SessionsController.sendCallbackEmailActivation(id: Long)
 
 
 
@@ -351,7 +352,7 @@ GET     /merchant/role/:id/detailrole              controllers.merchants.RoleMer
 GET     /master/feature/list                       controllers.masters.FeatureController.getAllFeatureMerchant(isMerchant:Boolean ?= false)
 
 #BRAND
-GET     /merchant/brand/list                        controllers.brand.BrandMerchantController.listBrand(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET     /merchant/brand/list                        controllers.brand.BrandMerchantController.listBrand(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, isActive:String ?= "")
 POST    /merchant/brand                             controllers.brand.BrandMerchantController.createBrand()
 DELETE  /merchant/brand/:id/delete                  controllers.brand.BrandMerchantController.deleteBrand(id:Long)
 PUT     /merchant/brand/:id/update                  controllers.brand.BrandMerchantController.editBrand(id:Long)
@@ -417,7 +418,9 @@ GET    /master/config-setting/:key                  controllers.masters.ConfigSe
 
 #PRODUCT
 POST    /merchant/product                           controllers.product.ProductMerchantController.createProduct()
+POST    /merchant/product_v2                        controllers.product.ProductMerchantController.createProductWithProductStore()
 PUT    /merchant/product/:id                        controllers.product.ProductMerchantController.editProduct(id: Long)
+PUT    /merchant/product_v2/:id                     controllers.product.ProductMerchantController.editProductWithProductStore(id: Long)
 GET    /merchant/product                            controllers.product.ProductMerchantController.getAllProduct(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, isActive: Boolean ?= true)
 GET    /merchant/product/:id                        controllers.product.ProductMerchantController.getProductById(id: Long)
 DELETE    /merchant/product/:id                     controllers.product.ProductMerchantController.deleteProduct(id: Long)
@@ -563,7 +566,7 @@ DELETE       /merchant/bankaccount/:id                          controllers.merc
 GET          /merchant/bankaccount/:id                          controllers.merchants.BankAccountMerchantController.getBankAccountById(id: Long)
 
 #ORDER REPORT MERCHANTS
-GET         /merchant/order/reports/data                controllers.order.OrderMerchantController.orderReportMerchant(start_date:String ?= "", end_date:String ?= "", offset:Int ?= 0, limit:Int ?= 0, status_order:String ?= "", store_id:Long ?= 0)
+GET         /merchant/order/reports/data                controllers.order.OrderMerchantController.orderReportMerchant(start_date:String ?= "", end_date:String ?= "", offset:Int ?= 0, limit:Int ?= 0, status_order:String ?= "", store_id:Long ?= 0, product_type:String  ?= "ALL")
 GET         /merchant/order/reports/data/download       controllers.order.OrderMerchantController.downloadTransaction(start_date:String ?= "", end_date:String ?= "", offset:Int ?= 0, limit:Int ?= 0, status_order:String ?= "", store_id:Long ?= 0)
 
 #FINANCE TRANSACTION

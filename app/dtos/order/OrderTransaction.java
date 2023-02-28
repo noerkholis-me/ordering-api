@@ -25,14 +25,17 @@ public class OrderTransaction {
     private String orderType;
     @JsonProperty("device_type")
     private String deviceType;
-    @JsonProperty("customer_email")
-    private String customerEmail;
     @JsonProperty("customer_name")
     private String customerName;
+    @JsonProperty("customer_email")
+    private String customerEmail;
     @JsonProperty("customer_phone_number")
     private String customerPhoneNumber;
+    @JsonProperty("customer_google_id")
+    private String customerGoogleId;
     @JsonProperty("destination_address")
     private String destinationAddress;
+    
     @JsonProperty("sub_total")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal subTotal;
@@ -54,5 +57,8 @@ public class OrderTransaction {
     @JsonProperty("loyalty_usage")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal loyaltyUsage;
+    
+    @JsonProperty("reference_number")
+    private String referenceNumber;
 
 }

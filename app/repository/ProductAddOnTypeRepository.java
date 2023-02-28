@@ -49,6 +49,9 @@ public class ProductAddOnTypeRepository extends Model {
         if (limit != 0) {
             query = query.setMaxRows(limit);
         }
+        if (filter != "" && filter != null) {
+            offset = 0;
+        }
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
