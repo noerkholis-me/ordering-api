@@ -297,7 +297,7 @@ PUT    /merchant/users/edit/:id                         controllers.merchants.Us
 PATCH   /merchant/users/update-password             controllers.merchants.SessionsController.updatePassword()
 
 POST    /users/createpassword/:activationcode/updatepassword     controllers.merchants.UserMerchantController.createNewPassword(activationcode: String)
-POST	/merchant/callbackActivation/:id				controllers.merchants.SessionsController.sendCallbackEmailActivation(id: Long)
+GET	/merchant/callbackActivation/:id				controllers.merchants.SessionsController.sendCallbackEmailActivation(id: Long)
 
 
 
@@ -352,7 +352,7 @@ GET     /merchant/role/:id/detailrole              controllers.merchants.RoleMer
 GET     /master/feature/list                       controllers.masters.FeatureController.getAllFeatureMerchant(isMerchant:Boolean ?= false)
 
 #BRAND
-GET     /merchant/brand/list                        controllers.brand.BrandMerchantController.listBrand(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET     /merchant/brand/list                        controllers.brand.BrandMerchantController.listBrand(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, isActive:String ?= "")
 POST    /merchant/brand                             controllers.brand.BrandMerchantController.createBrand()
 DELETE  /merchant/brand/:id/delete                  controllers.brand.BrandMerchantController.deleteBrand(id:Long)
 PUT     /merchant/brand/:id/update                  controllers.brand.BrandMerchantController.editBrand(id:Long)
@@ -418,7 +418,9 @@ GET    /master/config-setting/:key                  controllers.masters.ConfigSe
 
 #PRODUCT
 POST    /merchant/product                           controllers.product.ProductMerchantController.createProduct()
+POST    /merchant/product_v2                        controllers.product.ProductMerchantController.createProductWithProductStore()
 PUT    /merchant/product/:id                        controllers.product.ProductMerchantController.editProduct(id: Long)
+PUT    /merchant/product_v2/:id                     controllers.product.ProductMerchantController.editProductWithProductStore(id: Long)
 GET    /merchant/product                            controllers.product.ProductMerchantController.getAllProduct(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, isActive: Boolean ?= true)
 GET    /merchant/product/:id                        controllers.product.ProductMerchantController.getProductById(id: Long)
 DELETE    /merchant/product/:id                     controllers.product.ProductMerchantController.deleteProduct(id: Long)

@@ -176,15 +176,17 @@ public class MailConfig {
 	}
 	
 	public static String renderMailResendActivation(UserMerchant user) {
-		String url = Constant.getInstance().getMerchantUrl();
-		String imageUrl = Constant.getInstance().getImageUrl() + "/assets/images/logo-sandbox.png";
-		return views.html.aktivationMailResend.render(user.getFullName(), user.getEmail(), url, imageUrl).toString();
+		String urlMiniPos = Constant.getInstance().getPosUrl();
+		String urlCms = Constant.getInstance().getMerchantUrl();
+		String imageUrl = Constant.getInstance().getImageUrl();
+		return views.html.aktivationMailResend.render(imageUrl, user.getEmail(), user.getFullName(), urlMiniPos, urlCms).toString();
 	}
 	
 	public static String renderMailResendActivation(Merchant user) {
-		String url = Constant.getInstance().getMerchantUrl();
-		String imageUrl = Constant.getInstance().getImageUrl() + "/assets/images/logo-sandbox.png";
-		return views.html.aktivationMailResend.render(user.fullName, user.email, url, imageUrl).toString();
+		String urlMiniPos = Constant.getInstance().getPosUrl();
+		String urlCms = Constant.getInstance().getMerchantUrl();
+		String imageUrl = Constant.getInstance().getImageUrl();
+		return views.html.aktivationMailResend.render(imageUrl, user.email, user.fullName, urlMiniPos, urlCms).toString();
 	}
 
     public static String renderMailForgotPasswordTemplate(Member member, String url) {

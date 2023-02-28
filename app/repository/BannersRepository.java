@@ -54,6 +54,9 @@ public class BannersRepository extends Model {
 		if (limit != 0) {
 			query = query.setMaxRows(limit);
 		}
+        if (filter != "" && filter != null) {
+            offset = 0;
+        }
 
 		List<Banners> resData = query.findPagingList(limit).getPage(offset).getList();
 

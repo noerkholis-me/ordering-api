@@ -471,6 +471,9 @@ public class OrderRepository extends Model {
 
     public static List<Order> getOrderListWithFilter(Long merchantId, Long storeId, int offset, int limit, String statusOrder, String filter, String productType) {
         Query<Order> query = queryGetOrderListWithFilter(merchantId, storeId, statusOrder, filter, productType);
+        if (filter != "" && filter != null) {
+            offset = 0;
+        }
         return query.findPagingList(limit).getPage(offset).getList();
     }
 

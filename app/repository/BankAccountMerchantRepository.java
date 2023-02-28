@@ -57,8 +57,12 @@ public class BankAccountMerchantRepository extends BaseModel {
         exp = exp.disjunction();
         exp = exp.ilike("t0.account_name", "%" + filter + "%");
         query = exp.query();
-        if (limit != 0)
+        if (limit != 0) {
             query = query.setMaxRows(limit);
+        }
+        if (filter != "" && filter != null) {
+            offset = 0;
+        }
         return query.findPagingList(limit).getPage(offset).getList();
     }
 

@@ -112,6 +112,10 @@ public class AppSettingsController extends BaseController {
                 AppSettingRequest request = objectMapper.readValue(json.toString(), AppSettingRequest.class);
                 // System.out.print(appSetting.id);
                 String validate = validateData(request);
+                if(ownMerchant.name.length() > 50) {
+                    response.setBaseResponse(0, 0, 0, "Merchant name tidak boleh lebih dari 100 karakter", null);
+                    return badRequest(Json.toJson(response));
+                }
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
@@ -176,6 +180,8 @@ public class AppSettingsController extends BaseController {
             return "Logo Aplikasi kiosk tidak boleh nol atau kosong";
         if (request.getAppSettingKioskRequest().getFavicon() == null)
             return "Favicon kiosk tidak boleh nol atau kosong";
+        if (request.getAppSettingKioskRequest().getKioskName().length() > 100)
+            return "Nama Merchant kiosk tidak boleh lebih dari 100 karakter";
         if (request.getAppSettingMobileQrRequest().getMobileQrName() == null)
             return "Nama Merchant mobile qr tidak boleh nol atau kosong";
         if (request.getAppSettingMobileQrRequest().getPrimaryColor() == null)
@@ -188,7 +194,8 @@ public class AppSettingsController extends BaseController {
             return "Favicon mobile qr tidak boleh nol atau kosong";
         if (request.getAppSettingMobileQrRequest().getThreshold() == null)
             return "Threshold tidak boleh nol atau kosong";
-
+        if (request.getAppSettingMobileQrRequest().getMobileQrName().length() > 50)
+            return "Nama Merchant mobile qr tidak boleh lebih dari 50 karakter";
         return null;
     }
 
