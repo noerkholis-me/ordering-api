@@ -213,7 +213,8 @@ public class ShipperController extends BaseController {
     @ApiOperation(value = "Get all domestic rate list.", notes = "Returns list of domestic rate.\n" + swaggerInfo
             + "", response = DomesticRatesResponse.class, responseContainer = "List", httpMethod = "GET")
     public static Result getAllDomesticRatesByAreaId (Long storeId, Long destinationAreaId, Integer
-            price, Double weight, Double length, Double wide, Double height, Integer storeType, Integer deliveryType) throws IOException {
+            price, Double weight, Double length, Double wide, Double height, Integer storeType, Integer deliveryType,
+            String rateType) throws IOException {
         int authority = checkAccessAuthorization("all");
 
         //start find latitude and longitude from areaId;
@@ -243,6 +244,9 @@ public class ShipperController extends BaseController {
         //end find latitude and longitude
 
         String domesticRateUrlApi = API_SHIPPER_ADDRESS_V3 + API_SHIPPER_DOMESTIC_RATES;
+        if (rateType != null && !rateType.trim().isEmpty()) {
+        	domesticRateUrlApi += "/" + rateType;
+        }
         Store objStore = Store.find.ref(storeId);
 
         if (authority == 200 || authority == 203) {
