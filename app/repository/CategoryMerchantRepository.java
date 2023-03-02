@@ -67,6 +67,9 @@ public class CategoryMerchantRepository extends Model {
 		if (limit != 0) {
 			query = query.setMaxRows(limit);
 		}
+        if (filter != "" && filter != null) {
+            offset = 0;
+        }
 
 		List<CategoryMerchant> resData = query.findPagingList(limit).getPage(offset).getList();
 
