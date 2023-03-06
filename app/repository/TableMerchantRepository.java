@@ -66,14 +66,14 @@ public class TableMerchantRepository extends Model {
             query = query.orderBy("t0.created_at desc");
         }
         ExpressionList<TableMerchant> exp = query.where();
+        if (filter != null && !filter.equals("")) {
+            offset = 0;
+        }
         exp = exp.disjunction();
         exp = exp.ilike("t0.name", "%" + filter + "%");
         query = exp.query();
         if (limit != 0) {
             query = query.setMaxRows(limit);
-        }
-        if (filter != "" && filter != null) {
-            offset = 0;
         }
         return query.findPagingList(limit).getPage(offset).getList();
     }

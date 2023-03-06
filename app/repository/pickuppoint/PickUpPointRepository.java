@@ -60,6 +60,9 @@ public class PickUpPointRepository extends Model {
 		if(idStore != null && idStore != 0){
 			exp = exp.eq("t0.store_id", idStore);
 		}
+        if (filter != null && !filter.equals("")) {
+            offset = 0;
+        }
 		exp = exp.ilike("t0.pupoint_name", "%" + filter + "%");
         // exp = exp.endjunction();
 
@@ -70,9 +73,6 @@ public class PickUpPointRepository extends Model {
 		if (limit != 0) {
 			query = query.setMaxRows(limit);
 		}
-        if (filter != "" && filter != null) {
-            offset = 0;
-        }
 
 		List<PickUpPointMerchant> resData = query.findPagingList(limit).getPage(offset).getList();
 
