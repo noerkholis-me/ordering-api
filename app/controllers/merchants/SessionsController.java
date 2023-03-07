@@ -555,6 +555,7 @@ public class SessionsController extends BaseController {
         profileData.setActive(member.isActive);
         profileData.setMerchantType(member.merchantType);
         profileData.setMerchantQrCode(member.merchantQrCode);
+        profileData.setProductStoreRequired(member.productStoreRequired);
 
         return profileData;
     }
