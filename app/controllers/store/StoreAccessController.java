@@ -112,47 +112,83 @@ public class StoreAccessController extends BaseController {
         return null;
     }
 
-    public static Result listUserAssign(String filter, String sort, int offset, int limit) {
+    public static Result listUserAssign(String filter, String sort, int offset, int limit, Long storeId) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<StoreAccess> query = StoreAccessRepository.find.fetch("userMerchant").where()
-                    .eq("t0.is_deleted", false).eq("t0.is_active", true).eq("merchant", ownMerchant)
-                    .order("t0.id desc");
-            try {
-                List<StoreAccessResponse> responsesStoreAccess = new ArrayList<>();
-                List<StoreAccess> totalData = StoreAccessRepository.getTotalData(query);
-                List<StoreAccess> responseIndex = StoreAccessRepository.getDataStoreAccess(query, sort, filter, offset,
-                        limit);
-                for (StoreAccess data : responseIndex) {
-                    Query<StoreAccessDetail> queryDetail = StoreAccessRepository.findDetail.where()
-                            .eq("t0.store_access_id", data.id).eq("t0.is_deleted", false).order("t0.id");
-                    List<StoreAccessDetail> dataDetail = StoreAccessRepository.getDetailData(queryDetail);
-                    List<StoreAccessResponse.StoreAccessDetail> responsesDetail = new ArrayList<>();
+            if (storeId != null && !storeId.equals(0L)){
+                Query<StoreAccessDetail> query = StoreAccessRepository.findDetail.where()
+                        .eq("t0.is_deleted", false).eq("t0.store_id", storeId).eq("storeAccess.merchant", ownMerchant)
+                        .order("t0.id desc");
+                try {
+                    List<StoreAccessResponse> responsesStoreAccess = new ArrayList<>();
+                    List<StoreAccessDetail> totalData = StoreAccessRepository.getTotal(query);
+                    List<StoreAccessDetail> responseIndex = StoreAccessRepository.getDataForUserMerchant(query, sort, filter, offset,
+                            limit);
+                    for (StoreAccessDetail data : responseIndex) {
+                        List<StoreAccessResponse.StoreAccessDetail> responsesDetail = new ArrayList<>();
 
-                    StoreAccessResponse responseStoreAccess = new StoreAccessResponse();
-                    responseStoreAccess.setId(data.id);
-                    responseStoreAccess.setUserMerchantId(data.getUserMerchant().id);
-                    responseStoreAccess.setUserName(data.getUserMerchant().getFullName());
-                    responseStoreAccess.setMerchantId(data.getMerchant().id);
-                    responseStoreAccess.setIsActive(data.getIsActive());
-                    for (StoreAccessDetail storeDetail : dataDetail) {
-                        StoreAccessResponse.StoreAccessDetail responseDetail = new StoreAccessResponse.StoreAccessDetail();
-                        Store storeDataFetch = Store.findById(storeDetail.getStore().id);
-                        if (storeDataFetch != null){
-                            responseDetail.setId(storeDataFetch.id);
-                            responseDetail.setStoreName(storeDataFetch.storeName);
-                            responseDetail.setIsActive(storeDataFetch.isActive);
+                        StoreAccessResponse responseStoreAccess = new StoreAccessResponse();
+                        responseStoreAccess.setId(data.getStoreAccess().id);
+                        responseStoreAccess.setUserMerchantId(data.getStoreAccess().getUserMerchant().id);
+                        responseStoreAccess.setUserName(data.getStoreAccess().getUserMerchant().getFullName());
+                        responseStoreAccess.setMerchantId(data.getStoreAccess().getMerchant().id);
+                        responseStoreAccess.setIsActive(data.getStoreAccess().getIsActive());
+                        // for (StoreAccessDetail storeDetail : responseIndex) {
+                            StoreAccessResponse.StoreAccessDetail responseDetail = new StoreAccessResponse.StoreAccessDetail();
+                            responseDetail.setId(data.getStore().id);
+                            responseDetail.setStoreName(data.getStore().storeName);
+                            responseDetail.setIsActive(data.getStore().isActive);
                             responsesDetail.add(responseDetail);
                             responseStoreAccess.setStoreData(responseDetail != null ? responsesDetail : null);
-                        }
+                        // }
+                        responsesStoreAccess.add(responseStoreAccess);
                     }
-                    responsesStoreAccess.add(responseStoreAccess);
+                    response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size(),
+                            offset, limit, "berhasil menampilkan data", responsesStoreAccess);
+                    return ok(Json.toJson(response));
+                } catch (IOException e) {
+                    Logger.error("allDetail", e);
                 }
-                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size(),
-                        offset, limit, "berhasil menampilkan data", responsesStoreAccess);
-                return ok(Json.toJson(response));
-            } catch (IOException e) {
-                Logger.error("allDetail", e);
+            } else {
+                Query<StoreAccess> query = StoreAccessRepository.find.fetch("userMerchant").where()
+                        .eq("t0.is_deleted", false).eq("t0.is_active", true).eq("merchant", ownMerchant)
+                        .order("t0.id desc");
+                try {
+                    List<StoreAccessResponse> responsesStoreAccess = new ArrayList<>();
+                    List<StoreAccess> totalData = StoreAccessRepository.getTotalData(query);
+                    List<StoreAccess> responseIndex = StoreAccessRepository.getDataStoreAccess(query, sort, filter, offset,
+                            limit);
+                    for (StoreAccess data : responseIndex) {
+                        Query<StoreAccessDetail> queryDetail = StoreAccessRepository.findDetail.where()
+                                .eq("t0.store_access_id", data.id).eq("t0.is_deleted", false).order("t0.id");
+                        List<StoreAccessDetail> dataDetail = StoreAccessRepository.getDetailData(queryDetail);
+                        List<StoreAccessResponse.StoreAccessDetail> responsesDetail = new ArrayList<>();
+
+                        StoreAccessResponse responseStoreAccess = new StoreAccessResponse();
+                        responseStoreAccess.setId(data.id);
+                        responseStoreAccess.setUserMerchantId(data.getUserMerchant().id);
+                        responseStoreAccess.setUserName(data.getUserMerchant().getFullName());
+                        responseStoreAccess.setMerchantId(data.getMerchant().id);
+                        responseStoreAccess.setIsActive(data.getIsActive());
+                        for (StoreAccessDetail storeDetail : dataDetail) {
+                            StoreAccessResponse.StoreAccessDetail responseDetail = new StoreAccessResponse.StoreAccessDetail();
+                            Store storeDataFetch = Store.findById(storeDetail.getStore().id);
+                            if (storeDataFetch != null){
+                                responseDetail.setId(storeDataFetch.id);
+                                responseDetail.setStoreName(storeDataFetch.storeName);
+                                responseDetail.setIsActive(storeDataFetch.isActive);
+                                responsesDetail.add(responseDetail);
+                                responseStoreAccess.setStoreData(responseDetail != null ? responsesDetail : null);
+                            }
+                        }
+                        responsesStoreAccess.add(responseStoreAccess);
+                    }
+                    response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size(),
+                            offset, limit, "berhasil menampilkan data", responsesStoreAccess);
+                    return ok(Json.toJson(response));
+                } catch (IOException e) {
+                    Logger.error("allDetail", e);
+                }
             }
         } else if (ownMerchant == null) {
             response.setBaseResponse(0, 0, 0, forbidden, null);
