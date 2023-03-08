@@ -2,6 +2,8 @@ package dtos.merchant;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 
@@ -73,6 +75,10 @@ public class MerchantSessionResponse {
     public String merchantType;
     @JsonProperty("merchant_qr_code")
     public String merchantQrCode;
+    @JsonProperty("product_store_required")
+    @Getter @Setter
+    public boolean productStoreRequired;
+
 
     public MerchantSessionResponse() {
     }

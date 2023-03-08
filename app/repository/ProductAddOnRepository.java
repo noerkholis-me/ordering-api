@@ -42,13 +42,11 @@ public class ProductAddOnRepository extends Model {
         }
 
         ExpressionList<ProductAddOn> exp = query.where();
-        // exp = exp.disjunction();
-        // exp = exp.ilike("t0.product_name", "%" + filter + "%");
         query = exp.query();
         if (limit != 0) {
             query = query.setMaxRows(limit);
         }
-        if (filter != "" && filter != null) {
+        if (filter != null && !filter.equals("")) {
             offset = 0;
         }
         return query.findPagingList(limit).getPage(offset).getList();
