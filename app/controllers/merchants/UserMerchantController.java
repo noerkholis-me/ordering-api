@@ -14,6 +14,7 @@ import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
 import dtos.merchant.*;
+import dtos.store.*;
 import models.Merchant;
 import models.RoleMerchant;
 import models.UserMerchant;
@@ -356,37 +357,69 @@ public class UserMerchantController extends BaseController {
 
     @ApiOperation(value = "Get all user list.", notes = "Returns list of user.\n" + swaggerInfo
             + "", response = UserMerchant.class, responseContainer = "List", httpMethod = "GET")
-    public static Result listUsers(String filter, String sort, int offset, int limit) {
+    public static Result listUsers(String filter, String sort, int offset, int limit, Long storeId) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<UserMerchant> query = UserMerchantRepository.find.where().eq("t0.is_deleted", false).eq("role.merchant", ownMerchant).order("id");
-            try {
-                List<UserMerchantResponse> responses = new ArrayList<>();
-                List<UserMerchant> totalData = UserMerchantRepository.getTotalData(query);
-                List<UserMerchant> responseIndex = UserMerchantRepository.getDataUser(query, sort, filter, offset, limit);
-                for (UserMerchant data : responseIndex) {
-                    UserMerchantResponse response = new UserMerchantResponse();
-                    Boolean statusActive = false;
-                    if(data.getIsActive() == "Active"){
-                        statusActive = true;
+            if(storeId != null && !storeId.equals(0L)){
+                Query<StoreAccessDetail> query = StoreAccessRepository.findDetail.where().eq("t0.store_id", storeId).eq("t0.is_deleted", false).eq("storeAccess.userMerchant.role.merchant", ownMerchant).order("id");
+                try {
+                    List<StoreAccessUserMerchantResponse> responses = new ArrayList<>();
+                    List<StoreAccessDetail> totalData = StoreAccessRepository.getTotal(query);
+                    List<StoreAccessDetail> responseIndex = StoreAccessRepository.getDataForUserMerchant(query, sort, filter, offset, limit);
+                    for (StoreAccessDetail data : responseIndex) {
+                        StoreAccessUserMerchantResponse response = new StoreAccessUserMerchantResponse();
+                        Boolean statusActive = false;
+                        if(data.getStoreAccess().getUserMerchant().getIsActive() == "Active"){
+                            statusActive = true;
+                        }
+                        response.setId(data.getStoreAccess().getUserMerchant().id);
+                        response.setFullName(data.getStoreAccess().getUserMerchant().getFullName());
+                        response.setFirstName(data.getStoreAccess().getUserMerchant().getFirstName());
+                        response.setLastName(data.getStoreAccess().getUserMerchant().getLastName());
+                        response.setEmail(data.getStoreAccess().getUserMerchant().getEmail());
+                        response.setIsActive(statusActive);
+                        response.setGender(data.getStoreAccess().getUserMerchant().getGender());
+                        response.setMerchantId(data.getStoreAccess().getUserMerchant().getRole().getMerchant().id);
+                        response.setRoleId(data.getStoreAccess().getUserMerchant().getRole().id);
+                        response.setRoleName(data.getStoreAccess().getUserMerchant().getRole().getName());
+                        responses.add(response);
                     }
-                    response.setId(data.id);
-                    response.setFullName(data.getFullName());
-                    response.setFirstName(data.getFirstName());
-                    response.setLastName(data.getLastName());
-                    response.setEmail(data.getEmail());
-                    response.setIsActive(statusActive);
-                    response.setGender(data.getGender());
-                    response.setMerchantId(data.getRole().getMerchant().id);
-                    response.setRoleId(data.getRole().id);
-                    response.setRoleName(data.getRole().getName());
-                    responses.add(response);
+                    response.setBaseResponse(filter == null || filter == "" ? totalData.size() : responseIndex.size() , offset, limit, success + " showing data", responses);
+                    // System.out.println(ok(Json.toJson(response)));
+                    return ok(Json.toJson(response));
+                } catch (IOException e) {
+                    Logger.error("allDetail", e);
                 }
-                response.setBaseResponse(filter == null || filter == "" ? totalData.size() : responseIndex.size() , offset, limit, success + " showing data", responses);
-                // System.out.println(ok(Json.toJson(response)));
-                return ok(Json.toJson(response));
-            } catch (IOException e) {
-                Logger.error("allDetail", e);
+            } else {
+                Query<UserMerchant> query = UserMerchantRepository.find.where().eq("t0.is_deleted", false).eq("role.merchant", ownMerchant).order("id");
+                try {
+                    List<UserMerchantResponse> responses = new ArrayList<>();
+                    List<UserMerchant> totalData = UserMerchantRepository.getTotalData(query);
+                    List<UserMerchant> responseIndex = UserMerchantRepository.getDataUser(query, sort, filter, offset, limit);
+                    for (UserMerchant data : responseIndex) {
+                        UserMerchantResponse response = new UserMerchantResponse();
+                        Boolean statusActive = false;
+                        if(data.getIsActive() == "Active"){
+                            statusActive = true;
+                        }
+                        response.setId(data.id);
+                        response.setFullName(data.getFullName());
+                        response.setFirstName(data.getFirstName());
+                        response.setLastName(data.getLastName());
+                        response.setEmail(data.getEmail());
+                        response.setIsActive(statusActive);
+                        response.setGender(data.getGender());
+                        response.setMerchantId(data.getRole().getMerchant().id);
+                        response.setRoleId(data.getRole().id);
+                        response.setRoleName(data.getRole().getName());
+                        responses.add(response);
+                    }
+                    response.setBaseResponse(filter == null || filter == "" ? totalData.size() : responseIndex.size() , offset, limit, success + " showing data", responses);
+                    // System.out.println(ok(Json.toJson(response)));
+                    return ok(Json.toJson(response));
+                } catch (IOException e) {
+                    Logger.error("allDetail", e);
+                }
             }
         } else if (ownMerchant == null) {
             response.setBaseResponse(0, 0, 0, forbidden, null);

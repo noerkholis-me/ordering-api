@@ -141,4 +141,43 @@ public class StoreAccessRepository extends Model {
 
 		return resData;
 	}
+
+	public static List<StoreAccessDetail> getDataForUserMerchant(Query<StoreAccessDetail> reqQuery, String sort, String filter, int offset, int limit) throws IOException {
+		Query<StoreAccessDetail> query = reqQuery;
+
+		if (!"".equals(sort)) {
+			query = query.orderBy(sort);
+		} else {
+			query = query.orderBy("storeAccess.userMerchant.id desc");
+		}
+
+		ExpressionList<StoreAccessDetail> exp = query.where();
+
+		exp = exp.ilike("storeAccess.userMerchant.fullName", "%" + filter + "%");
+		query = exp.query();
+
+		if (limit != 0) {
+			query = query.setMaxRows(limit);
+		}
+        if (filter != "" && filter != null) {
+            offset = 0;
+        }
+
+		List<StoreAccessDetail> resData = query.findPagingList(limit).getPage(offset).getList();
+
+		return resData;
+	}
+
+	public static List<StoreAccessDetail> getTotal(Query<StoreAccessDetail> reqQuery)
+			throws IOException {
+		Query<StoreAccessDetail> query = reqQuery;
+
+		ExpressionList<StoreAccessDetail> exp = query.where();
+
+		query = exp.query();
+
+		List<StoreAccessDetail> resData = query.findPagingList(0).getPage(0).getList();
+
+		return resData;
+	}
 }
