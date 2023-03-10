@@ -594,6 +594,9 @@ public class SessionsController extends BaseController {
                 responseStoreAccess.setStoreData(responseDetail != null ? responsesDetail : null);
             }
             userMerchantResponse.setStoreAccess(responseStoreAccess);
+
+            Merchant merchant = Merchant.find.byId(dataAccess.getMerchant().id);
+            userMerchantResponse.setProductStoreRequired(merchant.productStoreRequired);
         } else {
             userMerchantResponse.setStoreAccess(null);
         }
