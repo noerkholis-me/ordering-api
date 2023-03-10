@@ -54,5 +54,8 @@ public class OrderDetailPosResponse {
 
     @JsonProperty("payment_type")
     private String paymentType;
+    @JsonProperty("bank_code")
+    private String bankCode;
+    
 
 }

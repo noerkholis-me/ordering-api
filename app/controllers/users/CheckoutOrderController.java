@@ -446,6 +446,7 @@ public class CheckoutOrderController extends BaseController {
                 orderPayment.setStatus(mPayment.typePayment.equalsIgnoreCase("DIRECT_PAYMENT") ? PaymentStatus.PAID.getStatus() : PaymentStatus.PENDING.getStatus());
                 orderPayment.setPaymentType(orderRequest.getPaymentDetailResponse().getPaymentType());
                 orderPayment.setPaymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel());
+                orderPayment.setBankCode(orderRequest.getPaymentDetailResponse().getBankCode());
                 orderPayment.setPaymentDate(new Date());
                 orderPayment.setTaxPercentage(orderRequest.getPaymentDetailResponse().getTaxPercentage());
                 orderPayment.setServicePercentage(orderRequest.getPaymentDetailResponse().getServicePercentage());
