@@ -26,6 +26,7 @@ import validator.ProductValidator;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 
@@ -798,6 +799,38 @@ public class ProductMerchantController extends BaseController {
                     .build();
             productResponse.setProductDescription(productDescriptionResponse);
         }
+
+        try {
+            Query<ProductStore> queryPS = ProductStoreRepository.find.where()
+                .eq("t0.product_id", productMerchant.id).eq("t0.is_deleted", false)
+                .eq("merchant", productMerchant.getMerchant()).order("t0.id");
+            List<ProductStore> dataPS = ProductStoreRepository.getDataProductStore(queryPS);
+            List<ProductResponseStore.ProductStore> responsesProductStore = new ArrayList<>();
+            for (ProductStore dataPStore : dataPS) {
+                ProductResponseStore.ProductStore responsePStore = new ProductResponseStore.ProductStore();
+
+                responsePStore.setId(dataPStore.id);
+                responsePStore.setStoreId(dataPStore.getStore().id);
+                responsePStore.setProductId(dataPStore.getProductMerchant().id);
+                responsePStore.setIsActive(dataPStore.isActive);
+                responsePStore.setStorePrice(dataPStore.getStorePrice());
+                responsePStore.setDiscountType(dataPStore.getDiscountType());
+                responsePStore.setDiscount(dataPStore.getDiscount());
+                responsePStore.setIsDeleted(dataPStore.isDeleted);
+                responsePStore.setFinalPrice(dataPStore.getFinalPrice());
+
+                Store store = Store.findById(dataPStore.getStore().id);
+                if (store != null) {
+                    responsePStore.setStoresName(store.storeName);
+                }
+                responsesProductStore.add(responsePStore);
+                productResponse.setProductStore(responsePStore != null ? responsesProductStore : null);
+            }
+        } catch (IOException e) {
+            logger.error("Error saat menampilkan detail produk store", e);
+            e.printStackTrace();
+        }
+
         return productResponse;
     }
 

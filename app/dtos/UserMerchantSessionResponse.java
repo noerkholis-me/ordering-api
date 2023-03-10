@@ -38,5 +38,7 @@ public class UserMerchantSessionResponse {
     public String merchantType;
     @JsonProperty("account_label")
     public String accountLabel;
+    @JsonProperty("product_store_required")
+    public Boolean productStoreRequired;
 
 }
