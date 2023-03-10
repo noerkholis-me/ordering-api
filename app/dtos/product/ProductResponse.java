@@ -86,6 +86,7 @@ public class ProductResponse implements Serializable {
         @JsonProperty("brand_name")
         private String brandName;
     }
-    
+
+    private List<ProductResponseStore.ProductStore> productStore;
 
 }
