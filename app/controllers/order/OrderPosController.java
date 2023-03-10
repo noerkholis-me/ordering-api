@@ -153,6 +153,7 @@ public class OrderPosController extends BaseController {
             orderResponse.setServicePercentage(orderPayment.getServicePercentage());
             orderResponse.setTotal(getOrder.getTotalPrice());
             orderResponse.setPaymentType(orderPayment.getPaymentChannel());
+            orderResponse.setBankCode(orderPayment.getBankCode());
 
 
             response.setBaseResponse(1, 0, 1, success + " menampilkan data order", orderResponse);
