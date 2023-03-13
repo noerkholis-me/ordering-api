@@ -20,9 +20,4 @@ public class QrGroupStoreResponse {
     @JsonProperty("qr_group_id")
     private Long qrGroupId;
 
-    @JsonProperty("address")
-    private String address;
-
-    @JsonProperty("phone")
-    private String phone;
 }
