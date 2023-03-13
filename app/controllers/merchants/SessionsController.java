@@ -47,7 +47,7 @@ import play.mvc.Result;
 import repository.StoreAccessRepository;
 import repository.UserMerchantRepository;
 import repository.cashierhistory.CashierHistoryMerchantRepository;
-import service.CallbackActivationService;
+import service.EmailService;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -1184,7 +1184,7 @@ public class SessionsController extends BaseController {
     public static Result sendCallbackEmailActivation(Long id) {
     	Merchant merchant = Merchant.find.where().eq("id", id).eq("isDeleted", Boolean.FALSE).findUnique();
     	if(merchant != null) {
-    		CallbackActivationService.renderCallbackActivationMail(merchant);
+    		EmailService.renderCallbackActivationMail(merchant);
     		response.setBaseResponse(0, 0, 0, "Email Sent Successfully", null);
     		return ok(Json.toJson(response));
     	}
