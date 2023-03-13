@@ -6,9 +6,12 @@ import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
+import com.hokeba.util.MailConfig;
+
 import controllers.BaseController;
 import dtos.finance.FinanceWithdrawRequest;
 import dtos.finance.FinanceWithdrawResponse;
+import dtos.store.StoreWithdrawEmail;
 import models.Merchant;
 import models.Store;
 import models.finance.FinanceTransaction;
@@ -21,9 +24,11 @@ import repository.BankAccountMerchantRepository;
 import repository.finance.FinanceTransactionRepository;
 import repository.finance.FinanceWithdrawRepository;
 import service.DownloadTransactionService;
+import service.EmailService;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class FinanceWithdrawController extends BaseController {
@@ -148,6 +153,9 @@ public class FinanceWithdrawController extends BaseController {
                     financeTransaction.save();
 
                     trx.commit();
+                    
+                    StoreWithdrawEmail dto = StoreWithdrawEmail.getInstance(financeWithdraw);
+                    EmailService.renderMailInformationWithdraw(dto, merchant);
 
                     response.setBaseResponse(1, offset, 1, success + " Request withdraw", financeWithdraw.getEventId());
                     return ok(Json.toJson(response));
@@ -195,6 +203,17 @@ public class FinanceWithdrawController extends BaseController {
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
+    }
+    
+    public static Result callbackWithdrawSuccess (String reqNum) {
+    	FinanceWithdraw model = FinanceWithdraw.find.where().eq("t0.request_number", reqNum).setMaxRows(1).findUnique();
+    	if (model != null) {
+    		EmailService.renderMailSuccessWithdraw(StoreWithdrawEmail.getInstance(model), model.getStore().getMerchant());
+    		response.setBaseResponse(0, 0, 0, "Email Sent Successfully", null);
+    		return ok(Json.toJson(response));
+    	}
+    	response.setBaseResponse(0, 0, 0, "Error", null);
+    	return badRequest(Json.toJson(response));
     }
 
 }
