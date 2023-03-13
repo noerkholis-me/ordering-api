@@ -1,7 +1,8 @@
-package dtos.store;
+package dtos.merchant;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,15 +11,18 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class MultiStoreRequest {
+@Builder
+public class QrGroupStoreResponse {
 
-    @JsonProperty("address_type")
-    private String addressType;
+    @JsonProperty("store_id")
+    private Long storeId;
+
+    @JsonProperty("qr_group_id")
+    private Long qrGroupId;
+
     @JsonProperty("address")
     private String address;
-    @JsonProperty("store_phone")
-    private String storePhone;
-    @JsonProperty("google_maps_url")
-    private String googleMapsUrl;
 
+    @JsonProperty("phone")
+    private String phone;
 }

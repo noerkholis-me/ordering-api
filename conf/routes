@@ -413,9 +413,14 @@ GET    /merchant/allstore                           controllers.merchants.StoreC
 
 GET    /merchant/detail/:merchantCode				controllers.merchants.MerchantController.getMerchantDetail(merchantCode: String)
 
-#MULTI STORE
-GET     /merchant/multi-store                       controllers.merchants.MultiStoreController.getSettingMultiStore()
-POST    /merchant/multi-store                       controllers.merchants.MultiStoreController.settingMultiStore()
+#QR GROUP
+GET      /merchant/qr-group                         controllers.merchants.QrGroupController.getAllQrGroup(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET      /merchant/qr-group/:id/detail              controllers.merchants.QrGroupController.getQrGroupById(id:Long, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+POST     /merchant/qr-group                         controllers.merchants.QrGroupController.createQrGroup()
+PUT      /merchant/qr-group/:id                     controllers.merchants.QrGroupController.editQrGroup(id:Long)
+DELETE   /merchant/qr-group/:id                     controllers.merchants.QrGroupController.deleteQrGroup(id:Long)
+POST     /merchant/qr-group-store                   controllers.merchants.QrGroupController.addStoreToQrGroup()
+DELETE   /merchant/qr-group-store/:id             controllers.merchants.QrGroupController.deleteStoreFromQrGroup(id:Long)
 
 #CONFIG SETTING
 GET    /master/config-setting/:key                  controllers.masters.ConfigSettingController.getConfigSettingByKey(key: String)
