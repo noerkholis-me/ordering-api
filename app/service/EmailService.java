@@ -116,9 +116,9 @@ public class EmailService {
 	        Thread thread = new Thread(() -> {
 	            try {
 	            	if(toAdmin) {
-	            		for(int i = 0; i < emails.size() - 1; i++) {
+	            		for(int i = 0; i < emails.size(); i++) {
 	                    MailConfig.sendmail(emails.get(i), MailConfig.subjectInvoiceAdmin, MailConfig.renderMailInvoiceTemplateAdmin(Constant.getInstance().getImageUrl()
-	                    		,order, orderPayment), emails.get(emails.size()-1));
+	                    		,order, orderPayment), order.getStore().getMerchant().email);
 	            		}
 	            	} else {
 	                    MailConfig.sendmail(order.getMember().email, MailConfig.subjectInvoice, MailConfig.renderMailInvoiceTemplateNew(Constant.getInstance().getImageUrl(),order, orderPayment));
