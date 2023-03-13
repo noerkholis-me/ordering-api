@@ -206,7 +206,7 @@ public class FinanceWithdrawController extends BaseController {
     }
     
     public static Result callbackWithdrawSuccess (String reqNum) {
-    	FinanceWithdraw model = FinanceWithdraw.find.where().eq("t0.request_number", reqNum).findUnique();
+    	FinanceWithdraw model = FinanceWithdraw.find.where().eq("t0.request_number", reqNum).setMaxRows(1).findUnique();
     	if (model != null) {
     		EmailService.renderMailSuccessWithdraw(StoreWithdrawEmail.getInstance(model), model.getStore().getMerchant());
     		response.setBaseResponse(0, 0, 0, "Email Sent Successfully", null);

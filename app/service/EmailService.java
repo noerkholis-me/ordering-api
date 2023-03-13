@@ -29,11 +29,7 @@ public class EmailService {
 
     final static Logger.ALogger logger = Logger.of(EmailService.class);
 
-    public static String email = "";
-    public static String emailCC = "";
-    public static String subject = "";
-    public static String metodePembayaran = "";
-    public static String logoPembayaran = "";
+    
 	
 	public static void renderCallbackActivationMail(Merchant merchant) {
 		Thread thread = new Thread( () -> {
@@ -65,16 +61,9 @@ public class EmailService {
 	        System.out.println("order >>> " + order.id);
 	
 	        System.out.println("order member " + order.getMember().id);
-	        if (toAdmin) {
-	        	emailCC = order.getStore().getMerchant().email;
-	        	subject = MailConfig.subjectInvoiceAdmin;
-	        } else {
-	        	email = order.getMember().email;
-	        	subject = MailConfig.subjectInvoice;
-	        }
 	        
-	        System.out.println("email >>> " + email);
-	        System.out.println("subject >>> " + subject);
+	        
+	        System.out.println("email >>> " + order.getMember().email);
 	
 	//        String urlLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/hellobisnisnewlogo.png";
 	//        String urlEmailLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/email.png";
@@ -86,16 +75,16 @@ public class EmailService {
 	        		.concat(order.getOrderNumber());
 	        Optional<OrderPayment> optionalOrderPayment = OrderPaymentRepository.findByOrderId(order.id);
 	        OrderPayment orderPayment = optionalOrderPayment.get();
-	        if (("virtual_account").equalsIgnoreCase(orderPayment.getPaymentType())) {
-	        	metodePembayaran = "Virtual Account";
-	        	logoPembayaran = "VA.png";
-	        } else if("qr_code".equalsIgnoreCase(orderPayment.getPaymentType())) {
-	        	metodePembayaran = "QRIS";
-	        	logoPembayaran = "QRIS.png";
-	        } else if("gopay".equalsIgnoreCase(orderPayment.getPaymentType())) {
-	        	metodePembayaran = "Gopay";
-	        	logoPembayaran = "Gopay.png";
-	        }
+//	        if (("virtual_account").equalsIgnoreCase(orderPayment.getPaymentType())) {
+//	        	metodePembayaran = "Virtual Account";
+//	        	logoPembayaran = "VA.png";
+//	        } else if("qr_code".equalsIgnoreCase(orderPayment.getPaymentType())) {
+//	        	metodePembayaran = "QRIS";
+//	        	logoPembayaran = "QRIS.png";
+//	        } else if("gopay".equalsIgnoreCase(orderPayment.getPaymentType())) {
+//	        	metodePembayaran = "Gopay";
+//	        	logoPembayaran = "Gopay.png";
+//	        }
 	        
 	        
 	        if(toAdmin) {
@@ -127,12 +116,12 @@ public class EmailService {
 	        Thread thread = new Thread(() -> {
 	            try {
 	            	if(toAdmin) {
-	            		for(int i = 0; i < emails.size(); i++) {
-	                    MailConfig.sendmail(emails.get(i), subject, MailConfig.renderMailInvoiceTemplateAdmin(Constant.getInstance().getImageUrl()
-	                    		,order, orderPayment), emailCC);
+	            		for(int i = 0; i < emails.size() - 1; i++) {
+	                    MailConfig.sendmail(emails.get(i), MailConfig.subjectInvoiceAdmin, MailConfig.renderMailInvoiceTemplateAdmin(Constant.getInstance().getImageUrl()
+	                    		,order, orderPayment), emails.get(emails.size()-1));
 	            		}
 	            	} else {
-	                    MailConfig.sendmail(email, subject, MailConfig.renderMailInvoiceTemplateNew(Constant.getInstance().getImageUrl(),order, orderPayment));
+	                    MailConfig.sendmail(order.getMember().email, MailConfig.subjectInvoice, MailConfig.renderMailInvoiceTemplateNew(Constant.getInstance().getImageUrl(),order, orderPayment));
 	            	}
 	            } catch (Exception e) {
 	                e.printStackTrace();
@@ -167,15 +156,15 @@ public class EmailService {
 	public static void renderMailInformationWithdraw (StoreWithdrawEmail dto, Merchant merchant) {
 		List<String> emails = new ArrayList<>();
 	emails.add(merchant.email);
-	emails.add("michaelrahayaan19@gmail.com");
+	emails.add("admin@wgshub.com");
 	try {
 		List<Store> stores = Store.findAllStoreIsActiveByMerchant(merchant);
 		for (Store store : stores) {
 		    List<StoreAccessDetail> details = StoreAccessRepository.getDetailData(
 		        StoreAccessRepository.findDetail.where()
-		            .eq("store_id", store.id)
-		            .eq("is_deleted", false)
-		            .order("id")
+		            .eq("t0.store_id", store.id)
+		            .eq("t0.is_deleted", false)
+		            .order("t0.id")
 		    );
 		    for (StoreAccessDetail detail : details) {
 		        List<StoreAccess> accesses = StoreAccessRepository.getDataStoreAccess(
@@ -214,15 +203,16 @@ public class EmailService {
 	public static void renderMailSuccessWithdraw (StoreWithdrawEmail dto, Merchant merchant) {
 		List<String> emails = new ArrayList<>();
 		emails.add(merchant.email);
-		emails.add("michaelrahayaan19@gmail.com");
+		emails.add("admin@wgshub.com");
+		
 		try {
 			List<Store> stores = Store.findAllStoreIsActiveByMerchant(merchant);
 			for (Store store : stores) {
 			    List<StoreAccessDetail> details = StoreAccessRepository.getDetailData(
 			        StoreAccessRepository.findDetail.where()
-			            .eq("store_id", store.id)
-			            .eq("is_deleted", false)
-			            .order("id")
+			            .eq("t0.store_id", store.id)
+			            .eq("t0.is_deleted", false)
+			            .order("t0.id")
 			    );
 			    for (StoreAccessDetail detail : details) {
 			        List<StoreAccess> accesses = StoreAccessRepository.getDataStoreAccess(

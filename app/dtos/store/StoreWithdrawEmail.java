@@ -26,7 +26,7 @@ public class StoreWithdrawEmail {
 	
 	public static StoreWithdrawEmail getInstance(FinanceWithdraw data) {
 		StoreWithdrawEmail response = new StoreWithdrawEmail();
-		SimpleDateFormat sdf = new SimpleDateFormat("MMMM dd, yyyy - kk : mm");
+		SimpleDateFormat sdf = new SimpleDateFormat("MMMM dd, yyyy - HH : mm");
 		response.adminName = data.getRequestBy();
 		response.invoiceNumber = data.getRequestNumber();
 		response.amount = Helper.getRupiahFormat(data.getAmount().doubleValue());

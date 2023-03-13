@@ -298,6 +298,7 @@ public class MailConfig {
 			String html = views.html.withdrawMailSuccess.render(imageURL, store).toString();
 			return html;
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return "";
 	}
@@ -308,6 +309,7 @@ public class MailConfig {
 			String html = views.html.withdrawMailInformation.render(imageURL, store).toString();
 			return html;
 		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return "";
 	}
