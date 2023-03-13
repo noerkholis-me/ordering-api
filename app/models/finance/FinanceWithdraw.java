@@ -59,7 +59,7 @@ public class FinanceWithdraw extends BaseModel {
     @JoinColumn(name = "store_id", referencedColumnName = "id")
     private Store store;
 
-    private static final Finder<Long, FinanceWithdraw> find = new Finder<>(Long.class, FinanceWithdraw.class);
+    public static final Finder<Long, FinanceWithdraw> find = new Finder<>(Long.class, FinanceWithdraw.class);
 
     public static String generateRequestNumber(){
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyMMDD");
