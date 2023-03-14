@@ -1,23 +1,25 @@
-package dtos.merchant;
+package dtos.merchant.qrgroup.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import dtos.merchant.qrgroup.response.QrGroupStoreResponse;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import models.Store;
+
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@Builder
-public class QrGroupStoreResponse {
-
-    @JsonProperty("store_id")
-    private Long storeId;
+public class QrGroupStoreRequest {
 
     @JsonProperty("qr_group_id")
     private Long qrGroupId;
+
+    @JsonProperty("store")
+    private List<QrGroupStoreResponse> store;
 
 }

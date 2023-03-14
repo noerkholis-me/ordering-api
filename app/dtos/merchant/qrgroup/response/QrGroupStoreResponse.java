@@ -1,4 +1,4 @@
-package dtos.merchant;
+package dtos.merchant.qrgroup.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dtos.shipper.AreaResponse;
@@ -16,7 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class QrGroupStoreResponseStore {
+public class QrGroupStoreResponse {
 
     private Long id;
 

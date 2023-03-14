@@ -1,4 +1,4 @@
-package dtos.merchant;
+package dtos.merchant.qrgroup.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -17,7 +17,7 @@ public class QrGroupResponseList {
     private String groupName;
     @JsonProperty("group_code")
     private String groupCode;
-    @JsonProperty("total_store")
-    private Integer totalStore;
+    @JsonProperty("store_count")
+    private Integer storeCount;
 
 }

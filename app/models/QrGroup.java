@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -23,7 +22,7 @@ public class QrGroup extends BaseModel {
 
     public static Finder<Long, QrGroup> find = new Finder<Long, QrGroup>(Long.class, QrGroup.class);
 
-    @Column(name = "group_Name")
+    @Column(name = "group_name")
     public String groupName;
 
     @Column(name = "group_logo")
@@ -73,7 +72,7 @@ public class QrGroup extends BaseModel {
     @Column(name="latitude")
     public Double latitude;
 
-    @ManyToOne(cascade = { CascadeType.ALL })
+    @ManyToOne
     @JoinColumn(name = "merchant_id", referencedColumnName = "id")
     public Merchant merchant;
 

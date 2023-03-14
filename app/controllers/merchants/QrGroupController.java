@@ -13,12 +13,11 @@ import com.hokeba.util.Constant;
 import com.hokeba.util.Helper;
 import com.wordnik.swagger.annotations.Api;
 import controllers.BaseController;
-import dtos.merchant.QrGroupRequest;
-import dtos.merchant.QrGroupResponse;
-import dtos.merchant.QrGroupStoreRequest;
-import dtos.merchant.QrGroupStoreResponse;
-import dtos.merchant.QrGroupStoreResponseStore;
-import dtos.merchant.QrGroupResponseList;
+import dtos.merchant.qrgroup.request.QrGroupRequest;
+import dtos.merchant.qrgroup.response.QrGroupResponse;
+import dtos.merchant.qrgroup.request.QrGroupStoreRequest;
+import dtos.merchant.qrgroup.response.QrGroupStoreResponse;
+import dtos.merchant.qrgroup.request.QrGroupResponseList;
 import models.Merchant;
 import models.QrGroup;
 import models.QrGroupStore;
@@ -32,6 +31,7 @@ import play.libs.Json;
 import play.mvc.Result;
 import utils.ShipperHelper;
 
+import java.io.DataInput;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,17 +61,17 @@ public class QrGroupController extends BaseController {
                     responses.setGroupName(qrGroup.groupName);
                     responses.setGroupCode(qrGroup.groupCode);
 
-                    int totalStore = 0;
+                    int storeCount = 0;
                     List<QrGroupStore> qrGroupStore = QrGroupStore.find.where().eq("t0.qr_group_id", qrGroup.id).eq("t0.is_deleted", false).findList();
                     if (qrGroupStore != null) {
-                        totalStore = qrGroupStore.size();
+                        storeCount = qrGroupStore.size();
                     }
 
-                    responses.setTotalStore(totalStore);
+                    responses.setStoreCount(storeCount);
                     listData.add(responses);
                 }
 
-                response.setBaseResponse(totalQrGroup, offset, limit, success + " menampilkan data QR group", listData);
+                response.setBaseResponse(totalQrGroup, offset, limit, "Berhasil menampilkan data list QR group.", listData);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 Logger.info("Error: " + e.getMessage());
@@ -113,11 +113,12 @@ public class QrGroupController extends BaseController {
 
                 Query<QrGroupStore> queryQrGroupStore = QrGroupStore.find.where().eq("t0.qr_group_id", id).eq("t0.is_deleted", false).order("t0.id desc");
                 List<QrGroupStore> listQrGroupStore = queryQrGroupStore.findPagingList(limit).getPage(offset).getList();
-                List<QrGroupStoreResponseStore> storeResponses = new ArrayList<>();
+                List<QrGroupStoreResponse> storeResponses = new ArrayList<>();
+                Integer storeCount = queryQrGroupStore.findList().size();
                 for (QrGroupStore groupStore : listQrGroupStore) {
                     Store getStore = Store.find.byId(groupStore.getStore().id);
                     if (getStore != null) {
-                        QrGroupStoreResponseStore store = new QrGroupStoreResponseStore();
+                        QrGroupStoreResponse store = new QrGroupStoreResponse();
                         store.setId(groupStore.id);
                         store.setStoreId(getStore.id);
                         store.setStoreName(getStore.storeName);
@@ -135,9 +136,9 @@ public class QrGroupController extends BaseController {
                         storeResponses.add(store);
                     }
                 }
-                qrGroupResponses.setStore(storeResponses);
+                qrGroupResponses.setStore(storeResponses.size() == 0 ? null : storeResponses);
 
-                response.setBaseResponse(1, 0, 1, success + " menampilkan data QR group", qrGroupResponses);
+                response.setBaseResponse(storeCount, offset, limit, "Berhasil menampilkan data QR group.", qrGroupResponses);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 Logger.info("Error: " + e.getMessage());
@@ -187,7 +188,7 @@ public class QrGroupController extends BaseController {
 
                     trx.commit();
 
-                    response.setBaseResponse(1, 0, 1, success + " membuat QR grup",
+                    response.setBaseResponse(1, 0, 1, "QR grup berhasil dibuat.",
                         toResponse(qrGroup));
                     return ok(Json.toJson(response));
                 } catch (Exception e) {
@@ -250,8 +251,8 @@ public class QrGroupController extends BaseController {
 
                     trx.commit();
 
-                    response.setBaseResponse(1, 0, 1, success + " mengubah QR grup",
-                        toResponse(getQrGroup));
+                    response.setBaseResponse(1, 0, 1, "Berhasil mengubah QR grup.",
+                        getQrGroup.id);
                     return ok(Json.toJson(response));
                 } catch (Exception e) {
                     logger.error("Error saat mengubah QR grup", e);
@@ -292,7 +293,7 @@ public class QrGroupController extends BaseController {
 
                     trx.commit();
 
-                    response.setBaseResponse(1, 0, 1, success + " menghapus QR grup", null);
+                    response.setBaseResponse(1, 0, 1, "Berhasil menghapus QR grup", null);
                     return ok(Json.toJson(response));
                 } catch (Exception e) {
                     logger.error("Error saat menghapus QR grup", e);
@@ -317,40 +318,39 @@ public class QrGroupController extends BaseController {
             JsonNode json = request().body().asJson();
             try {
                 QrGroupStoreRequest qrGroupStoreRequest = objectMapper.readValue(json.toString(), QrGroupStoreRequest.class);
+                if (qrGroupStoreRequest.getQrGroupId() == null) {
+                    response.setBaseResponse(0, 0, 0, "Id group tidak diboleh kosong.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                QrGroup getQrGroup = QrGroup.find.where().eq("t0.id", qrGroupStoreRequest.getQrGroupId()).eq("t0.is_deleted", false).findUnique();
+                if (getQrGroup == null) {
+                    response.setBaseResponse(0, 0, 0, "QR group tidak ditemukan.", null);
+                    return badRequest(Json.toJson(response));
+                }
                 Transaction trx = Ebean.beginTransaction();
                 try {
-                    Long groupId = null;
-                    for (QrGroupStoreResponse request : qrGroupStoreRequest.getQrGroupStoreRequest()) {
-                        Store getStore = Store.findById(request.getStoreId());
+                    for (QrGroupStoreResponse request : qrGroupStoreRequest.getStore()) {
+                        Store getStore = Store.find.where().eq("t0.id", request.getStoreId()).eq("t0.merchant_id", ownMerchant.id).eq("t0.is_deleted", false).findUnique();
                         if (getStore == null) {
                             trx.rollback();
-                            response.setBaseResponse(0, 0, 0, "Toko tidak ditemukan.", null);
+                            response.setBaseResponse(0, 0, 0, "Toko merchant tidak ditemukan.", null);
                             return badRequest(Json.toJson(response));
                         }
-
-                        QrGroup getQrGroup = QrGroup.find.byId(request.getQrGroupId());
-                        if (getQrGroup == null) {
-                            trx.rollback();
-                            response.setBaseResponse(0, 0, 0, "QR group tidak ditemukan.", null);
-                            return badRequest(Json.toJson(response));
-                        }
-
-                        QrGroupStore getQrGroupStore = QrGroupStore.find.where().eq("t0.store_id", request.getStoreId()).eq("t0.qr_group_id", request.getQrGroupId()).eq("t0.is_deleted", false).findUnique();
+                        QrGroupStore getQrGroupStore = QrGroupStore.find.where().eq("t0.store_id", request.getStoreId()).eq("t0.qr_group_id", getQrGroup.id).eq("t0.is_deleted", false).findUnique();
                         if (getQrGroupStore == null) {
                             QrGroupStore newQrGroupStore = new QrGroupStore();
                             Store store = Store.find.byId(request.getStoreId());
-                            QrGroup qrGroup = QrGroup.find.byId(request.getQrGroupId());
+                            QrGroup qrGroup = QrGroup.find.byId(getQrGroup.id);
                             newQrGroupStore.setStore(store);
                             newQrGroupStore.setQrGroup(qrGroup);
                             newQrGroupStore.save();
                         }
 
-                        groupId = request.getQrGroupId();
                     }
                     trx.commit();
 
-                    response.setBaseResponse(1, 0, 1, success + " menambahkan toko ke QR grup",
-                        groupId);
+                    response.setBaseResponse(1, 0, 1, "Berhasil menambahkan toko ke QR grup",
+                        getQrGroup.id);
                     return ok(Json.toJson(response));
                 } catch (Exception e) {
                     logger.error("Error saat menambahkan toko ke QR grup", e);
@@ -386,10 +386,10 @@ public class QrGroupController extends BaseController {
 
                     trx.commit();
 
-                    response.setBaseResponse(1, 0, 1, success + " menghapus toko dari grup", null);
+                    response.setBaseResponse(1, 0, 1, "Berhasil menghapus toko dari QR grup", null);
                     return ok(Json.toJson(response));
                 } catch (Exception e) {
-                    logger.error("Error saat menghapus QR grup", e);
+                    logger.error("Error saat menghapus toko dari QR grup", e);
                     e.printStackTrace();
                     trx.rollback();
                 } finally {

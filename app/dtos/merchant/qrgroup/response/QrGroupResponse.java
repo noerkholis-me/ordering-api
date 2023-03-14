@@ -1,17 +1,15 @@
-package dtos.merchant;
+package dtos.merchant.qrgroup.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import dtos.shipper.AreaResponse;
 import dtos.shipper.CityResponse;
 import dtos.shipper.ProvinceResponse;
 import dtos.shipper.SuburbResponse;
-import dtos.store.StoreResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import models.Store;
 
 import java.util.List;
 
@@ -68,6 +66,6 @@ public class QrGroupResponse {
     private Double longitude;
 
     @JsonProperty("store")
-    private List<QrGroupStoreResponseStore> store;
+    private List<QrGroupStoreResponse> store;
 
 }
