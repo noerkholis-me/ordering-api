@@ -12,6 +12,7 @@ import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor;
 import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
 import org.apache.poi.ss.usermodel.Drawing;
@@ -101,42 +102,109 @@ public class ProductExcelService {
 			BrandMerchant brandMerchant = null;
 			try {
 				for (Row row : datatypeSheet) {
-					if (isFirstLine) {
-						isFirstLine = false;
-					} else {
-						line++;
-						String idProduk = getCellValue(row, 0);
-						String noSku = getCellValue(row, 1);
-						String productName = getCellValue(row, 2);
-						String category = getCellValue(row, 3);
-						String subCategory = getCellValue(row, 4);
-						String subsCategory = getCellValue(row, 5);
-						String brand = getCellValue(row, 6);
-						String productType = getCellValue(row, 7);
-						String isCustomizeable = getCellValue(row, 8);
-						String productPrice = getCellValue(row, 9);
-						String discountType = getCellValue(row, 10);
-						String discount = getCellValue(row, 11);
-						String imageMain = getCellPicture(row, 12, datatypeSheet, line);
-						String image1 = getCellPicture(row, 13, datatypeSheet, line);
-						String image2 = getCellPicture(row, 14, datatypeSheet, line);
-						String image3 = getCellPicture(row, 15, datatypeSheet, line);
-						String image4 = getCellPicture(row, 16, datatypeSheet,line);
-						String shortDesc = getCellValue(row, 17);
-						String longDesc = getCellValue(row, 18);
-						
-						if (idProduk.isEmpty()) {
+				    if (!isRowEmpty(row)) {
+						if (isFirstLine) {
+							isFirstLine = false;
+						} else {
+							line++;
+							String idProduk = getCellValue(row, 0);
+							String noSku = getCellValue(row, 1);
+							String productName = getCellValue(row, 2);
+							String category = getCellValue(row, 3);
+							String subCategory = getCellValue(row, 4);
+							String subsCategory = getCellValue(row, 5);
+							String brand = getCellValue(row, 6);
+							String productType = getCellValue(row, 7);
+							String isCustomizeable = getCellValue(row, 8);
+							String productPrice = getCellValue(row, 9);
+							String discountType = getCellValue(row, 10);
+							String discount = getCellValue(row, 11);
+							String imageMain = getCellPicture(row, 12, datatypeSheet, line);
+							String image1 = getCellPicture(row, 13, datatypeSheet, line);
+							String image2 = getCellPicture(row, 14, datatypeSheet, line);
+							String image3 = getCellPicture(row, 15, datatypeSheet, line);
+							String image4 = getCellPicture(row, 16, datatypeSheet,line);
+							String shortDesc = getCellValue(row, 17);
+							String longDesc = getCellValue(row, 18);
 							
-							typeImport = "Import";
-							logger.info("Add New Product");
-							
-							error = validateImportRequest(idProduk, noSku, 
-									productName, category, subCategory, subsCategory, brand, productType, isCustomizeable, 
-									productPrice, discountType, discount, shortDesc, longDesc, error, line);
-							
-							error += errorValidation;
-							
-							if(errorValidation.isEmpty()) {
+							if (idProduk.isEmpty()) {
+								
+								typeImport = "Import";
+								logger.info("Add New Product");
+								
+								error = validateImportRequest(idProduk, noSku, 
+										productName, category, subCategory, subsCategory, brand, productType, isCustomizeable, 
+										productPrice, discountType, discount, shortDesc, longDesc, error, line);
+								
+								error += errorValidation;
+								
+								if(errorValidation.isEmpty()) {
+									categoryMerchant = CategoryMerchantRepository.
+											findByNameAndMerchantId(category, merchant);
+									if (categoryMerchant == null) 
+										error += ", Kategori Salah di Baris " + line;
+									
+									subCategoryMerchant = SubCategoryMerchantRepository.
+											findByNameAndMerchantId(subCategory, merchant);
+									if (subCategoryMerchant == null) 
+										error += ", Sub Kategori Salah di Baris " + line;
+									
+									subsCategoryMerchant = SubsCategoryMerchantRepository
+											.findByNameAndMerchantId(subsCategory, merchant);
+									if (subsCategoryMerchant == null) 
+										error += ", Subs Kategori Salah di Baris " + line;
+									
+									brandMerchant = BrandMerchantRepository.findByNameAndMerchantId
+											(brand, merchant);
+									if (brandMerchant == null)
+										error += ", Merek Salah di Baris " + line;
+								}
+								if (error.isEmpty()) {
+									
+									try {
+										ProductMerchant newProductMerchant = new ProductMerchant();
+										constructProductEntityRequest(newProductMerchant, merchant, noSku, productName, categoryMerchant,
+												subCategoryMerchant, subsCategoryMerchant, brandMerchant);
+										newProductMerchant.save();
+
+										// do save to detail
+										ProductMerchantDetail newProductMerchantDetail = new ProductMerchantDetail();
+										constructProductDetailEntityRequest(newProductMerchantDetail, newProductMerchant,
+												productType, isCustomizeable, productPrice, discountType, discount,imageMain, image1, image2, image3, image4);
+										newProductMerchantDetail.save();
+
+										ProductMerchantDescription newProductMerchantDescription = new ProductMerchantDescription();
+										newProductMerchantDescription.setShortDescription(shortDesc);
+										newProductMerchantDescription.setLongDescription(longDesc);
+										newProductMerchantDescription.setProductMerchantDetail(newProductMerchantDetail);
+										newProductMerchantDescription.save();
+										countDataImport += 1;
+									} catch (Exception e) {
+										e.printStackTrace();
+										error += ", Internal Server Error";
+										System.out.println("Error Save to DB");
+									}
+								}
+								
+							} else {
+								 error = validateImportRequest(idProduk, noSku, 
+										productName, category, subCategory, subsCategory, brand, productType, isCustomizeable, 
+										productPrice, discountType, discount, shortDesc, longDesc, error, line);
+								
+								ProductMerchant productMerchant = ProductMerchantRepository.findById(Long.parseLong(idProduk));
+								if (productMerchant == null) 
+									error += "Tidak Ditemukan Produk Dengan id - " + idProduk +" di Baris - " + line;
+								
+								ProductMerchantDetail productDetail = 
+										ProductMerchantDetailRepository.findByProduct(productMerchant);
+								if (productDetail == null) 
+									error += "Terjadi Kesalahan Update Produk Dengan id - " + idProduk + " di Baris - " + line;
+								
+								ProductMerchantDescription productDescription = 
+										ProductMerchantDescriptionRepository.findByProductMerchantDetail(productDetail);
+								if (productDescription == null) 
+									error += "Terjadi Kesalahan Update Produk Dengan id - " + idProduk + " di Baris - " + line;
+								
 								categoryMerchant = CategoryMerchantRepository.
 										findByNameAndMerchantId(category, merchant);
 								if (categoryMerchant == null) 
@@ -156,96 +224,31 @@ public class ProductExcelService {
 										(brand, merchant);
 								if (brandMerchant == null)
 									error += ", Merek Salah di Baris " + line;
-							}
-							if (error.isEmpty()) {
+										
+								typeImport = "Update";
 								
-								try {
-									ProductMerchant newProductMerchant = new ProductMerchant();
-									constructProductEntityRequest(newProductMerchant, merchant, noSku, productName, categoryMerchant,
+								
+								if (error.isEmpty()) {
+									
+									logger.info("Updating Product");
+									constructProductEntityRequest(productMerchant, merchant, noSku, productName, categoryMerchant,
 											subCategoryMerchant, subsCategoryMerchant, brandMerchant);
-									newProductMerchant.save();
-
-									// do save to detail
-									ProductMerchantDetail newProductMerchantDetail = new ProductMerchantDetail();
-									constructProductDetailEntityRequest(newProductMerchantDetail, newProductMerchant,
-											productType, isCustomizeable, productPrice, discountType, discount,imageMain, image1, image2, image3, image4);
-									newProductMerchantDetail.save();
-
-									ProductMerchantDescription newProductMerchantDescription = new ProductMerchantDescription();
-									newProductMerchantDescription.setShortDescription(shortDesc);
-									newProductMerchantDescription.setLongDescription(longDesc);
-									newProductMerchantDescription.setProductMerchantDetail(newProductMerchantDetail);
-									newProductMerchantDescription.save();
-									countDataImport += 1;
-								} catch (Exception e) {
-									e.printStackTrace();
-									error += ", Internal Server Error";
-									System.out.println("Error Save to DB");
+									productMerchant.update();
+									
+									constructProductDetailEntityRequest(productDetail, productMerchant,
+											productType, isCustomizeable, productPrice ,discountType, discount, imageMain, image1, image2, image3, image4);
+									productDetail.update();
+									
+									productDescription.setShortDescription(shortDesc);
+									productDescription.setLongDescription(longDesc);
+									productDescription.update();
+									
+									countDataUpdate += 1;
+									
 								}
 							}
-							
-						} else {
-							 error = validateImportRequest(idProduk, noSku, 
-									productName, category, subCategory, subsCategory, brand, productType, isCustomizeable, 
-									productPrice, discountType, discount, shortDesc, longDesc, error, line);
-							
-							ProductMerchant productMerchant = ProductMerchantRepository.findById(Long.parseLong(idProduk));
-							if (productMerchant == null) 
-								error += "Tidak Ditemukan Produk Dengan id - " + idProduk +" di Baris - " + line;
-							
-							ProductMerchantDetail productDetail = 
-									ProductMerchantDetailRepository.findByProduct(productMerchant);
-							if (productDetail == null) 
-								error += "Terjadi Kesalahan Update Produk Dengan id - " + idProduk + " di Baris - " + line;
-							
-							ProductMerchantDescription productDescription = 
-									ProductMerchantDescriptionRepository.findByProductMerchantDetail(productDetail);
-							if (productDescription == null) 
-								error += "Terjadi Kesalahan Update Produk Dengan id - " + idProduk + " di Baris - " + line;
-							
-							categoryMerchant = CategoryMerchantRepository.
-									findByNameAndMerchantId(category, merchant);
-							if (categoryMerchant == null) 
-								error += ", Kategori Salah di Baris " + line;
-							
-							subCategoryMerchant = SubCategoryMerchantRepository.
-									findByNameAndMerchantId(subCategory, merchant);
-							if (subCategoryMerchant == null) 
-								error += ", Sub Kategori Salah di Baris " + line;
-							
-							subsCategoryMerchant = SubsCategoryMerchantRepository
-									.findByNameAndMerchantId(subsCategory, merchant);
-							if (subsCategoryMerchant == null) 
-								error += ", Subs Kategori Salah di Baris " + line;
-							
-							brandMerchant = BrandMerchantRepository.findByNameAndMerchantId
-									(brand, merchant);
-							if (brandMerchant == null)
-								error += ", Merek Salah di Baris " + line;
-									
-							typeImport = "Update";
-							
-							
-							if (error.isEmpty()) {
-								
-								logger.info("Updating Product");
-								constructProductEntityRequest(productMerchant, merchant, noSku, productName, categoryMerchant,
-										subCategoryMerchant, subsCategoryMerchant, brandMerchant);
-								productMerchant.update();
-								
-								constructProductDetailEntityRequest(productDetail, productMerchant,
-										productType, isCustomizeable, productPrice ,discountType, discount, imageMain, image1, image2, image3, image4);
-								productDetail.update();
-								
-								productDescription.setShortDescription(shortDesc);
-								productDescription.setLongDescription(longDesc);
-								productDescription.update();
-								
-								countDataUpdate += 1;
-								
-							}
 						}
-					}
+				    }
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -937,5 +940,14 @@ public class ProductExcelService {
 			error += ", Kolom Deskripsi Panjang Kosong di Baris " + line;
 		
 		return error;
+	}
+	
+	public static boolean isRowEmpty(Row row) {
+	    for (Cell cell : row) {
+	        if (cell.getCellTypeEnum() != CellType.BLANK) {
+	            return false;
+	        }
+	    }
+	    return true;
 	}
 }
