@@ -102,14 +102,7 @@ public class ProductExcelService {
 			BrandMerchant brandMerchant = null;
 			try {
 				for (Row row : datatypeSheet) {
-					boolean isEmptyRow = true;
-					for (Cell cell1 : row) {
-				        if (cell1.getCellTypeEnum()!= CellType.BLANK) {
-				            isEmptyRow = false;
-				            break;
-				        }
-				    }
-				    if (!isEmptyRow) {
+				    if (!isRowEmpty(row)) {
 						if (isFirstLine) {
 							isFirstLine = false;
 						} else {
@@ -947,5 +940,14 @@ public class ProductExcelService {
 			error += ", Kolom Deskripsi Panjang Kosong di Baris " + line;
 		
 		return error;
+	}
+	
+	public static boolean isRowEmpty(Row row) {
+	    for (Cell cell : row) {
+	        if (cell.getCellTypeEnum() != CellType.BLANK) {
+	            return false;
+	        }
+	    }
+	    return true;
 	}
 }
