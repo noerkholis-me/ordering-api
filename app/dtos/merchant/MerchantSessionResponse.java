@@ -79,7 +79,6 @@ public class MerchantSessionResponse {
     @Getter @Setter
     public boolean productStoreRequired;
 
-
     public MerchantSessionResponse() {
     }
 
