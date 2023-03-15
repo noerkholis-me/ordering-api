@@ -1,4 +1,4 @@
-package dtos.merchant.qrgroup.request;
+package dtos.merchant.qrgroup.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
