@@ -34,7 +34,7 @@ import utils.ShipperHelper;
 import java.util.ArrayList;
 import java.util.List;
 
-@Api(value = "/merchants/qr-group", description = "Qr Group Management")
+@Api(value = "/merchant/qr-group", description = "Qr Group Management")
 public class QrGroupController extends BaseController {
 
     private final static Logger.ALogger logger = Logger.of(StoreController.class);
