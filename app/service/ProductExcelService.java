@@ -1,13 +1,19 @@
 package service;
 
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -39,6 +45,8 @@ import com.avaje.ebean.Transaction;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.util.CommonFunction;
 import com.hokeba.util.Constant;
+import com.hokeba.util.Helper;
+import com.sun.mail.iap.ByteArray;
 
 import controllers.product.ProductMerchantController;
 import models.BrandMerchant;
@@ -276,185 +284,324 @@ public class ProductExcelService {
 
 	}
 
-	public static File getImportTemplateMerchant() {
+	public static byte[] getImportTemplateMerchant() throws IOException {
 		
 		String FILE_NAME = "ImportProductTemplate";
 		String FILE_TYPE = ".xlsx";
 
-		File file = null;
+		File fileExcel = File.createTempFile(FILE_NAME, FILE_TYPE);
+		File fileTxt = File.createTempFile("readme", ".txt");
+		
 		try {
-			file = file.createTempFile(FILE_NAME, FILE_TYPE);
-			file.deleteOnExit();
-			FileOutputStream fileOut = new FileOutputStream(file);
-			Workbook workbook = new XSSFWorkbook();
-			Sheet sheetProduct = workbook.createSheet("Product-Import-Template");
+			fileExcel.deleteOnExit();
+			fileTxt.deleteOnExit();
+				
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-			Font headerFont = workbook.createFont();
-			headerFont.setBold(true);
-			headerFont.setFontHeightInPoints((short) 12);
-			headerFont.setColor(IndexedColors.BLACK.getIndex());
-
-			CellStyle titleCellStyle = workbook.createCellStyle();
-			titleCellStyle.setFont(headerFont);
-
-			CellStyle headerCellStyle = workbook.createCellStyle();
-			headerCellStyle.setFont(headerFont);
-			headerCellStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
-			headerCellStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
-			headerCellStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
-			headerCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
-
-			CellStyle contentCellStyle = workbook.createCellStyle();
-			/* XLSX File borders now */
-			contentCellStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
-			contentCellStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
-			contentCellStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
-			contentCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
-
-			Row headerRow = sheetProduct.createRow(0);
-			int a = 9;
-			int b = 17;
-			for (int i = 0; i < columnMerchant.length; i++) {
-				Cell cell = headerRow.createCell(i);
-				if((i > a & i < b) || i == 0 || i == 1) {
-					cell.setCellValue(columnMerchant[i]);
-				} else {
-					cell.setCellValue(columnMerchant[i] + " *");
-				}
-				cell.setCellStyle(headerCellStyle);
-			}
-			
-			//Dummy Row
-			Row row = sheetProduct.createRow(1);
-			row.setHeight((short)500);
-			
-			row.createCell(0).setCellValue("Kosong Kan Kolom ID");
-			row.getCell(0).setCellStyle(contentCellStyle);
-			
-			row.createCell(1).setCellValue(00000000);
-			row.getCell(1).setCellStyle(contentCellStyle);
-			
-			row.createCell(2).setCellValue("Dummy Product");
-			row.getCell(2).setCellStyle(contentCellStyle);
-
-			row.createCell(3).setCellValue("Category Name");
-			row.getCell(3).setCellStyle(contentCellStyle);
-			
-			row.createCell(4).setCellValue("Sub Category Name");
-			row.getCell(4).setCellStyle(contentCellStyle);
-			
-			row.createCell(5).setCellValue("Subs Category Name");
-			row.getCell(5).setCellStyle(contentCellStyle);
-			
-			row.createCell(6).setCellValue("Brand Name");
-			row.getCell(6).setCellStyle(contentCellStyle);
-			
-			row.createCell(7).setCellValue("Main / Additional");
-			row.getCell(7).setCellStyle(contentCellStyle);
-			
-			row.createCell(8).setCellValue("True / False");
-			row.getCell(8).setCellStyle(contentCellStyle);
-			
-			row.createCell(9).setCellValue("Dalam Rupiah ex- 700000 ");
-			row.getCell(9).setCellStyle(contentCellStyle);
-			
-			row.createCell(10).setCellValue("discount / potongan (Kosongkan jika tidak ada)");
-			row.getCell(10).setCellStyle(contentCellStyle);
-			
-			row.createCell(11).setCellValue("Tipe - discount = 10 (tanpa %), Tipe - potongan = 1000  (Kosongan jika tidak ada)");
-			row.getCell(11).setCellStyle(contentCellStyle);
-			
-			row.createCell(12);
-			printImage(workbook, sheetProduct, 1, 12, Constant.getInstance().getImageUrl()+"/assets/images/HelloBisnis.png");
-			row.getCell(12).setCellStyle(contentCellStyle);
-			
-			row.createCell(13).setCellValue("Sama Seperti Image Main");
-			row.getCell(13).setCellStyle(contentCellStyle);
-			
-			row.createCell(14).setCellValue("Sama Seperti Image Main");
-			row.getCell(14).setCellStyle(contentCellStyle);
-			
-			row.createCell(15).setCellValue("Sama Seperti Image Main");
-			row.getCell(15).setCellStyle(contentCellStyle);
-			
-			row.createCell(16).setCellValue("Sama Seperti Image Main");
-			row.getCell(16).setCellStyle(contentCellStyle);
-			
-			row.createCell(17).setCellValue("Deskripsi Pendek Barang");
-			row.getCell(17).setCellStyle(contentCellStyle);
-			
-			row.createCell(18).setCellValue("Deskripsi Barang, Dummy Product Adalah Barang Dummy Sebagai Contoh");
-			row.getCell(18).setCellStyle(contentCellStyle);
-			
-
-			for (int i = 0; i < columnMerchant.length; i++) {
-				sheetProduct.autoSizeColumn(i);
-			}
-			workbook.write(fileOut);
-			fileOut.close();
-			// Closing the workbook
+			ZipOutputStream zos = new ZipOutputStream(baos);
+				
+			FileInputStream excelFile = new FileInputStream(fileExcel);
+			FileOutputStream fileExcelOut = new FileOutputStream(fileExcel);
+			Workbook workbook = createExcelFileMerchant();
+			workbook.write(fileExcelOut);
+			fileExcelOut.close();
+				
+			FileOutputStream fileTxtOut = new FileOutputStream(fileTxt);
+			writeTextFile(fileTxt);
+			FileInputStream txtFile = new FileInputStream(fileTxt);
+				
+			Helper.addToZip("readme.txt", txtFile, zos);
+			Helper.addToZip("ImportTemplate.xlsx", excelFile, zos);
+				
+			zos.close();
 			workbook.close();
-			return file;
+			fileExcelOut.close();
+			fileTxtOut.close();
+			return baos.toByteArray();
 		} catch (Exception e) {
 			Logger.error("Download template error ", e);
 			return null;
 		}
 	}
 
-	public static File getImportTemplateStore() {
+	public static byte[] getImportTemplateStore() throws IOException {
 		String FILE_NAME = "ImportProductTemplate";
 		String FILE_TYPE = ".xlsx";
 
-		File file = null;
+		File fileExcel = File.createTempFile(FILE_NAME, FILE_TYPE);
+		File fileTxt = File.createTempFile("readme", ".txt");
+		
 		try {
-			file = file.createTempFile(FILE_NAME, FILE_TYPE);
-			file.deleteOnExit();
-			FileOutputStream fileOut = new FileOutputStream(file);
-			Workbook workbook = new XSSFWorkbook();
-			Sheet sheetProduct = workbook.createSheet("Product-Import-Template");
+			fileExcel.deleteOnExit();
+			
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-			Font headerFont = workbook.createFont();
-			headerFont.setBold(true);
-			headerFont.setFontHeightInPoints((short) 12);
-			headerFont.setColor(IndexedColors.BLACK.getIndex());
-
-			CellStyle titleCellStyle = workbook.createCellStyle();
-			titleCellStyle.setFont(headerFont);
-
-			CellStyle headerCellStyle = workbook.createCellStyle();
-			headerCellStyle.setFont(headerFont);
-			headerCellStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
-			headerCellStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
-			headerCellStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
-			headerCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
-
-			CellStyle contentCellStyle = workbook.createCellStyle();
-			/* XLSX File borders now */
-			contentCellStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
-			contentCellStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
-			contentCellStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
-			contentCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
-
-			Row headerRow = sheetProduct.createRow(0);
-			for (int i = 0; i < columnStore.length; i++) {
-				Cell cell = headerRow.createCell(i);
-				cell.setCellValue(columnStore[i]);
-				cell.setCellStyle(headerCellStyle);
-			}
-			for (int i = 0; i < columnStore.length; i++) {
-				sheetProduct.autoSizeColumn(i);
-			}
-			workbook.write(fileOut);
-			fileOut.close();
-			// Closing the workbook
-			workbook.close();
-			return file;
+			ZipOutputStream zos = new ZipOutputStream(baos);
+			
+			FileInputStream excelFile = new FileInputStream(fileExcel);
+			FileOutputStream fileExcelOut = new FileOutputStream(fileExcel);
+			Workbook workbook = createExcelFileStore();
+			workbook.write(fileExcelOut);
+			fileExcelOut.close();
+			
+			FileOutputStream fileTxtOut = new FileOutputStream(fileTxt);
+			writeTextFile(fileTxt);
+			FileInputStream txtFile = new FileInputStream(fileTxt);
+			
+			Helper.addToZip("readme.txt", txtFile, zos);
+			Helper.addToZip("ImportTemplate.xlsx", excelFile, zos);
+			
+			zos.close();
+			
+			return baos.toByteArray();
 		} catch (Exception e) {
 			Logger.error("Download template error ", e);
 			return null;
 		}
 	}
+	
+	public static Workbook createExcelFileStore () {
+		Workbook workbook = new XSSFWorkbook();
+		Sheet sheetProduct = workbook.createSheet("Product-Import-Template");
 
+		Font headerFont = workbook.createFont();
+		headerFont.setBold(true);
+		headerFont.setFontHeightInPoints((short) 12);
+		headerFont.setColor(IndexedColors.BLACK.getIndex());
+
+		CellStyle titleCellStyle = workbook.createCellStyle();
+		titleCellStyle.setFont(headerFont);
+
+		CellStyle headerCellStyle = workbook.createCellStyle();
+		headerCellStyle.setFont(headerFont);
+		headerCellStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
+		headerCellStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
+		headerCellStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
+		headerCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
+
+		CellStyle contentCellStyle = workbook.createCellStyle();
+		/* XLSX File borders now */
+		contentCellStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
+		contentCellStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
+		contentCellStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
+		contentCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
+
+		Row headerRow = sheetProduct.createRow(0);
+		for (int i = 0; i < columnStore.length; i++) {
+			Cell cell = headerRow.createCell(i);
+			cell.setCellValue(columnStore[i]);
+			cell.setCellStyle(headerCellStyle);
+		}
+		for (int i = 0; i < columnStore.length; i++) {
+			sheetProduct.autoSizeColumn(i);
+		}
+		
+		return workbook;
+	}
+	
+	public static Workbook createExcelFileMerchant () {
+		Workbook workbook = new XSSFWorkbook();
+		Sheet sheetProduct = workbook.createSheet("Product-Import-Template");
+
+		Font headerFont = workbook.createFont();
+		headerFont.setBold(true);
+		headerFont.setFontHeightInPoints((short) 12);
+		headerFont.setColor(IndexedColors.BLACK.getIndex());
+
+		CellStyle titleCellStyle = workbook.createCellStyle();
+		titleCellStyle.setFont(headerFont);
+
+		CellStyle headerCellStyle = workbook.createCellStyle();
+		headerCellStyle.setFont(headerFont);
+		headerCellStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
+		headerCellStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
+		headerCellStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
+		headerCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
+
+		CellStyle contentCellStyle = workbook.createCellStyle();
+		/* XLSX File borders now */
+		contentCellStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
+		contentCellStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
+		contentCellStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
+		contentCellStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
+
+		Row headerRow = sheetProduct.createRow(0);
+		int a = 9;
+		int b = 17;
+		for (int i = 0; i < columnMerchant.length; i++) {
+			Cell cell = headerRow.createCell(i);
+			if((i > a & i < b) || i == 0 || i == 1) {
+				cell.setCellValue(columnMerchant[i]);
+			} else {
+				cell.setCellValue(columnMerchant[i] + " *");
+			}
+			cell.setCellStyle(headerCellStyle);
+		}
+		
+		//Dummy Row
+		for (int i = 1; i < 5; i++) {
+			if (i == 1) {
+
+				Row row = sheetProduct.createRow(i);
+				row.setHeight((short)500);
+				
+				row.createCell(0).setCellValue("Kosong Kan Kolom ID");
+				row.getCell(0).setCellStyle(contentCellStyle);
+				
+				row.createCell(1).setCellValue(00000000);
+				row.getCell(1).setCellStyle(contentCellStyle);
+				
+				row.createCell(2).setCellValue("Dummy Product " + i);
+				row.getCell(2).setCellStyle(contentCellStyle);
+
+				row.createCell(3).setCellValue("Category Name");
+				row.getCell(3).setCellStyle(contentCellStyle);
+				
+				row.createCell(4).setCellValue("Sub Category Name");
+				row.getCell(4).setCellStyle(contentCellStyle);
+				
+				row.createCell(5).setCellValue("Subs Category Name");
+				row.getCell(5).setCellStyle(contentCellStyle);
+				
+				row.createCell(6).setCellValue("Brand Name");
+				row.getCell(6).setCellStyle(contentCellStyle);
+				
+				row.createCell(7).setCellValue("Main / Additional");
+				row.getCell(7).setCellStyle(contentCellStyle);
+				
+				row.createCell(8).setCellValue("True / False");
+				row.getCell(8).setCellStyle(contentCellStyle);
+				
+				row.createCell(9).setCellValue("Dalam Rupiah ex- 700000 ");
+				row.getCell(9).setCellStyle(contentCellStyle);
+				
+				row.createCell(10).setCellValue("discount / potongan (Kosongkan jika tidak ada)");
+				row.getCell(10).setCellStyle(contentCellStyle);
+				
+				row.createCell(11).setCellValue("Tipe - discount = 10 (tanpa %), Tipe - potongan = 1000  (Kosongan jika tidak ada)");
+				row.getCell(11).setCellStyle(contentCellStyle);
+				
+				row.createCell(12);
+				printImage(workbook, sheetProduct, 1, 12, Constant.getInstance().getImageUrl()+"/assets/images/HelloBisnis.png");
+				row.getCell(12).setCellStyle(contentCellStyle);
+				
+				row.createCell(13).setCellValue("Sama Seperti Image Main");
+				row.getCell(13).setCellStyle(contentCellStyle);
+				
+				row.createCell(14).setCellValue("Sama Seperti Image Main");
+				row.getCell(14).setCellStyle(contentCellStyle);
+				
+				row.createCell(15).setCellValue("Sama Seperti Image Main");
+				row.getCell(15).setCellStyle(contentCellStyle);
+				
+				row.createCell(16).setCellValue("Sama Seperti Image Main");
+				row.getCell(16).setCellStyle(contentCellStyle);
+				
+				row.createCell(17).setCellValue("Deskripsi Pendek Barang");
+				row.getCell(17).setCellStyle(contentCellStyle);
+				
+				row.createCell(18).setCellValue("Deskripsi Barang, Dummy Product Adalah Barang Dummy Sebagai Contoh");
+				row.getCell(18).setCellStyle(contentCellStyle);
+			} else {
+				Row row = sheetProduct.createRow(i);
+				row.setHeight((short)500);
+				
+				row.createCell(0).setCellValue("");
+				row.getCell(0).setCellStyle(contentCellStyle);
+				
+				row.createCell(1).setCellValue("");
+				row.getCell(1).setCellStyle(contentCellStyle);
+				
+				row.createCell(2).setCellValue("Dummy Product " + i);
+				row.getCell(2).setCellStyle(contentCellStyle);
+
+				row.createCell(3).setCellValue("kategori " + (i - 1) );
+				row.getCell(3).setCellStyle(contentCellStyle);
+				
+				row.createCell(4).setCellValue("sub kategori " + (i - 1));
+				row.getCell(4).setCellStyle(contentCellStyle);
+				
+				row.createCell(5).setCellValue("subs kategori " + (i - 1));
+				row.getCell(5).setCellStyle(contentCellStyle);
+				
+				row.createCell(6).setCellValue("merek contoh " + (i - 1));
+				row.getCell(6).setCellStyle(contentCellStyle);
+				
+				if (i == 2) {
+					row.createCell(7).setCellValue("Main");
+					row.createCell(8).setCellValue("True");
+					row.createCell(10).setCellValue("discount");
+					row.createCell(11).setCellValue(50);
+				}
+				else if (i == 3){
+					row.createCell(7).setCellValue("Additional");
+					row.createCell(8).setCellValue("False");
+					row.createCell(10).setCellValue("potongan");
+					row.createCell(11).setCellValue(5000);
+				} else {
+					row.createCell(7).setCellValue("Additional");
+					row.createCell(8).setCellValue("False");
+					row.createCell(10).setCellValue("discount");
+					row.createCell(11).setCellValue(50);
+				}
+				row.getCell(7).setCellStyle(contentCellStyle);
+				row.getCell(8).setCellStyle(contentCellStyle);
+				
+				row.createCell(9).setCellValue(10000);
+				row.getCell(9).setCellStyle(contentCellStyle);
+				
+				row.getCell(10).setCellStyle(contentCellStyle);
+				
+				row.getCell(11).setCellStyle(contentCellStyle);
+				
+				row.createCell(12);
+				printImage(workbook, sheetProduct, 1, 12, Constant.getInstance().getImageUrl()+"/assets/images/HelloBisnis.png");
+				row.getCell(12).setCellStyle(contentCellStyle);
+				
+				row.createCell(13);
+				row.getCell(13).setCellStyle(contentCellStyle);
+				
+				row.createCell(14);
+				row.getCell(14).setCellStyle(contentCellStyle);
+				
+				row.createCell(15);
+				row.getCell(15).setCellStyle(contentCellStyle);
+				
+				row.createCell(16);
+				row.getCell(16).setCellStyle(contentCellStyle);
+				
+				row.createCell(17).setCellValue("Deskripsi Pendek Barang");
+				row.getCell(17).setCellStyle(contentCellStyle);
+				
+				row.createCell(18).setCellValue("Deskripsi Barang, Dummy Product Adalah Barang Dummy Sebagai Contoh");
+				row.getCell(18).setCellStyle(contentCellStyle);
+			}
+			
+		}
+
+		for (int i = 0; i < columnMerchant.length; i++) {
+			sheetProduct.autoSizeColumn(i);
+		}
+		return workbook;
+	}
+
+	public static void writeTextFile (File file) throws IOException {
+		FileWriter fw = new FileWriter(file);
+		
+		BufferedWriter bw = new BufferedWriter(fw);
+		
+		List<String> listContent = new ArrayList<>();
+		listContent.add("# IMPORTANT #");
+		listContent.add("Sebelum Memasukan data produk, pastikan admin sudah memasukan data kategori, dan brand");
+		
+		for (String a : listContent) {
+			bw.write(a);
+			bw.newLine();
+		}
+		
+		bw.close();
+	}
+	
 	public boolean importProductStore(FilePart file, Merchant merchant, BaseResponse<String> response) {
 		String error = "";
 		Transaction txn = Ebean.beginTransaction();
