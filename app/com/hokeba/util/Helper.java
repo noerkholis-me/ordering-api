@@ -7,6 +7,7 @@ import play.Logger;
 import play.Play;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.DateFormat;
@@ -19,6 +20,8 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 //import org.apache.commons.mail.DefaultAuthenticator;
 //import org.apache.commons.mail.HtmlEmail;
@@ -331,5 +334,23 @@ public class Helper {
             count++;
         }
         return sb.toString();
+    }
+    
+    public static void addToZip(String fileName, FileInputStream file, ZipOutputStream zip) throws IOException {
+    	// create new zip entry
+    	ZipEntry entry = new ZipEntry(fileName);
+    	// add the entry to zip
+    	zip.putNextEntry(entry);
+    	
+    	//write file to the zip output stream
+    	byte[] buffer = new byte[1024];
+        int len;
+        while ((len = file.read(buffer)) > 0) {
+            zip.write(buffer, 0, len);
+        }
+
+        // Close the zip entry and the file input stream
+        zip.closeEntry();
+        file.close();
     }
 }
