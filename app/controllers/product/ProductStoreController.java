@@ -1736,17 +1736,18 @@ public class ProductStoreController extends BaseController {
     }
     
     public static Result getImportTemplateStore() {
-    	Merchant merchant = checkMerchantAccessAuthorization();
-    	if(merchant != null) {
-    		File file = ProductExcelService.getImportTemplateStore();
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-            String filename = "ImportProductStoreTemplate-"+simpleDateFormat.format(new Date()).toString() + ".xlsx";
-    		response().setContentType("application/vnd.ms-excel");
-			response().setHeader("Content-disposition", "attachment; filename=" + filename);
-			return ok(file);
-    	}
-    	response.setBaseResponse(0, 0, 0, unauthorized, null);
-        return unauthorized(Json.toJson(response));
+//    	Merchant merchant = checkMerchantAccessAuthorization();
+//    	if(merchant != null) {
+//    		byte = ProductExcelService.getImportTemplateStore();
+//            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+//            String filename = "ImportProductStoreTemplate-"+simpleDateFormat.format(new Date()).toString() + ".xlsx";
+//    		response().setContentType("application/vnd.ms-excel");
+//			response().setHeader("Content-disposition", "attachment; filename=" + filename);
+//			return ok(file);
+//    	}
+//    	response.setBaseResponse(0, 0, 0, unauthorized, null);
+//        return unauthorized(Json.toJson(response));
+    	return null;
     }
     
 }
