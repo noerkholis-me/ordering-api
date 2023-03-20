@@ -333,6 +333,7 @@ public class ProductExcelService {
 		
 		try {
 			fileExcel.deleteOnExit();
+			fileTxt.deleteOnExit();
 			
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
