@@ -330,6 +330,9 @@ public class QrGroupController extends BaseController {
                 try {
                     for (Long requestId : qrGroupStoreRequest.getStoreId()) {
                         Store getStore = Store.find.where().eq("t0.id", requestId).eq("t0.merchant_id", ownMerchant.id).eq("t0.is_deleted", false).findUnique();
+                        if (ownMerchant.globalStoreQrGroup) {
+                            getStore = Store.find.where().eq("t0.id", requestId).eq("t0.is_deleted", false).findUnique();
+                        }
                         if (getStore == null) {
                             trx.rollback();
                             response.setBaseResponse(0, 0, 0, "Toko merchant tidak ditemukan.", null);
@@ -429,6 +432,37 @@ public class QrGroupController extends BaseController {
             return "Area is null or empty";
         if (qrGroupRequest.getUrlGmap() == null || qrGroupRequest.getUrlGmap().trim().isEmpty())
             return "Google maps url is null or empty";
+
+        if (qrGroupRequest.getGroupName().length() > 50) {
+            return "Nama grup tidak boleh lebih dari 50 karakter";
+        }
+        if (qrGroupRequest.getProvinceId() != null) {
+            ShipperProvince province = ShipperProvince.findById(qrGroupRequest.getProvinceId());
+            if (province == null) {
+                return "Provinsi tidak ditemukan";
+            }
+        }
+        if (qrGroupRequest.getCityId() != null) {
+            ShipperCity shipperCity = ShipperCity.findById(qrGroupRequest.getCityId());
+            if (shipperCity == null) {
+                return "Kota tidak ditemukan";
+            }
+        }
+        if (qrGroupRequest.getSuburbId() != null) {
+            ShipperSuburb shipperSuburb = ShipperSuburb.findById(qrGroupRequest.getSuburbId());
+            if (shipperSuburb == null) {
+                return "Kecamatan tidak ditemukan";
+            }
+        }
+        if (qrGroupRequest.getAreaId() != null) {
+            ShipperArea shipperArea = ShipperArea.findById(qrGroupRequest.getAreaId());
+            if (shipperArea == null) {
+                return "Kelurahan tidak ditemukan";
+            }
+        }
+        if (!qrGroupRequest.getPhone().matches(CommonFunction.phoneRegex)){
+            return "Format nomor telepon tidak valid.";
+        }
 
         return null;
     }
