@@ -329,9 +329,11 @@ public class QrGroupController extends BaseController {
                 Transaction trx = Ebean.beginTransaction();
                 try {
                     for (Long requestId : qrGroupStoreRequest.getStoreId()) {
-                        Store getStore = Store.find.where().eq("t0.id", requestId).eq("t0.merchant_id", ownMerchant.id).eq("t0.is_deleted", false).findUnique();
+                        Store getStore = null;
                         if (ownMerchant.globalStoreQrGroup) {
                             getStore = Store.find.where().eq("t0.id", requestId).eq("t0.is_deleted", false).findUnique();
+                        } else {
+                            getStore = Store.find.where().eq("t0.id", requestId).eq("t0.merchant_id", ownMerchant.id).eq("t0.is_deleted", false).findUnique();
                         }
                         if (getStore == null) {
                             trx.rollback();
@@ -433,9 +435,6 @@ public class QrGroupController extends BaseController {
         if (qrGroupRequest.getUrlGmap() == null || qrGroupRequest.getUrlGmap().trim().isEmpty())
             return "Google maps url is null or empty";
 
-        if (qrGroupRequest.getGroupName().length() > 50) {
-            return "Nama grup tidak boleh lebih dari 50 karakter";
-        }
         if (qrGroupRequest.getProvinceId() != null) {
             ShipperProvince province = ShipperProvince.findById(qrGroupRequest.getProvinceId());
             if (province == null) {
