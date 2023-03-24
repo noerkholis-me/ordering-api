@@ -556,6 +556,7 @@ public class SessionsController extends BaseController {
         profileData.setMerchantType(member.merchantType);
         profileData.setMerchantQrCode(member.merchantQrCode);
         profileData.setProductStoreRequired(member.productStoreRequired);
+        profileData.setGlobalStoreQrGroup(member.globalStoreQrGroup);
 
         return profileData;
     }
@@ -597,6 +598,7 @@ public class SessionsController extends BaseController {
 
             Merchant merchant = Merchant.find.byId(dataAccess.getMerchant().id);
             userMerchantResponse.setProductStoreRequired(merchant.productStoreRequired);
+            userMerchantResponse.setGlobalStoreQrGroup(merchant.globalStoreQrGroup);
         } else {
             userMerchantResponse.setStoreAccess(null);
         }

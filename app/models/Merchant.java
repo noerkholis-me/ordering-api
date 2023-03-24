@@ -255,7 +255,10 @@ public class Merchant extends BaseModel{
     @JsonProperty("product_store_required")
     @Column(name = "product_store_required")
     public boolean productStoreRequired;
-    
+
+    @JsonProperty("global_store_qr_group")
+    @Column(name = "global_store_qr_group")
+    public boolean globalStoreQrGroup;
 
     public Merchant(String password, String email, String gender, String fullName, String name, String companyName, String status, String cityName, String address, String phone, boolean isActive) {
         this.password = password;

@@ -7,6 +7,8 @@ import lombok.Setter;
 
 import java.util.Date;
 
+@Getter
+@Setter
 public class MerchantSessionResponse {
 
     @JsonProperty("email")
@@ -76,8 +78,9 @@ public class MerchantSessionResponse {
     @JsonProperty("merchant_qr_code")
     public String merchantQrCode;
     @JsonProperty("product_store_required")
-    @Getter @Setter
     public boolean productStoreRequired;
+    @JsonProperty("global_store_qr_group")
+    public boolean globalStoreQrGroup;
 
     public MerchantSessionResponse() {
     }
