@@ -246,6 +246,16 @@ public class QrGroupController extends BaseController {
                         String[] finalLotLang = getLongitudeLatitude(getQrGroup.urlGmap);
                         getQrGroup.setLongitude(Double.parseDouble(finalLotLang[0]));
                         getQrGroup.setLatitude(Double.parseDouble(finalLotLang[1]));
+                    } else {
+                        getQrGroup.setAddress(null);
+                        getQrGroup.setPhone(null);
+                        getQrGroup.setShipperProvince(null);
+                        getQrGroup.setShipperCity(null);
+                        getQrGroup.setShipperSuburb(null);
+                        getQrGroup.setShipperArea(null);
+                        getQrGroup.setUrlGmap(null);
+                        getQrGroup.setLongitude(null);
+                        getQrGroup.setLatitude(null);
                     }
                     getQrGroup.update();
 
