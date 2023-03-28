@@ -424,8 +424,7 @@ public class OrderRepository extends Model {
             whereCondition = "WHERE str.merchant_id = " + merchantId + " "
                 + "AND ord.status = '" + statusOrder + "' ";
         } else if (statusOrder.equalsIgnoreCase("PENDING")) {
-            whereCondition = "WHERE (ord.device_type != 'MINIPOS' OR ord.user_merchant_id IS NULL) "
-                + "AND (ord.status != 'CANCELLED' OR ord.status != 'CANCELED') "
+            whereCondition = "WHERE (ord.status != 'CANCELLED' OR ord.status != 'CANCELED') "
                 + "AND str.merchant_id = " + merchantId + " "
                 + "AND op.status = '" + statusOrder + "' ";
         } else {
@@ -440,8 +439,7 @@ public class OrderRepository extends Model {
                 whereCondition = "WHERE str.id = " + storeId + " "
                     + "AND ord.status = '" + statusOrder + "' ";
             } else if (statusOrder.equalsIgnoreCase("PENDING")) {
-                whereCondition = "WHERE (ord.device_type != 'MINIPOS' OR ord.user_merchant_id IS NULL) "
-                    + "AND (ord.status != 'CANCELLED' OR ord.status != 'CANCELED') "
+                whereCondition = "WHERE (ord.status != 'CANCELLED' OR ord.status != 'CANCELED') "
                     + "AND str.id = " + storeId + " "
                     + "AND op.status = '" + statusOrder + "' ";
             } else {
