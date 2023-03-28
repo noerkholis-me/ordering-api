@@ -422,6 +422,9 @@ DELETE   /merchant/qr-group/:id                     controllers.merchants.QrGrou
 POST     /merchant/qr-group-store                   controllers.merchants.QrGroupController.addStoreToQrGroup()
 DELETE   /merchant/qr-group-store/:id             controllers.merchants.QrGroupController.deleteStoreFromQrGroup(id:Long)
 
+GET      /merchant/group/:groupCode/detail          controllers.merchants.QrGroupController.getQrGroupByGroupCode(groupCode:String, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET      /merchant/group/:groupCode/product         controllers.merchants.QrGroupController.getListProductFromGroup(groupCode:String, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+
 #CONFIG SETTING
 GET    /master/config-setting/:key                  controllers.masters.ConfigSettingController.getConfigSettingByKey(key: String)
 
