@@ -334,7 +334,7 @@ GET		/users/register_with_referral      			controllers.users.ProfileController.r
 
 #MERCHANTS
 POST    /merchant/users/add                         controllers.merchants.UserMerchantController.createUser()
-GET         /merchant/users/list                        controllers.merchants.UserMerchantController.listUsers(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET         /merchant/users/list                        controllers.merchants.UserMerchantController.listUsers(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, storeid:Long ?= 0)
 GET         /merchant/users/:id/view                    controllers.merchants.UserMerchantController.viewUser(id:Long)
 DELETE      /merchant/users/:id/delete                  controllers.merchants.UserMerchantController.deleteUsers(id:Long)
 PUT         /merchant/users/:id/edit                    controllers.merchants.UserMerchantController.editUser(id:Long)
@@ -400,7 +400,7 @@ GET     /master/city/:id/province                   controllers.masters.ShipperC
 GET     /master/suburb/:id/city                     controllers.masters.ShipperController.getAllSuburbByCityId(id: Long, suburbName: String ?= "")
 GET     /master/area/:id/suburb                     controllers.masters.ShipperController.getAllAreaBySuburbId(id: Long, areaName: String ?= "")
 #### new shipper API for delivery order ######
-GET     /master/domesticrates                       controllers.masters.ShipperController.getAllDomesticRatesByAreaId(storeId: Long ?= 0, destinationAreaId: Long ?= 0, price: Integer ?= 0, weight: Double ?= 0, length: Double ?= 0, wide: Double ?= 0, height: Double ?= 0, storeType: Int ?= 0, deliveryType: Int ?= 0)
+GET     /master/domesticrates                       controllers.masters.ShipperController.getAllDomesticRatesByAreaId(storeId: Long ?= 0, destinationAreaId: Long ?= 0, price: Integer ?= 0, weight: Double ?= 0, length: Double ?= 0, wide: Double ?= 0, height: Double ?= 0, storeType: Int ?= 0, deliveryType: Int ?= 0, rateType: String ?= "")
 
 #STORE
 POST    /merchant/store                             controllers.merchants.StoreController.createStore()
@@ -412,6 +412,18 @@ GET    /merchant/store/:storeCode/detail            controllers.merchants.StoreC
 GET    /merchant/allstore                           controllers.merchants.StoreController.getAllStoreMerchant()
 
 GET    /merchant/detail/:merchantCode				controllers.merchants.MerchantController.getMerchantDetail(merchantCode: String)
+
+#QR GROUP
+GET      /merchant/qr-group                         controllers.merchants.QrGroupController.getAllQrGroup(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET      /merchant/qr-group/:id/detail              controllers.merchants.QrGroupController.getQrGroupById(id:Long, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+POST     /merchant/qr-group                         controllers.merchants.QrGroupController.createQrGroup()
+PUT      /merchant/qr-group/:id                     controllers.merchants.QrGroupController.editQrGroup(id:Long)
+DELETE   /merchant/qr-group/:id                     controllers.merchants.QrGroupController.deleteQrGroup(id:Long)
+POST     /merchant/qr-group-store                   controllers.merchants.QrGroupController.addStoreToQrGroup()
+DELETE   /merchant/qr-group-store/:id             controllers.merchants.QrGroupController.deleteStoreFromQrGroup(id:Long)
+
+GET      /merchant/group/:groupCode/detail          controllers.merchants.QrGroupController.getQrGroupByGroupCode(groupCode:String, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET      /merchant/group/:groupCode/product         controllers.merchants.QrGroupController.getListProductFromGroup(groupCode:String, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 
 #CONFIG SETTING
 GET    /master/config-setting/:key                  controllers.masters.ConfigSettingController.getConfigSettingByKey(key: String)
@@ -548,7 +560,7 @@ GET         /merchant/view-qr-code/:orderNumber         controllers.payment.Paym
 POST        /merchant/assign/store/access               controllers.store.StoreAccessController.assignStoreAccess()
 PUT         /merchant/assign/store/access/:id_assign/update        controllers.store.StoreAccessController.updateStoreAccess(id_assign: Long)
 DELETE      /merchant/assign/store/access/:id_assign/delete        controllers.store.StoreAccessController.deleteStoreAssign(id_assign: Long)
-GET         /merchant/assign/store/list                 controllers.store.StoreAccessController.listUserAssign(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET         /merchant/assign/store/list                 controllers.store.StoreAccessController.listUserAssign(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, storeid:Long ?= 0)
 GET         /merchant/assign/store/:user_merchant_id/detail      controllers.store.StoreAccessController.detailUserAssign(user_merchant_id: Long)
 
 #LOYALTY POINT
@@ -576,6 +588,7 @@ GET         /merchant/finance/withdraw                          controllers.fina
 POST        /merchant/finance/withdraw/request-withdraw                  controllers.finance.FinanceWithdrawController.requestWithdraw()
 GET         /merchant/finance/withdraw/download                 controllers.finance.FinanceWithdrawController.downloadWithdraw(store_id:Long ?= 0, start_date: String ?= "", end_date: String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, status: String?="")
 GET         /merchant/finance/transaction/active-balance                 controllers.finance.FinanceTransactionController.getActiveBalance(store_id:Long ?= 0)
+GET			/merchant/finance/withdraw/success/:reqNum				controllers.finance.FinanceWithdrawController.callbackWithdrawSuccess(reqNum: String)
 
 # ORDER LIST
 GET         /merchant/orders/list                 controllers.order.OrderMerchantController.getOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="", filter:String?="", product_type:String  ?= "ALL")

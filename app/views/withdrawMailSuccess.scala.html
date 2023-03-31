@@ -1,0 +1,289 @@
+@import dtos.store.StoreWithdrawEmail
+@(imageURL: String, dtoOrder: StoreWithdrawEmail)
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta http-equiv = "Content-Type" content="text/html" charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Withdrawal - Penarikan Sukses - Inline CSS</title>
+        <!-- CSS -->
+        <style>
+            @@import url('https://fonts.cdnfonts.com/css/d-din');
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                font-family: 'D-DIN Exp', sans-serif;
+            }
+
+            .wrapper {
+                width: 450px;
+                height: auto;
+                background-color: #fff;
+                margin: auto;
+                padding: 25px;
+                margin-top: 5px;
+                border: 1px solid #ccc;
+            }
+
+            /* start header */
+            header {
+                width: 100%;
+                height: 45px;
+            }
+
+            .content-header {
+                width: 100%;
+                display: flex;
+                align-items: center;
+            }
+
+            .content-header img {
+                width: 150px;
+                height: 29px;
+                margin-right: auto;
+            }
+
+            .content-header p {
+                font-size: 14px;
+                color: #A1A6AD;
+            }
+
+            .line {
+                width: 100%;
+                border: 1px solid #ccc;
+                margin-top: 5px;
+            }
+
+            /* end header */
+
+            /* start ilustrasi */
+            .img-ilustrasi {
+                display: block;
+                flex-direction: column;
+                margin: 25px auto;
+                text-align: center;
+            }
+
+            .img-ilustrasi img {
+                margin: auto;
+                width: 50%;
+                text-align: center;
+            }
+
+            .img-ilustrasi p {
+                text-align: center;
+                font-size: 22px;
+                font-weight: bold;
+                color: #080551;
+                margin-top: -20px;
+            }
+
+            /* end ilustrasi */
+
+            /* start article */
+            article {
+                width: 100%;
+            }
+
+            .greeting-email p:nth-child(1) {
+                font-size: 18px;
+                font-weight: bold;
+                color: #636B78;
+            }
+
+            .greeting-email p:nth-child(2) {
+                font-size: 14px;
+                color: #636B78;
+                margin-top: 5px;
+                line-height: 18px;
+            }
+
+            .span_child {
+                color: #16479C;
+                font-weight: bold;
+            }
+
+            .section {
+                width: 400px;
+                height: max-content;
+                border-radius: 10px;
+                margin: 25px 0;
+                border: 2px solid #16479C;
+                padding: 25px;
+            }
+
+            .item {
+                margin-bottom: 20px;
+            }
+
+            .icon-item {
+                display: flex;
+                align-items: center;
+            }
+
+            .icon-item p {
+                font-size: 12px;
+                color: #495057;
+                margin-left: 10px;
+            }
+
+            .title-item p {
+                font-size: 16px;
+                font-weight: bold;
+                color: #495057;
+                margin-left: 30px;
+            }
+
+            .noted p {
+                font-size: 14px;
+                color: #495057;
+            }
+
+            /* end article */
+
+
+
+            /* Footer */
+
+            footer {
+                margin-top: 50px;
+                padding: 0;
+            }
+
+            .title-footer {
+                margin-top: 10px;
+            }
+
+            .title-footer p {
+                font-size: 14px;
+                color: #495057;
+                text-align: center;
+            }
+
+            .title-footer p:nth-child(1) {
+                margin-bottom: 10px;
+            }
+
+            .title-footer p span {
+                font-weight: bold;
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- START WRAPPER -->
+        <div class="wrapper">
+
+            <!-- start header -->
+            <header>
+                <div class="content-header">
+                    <img src="@imageURL/email-Invoice/hellobisnisnewlogo.png" alt="">
+                    <p>@dtoOrder.getDate()</p>
+                </div>
+                <div class="line"></div>
+            </header>
+            <!-- end header -->
+
+            <!-- start ilustrasi -->
+            <div class="img-ilustrasi">
+                <img src="@imageURL/email-withdraw/ilustrasi_success_withdraw.png" alt="penarikan sukses">
+                <p>Penarikan Sukses</p>
+            </div>
+            <!-- end ilustrasi -->
+
+            <!-- start article -->
+            <article>
+                <div class="greeting-email">
+                    <p>Hello, @dtoOrder.getAdminName()</p>
+                    <p>Kami Punya kabar baik!, Pendapatan anda sebesar <span class="span_child">@dtoOrder.getAmount()</span> akan dikirim ke rekening
+                        anda, akan membutuhkan beberapa saat untuk dana tersebut muncul di rekening anda.</p>
+                </div>
+
+                <div class="section">
+                    <div class="list-item">
+                        <div class="item">
+                            <div class="icon-item">
+                                <img src="@imageURL/email-withdraw/invoice.png" alt="">
+                                <p>Invoice</p>
+                            </div>
+                            <div class="title-item">
+                                <p>120712</p>
+                            </div>
+                            <div class="line"></div>
+                        </div>
+
+                        <div class="item">
+                            <div class="icon-item">
+                                <img src="@imageURL/email-withdraw/total-saldo.png" alt="">
+                                <p>Amount</p>
+                            </div>
+                            <div class="title-item">
+                                <p>@dtoOrder.getAmount()</p>
+                            </div>
+                            <div class="line"></div>
+                        </div>
+
+                        <div class="item">
+                            <div class="icon-item">
+                                <img src="@imageURL/email-withdraw/remain.png" alt="">
+                                <p>Remain</p>
+                            </div>
+                            <div class="title-item">
+                                <p>@dtoOrder.getRemainingBalance()</p>
+                            </div>
+                            <div class="line"></div>
+                        </div>
+
+                        <div class="item">
+                            <div class="icon-item">
+                                <img src="@imageURL/email-withdraw/date.png" alt="">
+                                <p>Date</p>
+                            </div>
+                            <div class="title-item">
+                                <p>@dtoOrder.getDate()</p>
+                            </div>
+                            <div class="line"></div>
+                        </div>
+
+                        <div class="item">
+                            <div class="icon-item">
+                                <img src="@imageURL/email-withdraw/account.png" alt="">
+                                <p>Account</p>
+                            </div>
+                            <div class="title-item">
+                                <p>@dtoOrder.getAccount()</p>
+                            </div>
+                            <div class="line"></div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="noted">
+                    <p>Catatan :</p>
+                    <p>Setiap penarikan akan dikenakan biaya.</p>
+                </div>
+
+            </article>
+            <!-- end article -->
+
+            <!-- Footer -->
+            <footer>
+                <div class="line"></div>
+                <div class="title-footer">
+                    <p>Email ini di buat Otomatis, jika anda membutuhkan bantuan silahkan hubungi <span>Customer
+                            Service.</span> </p>
+                    <p>2023 Hello<span>Bisnis</span>.com | All Rights Reserved.</p>
+                </div>
+            </footer>
+            <!-- Footer -->
+
+        </div>
+        <!-- END WRAPPER -->
+    </body>
+
+</html>
