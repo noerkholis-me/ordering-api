@@ -10,6 +10,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import dtos.store.StoreWithdrawEmail;
 import models.Member;
 import models.Merchant;
 import models.SalesOrder;
@@ -32,6 +33,8 @@ public class MailConfig {
 	public static final String subjectInvoice = "[Sandbox] Invoice";
 	public static final String subjectInvoiceAdmin = "[Sandbox] New Order Succcessfull";
 	public static final String subjectSuccessActivation = "[Sandbox] Account Activation Success";
+	public static final String subjectWithdrawSuccess = "[Sandbox] Withdraw Succsess";
+	public static final String subjectWithdrawInformation = "[Sandbox] Withdraw Will Be Processed";
 
 	// Using send grid api
 	public static boolean sendmail2(String recipients, String subject, String contentTemplate) {
@@ -285,6 +288,28 @@ public class MailConfig {
 			return html;
 		} catch (Exception ignored) {
 
+		}
+		return "";
+	}
+	
+	public static String renderSuccessMailWithdraw (StoreWithdrawEmail store) {
+		try {
+			String imageURL = Constant.getInstance().getImageUrl().concat("/assets");
+			String html = views.html.withdrawMailSuccess.render(imageURL, store).toString();
+			return html;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "";
+	}
+	
+	public static String renderInformationMailWithdraw (StoreWithdrawEmail store) {
+		try {
+			String imageURL = Constant.getInstance().getImageUrl().concat("/assets");
+			String html = views.html.withdrawMailInformation.render(imageURL, store).toString();
+			return html;
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		return "";
 	}

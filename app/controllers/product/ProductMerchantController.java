@@ -24,13 +24,16 @@ import service.ProductExcelService;
 import service.DownloadOrderReport;
 import validator.ProductValidator;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 
 import com.avaje.ebean.SqlQuery;
 import java.util.List;
+import java.util.zip.ZipInputStream;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -681,13 +684,15 @@ public class ProductMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
     
-    public static Result getImportTemplate() {
+    public static Result getImportTemplate() throws IOException {
     	Merchant merchant = checkMerchantAccessAuthorization();
     	if(merchant != null) {
-    		File file = ProductExcelService.getImportTemplateMerchant();
+    		byte[] file = ProductExcelService.getImportTemplateMerchant();
+//    		ByteArrayInputStream bis = new ByteArrayInputStream(file);
+//    	    ZipInputStream zis = new ZipInputStream(bis);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-            String filename = "ImportProductMerchantTemplate-"+simpleDateFormat.format(new Date()).toString() + ".xlsx";
-    		response().setContentType("application/vnd.ms-excel");
+            String filename = "ImportProductMerchant-"+simpleDateFormat.format(new Date()).toString() + ".zip";
+    		response().setContentType("application/zip");
 			response().setHeader("Content-disposition", "attachment; filename=" + filename);
 			return ok(file);
     	}
@@ -798,6 +803,38 @@ public class ProductMerchantController extends BaseController {
                     .build();
             productResponse.setProductDescription(productDescriptionResponse);
         }
+
+        try {
+            Query<ProductStore> queryPS = ProductStoreRepository.find.where()
+                .eq("t0.product_id", productMerchant.id).eq("t0.is_deleted", false)
+                .eq("merchant", productMerchant.getMerchant()).order("t0.id");
+            List<ProductStore> dataPS = ProductStoreRepository.getDataProductStore(queryPS);
+            List<ProductResponseStore.ProductStore> responsesProductStore = new ArrayList<>();
+            for (ProductStore dataPStore : dataPS) {
+                ProductResponseStore.ProductStore responsePStore = new ProductResponseStore.ProductStore();
+
+                responsePStore.setId(dataPStore.id);
+                responsePStore.setStoreId(dataPStore.getStore().id);
+                responsePStore.setProductId(dataPStore.getProductMerchant().id);
+                responsePStore.setIsActive(dataPStore.isActive);
+                responsePStore.setStorePrice(dataPStore.getStorePrice());
+                responsePStore.setDiscountType(dataPStore.getDiscountType());
+                responsePStore.setDiscount(dataPStore.getDiscount());
+                responsePStore.setIsDeleted(dataPStore.isDeleted);
+                responsePStore.setFinalPrice(dataPStore.getFinalPrice());
+
+                Store store = Store.findById(dataPStore.getStore().id);
+                if (store != null) {
+                    responsePStore.setStoresName(store.storeName);
+                }
+                responsesProductStore.add(responsePStore);
+                productResponse.setProductStore(responsePStore != null ? responsesProductStore : null);
+            }
+        } catch (IOException e) {
+            logger.error("Error saat menampilkan detail produk store", e);
+            e.printStackTrace();
+        }
+
         return productResponse;
     }
 

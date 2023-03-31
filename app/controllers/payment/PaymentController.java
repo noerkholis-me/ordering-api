@@ -18,7 +18,7 @@ import play.libs.Json;
 import play.mvc.Result;
 import repository.OrderPaymentRepository;
 import repository.OrderRepository;
-import service.InvoiceMailService;
+import service.EmailService;
 import service.PaymentService;
 import service.firebase.FirebaseService;
 
@@ -166,14 +166,14 @@ public class PaymentController extends BaseController {
             }
             
             if(Boolean.parseBoolean(toAdmin)) {
-            	InvoiceMailService.handleCallbackAndSendEmail(order.get(), true);
+            	EmailService.handleCallbackAndSendEmail(order.get(), true);
             	
             	FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order.get());
             	
             	response.setBaseResponse(1, 0, 0, success, "SENT");
                 return ok(Json.toJson(response));
             } else {
-            	InvoiceMailService.handleCallbackAndSendEmail(order.get(), false);
+            	EmailService.handleCallbackAndSendEmail(order.get(), false);
             	
             	response.setBaseResponse(1, 0, 0, success, "SENT");
                 return ok(Json.toJson(response));

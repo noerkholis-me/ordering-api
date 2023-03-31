@@ -48,6 +48,7 @@ import repository.loyalty.LoyaltyPointHistoryRepository;
 import repository.loyalty.LoyaltyPointMerchantRepository;
 import repository.pickuppoint.PickUpPointRepository;
 import service.PaymentService;
+import service.firebase.FirebaseService;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -446,6 +447,7 @@ public class CheckoutOrderController extends BaseController {
                 orderPayment.setStatus(mPayment.typePayment.equalsIgnoreCase("DIRECT_PAYMENT") ? PaymentStatus.PAID.getStatus() : PaymentStatus.PENDING.getStatus());
                 orderPayment.setPaymentType(orderRequest.getPaymentDetailResponse().getPaymentType());
                 orderPayment.setPaymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel());
+                orderPayment.setBankCode(orderRequest.getPaymentDetailResponse().getBankCode());
                 orderPayment.setPaymentDate(new Date());
                 orderPayment.setTaxPercentage(orderRequest.getPaymentDetailResponse().getTaxPercentage());
                 orderPayment.setServicePercentage(orderRequest.getPaymentDetailResponse().getServicePercentage());
@@ -661,6 +663,10 @@ public class CheckoutOrderController extends BaseController {
                         member.lastPurchase = new Date();
                         member.update();
                     }
+                    
+                    if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
+                    	FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order);
+                    }
 
                     response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
                     return ok(Json.toJson(response));
@@ -754,9 +760,13 @@ public class CheckoutOrderController extends BaseController {
                         }
                         orderData.get().setStatus(statusRequest.getStatusOrder());
                         orderData.get().update();
-
                         
                         trx.commit();
+                        
+                        if ("NEW_ORDER".equals(statusRequest.getStatusOrder())) {
+                        	FirebaseService.getInstance().sendFirebaseNotifOrderToStore(orderData.get());
+                        }
+                        
                         response.setBaseResponse(1, 0, 0, "Berhasil mengubah status Nomor Order " + orderData.get().getOrderNumber(), orderData.get().getOrderNumber());
                         return ok(Json.toJson(response));
                     }

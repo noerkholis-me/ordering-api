@@ -38,6 +38,9 @@ public class OrderPayment extends BaseModel {
 
     @Column(name = "payment_channel")
     private String paymentChannel;
+    
+    @Column(name = "bank_code")
+    private String bankCode;
 
     @Column(name = "total_amount")
     private BigDecimal totalAmount;
