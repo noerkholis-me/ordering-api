@@ -403,6 +403,33 @@ public class QrGroupController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
+    public static Result getListStoreFromGroup(String groupCode, String filter, String sortName, String sortStore, int offset, int limit) {
+        int authority = checkAccessAuthorization("all");
+        if (authority == 200 || authority == 203) {
+            try {
+                QrGroup getQrGroup = QrGroupRepository.findByCode(groupCode);
+                if (getQrGroup == null) {
+                    response.setBaseResponse(0, 0, 0, "QR group tidak ditemukan.", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                List<QrGroupStore> listQrGroupStore = QrGroupRepository.findListStoreFromGroup(getQrGroup.id, filter, sortName, sortStore,  offset, limit);
+                Integer storeCount = QrGroupRepository.findListStoreFromGroup(getQrGroup.id, filter, sortName, sortStore, 0, 0).size();
+
+                response.setBaseResponse(storeCount, offset, limit, "Berhasil menampilkan data QR group.",
+                    toListStoreResponse(listQrGroupStore));
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                Logger.info("Error: " + e.getMessage());
+            }
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
     public static Result getListProductFromGroup(String groupCode, String filter, String sort, int offset, int limit) {
         int authority = checkAccessAuthorization("all");
         if (authority == 200 || authority == 203) {
@@ -556,6 +583,34 @@ public class QrGroupController extends BaseController {
         qrGroupResponses.setStore(storeResponses.size() == 0 ? null : storeResponses);
 
         return qrGroupResponses;
+    }
+
+    private static List<QrGroupStoreResponse> toListStoreResponse(List<QrGroupStore> listQrGroupStore) {
+        List<QrGroupStoreResponse> storeResponses = new ArrayList<>();
+        for (QrGroupStore groupStore : listQrGroupStore) {
+            Store getStore = Store.find.byId(groupStore.getStore().id);
+            if (getStore != null) {
+                QrGroupStore store = new QrGroupStore(getStore, null);
+                QrGroupStoreResponse storeRes = new QrGroupStoreResponse();
+                storeRes.setId(groupStore.id);
+                storeRes.setStoreId(store.getStoreId());
+                storeRes.setStoreName(store.getStoreName());
+                storeRes.setAddress(store.getStoreAddress());
+                storeRes.setPhone(store.getStorePhone());
+                storeRes.setProvince(store.getShipperProvince());
+                storeRes.setCity(store.getShipperCity());
+                storeRes.setSuburb(store.getShipperSuburb());
+                storeRes.setArea(store.getShipperArea());
+                storeRes.setStoreQrCode(store.getStoreQrCode());
+                storeRes.setMerchantId(store.getMerchantId());
+                storeRes.setStoreLogo(store.getStoreLogo());
+                storeRes.setMerchantType(store.getMerchantType());
+                storeRes.setStoreQueueUrl(Helper.MOBILEQR_URL + store.getStoreCode() + "/queue");
+                storeResponses.add(storeRes);
+            }
+        }
+
+        return storeResponses;
     }
 
     private static List<ProductSpecificStoreResponse> toListProductResponse(List<ProductStore> listProductStore) {

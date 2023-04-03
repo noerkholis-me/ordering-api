@@ -406,6 +406,7 @@ GET     /master/domesticrates                       controllers.masters.ShipperC
 POST    /merchant/store                             controllers.merchants.StoreController.createStore()
 PUT    /merchant/store/:id                          controllers.merchants.StoreController.editStore(id:Long)
 GET    /merchant/store                              controllers.merchants.StoreController.getAllStore(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/store/list                         controllers.merchants.StoreController.getAllStoreFromAllMerchant(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET    /merchant/store/:id                          controllers.merchants.StoreController.getStoreById(id:Long)
 DELETE    /merchant/store/:id                       controllers.merchants.StoreController.deleteStore(id:Long)
 GET    /merchant/store/:storeCode/detail            controllers.merchants.StoreController.getStoreByStoreCode(storeCode: String)
@@ -423,6 +424,7 @@ POST     /merchant/qr-group-store                   controllers.merchants.QrGrou
 DELETE   /merchant/qr-group-store/:id             controllers.merchants.QrGroupController.deleteStoreFromQrGroup(id:Long)
 
 GET      /merchant/group/:groupCode/detail          controllers.merchants.QrGroupController.getQrGroupByGroupCode(groupCode:String, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET      /merchant/group/:groupCode/store           controllers.merchants.QrGroupController.getListStoreFromGroup(groupCode:String, filter:String ?= "", sort_name:String ?= "", sort_store:String ?= "",offset:Int ?= 0, limit:Int ?= 10)
 GET      /merchant/group/:groupCode/product         controllers.merchants.QrGroupController.getListProductFromGroup(groupCode:String, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 
 #CONFIG SETTING

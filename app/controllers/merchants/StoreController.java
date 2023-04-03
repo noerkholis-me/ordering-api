@@ -167,6 +167,26 @@ public class StoreController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
+    @ApiOperation(value = "Get all list of store.", notes = "Returns all list of store.\n" + swaggerInfo
+        + "", responseContainer = "List", httpMethod = "GET")
+    public static Result getAllStoreFromAllMerchant (String filter, String sort, int offset, int limit) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            try {
+                Query<Store> query = Store.findAllStoreFromAllMerchant();
+                List<Store> totalData = Store.getTotalDataPage(query);
+                List<Store> storeList = Store.findStoreWithPaging(query, sort, filter, offset, limit);
+                List<StoreResponse> storeResponses = toResponses(storeList);
+                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : storeList.size(), offset, limit, success + " Showing data stores", storeResponses);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                Logger.info("Error: " + e.getMessage());
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
     @ApiOperation(value = "Get store", notes = "Returns of store.\n" + swaggerInfo
             + "", responseContainer = "object", httpMethod = "GET")
     public static Result getStoreById (Long id) {
