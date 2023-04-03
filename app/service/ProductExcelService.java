@@ -20,16 +20,20 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.ConditionalFormattingRule;
 import org.apache.poi.ss.usermodel.ClientAnchor.AnchorType;
+import org.apache.poi.ss.usermodel.ComparisonOperator;
 import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.PatternFormatting;
 import org.apache.poi.ss.usermodel.Picture;
 import org.apache.poi.ss.usermodel.PictureData;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.util.IOUtils;
 import org.apache.poi.util.Units;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -83,7 +87,7 @@ public class ProductExcelService {
 	
 	public static final String[] columnMerchant = { "Id Produk", "No SKU" , "Nama Produk", "Kategori Produk", "Sub Kategori Produk", "Subs Kategori Produk", "Merek Produk",
 			"Tipe Produk", "Dapat Disesuaikan", "Harga Produk", "Tipe Diskon", "Diskon",
-			"Gambar Main", "Gambar 1", "Gambar 2", "Gambar 3", "Gambar 4", "Deskripsi Pendek", "Deskripsi Panjang" };
+			"Gambar Main", "Gambar 1", "Gambar 2", "Gambar 3", "Gambar 4", "Deskripsi Pendek", "Deskripsi Panjang", "Product Toko", "Nama Store" };
 	
 	public static final String[] columnStore = { "Product Id", "Store Id", "Store Price", "Discount type", "Discount", "Final Price",
 			"Is Active", "Is Deleted", "Merchant Id" };
@@ -403,7 +407,7 @@ public class ProductExcelService {
 	public static Workbook createExcelFileMerchant () {
 		Workbook workbook = new XSSFWorkbook();
 		Sheet sheetProduct = workbook.createSheet("Product-Import-Template");
-
+		
 		Font headerFont = workbook.createFont();
 		headerFont.setBold(true);
 		headerFont.setFontHeightInPoints((short) 12);
@@ -433,9 +437,12 @@ public class ProductExcelService {
 			Cell cell = headerRow.createCell(i);
 			if((i > a & i < b) || i == 0 || i == 1) {
 				cell.setCellValue(columnMerchant[i]);
+			} else if (i == 20) {
+				cell.setCellValue("=IF(ISBLANK(A:A);\"Nama Toko\";\"Nama Toko *\")");
+				
 			} else {
 				cell.setCellValue(columnMerchant[i] + " *");
-			}
+			} 
 			cell.setCellStyle(headerCellStyle);
 		}
 		
@@ -503,6 +510,10 @@ public class ProductExcelService {
 				
 				row.createCell(18).setCellValue("Deskripsi Barang, Dummy Product Adalah Barang Dummy Sebagai Contoh");
 				row.getCell(18).setCellStyle(contentCellStyle);
+				
+				row.createCell(19).setCellValue("true / false");
+				row.getCell(19).setCellStyle(contentCellStyle);
+				
 			} else {
 				Row row = sheetProduct.createRow(i);
 				row.setHeight((short)500);
@@ -533,17 +544,23 @@ public class ProductExcelService {
 					row.createCell(8).setCellValue("True");
 					row.createCell(10).setCellValue("discount");
 					row.createCell(11).setCellValue(50);
+					row.createCell(19).setCellValue("TRUE");
+					row.createCell(20).setCellValue("1");
 				}
 				else if (i == 3){
 					row.createCell(7).setCellValue("Additional");
 					row.createCell(8).setCellValue("False");
 					row.createCell(10).setCellValue("potongan");
 					row.createCell(11).setCellValue(5000);
+					row.createCell(19).setCellValue("FALSE");
+					row.createCell(20).setCellValue("2");
 				} else {
 					row.createCell(7).setCellValue("Additional");
 					row.createCell(8).setCellValue("False");
 					row.createCell(10).setCellValue("discount");
 					row.createCell(11).setCellValue(50);
+					row.createCell(19).setCellValue("FALSE");
+					row.createCell(20).setCellValue("3");
 				}
 				row.getCell(7).setCellStyle(contentCellStyle);
 				row.getCell(8).setCellStyle(contentCellStyle);
@@ -576,6 +593,10 @@ public class ProductExcelService {
 				
 				row.createCell(18).setCellValue("Deskripsi Barang, Dummy Product Adalah Barang Dummy Sebagai Contoh");
 				row.getCell(18).setCellStyle(contentCellStyle);
+				
+				row.getCell(19).setCellStyle(contentCellStyle);
+				row.getCell(20).setCellStyle(contentCellStyle);
+				
 			}
 			
 		}
@@ -973,9 +994,9 @@ public class ProductExcelService {
 	private static void printImage (Workbook workbook ,Sheet sheetProduct, int row, int column, String path){
 		try {
 			String extension = "";
-			if(!path.isEmpty()) {
+			if(!path.isEmpty())
 				extension = FilenameUtils.getExtension(path);
-			}
+			
 			URL url = new URL(path);
 			InputStream is = url.openStream();
 			
@@ -998,13 +1019,7 @@ public class ProductExcelService {
 			else if(extension.equalsIgnoreCase("png"))
 				pictureIdx = workbook.addPicture(pictureData, XSSFWorkbook.PICTURE_TYPE_PNG);
 			
-			Picture picture = drawing.createPicture(anchor, pictureIdx);
-//			int width = (int) (picture.getImageDimension().getWidth() * 1.5);
-//			short height = (short) (picture.getImageDimension().getHeight() * 1.5);
-//
-//			System.out.println("image width - "+width);
-//			System.out.println("image height - "+height);
-			
+			drawing.createPicture(anchor, pictureIdx);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -1098,4 +1113,5 @@ public class ProductExcelService {
 	    }
 	    return true;
 	}
+
 }
