@@ -194,6 +194,10 @@ public class Store extends BaseModel{
                 .getPage(offset);
     }
 
+    public static Query<Store> findAllStoreFromAllMerchant() {
+        return find.where().eq("isDeleted", false).order("id");
+    }
+
     public static Query<Store> findStoreIsActiveAndMerchant(Merchant merchant) {
         return find.where().eq("isDeleted", false).eq("merchant", merchant).order("id");
     }
