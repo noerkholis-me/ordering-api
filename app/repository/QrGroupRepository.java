@@ -53,6 +53,48 @@ public class QrGroupRepository extends Model {
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
+    public static List<QrGroupStore> findListStoreFromGroup(Long qrGroupId, String filter, String sort_name, String sort_store, int offset, int limit) {
+        String sortByName = null;
+        if (sort_name.equalsIgnoreCase("A-Z")) {
+            sortByName = "st.store_name asc";
+        } else if (sort_name.equalsIgnoreCase("Z-A")) {
+            sortByName = "st.store_name desc";
+        }
+
+        String sortByStore = null;
+        if (sort_store.equalsIgnoreCase("OLD")) {
+            sortByStore = "st.id asc";
+        } else if (sort_store.equalsIgnoreCase("NEW")) {
+            sortByStore = "st.id desc";
+        }
+
+        String orderBy = null;
+        if (!sort_name.trim().isEmpty() && !sort_store.trim().isEmpty()) {
+            orderBy = "ORDER BY " + sortByName + ", " + sortByStore + " ";
+        } else if (!sort_name.trim().isEmpty()) {
+            orderBy = "ORDER BY " + sortByName + " ";
+        } else if (!sort_store.trim().isEmpty()) {
+            orderBy = "ORDER BY " + sortByStore + " ";
+        } else {
+            orderBy = "ORDER BY RANDOM ()";
+        }
+
+        String querySql = "SELECT qgs.id FROM qr_group_store qgs "
+            + "JOIN store st ON qgs.store_id = st.id "
+            + "WHERE qgs.qr_group_id = " + qrGroupId + " AND qgs.is_deleted = false "
+            + orderBy;
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<QrGroupStore> query = Ebean.find(QrGroupStore.class).setRawSql(rawSql);
+
+        ExpressionList<QrGroupStore> exp = query.where();
+        exp = exp.disjunction();
+        exp = exp.ilike("st.store_name", "%" + filter + "%");
+        query = exp.query();
+
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
     public static List<ProductStore> findListProductFromGroupCode(String groupCode, String filter, int offset, int limit) {
         String querySql = "SELECT ps.id FROM qr_group qg "
             + "JOIN qr_group_store qgs ON qgs.qr_group_id = qg.id "
