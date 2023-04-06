@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
@@ -88,7 +89,7 @@ public class ProductExcelService {
 	
 	public static final String[] columnMerchant = { "Id Produk", "No SKU" , "Nama Produk", "Kategori Produk", "Sub Kategori Produk", "Subs Kategori Produk"
 			, "Merek Produk", "Tipe Produk", "Dapat Disesuaikan", "Harga Produk", "Tipe Diskon", "Diskon",
-			"Gambar Main", "Gambar 1", "Gambar 2", "Gambar 3", "Gambar 4", "Deskripsi Pendek", "Deskripsi Panjang", "Nama Toko", "Harga Toko"
+			"Gambar Main", "Gambar 1", "Gambar 2", "Gambar 3", "Gambar 4", "Deskripsi Pendek", "Deskripsi Panjang" ,"Id Produk Toko" ,"Nama Toko", "Harga Toko"
 			, "Tipe Diskon Toko", "Diskon Toko" };
 	
 	public static final String[] columnStore = { "Product Id", "Store Id", "Store Price", "Discount type", "Discount", "Final Price",
@@ -142,9 +143,10 @@ public class ProductExcelService {
 							String shortDesc = getCellValue(row, 17);
 							String longDesc = getCellValue(row, 18);
 							String idStore = getCellValue(row, 19);
-							String storePrice = getCellValue(row, 20);
-							String typeDiscountStore = getCellValue(row, 21);
-							String discountStore = getCellValue(row, 22);
+							String namaStore = getCellValue(row, 20);
+							String storePrice = getCellValue(row, 21);
+							String typeDiscountStore = getCellValue(row, 22);
+							String discountStore = getCellValue(row, 23);
 							
 							if (idProduk.isEmpty()) {
 								
@@ -175,9 +177,9 @@ public class ProductExcelService {
 									if (brandMerchant == null)
 										error += ", Merek Salah di Baris " + line;
 									
-									if (!idStore.isEmpty()) {
-										validateStoreRequest(idStore, storePrice, typeDiscountStore, discountStore, error, line);
-										store = Store.find.where().ieq("storeName", idStore).eq("isDeleted", false).setMaxRows(1).findUnique() ;
+									if (!namaStore.isEmpty()) {
+										validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
+										store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", false).setMaxRows(1).findUnique() ;
 										if (store == null)
 											error += ", Nama Toko Salah di Baris " + line;	
 									}
@@ -222,7 +224,7 @@ public class ProductExcelService {
 										productPrice, discountType, discount, shortDesc, longDesc, error, line);
 								
 								ProductMerchant productMerchant = ProductMerchantRepository.findById(Long.parseLong(idProduk));
-								if (productMerchant == null) 
+								if (productMerchant == null)
 									error += "Tidak Ditemukan Produk Dengan id - " + idProduk +" di Baris - " + line;
 								
 								ProductMerchantDetail productDetail = 
@@ -255,17 +257,14 @@ public class ProductExcelService {
 								if (brandMerchant == null)
 									error += ", Merek Salah di Baris " + line;
 								
-								if (!idStore.isEmpty()) {
-									validateStoreRequest(idStore, storePrice, typeDiscountStore, discountStore, error, line);
-									store = Store.find.where().ieq("storeName", idStore).eq("isDeleted", false).setMaxRows(1).findUnique() ;
+								if (!namaStore.isEmpty()) {
+									validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
+									store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", Boolean.FALSE).setMaxRows(1).findUnique() ;
 									if (store == null)
 										error += ", Nama Toko Salah di Baris " + line;
 								}
 										
 								typeImport = "Update";
-								
-								
-								
 								
 								if (error.isEmpty()) {
 									
@@ -283,12 +282,11 @@ public class ProductExcelService {
 									productDescription.update();
 									
 									ProductStore checkProductStoreUpdate = new ProductStore();
-									
-									if (!idStore.isEmpty()) {
+									if (!namaStore.isEmpty()) {
+										System.out.println("id store not empty");
 										checkProductStoreUpdate = ProductStoreRepository.find.where()
 												.eq("store", store)
-												.eq("productMerchant", productMerchant)
-												.eq("t0.is_deleted", Boolean.FALSE).setMaxRows(1).findUnique();
+												.eq("productMerchant", productMerchant).setMaxRows(1).findUnique();
 										if (checkProductStoreUpdate != null) {
 											constructProductStoreRequestEntity(checkProductStoreUpdate, productMerchant, productDetail, 
 													store, merchant, storePrice, typeDiscountStore, discountStore);
@@ -300,15 +298,17 @@ public class ProductExcelService {
 											addNewProductStore.save();
 										}
 									} else {
-										checkProductStoreUpdate = ProductStoreRepository.find.where()
-												.eq("t0.product_id", productMerchant).eq("t0.is_active", true).eq("t0.store_id", store).setMaxRows(1).findUnique();
-										if (checkProductStoreUpdate != null) {
-											checkProductStoreUpdate.isActive = Boolean.FALSE;
-											checkProductStoreUpdate.isDeleted = Boolean.TRUE;
-											checkProductStoreUpdate.update();
+										if (!idStore.isEmpty()) {
+											Optional <ProductStore> optionalProductStore = ProductStoreRepository.findById(Long.parseLong(idStore));
+											if (optionalProductStore.isPresent()) {
+												checkProductStoreUpdate = optionalProductStore.get();
+												checkProductStoreUpdate.isActive = Boolean.FALSE;
+												checkProductStoreUpdate.isDeleted = Boolean.TRUE;
+												checkProductStoreUpdate.update();
+											}
 										}
 									}
-									
+										
 									countDataUpdate += 1;
 									
 								}
@@ -572,17 +572,20 @@ public class ProductExcelService {
 				row.createCell(18).setCellValue("Deskripsi Barang, Dummy Product Adalah Barang Dummy Sebagai Contoh");
 				row.getCell(18).setCellStyle(contentCellStyle);
 				
-				row.createCell(19).setCellValue("Nama Toko");
+				row.createCell(19).setCellValue("Id Produk Toko");
 				row.getCell(19).setCellStyle(contentCellStyle);
 				
-				row.createCell(20).setCellValue("Untuk Toko Dalam Rupiah ex- 700000");
+				row.createCell(20).setCellValue("Nama Toko");
 				row.getCell(20).setCellStyle(contentCellStyle);
 				
-				row.createCell(21).setCellValue("Tipe Diskon Untuk Toko (potongan / discount)");
+				row.createCell(21).setCellValue("Untuk Toko Dalam Rupiah ex- 700000");
 				row.getCell(21).setCellStyle(contentCellStyle);
 				
-				row.createCell(22).setCellValue("Tipe - discount = 10 (tanpa %), Tipe - potongan = 1000  (Kosongan jika tidak ada)");
+				row.createCell(22).setCellValue("Tipe Diskon Untuk Toko (potongan / discount)");
 				row.getCell(22).setCellStyle(contentCellStyle);
+				
+				row.createCell(23).setCellValue("Tipe - discount = 10 (tanpa %), Tipe - potongan = 1000  (Kosongan jika tidak ada)");
+				row.getCell(23).setCellStyle(contentCellStyle);
 				
 			} else {
 				Row row = sheetProduct.createRow(i);
@@ -614,9 +617,10 @@ public class ProductExcelService {
 					row.createCell(8).setCellValue("True");
 					row.createCell(10).setCellValue("discount");
 					row.createCell(11).setCellValue(50);
-					row.createCell(19).setCellValue("Toko Sample");
-					row.createCell(20).setCellValue(4000);
-					row.createCell(21).setCellValue("discount");
+					row.createCell(19).setCellValue("");
+					row.createCell(20).setCellValue("Toko Sample");
+					row.createCell(21).setCellValue(4000);
+					row.createCell(22).setCellValue("discount");
 					row.createCell(22).setCellValue(10);
 					
 				}
@@ -625,10 +629,11 @@ public class ProductExcelService {
 					row.createCell(8).setCellValue("False");
 					row.createCell(10).setCellValue("potongan");
 					row.createCell(11).setCellValue(5000);
-					row.createCell(19).setCellValue("Toko Sample 3");
-					row.createCell(20).setCellValue(5000);
-					row.createCell(21).setCellValue("potongan");
-					row.createCell(22).setCellValue(1000);
+					row.createCell(19).setCellValue("");
+					row.createCell(20).setCellValue("Toko Sample 3");
+					row.createCell(21).setCellValue(5000);
+					row.createCell(22).setCellValue("potongan");
+					row.createCell(23).setCellValue(1000);
 					
 				} else {
 					row.createCell(7).setCellValue("Additional");
@@ -639,6 +644,7 @@ public class ProductExcelService {
 					row.createCell(20).setCellValue("");
 					row.createCell(21).setCellValue("");
 					row.createCell(22).setCellValue("");
+					row.createCell(23).setCellValue("");
 				}
 				row.getCell(7).setCellStyle(contentCellStyle);
 				row.getCell(8).setCellStyle(contentCellStyle);
@@ -698,8 +704,12 @@ public class ProductExcelService {
 		listContent.add(" - Sebelum Memasukan data produk, pastikan admin sudah memasukan data kategori, dan brand");
 
 		listContent.add("# Product Toko #");
+		listContent.add(" - Untuk Assign suatu produk pada sebuah toko, mohon masukkan nama toko yang dituju pada kolom nama toko");
+		listContent.add(" - Untuk Unassign Produk dari Toko, silahkan kosongkan kolom nama Toko dari File "
+				+ "excel Export Data Produk pada baris produk yang diinginkan");
 		listContent.add(" - Jika Nama Toko Di isi maka kolom Harga, Tipe Diskon, dan Diskon Toko menjadi Mandatory");
-		listContent.add(" - Jika Merchant Mengisi Field \"Product Store Required\" Maka kolom Nama, Harga, Tipe Diskon, dan Diskon Toko Menjadi Mandatory ");
+		listContent.add(" - Jika Merchant Mengisi Field \"Product Store Required\" Maka kolom Nama, Harga, Tipe Diskon"
+				+ ", dan Diskon Toko Menjadi Mandatory ");
 		
 		for (String a : listContent) {
 			bw.write(a);
@@ -861,89 +871,122 @@ public class ProductExcelService {
 				cell.setCellStyle(headerCellStyle);
 			}
 			int rowNum = 0;
+			System.out.println("TEst");
 			List<ProductMerchant> products = ProductMerchantRepository.find.where().eq("merchant", merchant).
 					eq("isActive", Boolean.TRUE).findList();
-			
+			System.out.println("Toast");
+			List<ProductExport> productResponse = new ArrayList<>();
+			int a = 0;
 			for(ProductMerchant data : products) {
-//				System.out.println(rowNum);
+				List<ProductStore> productStore = ProductStoreRepository.find.where().eq("productMerchant", data).eq("isActive", true).findList();
 				ProductMerchantDetail detail = ProductMerchantDetailRepository.findByProduct(data);
-				if(detail == null) 
+				ProductMerchantDescription desc = ProductMerchantDescriptionRepository.findByProductMerchantDetail(detail);
+				if(detail == null)
 					continue;
 				
-				ProductMerchantDescription desc = ProductMerchantDescriptionRepository.findByProductMerchantDetail(detail);
 				if(desc == null)
 					continue;
+				
+				a++;
+				System.out.println("Test " + a);
+				if (productStore.isEmpty()) {
+					productResponse.add(ProductExport.getInstance(data, detail, desc));
+				} else {
+					for (ProductStore storeData : productStore) {
+						productResponse.add(ProductExport.getInstance(data,storeData ,detail, desc));
+					}
+				}
+				
+			}
+			for(ProductExport data : productResponse) {
+//				System.out.println(rowNum);
+				
 				
 				Row row = sheetProduct.createRow(rowNum+=1);
 
 				row.setHeight((short)1050);
 				
-				row.createCell(0).setCellValue(data.id);
+				row.createCell(0).setCellValue(data.getProductId());
 				row.getCell(0).setCellStyle(contentCellStyle);
 				
-				row.createCell(1).setCellValue(data.getNoSKU());
+				row.createCell(1).setCellValue(data.getSkuNumber());
 				row.getCell(1).setCellStyle(contentCellStyle);
 				
 				row.createCell(2).setCellValue(data.getProductName());
 				row.getCell(2).setCellStyle(contentCellStyle);
 				
-				row.createCell(3).setCellValue(data.getCategoryMerchant().getCategoryName());
+				row.createCell(3).setCellValue(data.getCategoryProduct());
 				row.getCell(3).setCellStyle(contentCellStyle);
 				
-				row.createCell(4).setCellValue(data.getSubCategoryMerchant().getSubcategoryName());
+				row.createCell(4).setCellValue(data.getSubCategoryProduct());
 				row.getCell(4).setCellStyle(contentCellStyle);
 				
-				row.createCell(5).setCellValue(data.getSubsCategoryMerchant().getSubscategoryName());
+				row.createCell(5).setCellValue(data.getSubsCategoryProduct());
 				row.getCell(5).setCellStyle(contentCellStyle);
 
-				row.createCell(6).setCellValue(data.getBrandMerchant().getBrandName());
+				row.createCell(6).setCellValue(data.getProductBrand());
 				row.getCell(6).setCellStyle(contentCellStyle);
 				
-				row.createCell(7).setCellValue(detail.getProductType());
+				row.createCell(7).setCellValue(data.getProductType());
 				row.getCell(7).setCellStyle(contentCellStyle);
 				
-				row.createCell(8).setCellValue(detail.getIsCustomizable().toString());
+				row.createCell(8).setCellValue(data.getIsCustomizable());
 				row.getCell(8).setCellStyle(contentCellStyle);
 				
-				row.createCell(9).setCellValue(detail.getProductPrice().intValue());
+				row.createCell(9).setCellValue(data.getPrice().intValue());
 				row.getCell(9).setCellStyle(contentCellStyle);
 				
-				row.createCell(10).setCellValue(detail.getDiscountType());
+				row.createCell(10).setCellValue(!data.getDiscountType().isEmpty() ? data.getDiscountType() : "none");
 				row.getCell(10).setCellStyle(contentCellStyle);
 
-				row.createCell(11).setCellValue(detail.getDiscount().intValue());
+				row.createCell(11).setCellValue(data.getDiscount());
 				row.getCell(11).setCellStyle(contentCellStyle);
 				
 				row.createCell(12);
-				if(!detail.getProductImageMain().isEmpty())
-					printImage(workbook, sheetProduct, rowNum, 12, detail.getProductImageMain());
+				if(!data.getImageMain().isEmpty())
+					printImage(workbook, sheetProduct, rowNum, 12, data.getImageMain());
 				row.getCell(12).setCellStyle(contentCellStyle);
 				
 				row.createCell(13);
-				if(!detail.getProductImage1().isEmpty())
-					printImage(workbook, sheetProduct, rowNum, 13, detail.getProductImage1());
+				if(!data.getImage1().isEmpty())
+					printImage(workbook, sheetProduct, rowNum, 13, data.getImage1());
 				row.getCell(13).setCellStyle(contentCellStyle);
 
 				row.createCell(14);
-				if(!detail.getProductImage2().isEmpty())
-					printImage(workbook, sheetProduct, rowNum, 14, detail.getProductImage2());
+				if(!data.getImage2().isEmpty())
+					printImage(workbook, sheetProduct, rowNum, 14, data.getImage2());
 				row.getCell(14).setCellStyle(contentCellStyle);
 				
 				row.createCell(15);
-				if(!detail.getProductImage3().isEmpty())
-					printImage(workbook, sheetProduct, rowNum, 15, detail.getProductImage3());
+				if(!data.getImage3().isEmpty())
+					printImage(workbook, sheetProduct, rowNum, 15, data.getImage3());
 				row.getCell(15).setCellStyle(contentCellStyle);
 				
 				row.createCell(16);
-				if(!detail.getProductImage4().isEmpty())
-					printImage(workbook, sheetProduct, rowNum, 16, detail.getProductImage4());
+				if(!data.getImage4().isEmpty())
+					printImage(workbook, sheetProduct, rowNum, 16, data.getImage4());
 				row.getCell(16).setCellStyle(contentCellStyle);
 				
-				row.createCell(17).setCellValue(desc.getShortDescription());
+				row.createCell(17).setCellValue(data.getShortDesc());
 				row.getCell(17).setCellStyle(contentCellStyle);
 				
-				row.createCell(18).setCellValue(desc.getLongDescription());
+				row.createCell(18).setCellValue(data.getLongDesc());
 				row.getCell(18).setCellStyle(contentCellStyle);
+
+				row.createCell(19).setCellValue(data.getProductStoreId());
+				row.getCell(19).setCellStyle(contentCellStyle);
+				
+				row.createCell(20).setCellValue(data.getStoreName());
+				row.getCell(20).setCellStyle(contentCellStyle);
+				
+				row.createCell(21).setCellValue(data.getPriceStore());
+				row.getCell(21).setCellStyle(contentCellStyle);
+				
+				row.createCell(22).setCellValue(data.getTypeDiscountStore());
+				row.getCell(22).setCellStyle(contentCellStyle);
+				
+				row.createCell(23).setCellValue(data.getDiscountStore());
+				row.getCell(23).setCellStyle(contentCellStyle);
 			
 			}
 			
@@ -1025,7 +1068,8 @@ public class ProductExcelService {
 		productStore.setStore(store);
 		productStore.setProductMerchant(productMerchant);
 		productStore.setMerchant(merchant);
-		productStore.setActive(true);
+		productStore.isActive = Boolean.TRUE;
+		productStore.isDeleted = Boolean.FALSE;
 		productStore.setStorePrice(new BigDecimal(storePrice));
 		productStore.setProductStoreQrCode(
 				Constant.getInstance().getFrontEndUrl().concat(store.storeCode + "/" + store.id
