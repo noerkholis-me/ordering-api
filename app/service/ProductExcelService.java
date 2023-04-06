@@ -217,7 +217,6 @@ public class ProductExcelService {
 										System.out.println("Error Save to DB");
 									}
 								}
-								
 							} else {
 								 error = validateImportRequest(idProduk, noSku, 
 										productName, category, subCategory, subsCategory, brand, productType, isCustomizeable, 
@@ -283,7 +282,6 @@ public class ProductExcelService {
 									
 									ProductStore checkProductStoreUpdate = new ProductStore();
 									if (!namaStore.isEmpty()) {
-										System.out.println("id store not empty");
 										checkProductStoreUpdate = ProductStoreRepository.find.where()
 												.eq("store", store)
 												.eq("productMerchant", productMerchant).setMaxRows(1).findUnique();
