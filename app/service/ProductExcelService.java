@@ -177,11 +177,15 @@ public class ProductExcelService {
 									if (brandMerchant == null)
 										error += ", Merek Salah di Baris " + line;
 									
-									if (!namaStore.isEmpty()) {
-										validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
-										store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", false).setMaxRows(1).findUnique() ;
-										if (store == null)
-											error += ", Nama Toko Salah di Baris " + line;	
+									if (merchant.productStoreRequired) {
+										if (namaStore.isEmpty()) {
+											error += ", Nama Toko Tidak Boleh Kosong";
+										} else {
+											validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
+											store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", false).setMaxRows(1).findUnique() ;
+											if (store == null)
+												error += ", Nama Toko Salah di Baris " + line;	
+										}
 									}
 									
 								if (error.isEmpty()) {
@@ -306,9 +310,7 @@ public class ProductExcelService {
 											}
 										}
 									}
-										
 									countDataUpdate += 1;
-									
 								}
 							}
 						}
@@ -493,13 +495,13 @@ public class ProductExcelService {
 				cell.setCellValue(columnMerchant[i]);
 			} else {
 				if(assignStore){
+					if (i > 19 & i < 22)
 					cell.setCellValue(columnMerchant[i] + " *");
+				else
+					cell.setCellValue(columnMerchant[i]);
 				} else {
-					if (i > 18 & i < 23 )
-						cell.setCellValue(columnMerchant[i]);
-					else
-						cell.setCellValue(columnMerchant[i] + " *");
-				} 
+					cell.setCellValue(columnMerchant[i]);
+				}
 			}
 			
 			cell.setCellStyle(headerCellStyle);
@@ -619,7 +621,7 @@ public class ProductExcelService {
 					row.createCell(20).setCellValue("Toko Sample");
 					row.createCell(21).setCellValue(4000);
 					row.createCell(22).setCellValue("discount");
-					row.createCell(22).setCellValue(10);
+					row.createCell(23).setCellValue(10);
 					
 				}
 				else if (i == 3){
@@ -680,6 +682,7 @@ public class ProductExcelService {
 				row.getCell(20).setCellStyle(contentCellStyle);
 				row.getCell(21).setCellStyle(contentCellStyle);
 				row.getCell(22).setCellStyle(contentCellStyle);
+				row.getCell(23).setCellStyle(contentCellStyle);
 				
 				
 			}
