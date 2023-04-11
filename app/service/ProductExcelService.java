@@ -116,6 +116,7 @@ public class ProductExcelService {
 			SubsCategoryMerchant subsCategoryMerchant = null;
 			BrandMerchant brandMerchant = null;
 			Store store = null;
+			Boolean storeEmpty = false;
 			try {
 				for (Row row : datatypeSheet) {
 				    if (!isRowEmpty(row)) {
@@ -177,18 +178,18 @@ public class ProductExcelService {
 									if (brandMerchant == null)
 										error += ", Merek Salah di Baris " + line;
 									
-									if (merchant.productStoreRequired) {
-										if (namaStore.isEmpty()) {
-											error += ", Nama Toko Tidak Boleh Kosong";
-										} else {
-											validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
-											store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", false).setMaxRows(1).findUnique() ;
-											if (store == null)
-												error += ", Nama Toko Salah di Baris " + line;	
-										}
+									if (!namaStore.isEmpty()) {
+										validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
+										store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", Boolean.FALSE)
+												.eq("isActive", Boolean.TRUE).setMaxRows(1).findUnique() ;
+										if (store == null)
+											error += ", Nama Toko Salah di Baris " + line;	
+									} else {
+										if (merchant.productStoreRequired)
+												storeEmpty = true;
 									}
 									
-								if (error.isEmpty()) {
+								if (error.isEmpty() && !storeEmpty) {
 									
 									try {
 										ProductMerchant newProductMerchant = new ProductMerchant();
@@ -262,14 +263,18 @@ public class ProductExcelService {
 								
 								if (!namaStore.isEmpty()) {
 									validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
-									store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", Boolean.FALSE).setMaxRows(1).findUnique() ;
+									store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", Boolean.FALSE)
+										.eq("isActive", Boolean.TRUE).setMaxRows(1).findUnique() ;
 									if (store == null)
-										error += ", Nama Toko Salah di Baris " + line;
+									error += ", Nama Toko Salah di Baris " + line;
+								} else {
+									if (merchant.productStoreRequired)
+										storeEmpty = true;
 								}
 										
 								typeImport = "Update";
 								
-								if (error.isEmpty()) {
+								if (error.isEmpty() && !storeEmpty) {
 									
 									logger.info("Updating Product");
 									constructProductEntityRequest(productMerchant, merchant, noSku, productName, categoryMerchant,
@@ -316,6 +321,10 @@ public class ProductExcelService {
 						}
 				    }
 				}
+				if (storeEmpty) {
+					error += ", Kolom Nama Toko Tidak Boleh ada yang Kosong";
+				}
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 				error += " Ada masalah saat import produk, Detail : "+e.getMessage().replaceAll("\\\\", "");
@@ -487,21 +496,16 @@ public class ProductExcelService {
 		
 		// product
 		Row headerRow = sheetProduct.createRow(0);
-		int a = 9;
-		int b = 17;
 		for (int i = 0; i < columnMerchant.length; i++) {
 			Cell cell = headerRow.createCell(i);
-			if((i > a & i < b) || i == 0 || i == 1) {
-				cell.setCellValue(columnMerchant[i]);
+			if (mandatoryColumn(i)) {
+			    cell.setCellValue(columnMerchant[i] + " *");
 			} else {
-				if(assignStore){
-					if (i > 19 & i < 22)
-					cell.setCellValue(columnMerchant[i] + " *");
-				else
-					cell.setCellValue(columnMerchant[i]);
-				} else {
-					cell.setCellValue(columnMerchant[i]);
-				}
+			    if (assignStore && mandatoryStoreColumn(i)) {
+			        cell.setCellValue(columnMerchant[i] + " *");
+			    } else {
+			        cell.setCellValue(columnMerchant[i]);
+			    }
 			}
 			
 			cell.setCellStyle(headerCellStyle);
@@ -709,8 +713,7 @@ public class ProductExcelService {
 		listContent.add(" - Untuk Unassign Produk dari Toko, silahkan kosongkan kolom nama Toko dari File "
 				+ "excel Export Data Produk pada baris produk yang diinginkan");
 		listContent.add(" - Jika Nama Toko Di isi maka kolom Harga, Tipe Diskon, dan Diskon Toko menjadi Mandatory");
-		listContent.add(" - Jika Merchant Mengisi Field \"Product Store Required\" Maka kolom Nama, Harga, Tipe Diskon"
-				+ ", dan Diskon Toko Menjadi Mandatory ");
+		listContent.add(" - Jika Merchant Mengisi Field \"Product Store Required\" Maka kolom Nama dan Harga Toko Menjadi Mandatory");
 		
 		for (String a : listContent) {
 			bw.write(a);
@@ -872,10 +875,8 @@ public class ProductExcelService {
 				cell.setCellStyle(headerCellStyle);
 			}
 			int rowNum = 0;
-			System.out.println("TEst");
 			List<ProductMerchant> products = ProductMerchantRepository.find.where().eq("merchant", merchant).
 					eq("isActive", Boolean.TRUE).findList();
-			System.out.println("Toast");
 			List<ProductExport> productResponse = new ArrayList<>();
 			int a = 0;
 			for(ProductMerchant data : products) {
@@ -889,7 +890,6 @@ public class ProductExcelService {
 					continue;
 				
 				a++;
-				System.out.println("Test " + a);
 				if (productStore.isEmpty()) {
 					productResponse.add(ProductExport.getInstance(data, detail, desc));
 				} else {
@@ -900,8 +900,6 @@ public class ProductExcelService {
 				
 			}
 			for(ProductExport data : productResponse) {
-//				System.out.println(rowNum);
-				
 				
 				Row row = sheetProduct.createRow(rowNum+=1);
 
@@ -1309,6 +1307,14 @@ public class ProductExcelService {
 	        }
 	    }
 	    return true;
+	}
+	
+	private static boolean mandatoryColumn (int i) {
+	    return (i > 1 && i < 10) || (i > 16 && i < 19);
+	}
+	
+	private static boolean mandatoryStoreColumn (int i) {
+	    return i == 20 || i == 21;
 	}
 
 }
