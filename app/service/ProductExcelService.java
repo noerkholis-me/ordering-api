@@ -178,16 +178,15 @@ public class ProductExcelService {
 									if (brandMerchant == null)
 										error += ", Merek Salah di Baris " + line;
 									
-									if (merchant.productStoreRequired) {
-										if (namaStore.isEmpty()) {
-											storeEmpty = true;
-										} else {
-											validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
-											store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", Boolean.FALSE)
-													.eq("isActive", Boolean.TRUE).setMaxRows(1).findUnique() ;
-											if (store == null)
-												error += ", Nama Toko Salah di Baris " + line;	
-										}
+									if (!namaStore.isEmpty()) {
+										validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
+										store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", Boolean.FALSE)
+												.eq("isActive", Boolean.TRUE).setMaxRows(1).findUnique() ;
+										if (store == null)
+											error += ", Nama Toko Salah di Baris " + line;	
+									} else {
+										if (merchant.productStoreRequired)
+												storeEmpty = true;
 									}
 									
 								if (error.isEmpty() & !storeEmpty) {
@@ -262,16 +261,15 @@ public class ProductExcelService {
 								if (brandMerchant == null)
 									error += ", Merek Salah di Baris " + line;
 								
-								if (merchant.productStoreRequired) {
-									if (namaStore.isEmpty()) {
+								if (!namaStore.isEmpty()) {
+									validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
+									store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", Boolean.FALSE)
+										.eq("isActive", Boolean.TRUE).setMaxRows(1).findUnique() ;
+									if (store == null)
+									error += ", Nama Toko Salah di Baris " + line;
+								} else {
+									if (merchant.productStoreRequired)
 										storeEmpty = true;
-									} else {
-										validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
-										store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", Boolean.FALSE)
-												.eq("isActive", Boolean.TRUE).setMaxRows(1).findUnique() ;
-										if (store == null)
-											error += ", Nama Toko Salah di Baris " + line;	
-									}
 								}
 										
 								typeImport = "Update";
