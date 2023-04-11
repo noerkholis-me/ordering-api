@@ -189,7 +189,7 @@ public class ProductExcelService {
 												storeEmpty = true;
 									}
 									
-								if (error.isEmpty() & !storeEmpty) {
+								if (error.isEmpty() && !storeEmpty) {
 									
 									try {
 										ProductMerchant newProductMerchant = new ProductMerchant();
@@ -274,7 +274,7 @@ public class ProductExcelService {
 										
 								typeImport = "Update";
 								
-								if (error.isEmpty() & !storeEmpty) {
+								if (error.isEmpty() && !storeEmpty) {
 									
 									logger.info("Updating Product");
 									constructProductEntityRequest(productMerchant, merchant, noSku, productName, categoryMerchant,
