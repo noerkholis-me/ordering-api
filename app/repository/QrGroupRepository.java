@@ -6,9 +6,12 @@ import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
+import models.BrandMerchant;
+import models.CategoryMerchant;
 import models.ProductStore;
 import models.QrGroup;
 import models.QrGroupStore;
+import models.merchant.ProductMerchantDetail;
 import play.db.ebean.Model;
 
 import java.util.List;
@@ -100,9 +103,14 @@ public class QrGroupRepository extends Model {
             + "JOIN qr_group_store qgs ON qgs.qr_group_id = qg.id "
             + "JOIN product_store ps ON ps.store_id = qgs.store_id "
             + "JOIN product_merchant pm ON pm.id = ps.product_id "
+            + "JOIN product_merchant_detail pmd ON pmd.product_merchant_id = pm.id "
+            + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
             + "WHERE qg.group_code = '"+ groupCode +"' AND qg.is_deleted = false "
             + "AND qgs.is_deleted = false "
             + "AND ps.is_deleted = false AND ps.is_active = true "
+            + "AND pm.is_deleted = false AND pm.is_active = true "
+            + "AND pmd.is_deleted = false AND pmd.product_type = 'MAIN' "
+            + "AND bm.is_active = true and pm.brand_merchant_id = bm.id "
             + "ORDER BY ps.product_id DESC";
 
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
@@ -117,4 +125,149 @@ public class QrGroupRepository extends Model {
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
+    public static List<ProductStore> findAllProductFromGroup(String groupCode, Long brandId, Long categoryId, String keyword, int offset, int limit) {
+        String category = null;
+        if (categoryId > 0) {
+            category = "AND pm.subs_category_merchant_id = " + categoryId + " ";
+        }
+
+        String product = null;
+        if (!brandId.equals(0L)) {
+            product = "AND pm.is_deleted = false AND pm.is_active = true AND bm.is_active = true "
+                + "AND pm.brand_merchant_id = " + brandId + " " + category + " ";
+        } else {
+            product = "AND pm.is_deleted = false AND pm.is_active = true AND bm.is_active = true ";
+        }
+
+        String querySql = "SELECT ps.id FROM qr_group qg "
+            + "JOIN qr_group_store qgs ON qgs.qr_group_id = qg.id "
+            + "JOIN product_store ps ON ps.store_id = qgs.store_id "
+            + "JOIN product_merchant pm ON pm.id = ps.product_id "
+            + "JOIN product_merchant_detail pmd ON pmd.product_merchant_id = pm.id "
+            + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
+            + "WHERE qg.group_code = '" + groupCode + "' AND qg.is_deleted = false "
+            + "AND qgs.is_deleted = false "
+            + "AND ps.is_deleted = false AND ps.is_active = true "
+            + "AND pmd.is_deleted = false AND pmd.product_type = 'MAIN' "
+            + product
+            + "ORDER BY ps.product_id ASC";
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<ProductStore> query = Ebean.find(ProductStore.class).setRawSql(rawSql);
+
+        ExpressionList<ProductStore> exp = query.where();
+        exp = exp.disjunction();
+        exp = exp.ilike("pm.product_name", "%" + keyword + "%");
+        exp = exp.endJunction();
+        query = exp.query();
+
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static List<CategoryMerchant> findListCategoryFromGroup(String groupCode, String filter, int offset, int limit) {
+        String querySql = "SELECT cm.id FROM qr_group qg "
+            + "JOIN merchant mc ON qg.merchant_id = mc.id "
+            + "JOIN category_merchant cm ON mc.id = cm.merchant_id "
+            + "JOIN product_merchant pm ON cm.id = pm.category_merchant_id "
+            + "WHERE qg.group_code = '" + groupCode + "' AND qg.is_deleted = false "
+            + "AND cm.is_deleted = false AND cm.is_active = true "
+            + "AND pm.is_deleted = false AND pm.is_active = true "
+            + "GROUP BY cm.id "
+            + "ORDER BY cm.id DESC";
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<CategoryMerchant> query = Ebean.find(CategoryMerchant.class).setRawSql(rawSql);
+
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static String queryTotalCategory(String groupCode, String category) {
+        return "SELECT pm.id FROM qr_group qg "
+            + "JOIN merchant mc ON qg.merchant_id = mc.id "
+            + "JOIN category_merchant cm ON mc.id = cm.merchant_id "
+            + "JOIN product_merchant pm ON cm.id = pm.category_merchant_id "
+            + "JOIN product_merchant_detail pmd ON pm.id = pmd.product_merchant_id "
+            + "WHERE qg.group_code = '" + groupCode + "' AND qg.is_deleted = false "
+            + "AND cm.is_deleted = false AND cm.is_active = true "
+            + "AND pm.is_deleted = false AND pm.is_active = true AND " + category + " "
+            + "AND pmd.is_deleted = false AND pmd.product_type = 'MAIN' "
+            + "ORDER BY pm.id DESC";
+    }
+
+    public static Integer getTotalProductCategory(String groupCode, Long categoryMerchantId) {
+        String querySql = queryTotalCategory(groupCode, "pm.category_merchant_id = " + categoryMerchantId + "");
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<CategoryMerchant> query = Ebean.find(CategoryMerchant.class).setRawSql(rawSql);
+
+        return query.findPagingList(0).getPage(0).getList().size();
+    }
+
+    public static Integer getTotalProductSubCategory(String groupCode, Long subCategoryMerchantId) {
+        String querySql = queryTotalCategory(groupCode, "pm.sub_category_merchant_id = " + subCategoryMerchantId + "");
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<CategoryMerchant> query = Ebean.find(CategoryMerchant.class).setRawSql(rawSql);
+
+        return query.findPagingList(0).getPage(0).getList().size();
+    }
+
+    public static Integer getTotalProductSubsCategory(String groupCode, Long subsCategoryMerchantId) {
+        String querySql = queryTotalCategory(groupCode, "pm.subs_category_merchant_id = " + subsCategoryMerchantId + "");
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<CategoryMerchant> query = Ebean.find(CategoryMerchant.class).setRawSql(rawSql);
+
+        return query.findPagingList(0).getPage(0).getList().size();
+    }
+
+    public static List<BrandMerchant> findListBrandFromGroup(String groupCode, String filter, int offset, int limit) {
+        String querySql = "SELECT bm.id FROM qr_group qg "
+            + "JOIN qr_group_store qgs ON qgs.qr_group_id = qg.id "
+            + "JOIN product_store ps ON ps.store_id = qgs.store_id "
+            + "JOIN product_merchant pm ON pm.id = ps.product_id "
+            + "JOIN product_merchant_detail pmd ON pmd.product_merchant_id = pm.id "
+            + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
+            + "WHERE qg.group_code = '"+ groupCode +"' AND qg.is_deleted = false "
+            + "AND qgs.is_deleted = false "
+            + "AND ps.is_deleted = false AND ps.is_active = true "
+            + "AND pm.is_deleted = false AND pm.is_active = true "
+            + "AND pmd.is_deleted = false AND pmd.product_type = 'MAIN' "
+            + "AND bm.is_active = true "
+            + "GROUP BY bm.id "
+            + "ORDER BY bm.brand_name ASC";
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<BrandMerchant> query = Ebean.find(BrandMerchant.class).setRawSql(rawSql);
+
+        ExpressionList<BrandMerchant> exp = query.where();
+        exp = exp.disjunction();
+        exp = exp.ilike("bm.brand_name", "%" + filter + "%");
+        exp = exp.endJunction();
+        query = exp.query();
+
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static Integer getTotalProductBrandFromGroup(String groupCode, Long brandId) {
+        String querySql = "SELECT bm.id FROM qr_group qg "
+            + "JOIN qr_group_store qgs ON qgs.qr_group_id = qg.id "
+            + "JOIN product_store ps ON ps.store_id = qgs.store_id "
+            + "JOIN product_merchant pm ON pm.id = ps.product_id "
+            + "JOIN product_merchant_detail pmd ON pmd.product_merchant_id = pm.id "
+            + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
+            + "WHERE qg.group_code = '"+ groupCode +"' AND qg.is_deleted = false "
+            + "AND qgs.is_deleted = false "
+            + "AND ps.is_deleted = false AND ps.is_active = true "
+            + "AND pm.is_deleted = false AND pm.is_active = true "
+            + "AND pmd.is_deleted = false AND pmd.product_type = 'MAIN' "
+            + "AND pm.brand_merchant_id = " + brandId + " AND bm.is_active = true "
+            + "ORDER BY bm.brand_name ASC";
+
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<BrandMerchant> query = Ebean.find(BrandMerchant.class).setRawSql(rawSql);
+
+        return query.findPagingList(0).getPage(0).getList().size();
+    }
 }

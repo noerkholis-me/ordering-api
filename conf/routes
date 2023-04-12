@@ -425,7 +425,10 @@ DELETE   /merchant/qr-group-store/:id             controllers.merchants.QrGroupC
 
 GET      /merchant/group/:groupCode/detail          controllers.merchants.QrGroupController.getQrGroupByGroupCode(groupCode:String, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET      /merchant/group/:groupCode/store           controllers.merchants.QrGroupController.getListStoreFromGroup(groupCode:String, filter:String ?= "", sort_name:String ?= "", sort_store:String ?= "",offset:Int ?= 0, limit:Int ?= 10)
-GET      /merchant/group/:groupCode/product         controllers.merchants.QrGroupController.getListProductFromGroup(groupCode:String, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET      /merchant/group/:groupCode/product         controllers.merchants.QrGroupController.getListProductFromGroup(groupCode:String, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 30)
+GET      /merchant/group/:groupCode/product/list    controllers.merchants.QrGroupController.getAllProductFromGroup(groupCode:String, brand_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET      /merchant/group/:groupCode/category        controllers.merchants.QrGroupController.getListCategoryFromGroup(groupCode:String)
+GET      /merchant/group/:groupCode/brand           controllers.merchants.QrGroupController.getListBrandFromGroup(groupCode:String, filter:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 
 #CONFIG SETTING
 GET    /master/config-setting/:key                  controllers.masters.ConfigSettingController.getConfigSettingByKey(key: String)
