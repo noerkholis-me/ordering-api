@@ -179,7 +179,7 @@ public class ProductExcelService {
 										error += ", Merek Salah di Baris " + line;
 									
 									if (!namaStore.isEmpty()) {
-										validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
+										error = validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
 										store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", Boolean.FALSE)
 												.eq("isActive", Boolean.TRUE).setMaxRows(1).findUnique() ;
 										if (store == null)
@@ -262,7 +262,7 @@ public class ProductExcelService {
 									error += ", Merek Salah di Baris " + line;
 								
 								if (!namaStore.isEmpty()) {
-									validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
+									error = validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
 									store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", Boolean.FALSE)
 										.eq("isActive", Boolean.TRUE).setMaxRows(1).findUnique() ;
 									if (store == null)
@@ -1083,7 +1083,7 @@ public class ProductExcelService {
 		productStore.setProductStoreQrCode(
 				Constant.getInstance().getFrontEndUrl().concat(store.storeCode + "/" + store.id
 						+ "/" + merchant.id + "/product/" + productMerchantDetail.id + "/detail"));
-		productStore.setDiscountType(discountType);
+		productStore.setDiscountType(!discountType.isEmpty() ? discountType : "none");
 		productStore.setDiscount(!discount.isEmpty() ? Double.valueOf(discount) : 0D);
 		productStore.setFinalPrice(priceAfterDiscount);
 	}
@@ -1303,6 +1303,8 @@ public class ProductExcelService {
 		
 		if(!discountType.isEmpty() && discount.isEmpty())
 			error += ", Kolom Diskon Kosong di Baris " + line;
+		
+		System.out.println(error);
 		
 		return error;
 		
