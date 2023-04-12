@@ -47,6 +47,12 @@ public class StoreResponse {
     public String merchantType;
     @JsonProperty("store_queue_url")
     private String storeQueueUrl;
+    @JsonProperty("status_open_store")
+    private Boolean statusOpenStore;
+    @JsonProperty("open_at")
+    private String openAt;
+    @JsonProperty("closed_at")
+    private String closedAt;
     @JsonProperty("product_stores")
     private List<ProductStoreResponseForStore> productStoreResponses;
 

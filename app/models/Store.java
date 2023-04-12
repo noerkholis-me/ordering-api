@@ -127,6 +127,18 @@ public class Store extends BaseModel{
     @javax.persistence.Transient
     public Long area_id;
 
+    @Column(name = "status_open_store")
+    @Getter @Setter
+    public Boolean statusOpenStore;
+
+    @Column(name = "open_at")
+    @Getter @Setter
+    public String openAt;
+
+    @Column(name = "closed_at")
+    @Getter @Setter
+    public String closedAt;
+
     public Store() {
 
     }
