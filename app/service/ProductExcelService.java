@@ -179,7 +179,7 @@ public class ProductExcelService {
 										error += ", Merek Salah di Baris " + line;
 									
 									if (!namaStore.isEmpty()) {
-										error = validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
+										error += validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
 										store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", Boolean.FALSE)
 												.eq("isActive", Boolean.TRUE).setMaxRows(1).findUnique() ;
 										if (store == null)
@@ -262,7 +262,7 @@ public class ProductExcelService {
 									error += ", Merek Salah di Baris " + line;
 								
 								if (!namaStore.isEmpty()) {
-									error = validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
+									error += validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
 									store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", Boolean.FALSE)
 										.eq("isActive", Boolean.TRUE).setMaxRows(1).findUnique() ;
 									if (store == null)
