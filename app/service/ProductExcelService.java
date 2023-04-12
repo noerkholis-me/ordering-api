@@ -1304,8 +1304,6 @@ public class ProductExcelService {
 		if(!discountType.isEmpty() && discount.isEmpty())
 			error += ", Kolom Diskon Kosong di Baris " + line;
 		
-		System.out.println(error);
-		
 		return error;
 		
 		
