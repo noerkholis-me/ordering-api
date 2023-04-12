@@ -30,5 +30,10 @@ public class StoreRequest {
     private String googleMapsUrl;
     @JsonProperty("store_logo")
     public String storeLogo;
-
+    @JsonProperty("status_open_store")
+    public Boolean statusOpenStore;
+    @JsonProperty("open_at")
+    public String openAt;
+    @JsonProperty("closed_at")
+    public String closedAt;
 }
