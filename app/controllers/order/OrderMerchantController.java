@@ -895,7 +895,7 @@ public class OrderMerchantController extends BaseController {
                 paymentInformation.setInvoiceNumber(orderPayment.getInvoiceNo());
                 paymentInformation.setOrderNumber(getOrder.getOrderNumber());
                 paymentInformation.setOrderType(getOrder.getOrderType());
-                if(getOrder.getStatus().equalsIgnoreCase("PENDING") || getOrder.getStatus().equalsIgnoreCase("COMPLETE") || getOrder.getStatus().equalsIgnoreCase("NEW_ORDER")) {
+                if(getOrder.getStatus().equalsIgnoreCase("PENDING") || getOrder.getStatus().equalsIgnoreCase("COMPLETE") || getOrder.getStatus().equalsIgnoreCase("NEW_ORDER") || getOrder.getStatus().equalsIgnoreCase("CLOSED")) {
                     paymentInformation.setOrderStatus(getOrder.getStatus());
                 } else {
                     OrderStatus orderStatus = OrderStatus.convertToOrderStatus(getOrder.getStatus());
