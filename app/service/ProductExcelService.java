@@ -179,7 +179,7 @@ public class ProductExcelService {
 										error += ", Merek Salah di Baris " + line;
 									
 									if (!namaStore.isEmpty()) {
-										validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
+										error += validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
 										store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", Boolean.FALSE)
 												.eq("isActive", Boolean.TRUE).setMaxRows(1).findUnique() ;
 										if (store == null)
@@ -262,7 +262,7 @@ public class ProductExcelService {
 									error += ", Merek Salah di Baris " + line;
 								
 								if (!namaStore.isEmpty()) {
-									validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
+									error += validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
 									store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", Boolean.FALSE)
 										.eq("isActive", Boolean.TRUE).setMaxRows(1).findUnique() ;
 									if (store == null)
@@ -291,24 +291,34 @@ public class ProductExcelService {
 									
 									ProductStore checkProductStoreUpdate = new ProductStore();
 									if (!namaStore.isEmpty()) {
-										checkProductStoreUpdate = ProductStoreRepository.find.where()
-												.eq("store", store)
-												.eq("productMerchant", productMerchant).setMaxRows(1).findUnique();
-										if (checkProductStoreUpdate != null) {
-											constructProductStoreRequestEntity(checkProductStoreUpdate, productMerchant, productDetail, 
-													store, merchant, storePrice, typeDiscountStore, discountStore);
-											checkProductStoreUpdate.update();
+										if (!idStore.isEmpty()) {
+											checkProductStoreUpdate = ProductStoreRepository.
+													findByIdAndMerchantId(Long.parseLong(idStore), merchant);
+											if (checkProductStoreUpdate != null) {
+												constructProductStoreRequestEntity(checkProductStoreUpdate, productMerchant, productDetail, 
+														store, merchant, storePrice, typeDiscountStore, discountStore);
+												checkProductStoreUpdate.update();
+											}
 										} else {
-											ProductStore addNewProductStore = new ProductStore();
-											constructProductStoreRequestEntity(addNewProductStore, productMerchant, productDetail, 
-													store, merchant, storePrice, typeDiscountStore, discountStore);
-											addNewProductStore.save();
+											checkProductStoreUpdate = ProductStoreRepository.find.where()
+													.eq("store", store)
+													.eq("productMerchant", productMerchant).setMaxRows(1).findUnique();
+											if (checkProductStoreUpdate != null) {
+												constructProductStoreRequestEntity(checkProductStoreUpdate, productMerchant, productDetail, 
+														store, merchant, storePrice, typeDiscountStore, discountStore);
+												checkProductStoreUpdate.update();
+											} else {
+												ProductStore addNewProductStore = new ProductStore();
+												constructProductStoreRequestEntity(addNewProductStore, productMerchant, productDetail, 
+														store, merchant, storePrice, typeDiscountStore, discountStore);
+												addNewProductStore.save();
+											}
 										}
 									} else {
 										if (!idStore.isEmpty()) {
-											Optional <ProductStore> optionalProductStore = ProductStoreRepository.findById(Long.parseLong(idStore));
-											if (optionalProductStore.isPresent()) {
-												checkProductStoreUpdate = optionalProductStore.get();
+											checkProductStoreUpdate = ProductStoreRepository.
+													findByIdAndMerchantId(Long.parseLong(idStore), merchant);
+											if (checkProductStoreUpdate != null) {
 												checkProductStoreUpdate.isActive = Boolean.FALSE;
 												checkProductStoreUpdate.isDeleted = Boolean.TRUE;
 												checkProductStoreUpdate.update();
@@ -1073,7 +1083,7 @@ public class ProductExcelService {
 		productStore.setProductStoreQrCode(
 				Constant.getInstance().getFrontEndUrl().concat(store.storeCode + "/" + store.id
 						+ "/" + merchant.id + "/product/" + productMerchantDetail.id + "/detail"));
-		productStore.setDiscountType(discountType);
+		productStore.setDiscountType(!discountType.isEmpty() ? discountType : "none");
 		productStore.setDiscount(!discount.isEmpty() ? Double.valueOf(discount) : 0D);
 		productStore.setFinalPrice(priceAfterDiscount);
 	}
