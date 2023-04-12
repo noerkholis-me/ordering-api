@@ -291,24 +291,34 @@ public class ProductExcelService {
 									
 									ProductStore checkProductStoreUpdate = new ProductStore();
 									if (!namaStore.isEmpty()) {
-										checkProductStoreUpdate = ProductStoreRepository.find.where()
-												.eq("store", store)
-												.eq("productMerchant", productMerchant).setMaxRows(1).findUnique();
-										if (checkProductStoreUpdate != null) {
-											constructProductStoreRequestEntity(checkProductStoreUpdate, productMerchant, productDetail, 
-													store, merchant, storePrice, typeDiscountStore, discountStore);
-											checkProductStoreUpdate.update();
+										if (!idStore.isEmpty()) {
+											checkProductStoreUpdate = ProductStoreRepository.
+													findByIdAndMerchantId(Long.parseLong(idStore), merchant);
+											if (checkProductStoreUpdate != null) {
+												constructProductStoreRequestEntity(checkProductStoreUpdate, productMerchant, productDetail, 
+														store, merchant, storePrice, typeDiscountStore, discountStore);
+												checkProductStoreUpdate.update();
+											}
 										} else {
-											ProductStore addNewProductStore = new ProductStore();
-											constructProductStoreRequestEntity(addNewProductStore, productMerchant, productDetail, 
-													store, merchant, storePrice, typeDiscountStore, discountStore);
-											addNewProductStore.save();
+											checkProductStoreUpdate = ProductStoreRepository.find.where()
+													.eq("store", store)
+													.eq("productMerchant", productMerchant).setMaxRows(1).findUnique();
+											if (checkProductStoreUpdate != null) {
+												constructProductStoreRequestEntity(checkProductStoreUpdate, productMerchant, productDetail, 
+														store, merchant, storePrice, typeDiscountStore, discountStore);
+												checkProductStoreUpdate.update();
+											} else {
+												ProductStore addNewProductStore = new ProductStore();
+												constructProductStoreRequestEntity(addNewProductStore, productMerchant, productDetail, 
+														store, merchant, storePrice, typeDiscountStore, discountStore);
+												addNewProductStore.save();
+											}
 										}
 									} else {
 										if (!idStore.isEmpty()) {
-											Optional <ProductStore> optionalProductStore = ProductStoreRepository.findById(Long.parseLong(idStore));
-											if (optionalProductStore.isPresent()) {
-												checkProductStoreUpdate = optionalProductStore.get();
+											checkProductStoreUpdate = ProductStoreRepository.
+													findByIdAndMerchantId(Long.parseLong(idStore), merchant);
+											if (checkProductStoreUpdate != null) {
 												checkProductStoreUpdate.isActive = Boolean.FALSE;
 												checkProductStoreUpdate.isDeleted = Boolean.TRUE;
 												checkProductStoreUpdate.update();
