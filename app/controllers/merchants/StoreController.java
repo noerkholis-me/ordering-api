@@ -112,6 +112,9 @@ public class StoreController extends BaseController {
                         store.storePhone = storeRequest.getStorePhone();
                         store.storeAddress = storeRequest.getAddress();
                         store.isActive = Boolean.TRUE;
+                        store.setStatusOpenStore(storeRequest.getStatusOpenStore());
+                        store.setOpenAt(storeRequest.getOpenAt());
+                        store.setClosedAt(storeRequest.getClosedAt());
                         store.shipperProvince = ShipperProvince.findById(storeRequest.getProvinceId());
                         store.shipperCity = ShipperCity.findById(storeRequest.getCityId());
                         store.shipperSuburb = ShipperSuburb.findById(storeRequest.getSuburbId());
@@ -356,6 +359,9 @@ public class StoreController extends BaseController {
                 .merchantType(store.merchant.merchantType)
                 .storeQueueUrl(Helper.MOBILEQR_URL + store.storeCode + "/queue")
                 .productStoreResponses(list)
+                .statusOpenStore(store.statusOpenStore)
+                .openAt(store.openAt)
+                .closedAt(store.closedAt)
                 .build();
     }
 
@@ -371,6 +377,7 @@ public class StoreController extends BaseController {
         store.storePhone = storeRequest.getStorePhone();
         store.storeAddress = storeRequest.getAddress();
         store.isActive = Boolean.TRUE;
+        store.statusOpenStore = Boolean.FALSE;
         store.shipperProvince = ShipperProvince.findById(storeRequest.getProvinceId());
         store.shipperCity = ShipperCity.findById(storeRequest.getCityId());
         store.shipperSuburb = ShipperSuburb.findById(storeRequest.getSuburbId());
