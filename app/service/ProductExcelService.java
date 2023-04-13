@@ -98,6 +98,7 @@ public class ProductExcelService {
 	public boolean importProductMerchant(FilePart file, Merchant merchant, BaseResponse<?> response) {
 		String error = "";
 		String errorValidation = "";
+		String errorValidationStore = "";
 		Transaction txn = Ebean.beginTransaction();
 		int line = 1;
 		int cell = 0;
@@ -154,7 +155,7 @@ public class ProductExcelService {
 								typeImport = "Import";
 								logger.info("Add New Product");
 								
-								error = validateImportRequest(idProduk, noSku, 
+								errorValidation = validateImportRequest(idProduk, noSku, 
 										productName, category, subCategory, subsCategory, brand, productType, isCustomizeable, 
 										productPrice, discountType, discount, shortDesc, longDesc, error, line);
 								
@@ -179,11 +180,11 @@ public class ProductExcelService {
 										error += ", Merek Salah di Baris " + line;
 									
 									if (!namaStore.isEmpty()) {
-										error += validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
+										errorValidationStore = validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, line);
 										store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", Boolean.FALSE)
 												.eq("isActive", Boolean.TRUE).setMaxRows(1).findUnique() ;
 										if (store == null)
-											error += ", Nama Toko Salah di Baris " + line;	
+											error += ", Nama Toko Salah di Baris " + line;
 									} else {
 										if (merchant.productStoreRequired)
 												storeEmpty = true;
@@ -223,7 +224,7 @@ public class ProductExcelService {
 									}
 								}
 							} else {
-								 error = validateImportRequest(idProduk, noSku, 
+								 errorValidation = validateImportRequest(idProduk, noSku, 
 										productName, category, subCategory, subsCategory, brand, productType, isCustomizeable, 
 										productPrice, discountType, discount, shortDesc, longDesc, error, line);
 								
@@ -262,7 +263,7 @@ public class ProductExcelService {
 									error += ", Merek Salah di Baris " + line;
 								
 								if (!namaStore.isEmpty()) {
-									error += validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, error, line);
+									errorValidationStore = validateStoreRequest(namaStore, storePrice, typeDiscountStore, discountStore, line);
 									store = Store.find.where().ieq("storeName", namaStore).eq("isDeleted", Boolean.FALSE)
 										.eq("isActive", Boolean.TRUE).setMaxRows(1).findUnique() ;
 									if (store == null)
@@ -354,7 +355,7 @@ public class ProductExcelService {
 					"Success Importing Data", "Imported " + countDataImport + " New Product, Updated " + countDataUpdate + " Product");
 			return true;
 		}
-		response.setBaseResponse(0, 0, 0, "Import Failed" + error, null);
+		response.setBaseResponse(0, 0, 0, "Import Failed" + error + errorValidation + errorValidationStore, null);
 		txn.rollback();
 		txn.end();
 		return false;
@@ -1271,7 +1272,8 @@ public class ProductExcelService {
 		return error;
 	} 
 	
-	private static String validateStoreRequest (String storeName, String price, String discountType, String discount, String error, int line) {
+	private static String validateStoreRequest (String storeName, String price, String discountType, String discount, int line) {
+		String error = "";
 		if (storeName.isEmpty())
 			error += "Nama Toko Salah di Baris " +line;
 		if(price.isEmpty())
