@@ -430,6 +430,12 @@ GET      /merchant/group/:groupCode/product/list    controllers.merchants.QrGrou
 GET      /merchant/group/:groupCode/category        controllers.merchants.QrGroupController.getListCategoryFromGroup(groupCode:String)
 GET      /merchant/group/:groupCode/brand           controllers.merchants.QrGroupController.getListBrandFromGroup(groupCode:String, filter:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 
+#VOUCHER MERCHANT
+GET		 /merchant/voucher							controllers.merchants.VoucherController.getAllVoucher(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET		 /merchant/voucher/:id						controllers.merchants.VoucherController.getVoucherById(id:Long)
+POST	 /merchant/voucher/create					controllers.merchants.VoucherController.createVoucher()
+POST	 /merchant/voucher/edit/:id					controllers.merchants.VoucherController.editVoucher(id:Long)
+DELETE	 /merchant/voucher/delete/:id				controllers.merchants.VoucherController.deleteVoucher(id:Long)
 #CONFIG SETTING
 GET    /master/config-setting/:key                  controllers.masters.ConfigSettingController.getConfigSettingByKey(key: String)
 

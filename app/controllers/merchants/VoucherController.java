@@ -1,6 +1,7 @@
 package controllers.merchants;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,21 +9,30 @@ import java.util.List;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Query;
 import com.avaje.ebean.Transaction;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.mapping.request.MapVoucher;
+import com.hokeba.util.Helper;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 
 import controllers.BaseController;
+import dtos.merchant.MerchantResponse;
+import dtos.store.StoreResponse;
+import dtos.voucher.CreateVoucherRequest;
+import dtos.voucher.VoucherResponse;
 import models.Merchant;
-
+import models.Store;
 import models.Voucher;
 import models.VoucherDetail;
+import models.VoucherMerchant;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import utils.ShipperHelper;
 import play.mvc.BodyParser;
 
 @Api(value = "/merchants/vouchers", description = "Vouchers")
@@ -169,5 +179,175 @@ public class VoucherController extends BaseController {
 		}
 		response.setBaseResponse(0, 0, 0, unauthorized, null);
 		return unauthorized(Json.toJson(response));
+	}
+	
+	public static Result getAllVoucher(String filter, String sort, int offset, int limit) {
+		Merchant merchant = checkMerchantAccessAuthorization();
+		if (merchant != null) {
+			try {
+				Query<VoucherMerchant> query = VoucherMerchant.findAllVoucherMerchantAvailableAndMerchant(merchant);
+				List<VoucherMerchant> totalData = VoucherMerchant.getTotalDataPage(query);
+				List<VoucherMerchant> voucherList = VoucherMerchant.findVoucherMerchantWithPaging(query, sort, filter, offset, limit);
+				List<VoucherResponse> voucherRes = toResponses(voucherList);
+				response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : voucherList.size()
+						, offset, limit, success + " Showing data voucher", voucherRes);
+                return ok(Json.toJson(response));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+		}
+		return unauthorized(Json.toJson(response));
+	}
+	
+	public static Result getVoucherById(Long id) {
+		Merchant merchant = checkMerchantAccessAuthorization();
+		if (merchant != null) {
+			VoucherMerchant res = VoucherMerchant.findById(id);
+			if (res != null) {
+				response.setBaseResponse(1, 0, 0, "Success", toResponse(res));
+				return ok(Json.toJson(response));
+			}
+			return notFound(Json.toJson(response));
+		}
+		return unauthorized(Json.toJson(response));
+	}
+	
+	public static Result createVoucher() {
+		Merchant merchantCreator = checkMerchantAccessAuthorization();
+		if (merchantCreator != null) {
+			Transaction txn = Ebean.beginTransaction();
+			JsonNode json = request().body().asJson();
+			ObjectMapper mapper = new ObjectMapper();
+			try {
+				CreateVoucherRequest request = mapper.readValue(json.toString(), CreateVoucherRequest.class);
+				VoucherMerchant voucher = new VoucherMerchant(request, merchantCreator);
+				voucher.save();
+				txn.commit();
+
+				response.setBaseResponse(1, offset, 1, success, toResponse(voucher));
+				txn.end();
+				return ok(Json.toJson(response));
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		return unauthorized(Json.toJson(response));
+	}
+	
+	public static Result editVoucher (Long id) {
+		Merchant merchant = checkMerchantAccessAuthorization();
+		if (merchant != null) {
+			Transaction txn = Ebean.beginTransaction();
+			try {
+				JsonNode json = request().body().asJson();
+				ObjectMapper mapper = new ObjectMapper();
+				CreateVoucherRequest request = mapper.readValue(json.toString(), CreateVoucherRequest.class);
+				VoucherMerchant voucher = VoucherMerchant.findById(id);
+				String updateRes = updateVoucher(voucher, request);
+				txn.commit();
+				response.setBaseResponse(updateRes.equalsIgnoreCase("No Changes Applied") ? 0 : 1 , 0 , 0, "Success", updateRes);
+				txn.close();
+				return ok(Json.toJson(response));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return unauthorized(Json.toJson(response));
+	}
+	
+	public static Result deleteVoucher(Long id) throws IOException {
+		Merchant merchant = checkMerchantAccessAuthorization();
+		if (merchant != null) {
+			Transaction txn = Ebean.beginTransaction();
+			VoucherMerchant voucher = VoucherMerchant.findById(id);
+			if (voucher != null) {
+				voucher.isDeleted = Boolean.TRUE;
+				voucher.setAvailable(Boolean.FALSE);
+				voucher.update();
+				txn.commit();
+				response.setBaseResponse(0, 0, 0, "Success", "Success Deleted Voucher");
+			}
+			return ok(Json.toJson(response));
+		}
+		return unauthorized(Json.toJson(response));
+	}
+	
+	private static VoucherResponse toResponse(VoucherMerchant voucher) {
+		Merchant merchant = voucher.getMerchant();
+		MerchantResponse merchantRes = MerchantResponse.builder()
+				.id(merchant.id)
+				.email(merchant.email)
+				.fullName(merchant.fullName)
+				.userType("merchant").build();
+        return VoucherResponse.builder()
+                .id(voucher.id)
+                .code(voucher.getCode())
+                .name(voucher.getName())
+                .description(voucher.getDescription())
+                .expiryDay(voucher.getExpiryDay())
+                .isAvailable(voucher.isAvailable())
+                .value(voucher.getValue().intValue())
+                .purchasePrice(voucher.getPurchasePrice().intValue())
+                .valueText(voucher.getValueText())
+                .merchant(merchantRes)
+                .voucherType(voucher.getVoucherType())
+                .build();
+    }
+	
+	private static List<VoucherResponse> toResponses(List<VoucherMerchant> voucher) {
+        List<VoucherResponse> response = new ArrayList<>();
+        voucher.forEach(voucherMerchant -> response.add(toResponse(voucherMerchant)));
+        return response;
+    }
+	
+	private static String validateRequest (CreateVoucherRequest request) {
+		if (request == null)
+			return "Request Is Null or Empty";
+		if ("".equalsIgnoreCase(request.getName()))
+			return "Nama Voucher Kosong atau null";
+		if (request.getValue() == null)
+		if (Double.valueOf(request.getValue()).compareTo(0D) < 0 )	
+			return "Jumlah Potongan Voucher Tidak Boleh Kurang dari 0";
+		if (!request.getValueText().equalsIgnoreCase(VoucherMerchant.NOMINAL) && !request.getValueText().equalsIgnoreCase(VoucherMerchant.PERCENT))	
+			return "Tipe Voucher Tidak di Dukung";
+		return null;
+	}
+
+	private static String updateVoucher (VoucherMerchant voucher, CreateVoucherRequest req) {
+		String res = "";
+		if (req.getName() != null && !req.getName().equalsIgnoreCase(voucher.getName())) {
+			voucher.setName(req.getName());
+			res += "Updated Voucher Name";
+		}
+		if (!req.getValue().isEmpty()) {
+			if (Double.valueOf(req.getValue()).compareTo(0D) > 0 && Double.valueOf(req.getValue()).compareTo(voucher.getValue().doubleValue()) != 0) {
+				voucher.setValue(new BigDecimal(req.getValue()));
+				res += "Updated Voucher Value";
+			}
+		}
+		if (!req.getValueText().isEmpty() && !req.getValueText().equalsIgnoreCase(voucher.getValueText())) {
+			voucher.setValueText(req.getValueText());
+			res += "Updated Voucher Value Text";
+		}
+		if (req.getPurchasePrice() != 0 && !voucher.getPurchasePrice().equals(new BigDecimal(req.getPurchasePrice()))) {
+			voucher.setPurchasePrice(new BigDecimal(req.getPurchasePrice()));
+			res += "Updated Purchase Price";
+		}
+		if (!req.getDescription().isEmpty() && !voucher.getDescription().equalsIgnoreCase(req.getDescription())) {
+			voucher.setDescription(req.getDescription());
+			res += "Updated Voucher Description";
+		}
+		if (req.getExpiryDay() != 0 && voucher.getExpiryDay() != req.getExpiryDay()) {
+			voucher.setExpiryDay(req.getExpiryDay());
+			res += "Updated Voucher Expiry Date";
+		}
+		if (res.isEmpty())
+			res += "No Changes Applied";
+		
+		voucher.update();
+		return res;
 	}
 }
