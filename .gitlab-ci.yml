@@ -110,9 +110,9 @@ deploy_production:
   stage: deploy_production
   script:
     - sed -i "s,_IMAGE:VERSION_,${CI_REGISTRY_IMAGE}:$CI_BUILD_REF," docker-compose.yml
-    - scp -P 222 docker-compose.yml deploy@165.22.252.218:~/api/
-    - ssh -p 222 deploy@165.22.252.218 docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry.stagingapps.net
-    - ssh -p 222 deploy@165.22.252.218 "cd api && docker compose up -d"
+    - scp -P 222 docker-compose.yml deploy@128.199.64.120:~/api/
+    - ssh -p 222 deploy@128.199.64.120 docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry.stagingapps.net
+    - ssh -p 222 deploy@128.199.64.120 "cd api && docker compose up -d"
   only:
     - prod-do
   tags:
