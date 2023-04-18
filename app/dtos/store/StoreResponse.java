@@ -21,6 +21,8 @@ public class StoreResponse {
     private String storeCode;
     @JsonProperty("store_name")
     private String storeName;
+    @JsonProperty("store_alias")
+    private String storeAlias;
     @JsonProperty("store_phone")
     private String storePhone;
     @JsonProperty("address")

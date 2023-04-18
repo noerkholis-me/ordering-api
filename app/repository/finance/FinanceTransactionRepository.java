@@ -4,9 +4,12 @@ import com.avaje.ebean.Ebean;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.FetchConfig;
 import com.avaje.ebean.Query;
+import com.avaje.ebean.RawSql;
+import com.avaje.ebean.RawSqlBuilder;
 import controllers.finance.FinanceTransactionController;
 import models.BaseModel;
 import models.Merchant;
+import models.ProductStore;
 import models.Store;
 import models.finance.FinanceTransaction;
 import play.Logger;
@@ -29,6 +32,52 @@ public class FinanceTransactionRepository extends BaseModel {
         ExpressionList<FinanceTransaction> exp = query.where();
         query = exp.query();
         return query.findPagingList(0).getPage(0).getList().size();
+    }
+
+    public static List<FinanceTransaction> getAllTransactions(Long merchantId, Long storeId, String startDate, String endDate, String status, String sort, int offset, int limit) throws Exception {
+        String condition;
+        if (storeId != null && storeId != 0L) {
+            condition = "WHERE st.id = " + storeId + " ";
+        } else {
+            condition = "WHERE mc.id = " + merchantId + " ";
+        }
+
+        String sorting;
+        if (sort.equalsIgnoreCase("ASC")) {
+            sorting = "ORDER BY ft.date ASC";
+        } else {
+            sorting = "ORDER BY ft.date DESC";
+        }
+
+        String querySql = "SELECT ord.id FROM finance_transaction ft "
+            + "JOIN store st ON ft.store_id = st.id "
+            + "JOIN merchant mc ON st.merchant_id = mc.id "
+            + "JOIN orders ord ON ft.reference_number = ord.order_number "
+            + condition
+            + "GROUP BY ft.reference_number, ft.date, ord.id "
+            + sorting;
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<FinanceTransaction> query = Ebean.find(FinanceTransaction.class).setRawSql(rawSql);
+
+        ExpressionList<FinanceTransaction> exp = query.where();
+        exp = exp.disjunction();
+        if (!startDate.equalsIgnoreCase("") && !endDate.equalsIgnoreCase("")) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            Date start = simpleDateFormat.parse(startDate.concat(" 00:00:00.0"));
+            Date end = simpleDateFormat.parse(endDate.concat(" 23:59:00.0"));
+
+            Timestamp startTimestamp = new Timestamp(start.getTime());
+            Timestamp endTimestamp = new Timestamp(end.getTime());
+            exp.between("ft.date", startTimestamp, endTimestamp);
+        }
+        if (!status.equalsIgnoreCase("")) {
+            exp.eq("ft.status", status);
+        }
+        exp = exp.endJunction();
+        query = exp.query();
+
+        return query.findPagingList(limit).getPage(offset).getList();
     }
 
     public static Query<FinanceTransaction> findAllTransactionByMerchantId(Long merchantId) {
