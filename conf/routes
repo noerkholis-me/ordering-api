@@ -410,6 +410,7 @@ GET    /merchant/store/list                         controllers.merchants.StoreC
 GET    /merchant/store/:id                          controllers.merchants.StoreController.getStoreById(id:Long)
 DELETE    /merchant/store/:id                       controllers.merchants.StoreController.deleteStore(id:Long)
 GET    /merchant/store/:storeCode/detail            controllers.merchants.StoreController.getStoreByStoreCode(storeCode: String)
+GET    /merchant/store/v2/:storeAlias/detail        controllers.merchants.StoreController.getStoreByAlias(storeAlias: String)
 GET    /merchant/allstore                           controllers.merchants.StoreController.getAllStoreMerchant()
 
 GET    /merchant/detail/:merchantCode				controllers.merchants.MerchantController.getMerchantDetail(merchantCode: String)
