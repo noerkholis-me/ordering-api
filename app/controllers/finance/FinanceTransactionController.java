@@ -10,9 +10,11 @@ import dtos.finance.FinanceTransactionResponse;
 import models.Merchant;
 import models.Store;
 import models.finance.FinanceTransaction;
+import models.transaction.Order;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import repository.OrderRepository;
 import repository.finance.FinanceTransactionRepository;
 import service.DownloadTransactionService;
 
@@ -38,34 +40,30 @@ public class FinanceTransactionController extends BaseController {
                         response.setBaseResponse(0, 0, 0, "tanggal awal tidak boleh melebihi tanggal akhir", null);
                         return badRequest(Json.toJson(response));
                 }
-                Query<FinanceTransaction> query = null;
-                // default query find by merchant id
-                query = FinanceTransactionRepository.findAllTransactionByMerchantId(ownMerchant.id);
                 if (storeId != null && storeId != 0L) {
                     Store store = Store.findById(storeId);
                     if (store == null) {
                         response.setBaseResponse(0, 0, 0, "store id does not exists", null);
                         return badRequest(Json.toJson(response));
                     }
-                    query = FinanceTransactionRepository.findAllTransactionByStoreId(storeId);
                 }
-                List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findAllTransaction(query, startDate, endDate, sort, offset, limit, status);
-                Integer totalData = FinanceTransactionRepository.getTotalPage(query);
+
+                List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.getAllTransactions(ownMerchant.id, storeId, startDate, endDate, status, sort, offset, limit);
+                Integer totalData = FinanceTransactionRepository.getAllTransactions(ownMerchant.id, storeId, startDate, endDate, status, sort, 0, 0).size();
                 List<FinanceTransactionResponse> financeTransactionResponses = new ArrayList<>();
-                String refNumber = "";
                 for (FinanceTransaction transaction : financeTransactions) {
                     FinanceTransactionResponse trxRes = new FinanceTransactionResponse();
-                    if (!transaction.getReferenceNumber().equals(refNumber)){
-                        refNumber = transaction.getReferenceNumber();
-                        trxRes.setReferenceNumber(transaction.getReferenceNumber());
-                        trxRes.setDate(transaction.getDate());
-                        trxRes.setTransactionType(transaction.getTransactionType());
-                        trxRes.setStatus(transaction.getStatus());
-                        trxRes.setAmount(transaction.getAmount());
-                        financeTransactionResponses.add(trxRes);
-                    }
+                    Order order = OrderRepository.find.where().eq("id", transaction.id).eq("isDeleted", false).findUnique();
+                    FinanceTransaction trx = FinanceTransactionRepository.find.where().raw("reference_number = '" + order.getOrderNumber() + "' AND is_deleted = false ORDER BY date LIMIT 1").findUnique();
+                    trxRes.setReferenceNumber(trx.getReferenceNumber());
+                    trxRes.setDate(trx.getDate());
+                    trxRes.setTransactionType(trx.getTransactionType());
+                    trxRes.setStatus(trx.getStatus());
+                    trxRes.setAmount(trx.getAmount());
+                    financeTransactionResponses.add(trxRes);
                 }
-                response.setBaseResponse(financeTransactionResponses.size(), offset, limit, success + " Showing data transaction", financeTransactionResponses);
+
+                response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", financeTransactionResponses);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 LOGGER.error("Error when getting transaction data");
@@ -89,19 +87,30 @@ public class FinanceTransactionController extends BaseController {
                         response.setBaseResponse(0, 0, 0, "tanggal awal tidak boleh melebihi tanggal akhir", null);
                         return badRequest(Json.toJson(response));
                 }
-                Query<FinanceTransaction> query = null;
-                // default query find by merchant id
-                query = FinanceTransactionRepository.findAllTransactionByMerchantId(ownMerchant.id);
                 if (storeId != null && storeId != 0L) {
                     Store store = Store.findById(storeId);
                     if (store == null) {
                         response.setBaseResponse(0, 0, 0, "store id does not exists", null);
                         return badRequest(Json.toJson(response));
                     }
-                    query = FinanceTransactionRepository.findAllTransactionByStoreId(storeId);
                 }
-                List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findAllTransaction(query, startDate, endDate, sort, offset, limit, status);
-                File file = DownloadTransactionService.downloadTransaction(financeTransactions, FinanceTransaction.TRANSACTION, new ArrayList<>());
+
+                List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.getAllTransactions(ownMerchant.id, storeId, startDate, endDate, status, sort, 0, 0);
+                List<FinanceTransaction> financeTransactionResponses = new ArrayList<>();
+                for (FinanceTransaction transaction : financeTransactions) {
+                    FinanceTransaction trxRes = new FinanceTransaction();
+                    Order order = OrderRepository.find.where().eq("id", transaction.id).eq("isDeleted", false).findUnique();
+                    FinanceTransaction trx = FinanceTransactionRepository.find.where().raw("reference_number = '" + order.getOrderNumber() + "' AND is_deleted = false ORDER BY date LIMIT 1").findUnique();
+                    trxRes.setEventId(trx.getEventId());
+                    trxRes.setReferenceNumber(trx.getReferenceNumber());
+                    trxRes.setDate(trx.getDate());
+                    trxRes.setTransactionType(trx.getTransactionType());
+                    trxRes.setStatus(trx.getStatus());
+                    trxRes.setAmount(trx.getAmount());
+                    financeTransactionResponses.add(trxRes);
+                }
+
+                File file = DownloadTransactionService.downloadTransaction(financeTransactionResponses, FinanceTransaction.TRANSACTION, new ArrayList<>());
                 response().setContentType("application/vnd.ms-excel");
                 response().setHeader("Content-disposition", "attachment; filename=transaction.xlsx");
                 return ok(file);
