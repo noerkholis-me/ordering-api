@@ -687,7 +687,7 @@ public class ProductMerchantController extends BaseController {
     public static Result getImportTemplate() throws IOException {
     	Merchant merchant = checkMerchantAccessAuthorization();
     	if(merchant != null) {
-    		byte[] file = ProductExcelService.getImportTemplateMerchant();
+    		byte[] file = ProductExcelService.getImportTemplateMerchant(merchant);
 //    		ByteArrayInputStream bis = new ByteArrayInputStream(file);
 //    	    ZipInputStream zis = new ZipInputStream(bis);
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
