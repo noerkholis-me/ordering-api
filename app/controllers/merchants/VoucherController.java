@@ -193,17 +193,9 @@ public class VoucherController extends BaseController {
 		Merchant merchant = checkMerchantAccessAuthorization();
 		if (merchant != null) {
 			try {
-				System.out.println(merchant.id);
 				Query<VoucherMerchant> query = VoucherMerchant.findAllVoucherMerchantAvailableAndMerchant(merchant);
 				List<VoucherMerchant> totalData = VoucherMerchant.getTotalDataPage(query);
-				System.out.println("total data"+ totalData);
 				List<VoucherMerchant> voucherList = VoucherMerchant.findVoucherMerchantWithPaging(query, sort, filter, offset, limit);
-				System.out.println(voucherList.size());
-				List<VoucherHowToUse> htu = new ArrayList<>();
-				voucherList.forEach(a -> {
-					VoucherHowToUse resHtu = VoucherHowToUse.findByVoucherMerchant(a);
-					htu.add(resHtu);
-				});
 				List<VoucherListResponse> voucherRes = toResponses(voucherList);
 				response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : voucherList.size()
 						, offset, limit, success + " Showing data voucher", voucherRes);
@@ -373,11 +365,9 @@ public class VoucherController extends BaseController {
     }
 	
 	private static List<VoucherListResponse> toResponses(List<VoucherMerchant> voucher) {
-		System.out.println("in responses");
 //		List<VoucherListResponse> response = new ArrayList<>();
 		List<VoucherListResponse> response = voucher.stream().map(a -> toResponse(a)).collect(Collectors.toList());
 //	    voucher.forEach(voucherMerchant -> response.add(toResponse(voucherMerchant)));
-	    System.out.println(response.size());
 	    return response;
     }
 	
