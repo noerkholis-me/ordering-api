@@ -84,7 +84,7 @@ public class VoucherMerchant extends BaseModel{
     }
 	
 	public static Query<VoucherMerchant> findAllVoucherMerchantAvailableAndMerchant(Merchant merchant) {
-		return find.where().eq("isDeleted", Boolean.FALSE).eq("merchant", merchant).order("id");
+		return find.where().eq("isDeleted", false).eq("merchant", merchant).eq("available", true).order("id");
 	}
 	
 	public static List<VoucherMerchant> getTotalDataPage (Query<VoucherMerchant> reqQuery) {
@@ -101,7 +101,7 @@ public class VoucherMerchant extends BaseModel{
         if (!"".equals(sort)) {
             query = query.orderBy(sort);
         } else {
-            query = query.orderBy("t0.created_at desc");
+            query = query.orderBy("createdAt desc");
         }
 
         ExpressionList<VoucherMerchant> exp = query.where();
@@ -113,4 +113,8 @@ public class VoucherMerchant extends BaseModel{
         }
         return query.findPagingList(limit).getPage(offset).getList();
     }
+	
+	public static VoucherMerchant findByName (String name) {
+		return find.where().ieq("name", name).setMaxRows(1).findUnique();
+	}
 }

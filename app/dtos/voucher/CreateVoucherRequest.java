@@ -18,4 +18,5 @@ public class CreateVoucherRequest {
 	private String code;
 	private String description;
 	private String voucherType;
+	private String howToUse;
 }
