@@ -260,6 +260,10 @@ public class Merchant extends BaseModel{
     @Column(name = "global_store_qr_group")
     public boolean globalStoreQrGroup;
 
+    @JsonProperty("merchant_service_type")
+    @Column(name = "merchant_service_type")
+    public String merchantServiceType;
+
     public Merchant(String password, String email, String gender, String fullName, String name, String companyName, String status, String cityName, String address, String phone, boolean isActive) {
         this.password = password;
         this.email = email;

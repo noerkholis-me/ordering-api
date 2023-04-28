@@ -36,6 +36,7 @@ import utils.ShipperHelper;
 import com.hokeba.util.Helper;
 import java.math.BigDecimal;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,6 +65,20 @@ public class StoreController extends BaseController {
                     try {
                         Store store = new Store();
                         constructEntity(ownMerchant, storeRequest, store, Boolean.FALSE);
+
+                        String storeAlias = slugGenerate(storeRequest.getStoreName());
+                        Store alias = Store.find.where().raw("store_alias ~ '^" + storeAlias + "-[0-9]*$' ORDER BY store_alias DESC limit 1").findUnique();
+
+                        if (alias != null) {
+                            String[] tmpAlias = alias.storeAlias.split("-");
+                            String aliasName = tmpAlias[0];
+                            int currentindex = Integer.parseInt(tmpAlias[1]);
+                            int nextIndex = currentindex + 1;
+
+                            store.storeAlias = aliasName + "-" + nextIndex;
+                        } else {
+                            store.storeAlias = storeAlias + "-1";
+                        }
 
                         store.save();
                         trx.commit();
@@ -112,6 +127,9 @@ public class StoreController extends BaseController {
                         store.storePhone = storeRequest.getStorePhone();
                         store.storeAddress = storeRequest.getAddress();
                         store.isActive = Boolean.TRUE;
+                        store.setStatusOpenStore(storeRequest.getStatusOpenStore());
+                        store.setOpenAt(storeRequest.getOpenAt());
+                        store.setClosedAt(storeRequest.getClosedAt());
                         store.shipperProvince = ShipperProvince.findById(storeRequest.getProvinceId());
                         store.shipperCity = ShipperCity.findById(storeRequest.getCityId());
                         store.shipperSuburb = ShipperSuburb.findById(storeRequest.getSuburbId());
@@ -123,6 +141,35 @@ public class StoreController extends BaseController {
                         store.setStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode));
                         store.storeLogo = storeRequest.getStoreLogo();
                         System.out.println(store.storeQrCode);
+
+                        String storeAlias = slugGenerate(storeRequest.getStoreName());
+                        Store alias = Store.find.where().raw("store_alias ~ '^" + storeAlias + "-[0-9]*$' ORDER BY store_alias DESC limit 1").findUnique();
+
+                        // if alias exist, check store alias
+                        if (alias != null) {
+                            String[] tmpAlias = alias.storeAlias.split("-");
+                            String aliasName = tmpAlias[0];
+                            int currentindex = Integer.parseInt(tmpAlias[1]);
+                            int nextIndex = currentindex + 1;
+
+                            // if store alias == existing alias, check again
+                            if (storeAlias.equalsIgnoreCase(aliasName)) {
+                                Store getStore = Store.find.byId(id);
+                                if (getStore.storeAlias == null || getStore.storeAlias.trim().isEmpty()) {
+                                    store.storeAlias = storeAlias + "-" + nextIndex;
+                                } else {
+                                    String[] tmpCurrentAlias = getStore.storeAlias.split("-");
+                                    String currentAliasName = tmpCurrentAlias[0];
+                                    // if store alias != current store alias update store alias (e.g mystore != mynewstore)
+                                    if (!storeAlias.equalsIgnoreCase(currentAliasName)) {
+                                        store.storeAlias = storeAlias + "-" + nextIndex;
+                                    }
+                                }
+                            }
+                        } else {
+                            // create new store alias
+                            store.storeAlias = storeAlias + "-1";
+                        }
 
                         store.update();
                         trx.commit();
@@ -154,6 +201,26 @@ public class StoreController extends BaseController {
         if (ownMerchant != null) {
             try {
                 Query<Store> query = Store.findStoreIsActiveAndMerchant(ownMerchant);
+                List<Store> totalData = Store.getTotalDataPage(query);
+                List<Store> storeList = Store.findStoreWithPaging(query, sort, filter, offset, limit);
+                List<StoreResponse> storeResponses = toResponses(storeList);
+                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : storeList.size(), offset, limit, success + " Showing data stores", storeResponses);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                Logger.info("Error: " + e.getMessage());
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    @ApiOperation(value = "Get all list of store.", notes = "Returns all list of store.\n" + swaggerInfo
+        + "", responseContainer = "List", httpMethod = "GET")
+    public static Result getAllStoreFromAllMerchant (String filter, String sort, int offset, int limit) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            try {
+                Query<Store> query = Store.findAllStoreFromAllMerchant();
                 List<Store> totalData = Store.getTotalDataPage(query);
                 List<Store> storeList = Store.findStoreWithPaging(query, sort, filter, offset, limit);
                 List<StoreResponse> storeResponses = toResponses(storeList);
@@ -276,11 +343,38 @@ public class StoreController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
+    @ApiOperation(value = "Get store by alias", notes = "Returns of store.\n" + swaggerInfo
+        + "", responseContainer = "object", httpMethod = "GET")
+    public static Result getStoreByAlias(String storeAlias) {
+        int authority = checkAccessAuthorization("all");
+        if (authority == 200 || authority == 203) {
+            try {
+                Store store = Store.find.where().eq("storeAlias", storeAlias).eq("isDeleted", false).eq("isActive", true).findUnique();
+                if (store == null) {
+                    response.setBaseResponse(0, 0, 0, "Store is not found.", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                StoreResponse storeResponse = toResponse(store);
+                response.setBaseResponse(1, 0, 0, success + " Showing data store", storeResponse);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                Logger.info("Error: " + e.getMessage());
+            }
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
     private static StoreResponse toResponse(Store store) {
         return StoreResponse.builder()
                 .id(store.id)
                 .storeCode(store.storeCode)
                 .storeName(store.storeName)
+                .storeAlias(store.storeAlias)
                 .storePhone(store.storePhone)
                 .address(store.storeAddress)
                 .province(ShipperHelper.toProvinceResponse(store.shipperProvince))
@@ -301,26 +395,27 @@ public class StoreController extends BaseController {
     private static StoreResponse toResponse(Store store, List<ProductMerchant> productMerchantList) {
         List<ProductStoreResponseForStore> list = new ArrayList<>();
         for (ProductMerchant productMerchant : productMerchantList) {
-        	ProductStore productStore = ProductStoreRepository.findForCust(productMerchant.id, store.id, productMerchant.merchant);
+            ProductStore productStore = ProductStoreRepository.findForCust(productMerchant.id, store.id, productMerchant.merchant);
             if (productStore != null) {
-	            ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productMerchant);
-	            String linkQrProductMerchant = productMerchantDetail.getProductMerchantQrCode();
-	            String qrProductMerchantUrl = null;
-	            if (linkQrProductMerchant != null) {
-	                String[] parts = linkQrProductMerchant.split("/");
-	                qrProductMerchantUrl = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+"home/"+store.storeCode+"/"+store.id+"/"+productMerchant.getMerchant().id+"/"+parts[4]+"/"+parts[5];
-	            }
-	            ProductStoreResponseForStore productStoreResponse = new ProductStoreResponseForStore();
-	            productStoreResponse.setProductId(productMerchant.id);
-	            productStoreResponse.setProductName(productMerchant.getProductName());
-	            productStoreResponse.setProductStoreQrCode(qrProductMerchantUrl);
-	            list.add(productStoreResponse);
+                ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productMerchant);
+                String linkQrProductMerchant = productMerchantDetail.getProductMerchantQrCode();
+                String qrProductMerchantUrl = null;
+                if (linkQrProductMerchant != null) {
+                    String[] parts = linkQrProductMerchant.split("/");
+                    qrProductMerchantUrl = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+"home/"+store.storeCode+"/"+store.id+"/"+productMerchant.getMerchant().id+"/"+parts[4]+"/"+parts[5];
+                }
+                ProductStoreResponseForStore productStoreResponse = new ProductStoreResponseForStore();
+                productStoreResponse.setProductId(productMerchant.id);
+                productStoreResponse.setProductName(productMerchant.getProductName());
+                productStoreResponse.setProductStoreQrCode(qrProductMerchantUrl);
+                list.add(productStoreResponse);
             }
         }
         return StoreResponse.builder()
                 .id(store.id)
                 .storeCode(store.storeCode)
                 .storeName(store.storeName)
+                .storeAlias(store.storeAlias)
                 .storePhone(store.storePhone)
                 .address(store.storeAddress)
                 .province(ShipperHelper.toProvinceResponse(store.shipperProvince))
@@ -336,6 +431,9 @@ public class StoreController extends BaseController {
                 .merchantType(store.merchant.merchantType)
                 .storeQueueUrl(Helper.MOBILEQR_URL + store.storeCode + "/queue")
                 .productStoreResponses(list)
+                .statusOpenStore(store.statusOpenStore)
+                .openAt(store.openAt)
+                .closedAt(store.closedAt)
                 .build();
     }
 
@@ -351,6 +449,7 @@ public class StoreController extends BaseController {
         store.storePhone = storeRequest.getStorePhone();
         store.storeAddress = storeRequest.getAddress();
         store.isActive = Boolean.TRUE;
+        store.statusOpenStore = Boolean.FALSE;
         store.shipperProvince = ShipperProvince.findById(storeRequest.getProvinceId());
         store.shipperCity = ShipperCity.findById(storeRequest.getCityId());
         store.shipperSuburb = ShipperSuburb.findById(storeRequest.getSuburbId());
@@ -459,6 +558,16 @@ public class StoreController extends BaseController {
         List<StoreResponsePuP> storeResponses = new ArrayList<>();
         stores.forEach(store -> storeResponses.add(toResponsePuP(store)));
         return storeResponses;
+    }
+
+    public static String slugGenerate(String input) {
+        String slug = Normalizer.normalize(input.toLowerCase(), Normalizer.Form.NFD)
+            .replaceAll("\\p{InCombiningDiacriticalMarks}+", "").replaceAll("[^\\p{Alnum}]+", "");
+        if (slug.length() != 0 && slug.charAt(slug.length() - 1) == '-') {
+            return slug.substring(0, slug.length() - 1);
+        } else {
+            return slug;
+        }
     }
 
 }

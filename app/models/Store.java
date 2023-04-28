@@ -110,6 +110,9 @@ public class Store extends BaseModel{
     @Column(name = "store_logo")
     public String storeLogo;
 
+    @Column(name = "store_alias")
+    public String storeAlias;
+
     public static Finder<Long, Store> find = new Finder<Long, Store>(Long.class, Store.class);
 
     @javax.persistence.Transient
@@ -126,6 +129,18 @@ public class Store extends BaseModel{
 
     @javax.persistence.Transient
     public Long area_id;
+
+    @Column(name = "status_open_store")
+    @Getter @Setter
+    public Boolean statusOpenStore;
+
+    @Column(name = "open_at")
+    @Getter @Setter
+    public String openAt;
+
+    @Column(name = "closed_at")
+    @Getter @Setter
+    public String closedAt;
 
     public Store() {
 
@@ -192,6 +207,10 @@ public class Store extends BaseModel{
                 .findPagingList(limit)
                 .setFetchAhead(false)
                 .getPage(offset);
+    }
+
+    public static Query<Store> findAllStoreFromAllMerchant() {
+        return find.where().eq("isDeleted", false).order("id");
     }
 
     public static Query<Store> findStoreIsActiveAndMerchant(Merchant merchant) {
