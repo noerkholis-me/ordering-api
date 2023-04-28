@@ -5,6 +5,10 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
+import org.checkerframework.checker.units.qual.A;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Query;
@@ -15,6 +19,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.mapping.request.MapVoucher;
+import com.hokeba.util.CommonFunction;
 import com.hokeba.util.Helper;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
@@ -24,6 +29,7 @@ import dtos.merchant.MerchantResponse;
 import dtos.store.StoreResponse;
 import dtos.voucher.CreateVoucherRequest;
 import dtos.voucher.VoucherHowToUseResponse;
+import dtos.voucher.VoucherListResponse;
 import dtos.voucher.VoucherResponse;
 import models.Merchant;
 import models.Store;
@@ -187,10 +193,18 @@ public class VoucherController extends BaseController {
 		Merchant merchant = checkMerchantAccessAuthorization();
 		if (merchant != null) {
 			try {
+				System.out.println(merchant.id);
 				Query<VoucherMerchant> query = VoucherMerchant.findAllVoucherMerchantAvailableAndMerchant(merchant);
 				List<VoucherMerchant> totalData = VoucherMerchant.getTotalDataPage(query);
+				System.out.println("total data"+ totalData);
 				List<VoucherMerchant> voucherList = VoucherMerchant.findVoucherMerchantWithPaging(query, sort, filter, offset, limit);
-				List<VoucherResponse> voucherRes = toResponses(voucherList);
+				System.out.println(voucherList.size());
+				List<VoucherHowToUse> htu = new ArrayList<>();
+				voucherList.forEach(a -> {
+					VoucherHowToUse resHtu = VoucherHowToUse.findByVoucherMerchant(a);
+					htu.add(resHtu);
+				});
+				List<VoucherListResponse> voucherRes = toResponses(voucherList);
 				response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : voucherList.size()
 						, offset, limit, success + " Showing data voucher", voucherRes);
                 return ok(Json.toJson(response));
@@ -213,7 +227,7 @@ public class VoucherController extends BaseController {
 					return ok(Json.toJson(response));
 				}
 				response.setBaseResponse(0, 0, 0, "How To Use Voucher is empty or Null", null);
-				return internalServerError(Json.toJson(response));
+				return badRequest(Json.toJson(response));
 			}
 			response.setBaseResponse(0, 0, 0, "Voucher Not Found", null);
 			return notFound(Json.toJson(response));
@@ -277,7 +291,7 @@ public class VoucherController extends BaseController {
 				if (updateRes.isEmpty())
 					updateRes = ", No Changes Applied";
 				txn.commit();
-				response.setBaseResponse(updateRes.equalsIgnoreCase("No Changes Applied") ? 0 : 1 , 0 , 0, "Success","Succes"+ updateRes);
+				response.setBaseResponse(updateRes.equalsIgnoreCase("No Changes Applied") ? 0 : 1 , 0 , 0, "Success","Success"+ updateRes);
 				txn.close();
 				return ok(Json.toJson(response));
 			} catch (Exception e) {
@@ -331,32 +345,40 @@ public class VoucherController extends BaseController {
                 .build();
     }
 	
-	private static VoucherResponse toResponse(VoucherMerchant voucher) {
-		Merchant merchant = voucher.getMerchant();
-		MerchantResponse merchantRes = MerchantResponse.builder()
-				.id(merchant.id)
-				.email(merchant.email)
-				.fullName(merchant.fullName)
-				.userType("merchant").build();
-        return VoucherResponse.builder()
-                .id(voucher.id)
-                .code(voucher.getCode())
-                .name(voucher.getName())
-                .description(voucher.getDescription())
-                .expiryDay(voucher.getExpiryDay())
-                .isAvailable(voucher.isAvailable())
-                .value(voucher.getValue().intValue())
-                .purchasePrice(voucher.getPurchasePrice().intValue())
-                .valueText(voucher.getValueText())
-                .merchant(merchantRes)
-                .voucherType(voucher.getVoucherType())
-                .build();
+	private static VoucherListResponse toResponse(VoucherMerchant voucher) {
+		try {
+			Merchant merchant = voucher.getMerchant();
+			MerchantResponse merchantRes = MerchantResponse.builder()
+					.id(merchant.id)
+					.email(merchant.email)
+					.fullName(merchant.fullName)
+					.userType("merchant").build();
+	        return VoucherListResponse.builder()
+	                .id(voucher.id)
+	                .code(voucher.getCode())
+	                .name(voucher.getName())
+	                .description(voucher.getDescription())
+	                .expiryDay(voucher.getExpiryDay())
+	                .isAvailable(voucher.isAvailable())
+	                .value(voucher.getValue().intValue())
+	                .purchasePrice(voucher.getPurchasePrice().intValue())
+	                .valueText(voucher.getValueText())
+	                .merchant(merchantRes)
+	                .voucherType(voucher.getVoucherType())
+	                .build();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
     }
 	
-	private static List<VoucherResponse> toResponses(List<VoucherMerchant> voucher) {
-        List<VoucherResponse> response = new ArrayList<>();
-        voucher.forEach(voucherMerchant -> response.add(toResponse(voucherMerchant)));
-        return response;
+	private static List<VoucherListResponse> toResponses(List<VoucherMerchant> voucher) {
+		System.out.println("in responses");
+//		List<VoucherListResponse> response = new ArrayList<>();
+		List<VoucherListResponse> response = voucher.stream().map(a -> toResponse(a)).collect(Collectors.toList());
+//	    voucher.forEach(voucherMerchant -> response.add(toResponse(voucherMerchant)));
+	    System.out.println(response.size());
+	    return response;
     }
 	
 	private static String validateRequest (CreateVoucherRequest request) {
