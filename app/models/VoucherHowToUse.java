@@ -29,7 +29,7 @@ public class VoucherHowToUse extends BaseModel{
 	
 	private String content;
 	@OneToOne(cascade = { CascadeType.ALL })
-    @JoinColumn(name = "voucher_merchant_id", referencedColumnName = "id")
+    @JoinColumn(name = "voucher_id", referencedColumnName = "id")
 	private VoucherMerchant voucher;
 	
 	public VoucherHowToUse (VoucherMerchant voucher, CreateVoucherRequest req) {
