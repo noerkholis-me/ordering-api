@@ -18,6 +18,8 @@ CREATE TABLE voucher_merchant_new (
     constraint pk_voucher_merchant_new primary key (id)
 );
 
+
+
 alter table voucher_merchant_new add constraint fk_voucher_merchant_new_merchant_id foreign key (merchant_id) references merchant (id);
 create index ix_voucher_merchant_new_merchant_id on voucher_merchant_new (merchant_id);
 
