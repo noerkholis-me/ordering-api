@@ -23,11 +23,13 @@ import controllers.BaseController;
 import dtos.merchant.MerchantResponse;
 import dtos.store.StoreResponse;
 import dtos.voucher.CreateVoucherRequest;
+import dtos.voucher.VoucherHowToUseResponse;
 import dtos.voucher.VoucherResponse;
 import models.Merchant;
 import models.Store;
 import models.Voucher;
 import models.VoucherDetail;
+import models.VoucherHowToUse;
 import models.VoucherMerchant;
 import play.Logger;
 import play.libs.Json;
@@ -205,9 +207,15 @@ public class VoucherController extends BaseController {
 		if (merchant != null) {
 			VoucherMerchant res = VoucherMerchant.findById(id);
 			if (res != null) {
-				response.setBaseResponse(1, 0, 0, "Success", toResponse(res));
-				return ok(Json.toJson(response));
+				VoucherHowToUse htu = VoucherHowToUse.findByVoucherMerchant(res);
+				if (htu != null) {
+					response.setBaseResponse(1, 0, 0, "Success", toResponse(res, htu));
+					return ok(Json.toJson(response));
+				}
+				response.setBaseResponse(0, 0, 0, "How To Use Voucher is empty or Null", null);
+				return internalServerError(Json.toJson(response));
 			}
+			response.setBaseResponse(0, 0, 0, "Voucher Not Found", null);
 			return notFound(Json.toJson(response));
 		}
 		return unauthorized(Json.toJson(response));
@@ -221,11 +229,18 @@ public class VoucherController extends BaseController {
 			ObjectMapper mapper = new ObjectMapper();
 			try {
 				CreateVoucherRequest request = mapper.readValue(json.toString(), CreateVoucherRequest.class);
+				VoucherMerchant uniqueCheck = VoucherMerchant.findByName(request.getName());
+				if (uniqueCheck != null) {
+					response.setBaseResponse(0, 0, 0, "Voucher dengan nama yang sama sudah ada", null);
+					return badRequest(Json.toJson(response));
+				}
 				VoucherMerchant voucher = new VoucherMerchant(request, merchantCreator);
 				voucher.save();
+				VoucherHowToUse howToUse = new VoucherHowToUse(voucher, request);
+				howToUse.save();
 				txn.commit();
 
-				response.setBaseResponse(1, offset, 1, success, toResponse(voucher));
+				response.setBaseResponse(1, offset, 1, success, toResponse(voucher, howToUse));
 				txn.end();
 				return ok(Json.toJson(response));
 			} catch (Exception e) {
@@ -245,10 +260,24 @@ public class VoucherController extends BaseController {
 				JsonNode json = request().body().asJson();
 				ObjectMapper mapper = new ObjectMapper();
 				CreateVoucherRequest request = mapper.readValue(json.toString(), CreateVoucherRequest.class);
+				VoucherMerchant uniqueCheck = VoucherMerchant.findByName(request.getName());
+				if (uniqueCheck != null) {
+					response.setBaseResponse(0, 0, 0, "Voucher dengan nama yang sama sudah ada", null);
+					return badRequest(Json.toJson(response));
+				}
 				VoucherMerchant voucher = VoucherMerchant.findById(id);
 				String updateRes = updateVoucher(voucher, request);
+				if (request.getHowToUse() != null && !request.getHowToUse().isEmpty()) {
+					VoucherHowToUse htu = VoucherHowToUse.findByVoucherMerchant(voucher);
+					String htuRes = updateHowToUse(htu, request);
+
+					updateRes += htuRes;
+						
+				}
+				if (updateRes.isEmpty())
+					updateRes = ", No Changes Applied";
 				txn.commit();
-				response.setBaseResponse(updateRes.equalsIgnoreCase("No Changes Applied") ? 0 : 1 , 0 , 0, "Success", updateRes);
+				response.setBaseResponse(updateRes.equalsIgnoreCase("No Changes Applied") ? 0 : 1 , 0 , 0, "Success","Succes"+ updateRes);
 				txn.close();
 				return ok(Json.toJson(response));
 			} catch (Exception e) {
@@ -274,6 +303,33 @@ public class VoucherController extends BaseController {
 		}
 		return unauthorized(Json.toJson(response));
 	}
+	
+	private static VoucherResponse toResponse(VoucherMerchant voucher, VoucherHowToUse howToUse) {
+		Merchant merchant = voucher.getMerchant();
+		MerchantResponse merchantRes = MerchantResponse.builder()
+				.id(merchant.id)
+				.email(merchant.email)
+				.fullName(merchant.fullName)
+				.userType("merchant").build();
+		VoucherHowToUseResponse htu = VoucherHowToUseResponse.builder()
+				.id(howToUse.id)
+				.content(howToUse.getContent())
+				.build();
+        return VoucherResponse.builder()
+                .id(voucher.id)
+                .code(voucher.getCode())
+                .name(voucher.getName())
+                .description(voucher.getDescription())
+                .expiryDay(voucher.getExpiryDay())
+                .isAvailable(voucher.isAvailable())
+                .value(voucher.getValue().intValue())
+                .purchasePrice(voucher.getPurchasePrice().intValue())
+                .valueText(voucher.getValueText())
+                .merchant(merchantRes)
+                .voucherType(voucher.getVoucherType())
+                .howToUse(htu)
+                .build();
+    }
 	
 	private static VoucherResponse toResponse(VoucherMerchant voucher) {
 		Merchant merchant = voucher.getMerchant();
@@ -320,34 +376,40 @@ public class VoucherController extends BaseController {
 		String res = "";
 		if (req.getName() != null && !req.getName().equalsIgnoreCase(voucher.getName())) {
 			voucher.setName(req.getName());
-			res += "Updated Voucher Name";
+			res += ", Updated Voucher Name";
 		}
 		if (!req.getValue().isEmpty()) {
 			if (Double.valueOf(req.getValue()).compareTo(0D) > 0 && Double.valueOf(req.getValue()).compareTo(voucher.getValue().doubleValue()) != 0) {
 				voucher.setValue(new BigDecimal(req.getValue()));
-				res += "Updated Voucher Value";
+				res += ", Updated Voucher Value";
 			}
 		}
 		if (!req.getValueText().isEmpty() && !req.getValueText().equalsIgnoreCase(voucher.getValueText())) {
 			voucher.setValueText(req.getValueText());
-			res += "Updated Voucher Value Text";
+			res += ", Updated Voucher Value Text";
 		}
 		if (req.getPurchasePrice() != 0 && !voucher.getPurchasePrice().equals(new BigDecimal(req.getPurchasePrice()))) {
 			voucher.setPurchasePrice(new BigDecimal(req.getPurchasePrice()));
-			res += "Updated Purchase Price";
+			res += ", Updated Purchase Price";
 		}
 		if (!req.getDescription().isEmpty() && !voucher.getDescription().equalsIgnoreCase(req.getDescription())) {
 			voucher.setDescription(req.getDescription());
-			res += "Updated Voucher Description";
+			res += ", Updated Voucher Description";
 		}
 		if (req.getExpiryDay() != 0 && voucher.getExpiryDay() != req.getExpiryDay()) {
 			voucher.setExpiryDay(req.getExpiryDay());
-			res += "Updated Voucher Expiry Date";
+			res += ", Updated Voucher Expiry Date";
 		}
-		if (res.isEmpty())
-			res += "No Changes Applied";
-		
 		voucher.update();
 		return res;
+	}
+	
+	private static String updateHowToUse (VoucherHowToUse model, CreateVoucherRequest req) {
+		if (!req.getHowToUse().equalsIgnoreCase(model.getContent())) {
+			model.setContent(req.getHowToUse());
+			model.update();
+			return ", Updated How To Use";
+		}
+		return "";
 	}
 }
