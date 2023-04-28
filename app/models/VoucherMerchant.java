@@ -113,4 +113,8 @@ public class VoucherMerchant extends BaseModel{
         }
         return query.findPagingList(limit).getPage(offset).getList();
     }
+	
+	public static VoucherMerchant findByName (String name) {
+		return find.where().ieq("name", name).setMaxRows(1).findUnique();
+	}
 }
