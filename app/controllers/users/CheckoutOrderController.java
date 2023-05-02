@@ -170,9 +170,7 @@ public class CheckoutOrderController extends BaseController {
                     LocalTime openTime = LocalTime.parse(store.getOpenAt());
                     LocalTime closeTime = LocalTime.parse(store.getClosedAt());
 
-                    if(currentTime.isAfter(openTime) && currentTime.isBefore(closeTime)) {
-                        storeIsClosed = true;
-                    }
+                    storeIsClosed = currentTime.isAfter(openTime) && currentTime.isBefore(closeTime) ? false : true;
                 }
 
                 if(storeIsClosed) {
