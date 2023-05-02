@@ -208,6 +208,28 @@ public class VoucherController extends BaseController {
 		return unauthorized(Json.toJson(response));
 	}
 	
+	public static Result getAllVoucherForMobileQr(Long merchantId, String filter, String sort, int offset, int limit) {
+		if (!merchantId.equals(0L)){
+			Merchant merchant = Merchant.find.byId(merchantId);
+			if (merchant != null) {
+				try {
+					Query<VoucherMerchant> query = VoucherMerchant.findAllVoucherMerchantAvailableAndMerchant(merchant);
+					List<VoucherMerchant> totalData = VoucherMerchant.getTotalDataPage(query);
+					List<VoucherMerchant> voucherList = VoucherMerchant.findVoucherMerchantWithPaging(query, sort, filter, offset, limit);
+					List<VoucherListResponse> voucherRes = toResponses(voucherList);
+					response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : voucherList.size()
+							, offset, limit, success + " Showing data voucher", voucherRes);
+	                return ok(Json.toJson(response));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+			}
+			
+		}
+		return unauthorized(Json.toJson(response));
+	}
+	
 	public static Result getVoucherById(Long id) {
 		Merchant merchant = checkMerchantAccessAuthorization();
 		if (merchant != null) {
