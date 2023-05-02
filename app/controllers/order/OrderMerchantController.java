@@ -8,6 +8,7 @@ import com.hokeba.util.Constant;
 import controllers.BaseController;
 import dtos.order.*;
 import models.ProductStore;
+import models.UserMerchant;
 import repository.BrandMerchantRepository;
 import models.Address;
 import models.BrandMerchant;
@@ -34,6 +35,7 @@ import repository.TableMerchantRepository;
 
 // TableMerchant
 import models.pupoint.*;
+import repository.UserMerchantRepository;
 import repository.pickuppoint.PickUpPointRepository;
 
 import java.nio.charset.StandardCharsets;
@@ -90,6 +92,15 @@ public class OrderMerchantController extends BaseController {
                     } else {
                         orderRes.setCustomerName("GENERAL CUSTOMER (" + order.getStore().storeName + ")");
                     }
+
+                    UserMerchant cashier = order.getUserMerchant();
+                    if (order.getUserMerchant() != null) {
+                        cashier = UserMerchantRepository.find.byId(order.getUserMerchant().id);
+                        orderRes.setCashierName(cashier.fullName != null && cashier.fullName != "" ? cashier.fullName : "GENERAL CASHIER (" + order.getStore().storeName + ")");
+                    } else {
+                        orderRes.setCashierName("GENERAL CASHIER (" + order.getStore().storeName + ")");
+                    }
+
                     orderRes.setCustomerPhone(order.getPhoneNumber());
 
                     Store store = order.getStore(); // get store
@@ -471,6 +482,14 @@ public class OrderMerchantController extends BaseController {
                         orderRes.setCustomerName(member.fullName != null ? member.fullName : "GENERAL CUSTOMER (" + order.getStore().storeName + ")");
                     } else {
                         orderRes.setCustomerName("GENERAL CUSTOMER (" + order.getStore().storeName + ")");
+                    }
+
+                    UserMerchant cashier = order.getUserMerchant();
+                    if (order.getUserMerchant() != null) {
+                        cashier = UserMerchantRepository.find.byId(order.getUserMerchant().id);
+                        orderRes.setCashierName(cashier.fullName != null && cashier.fullName != "" ? cashier.fullName : "GENERAL CASHIER (" + order.getStore().storeName + ")");
+                    } else {
+                        orderRes.setCashierName("GENERAL CASHIER (" + order.getStore().storeName + ")");
                     }
 
                     Store store = order.getStore(); // get store
