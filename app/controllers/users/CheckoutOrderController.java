@@ -34,6 +34,8 @@ import models.transaction.OrderPayment;
 import models.transaction.OrderStatus;
 import models.transaction.PaymentDetail;
 import models.transaction.PaymentStatus;
+import org.joda.time.DateTime;
+import java.time.LocalTime;
 import org.json.JSONObject;
 import play.Logger;
 import play.Play;
@@ -154,6 +156,27 @@ public class CheckoutOrderController extends BaseController {
                 Store store = Store.findByStoreCode(orderRequest.getStoreCode());
                 if (store == null) {
                     response.setBaseResponse(0, 0, 0, "Store code is not null", null);
+                    return badRequest(Json.toJson(response));
+                }
+                Boolean storeIsClosed = false;
+                if(!store.getStatusOpenStore()) {
+                    storeIsClosed = true;
+                }
+
+                if(store.getOpenAt() == null && store.getClosedAt() == null) {
+                    storeIsClosed = true;
+                } else {
+                    LocalTime currentTime = LocalTime.now();
+                    LocalTime openTime = LocalTime.parse(store.getOpenAt());
+                    LocalTime closeTime = LocalTime.parse(store.getClosedAt());
+
+                    if(currentTime.isAfter(openTime) && currentTime.isBefore(closeTime)) {
+                        storeIsClosed = true;
+                    }
+                }
+
+                if(storeIsClosed) {
+                    response.setBaseResponse(0, 0, 0, "Store is closed", null);
                     return badRequest(Json.toJson(response));
                 }
 
