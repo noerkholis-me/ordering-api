@@ -158,6 +158,13 @@ public class CheckoutOrderController extends BaseController {
                     response.setBaseResponse(0, 0, 0, "Store code is not null", null);
                     return badRequest(Json.toJson(response));
                 }
+
+                Merchant merchant = Merchant.find.byId(store.getMerchant().id);
+                if (merchant.isActive == false) {
+                    response.setBaseResponse(0, 0, 0, "Merchant tidak aktif", null);
+                    return badRequest(Json.toJson(response));
+                }
+
                 Boolean storeIsClosed = false;
                 if(!store.getStatusOpenStore()) {
                     storeIsClosed = true;
@@ -174,13 +181,7 @@ public class CheckoutOrderController extends BaseController {
                 }
 
                 if(storeIsClosed) {
-                    response.setBaseResponse(0, 0, 0, "Store is closed", null);
-                    return badRequest(Json.toJson(response));
-                }
-
-                Merchant merchant = Merchant.find.byId(store.getMerchant().id);
-                if (merchant.isActive == false) {
-                    response.setBaseResponse(0, 0, 0, "Merchant tidak aktif", null);
+                    response.setBaseResponse(0, 0, 0, "Toko sedang tutup", null);
                     return badRequest(Json.toJson(response));
                 }
 
