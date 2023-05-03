@@ -166,9 +166,6 @@ public class CheckoutOrderController extends BaseController {
                 }
 
                 Boolean storeIsClosed = false;
-                if(!store.getStatusOpenStore()) {
-                    storeIsClosed = true;
-                }
 
                 if(store.getOpenAt() == null && store.getClosedAt() == null) {
                     storeIsClosed = true;
@@ -178,6 +175,10 @@ public class CheckoutOrderController extends BaseController {
                     LocalTime closeTime = LocalTime.parse(store.getClosedAt());
 
                     storeIsClosed = currentTime.isAfter(openTime) && currentTime.isBefore(closeTime) ? false : true;
+                }
+
+                if(!store.getStatusOpenStore()) {
+                    storeIsClosed = true;
                 }
 
                 if(storeIsClosed) {
