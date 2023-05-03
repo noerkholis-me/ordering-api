@@ -264,7 +264,7 @@ public class CheckoutOrderController extends BaseController {
                 if (member != null && orderRequest.getUseVoucher()) {
                 	VoucherMerchant voucher = VoucherMerchant.findById(orderRequest.getVoucherId());
                 	if (voucher == null) {
-                    	response.setBaseResponse(0, 0, 0, "Terjadi Kesalahan saat checkout, silahkan coba lagi", "Voucher Not Found");
+                    	response.setBaseResponse(0, 0, 0, "Voucher Tidak Ditemukan", null);
                     	return notFound(Json.toJson(response));
                 	}
                 	order.setDiscountAmount(voucher.getValue());

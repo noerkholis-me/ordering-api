@@ -11,6 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.avaje.ebean.Expr;
+import com.avaje.ebean.Expression;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -115,6 +116,10 @@ public class VoucherMerchant extends BaseModel{
         }
         return query.findPagingList(limit).getPage(offset).getList();
     }
+	
+	public static VoucherMerchant findByName (String name, Long id) {
+		return find.where().ieq("name", name).ne("id",id).setMaxRows(1).findUnique();
+	}
 	
 	public static VoucherMerchant findByName (String name) {
 		return find.where().ieq("name", name).setMaxRows(1).findUnique();
