@@ -34,6 +34,8 @@ import models.transaction.OrderPayment;
 import models.transaction.OrderStatus;
 import models.transaction.PaymentDetail;
 import models.transaction.PaymentStatus;
+import models.voucher.VoucherMerchant;
+
 import org.json.JSONObject;
 import play.Logger;
 import play.Play;
@@ -227,6 +229,20 @@ public class CheckoutOrderController extends BaseController {
 
                 if (member == null && orderRequest.getUseLoyalty() == true) {
                     response.setBaseResponse(0, 0, 0, "Ups, anda tidak dapat menggunakan loyalty point", null);
+                    return badRequest(Json.toJson(response));
+                }
+                
+                if (member != null && orderRequest.getUseVoucher()) {
+                	VoucherMerchant voucher = VoucherMerchant.findById(orderRequest.getVoucherId());
+                	if (voucher == null) {
+                    	response.setBaseResponse(0, 0, 0, "Terjadi Kesalahan saat checkout, silahkan coba lagi", "Voucher Not Found");
+                    	return notFound(Json.toJson(response));
+                	}
+                	order.setDiscountAmount(voucher.getValue());
+                }
+                
+                if (member == null && orderRequest.getUseVoucher()) {
+                    response.setBaseResponse(0, 0, 0, "Ups, anda tidak dapat menggunakan voucher", null);
                     return badRequest(Json.toJson(response));
                 }
 
@@ -477,7 +493,6 @@ public class CheckoutOrderController extends BaseController {
                     }
 
                     ((ObjectNode) jsonRequest).put("external_id", orderNumber);
-
                     // please
                     PaymentServiceRequest paymentServiceRequest = PaymentServiceRequest.builder()
                             .paymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel())
@@ -488,115 +503,116 @@ public class CheckoutOrderController extends BaseController {
                     request.setPaymentServiceRequest(paymentServiceRequest);
                     request.setProductOrderDetails(productOrderDetails);
                     request.setStoreCode(store.storeCode);
+                    System.out.println(Json.toJson(paymentServiceRequest));
 
-                    ServiceResponse serviceResponse = PaymentService.getInstance().initiatePayment(request);
-
-                    if (serviceResponse.getCode() == 408) {
-                        txn.rollback();
-                        ObjectNode result = Json.newObject();
-                        result.put("error_messages", Json.toJson(new String[]{"Request timeout, please try again later"}));
-                        response.setBaseResponse(1, offset, 1, timeOut, result);
-                        return badRequest(Json.toJson(response));
-                    } else if (serviceResponse.getCode() == 400) {
-                        txn.rollback();
-                        response.setBaseResponse(1, offset, 1, inputParameter, serviceResponse.getData());
-                        return badRequest(Json.toJson(response));
-                    } else {
-                        // update payment status
-                        order.setStatus(OrderStatus.NEW_ORDER.getStatus());
-                        order.setOrderQueue(createQueue(store.id));
-                        order.update();
-
-                        orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
-                        orderPayment.update();
-
-                        String object = objectMapper.writeValueAsString(serviceResponse.getData());
-                        JSONObject jsonObject = new JSONObject(object);
-                        String initiate = jsonObject.getJSONObject("data").toString();
-                        InitiatePaymentResponse initiatePaymentResponse = objectMapper.readValue(initiate, InitiatePaymentResponse.class);
-
-                        PaymentDetail payDetail = new PaymentDetail();
-                        payDetail.setOrderNumber(order.getOrderNumber());
-                        payDetail.setPaymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel());
-                        payDetail.setCreationTime(initiatePaymentResponse.getCreationTime());
-                        payDetail.setStatus(initiatePaymentResponse.getStatus());
-                        if (orderRequest.getPaymentDetailResponse().getPaymentChannel().equalsIgnoreCase("qr_code")) {
-                            payDetail.setQrCode(initiatePaymentResponse.getMetadata().getQrCode());
-                        } else if (orderRequest.getPaymentDetailResponse().getPaymentChannel().equalsIgnoreCase("virtual_account")){
-                            payDetail.setAccountNumber(initiatePaymentResponse.getMetadata().getAccountNumber());
-                        }
-                        payDetail.setReferenceId(initiatePaymentResponse.getMetadata().getReferenceId());
-                        payDetail.setTotalAmount(initiatePaymentResponse.getTotalAmount());
-                        payDetail.setOrderPayment(orderPayment);
-                        payDetail.save();
-
-                        txn.commit();
-
-                        OrderTransactionResponse orderTransactionResponse = new OrderTransactionResponse();
-                        orderTransactionResponse.setOrderNumber(order.getOrderNumber());
-                        orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
-                        orderTransactionResponse.setTotalAmount(initiatePaymentResponse.getTotalAmount());
-                        orderTransactionResponse.setQueueNumber(order.getOrderQueue());
-                        orderTransactionResponse.setStatus(order.getStatus());
-                        orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
-                        orderTransactionResponse.setMetadata(initiatePaymentResponse.getMetadata());
-
-                        if (member != null){
-                            member.lastPurchase = new Date();
-                            member.update();
-                        }
-
-                        // tambah lat dan long saat order shipper ke shipper API v3
-                        if (orderRequest.getOrderType().equalsIgnoreCase("DELIVERY")) {
-                            String domesticUrl = API_SHIPPER_ADDRESS_V3 + API_SHIPPER_DOMESTIC_ORDER;
-
-                            //start find lat and long from areaId;
-
-                            ObjectNode requestNode = (ObjectNode) jsonRequest;
-
-                            System.out.println("incoming shipper order request : "+requestNode.toString());
-
-                            String bodyRequest = requestNode.toString();
-                            System.out.println("domestic order request : "+bodyRequest);
-                            ProcessBuilder shipperBuilder = new ProcessBuilder(
-                                    "curl",
-                                    "-XPOST",
-                                    "-H", "Content-Type:application/json",
-                                    "-H", "user-agent: Shipper/1.0",
-                                    "-H", "X-API-Key: "+API_KEY_SHIPPER,
-                                    domesticUrl,
-                                    "-d", bodyRequest
-                            );
-
-
-                            Process prosesBuilder = shipperBuilder.start();
-                            InputStream is = prosesBuilder.getInputStream();
-                            InputStreamReader isr = new InputStreamReader(is);
-                            BufferedReader br = new BufferedReader(isr);
-
-
-                            String line =  br.readLine();
-                            JsonNode jsonResponse = new ObjectMapper().readValue(line, JsonNode.class);
-                            System.out.println("domestic response : "+jsonResponse.toString());
-                            String hasil = (String)jsonResponse.get("metadata").get("http_status").asText();
-                            System.out.println("status domestic order : "+hasil);
-
-                            if (hasil.equals("Created")) {
-                                String idShipperOrder = (String)jsonResponse.get("data").get("order_id").asText();
-                                System.out.println("order id shipper : "+idShipperOrder);
-                                order.setShipperOrderId(idShipperOrder);
-                                order.save();
-                                orderTransactionResponse.setShipperOrderId(idShipperOrder);
-                            } else {
-                                String messageShipper = (String) jsonResponse.get("metadata").get("http_status").asText();
-                                response.setBaseResponse(1, offset, 1, messageShipper, orderTransactionResponse);
-                                return ok(Json.toJson(response));
-                            }
-                        }
-
-                        response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
-                        return ok(Json.toJson(response));
-                    }
+//                    ServiceResponse serviceResponse = PaymentService.getInstance().initiatePayment(request);
+//
+//                    if (serviceResponse.getCode() == 408) {
+//                        txn.rollback();
+//                        ObjectNode result = Json.newObject();
+//                        result.put("error_messages", Json.toJson(new String[]{"Request timeout, please try again later"}));
+//                        response.setBaseResponse(1, offset, 1, timeOut, result);
+//                        return badRequest(Json.toJson(response));
+//                    } else if (serviceResponse.getCode() == 400) {
+//                        txn.rollback();
+//                        response.setBaseResponse(1, offset, 1, inputParameter, serviceResponse.getData());
+//                        return badRequest(Json.toJson(response));
+//                    } else {
+//                        // update payment status
+//                        order.setStatus(OrderStatus.NEW_ORDER.getStatus());
+//                        order.setOrderQueue(createQueue(store.id));
+//                        order.update();
+//
+//                        orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
+//                        orderPayment.update();
+//
+//                        String object = objectMapper.writeValueAsString(serviceResponse.getData());
+//                        JSONObject jsonObject = new JSONObject(object);
+//                        String initiate = jsonObject.getJSONObject("data").toString();
+//                        InitiatePaymentResponse initiatePaymentResponse = objectMapper.readValue(initiate, InitiatePaymentResponse.class);
+//
+//                        PaymentDetail payDetail = new PaymentDetail();
+//                        payDetail.setOrderNumber(order.getOrderNumber());
+//                        payDetail.setPaymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel());
+//                        payDetail.setCreationTime(initiatePaymentResponse.getCreationTime());
+//                        payDetail.setStatus(initiatePaymentResponse.getStatus());
+//                        if (orderRequest.getPaymentDetailResponse().getPaymentChannel().equalsIgnoreCase("qr_code")) {
+//                            payDetail.setQrCode(initiatePaymentResponse.getMetadata().getQrCode());
+//                        } else if (orderRequest.getPaymentDetailResponse().getPaymentChannel().equalsIgnoreCase("virtual_account")){
+//                            payDetail.setAccountNumber(initiatePaymentResponse.getMetadata().getAccountNumber());
+//                        }
+//                        payDetail.setReferenceId(initiatePaymentResponse.getMetadata().getReferenceId());
+//                        payDetail.setTotalAmount(initiatePaymentResponse.getTotalAmount());
+//                        payDetail.setOrderPayment(orderPayment);
+//                        payDetail.save();
+//
+//                        txn.commit();
+//
+//                        OrderTransactionResponse orderTransactionResponse = new OrderTransactionResponse();
+//                        orderTransactionResponse.setOrderNumber(order.getOrderNumber());
+//                        orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
+//                        orderTransactionResponse.setTotalAmount(initiatePaymentResponse.getTotalAmount());
+//                        orderTransactionResponse.setQueueNumber(order.getOrderQueue());
+//                        orderTransactionResponse.setStatus(order.getStatus());
+//                        orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
+//                        orderTransactionResponse.setMetadata(initiatePaymentResponse.getMetadata());
+//
+//                        if (member != null){
+//                            member.lastPurchase = new Date();
+//                            member.update();
+//                        }
+//
+//                        // tambah lat dan long saat order shipper ke shipper API v3
+//                        if (orderRequest.getOrderType().equalsIgnoreCase("DELIVERY")) {
+//                            String domesticUrl = API_SHIPPER_ADDRESS_V3 + API_SHIPPER_DOMESTIC_ORDER;
+//
+//                            //start find lat and long from areaId;
+//
+//                            ObjectNode requestNode = (ObjectNode) jsonRequest;
+//
+//                            System.out.println("incoming shipper order request : "+requestNode.toString());
+//
+//                            String bodyRequest = requestNode.toString();
+//                            System.out.println("domestic order request : "+bodyRequest);
+//                            ProcessBuilder shipperBuilder = new ProcessBuilder(
+//                                    "curl",
+//                                    "-XPOST",
+//                                    "-H", "Content-Type:application/json",
+//                                    "-H", "user-agent: Shipper/1.0",
+//                                    "-H", "X-API-Key: "+API_KEY_SHIPPER,
+//                                    domesticUrl,
+//                                    "-d", bodyRequest
+//                            );
+//
+//
+//                            Process prosesBuilder = shipperBuilder.start();
+//                            InputStream is = prosesBuilder.getInputStream();
+//                            InputStreamReader isr = new InputStreamReader(is);
+//                            BufferedReader br = new BufferedReader(isr);
+//
+//
+//                            String line =  br.readLine();
+//                            JsonNode jsonResponse = new ObjectMapper().readValue(line, JsonNode.class);
+//                            System.out.println("domestic response : "+jsonResponse.toString());
+//                            String hasil = (String)jsonResponse.get("metadata").get("http_status").asText();
+//                            System.out.println("status domestic order : "+hasil);
+//
+//                            if (hasil.equals("Created")) {
+//                                String idShipperOrder = (String)jsonResponse.get("data").get("order_id").asText();
+//                                System.out.println("order id shipper : "+idShipperOrder);
+//                                order.setShipperOrderId(idShipperOrder);
+//                                order.save();
+//                                orderTransactionResponse.setShipperOrderId(idShipperOrder);
+//                            } else {
+//                                String messageShipper = (String) jsonResponse.get("metadata").get("http_status").asText();
+//                                response.setBaseResponse(1, offset, 1, messageShipper, orderTransactionResponse);
+//                                return ok(Json.toJson(response));
+//                            }
+//                        }
+//
+//                        response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
+//                        return ok(Json.toJson(response));
+//                    }
                 } else {
                     System.out.println("PENDING / DIRECT");
                     InitiatePaymentRequest request = new InitiatePaymentRequest();
