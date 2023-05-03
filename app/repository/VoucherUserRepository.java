@@ -25,7 +25,7 @@ public class VoucherUserRepository extends Model{
 		
 		String queryStr = "SELECT vmn.id FROM voucher_merchant_new vmn "
 				+ "JOIN voucher_user vu ON vmn.id = vu.voucher_id "
-				+ "WHERE vmn.merchant_id = '"+merchant.id+"' AND vu.user_id = '"+ member.id +"'";
+				+ "WHERE vmn.merchant_id = '"+merchant.id+"' AND vu.user_id = '"+ member.id +"' AND vu.available = true ";
 		
 		RawSql rawsql = RawSqlBuilder.parse(queryStr).create();
 		Query<VoucherMerchant> query = Ebean.find(VoucherMerchant.class).setRawSql(rawsql);

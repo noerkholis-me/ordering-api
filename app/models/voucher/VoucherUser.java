@@ -26,8 +26,8 @@ public class VoucherUser extends BaseModel{
 
     private static final long serialVersionUID = 1L;
     
-    @Column(name = "status")
-    private String status;
+    @Column(name = "available")
+    private Boolean available;
 
     @ManyToOne
     @JoinColumn(name = "voucher_id", referencedColumnName = "id")
