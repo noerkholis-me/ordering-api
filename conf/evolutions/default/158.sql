@@ -5,7 +5,7 @@ create table voucher_user (
 	is_deleted		boolean,
 	user_id			bigint not null,
 	voucher_id		bigint not null,
-	status			varchar(30),
+	available		boolean,
 	constraint pk_voucher_user primary key (id)
 );
 alter table voucher_user add constraint fk_voucher_user_user_id foreign key (user_id) references "member" (id);
