@@ -178,6 +178,12 @@ public class CheckoutOrderController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
 
+                Merchant merchant = Merchant.find.byId(store.getMerchant().id);
+                if (merchant.isActive == false) {
+                    response.setBaseResponse(0, 0, 0, "Merchant tidak aktif", null);
+                    return badRequest(Json.toJson(response));
+                }
+
                 ((ObjectNode) jsonRequest.get("consigner")).put("name", store.storeName);
                 ((ObjectNode) jsonRequest.get("consigner")).put("phone_number", store.storePhone);
 
