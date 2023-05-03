@@ -1,4 +1,4 @@
-package models;
+package models.voucher;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -21,6 +21,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import models.BaseModel;
+import models.Merchant;
 @Entity
 @Table(name = "voucher_merchant_new")
 @Getter

@@ -1,4 +1,4 @@
-package models;
+package models.voucher;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import models.BaseModel;
 import play.db.ebean.Model.Finder;
 
 @Getter
