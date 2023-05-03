@@ -288,12 +288,12 @@ public class VoucherController extends BaseController {
 				JsonNode json = request().body().asJson();
 				ObjectMapper mapper = new ObjectMapper();
 				CreateVoucherRequest request = mapper.readValue(json.toString(), CreateVoucherRequest.class);
+				VoucherMerchant voucher = VoucherMerchant.findById(id);
 				VoucherMerchant uniqueCheck = VoucherMerchant.findByName(request.getName());
-				if (uniqueCheck != null) {
+				if (uniqueCheck != null && !voucher.equals(uniqueCheck)) {
 					response.setBaseResponse(0, 0, 0, "Voucher dengan nama yang sama sudah ada", null);
 					return badRequest(Json.toJson(response));
 				}
-				VoucherMerchant voucher = VoucherMerchant.findById(id);
 				String updateRes = updateVoucher(voucher, request);
 				if (request.getHowToUse() != null && !request.getHowToUse().isEmpty()) {
 					VoucherHowToUse htu = VoucherHowToUse.findByVoucherMerchant(voucher);
