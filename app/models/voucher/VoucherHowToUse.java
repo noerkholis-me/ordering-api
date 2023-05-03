@@ -1,4 +1,6 @@
-package models;
+package models.voucher;
+
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -13,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import models.BaseModel;
 import play.db.ebean.Model.Finder;
 
 @Getter
@@ -39,6 +42,10 @@ public class VoucherHowToUse extends BaseModel{
 	
 	public static VoucherHowToUse findByVoucherMerchant(VoucherMerchant voucher) {
 		return find.where().eq("isDeleted", Boolean.FALSE).eq("voucher", voucher).findUnique();
+	}
+	
+	public static List<VoucherHowToUse> findByVoucherMerchants (List<VoucherMerchant> merchants) {
+		return find.where().eq("isDeleted", Boolean.FALSE).in("voucher", merchants).findList();
 	}
 	
 

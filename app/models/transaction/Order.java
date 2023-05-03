@@ -124,6 +124,8 @@ public class Order extends BaseModel {
 
     @Column(name = "shipper_order_id")
     private String shipperOrderId;
+    @Column(name = "discount_amount")
+    private BigDecimal discountAmount;
 
     // ================================================================ //
 
