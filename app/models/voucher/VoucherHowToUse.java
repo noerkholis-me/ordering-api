@@ -1,5 +1,7 @@
 package models.voucher;
 
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -40,6 +42,10 @@ public class VoucherHowToUse extends BaseModel{
 	
 	public static VoucherHowToUse findByVoucherMerchant(VoucherMerchant voucher) {
 		return find.where().eq("isDeleted", Boolean.FALSE).eq("voucher", voucher).findUnique();
+	}
+	
+	public static List<VoucherHowToUse> findByVoucherMerchants (List<VoucherMerchant> merchants) {
+		return find.where().eq("isDeleted", Boolean.FALSE).in("voucher", merchants).findList();
 	}
 	
 

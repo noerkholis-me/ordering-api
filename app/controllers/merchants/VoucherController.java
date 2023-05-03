@@ -31,15 +31,18 @@ import dtos.voucher.CreateVoucherRequest;
 import dtos.voucher.VoucherHowToUseResponse;
 import dtos.voucher.VoucherListResponse;
 import dtos.voucher.VoucherResponse;
+import models.Member;
 import models.Merchant;
 import models.Store;
 import models.Voucher;
 import models.VoucherDetail;
-import models.VoucherHowToUse;
-import models.VoucherMerchant;
+import models.voucher.VoucherHowToUse;
+import models.voucher.VoucherMerchant;
+import models.voucher.VoucherUser;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import repository.VoucherUserRepository;
 import utils.ShipperHelper;
 import play.mvc.BodyParser;
 
@@ -208,18 +211,31 @@ public class VoucherController extends BaseController {
 		return unauthorized(Json.toJson(response));
 	}
 	
-	public static Result getAllVoucherForMobileQr(Long merchantId, String filter, String sort, int offset, int limit) {
+	public static Result getAllVoucherForMobileQr(Long merchantId, String emailUser, String filter, String sort, int offset, int limit) {
 		if (!merchantId.equals(0L)){
 			Merchant merchant = Merchant.find.byId(merchantId);
 			if (merchant != null) {
 				try {
-					Query<VoucherMerchant> query = VoucherMerchant.findAllVoucherMerchantAvailableAndMerchant(merchant);
-					List<VoucherMerchant> totalData = VoucherMerchant.getTotalDataPage(query);
-					List<VoucherMerchant> voucherList = VoucherMerchant.findVoucherMerchantWithPaging(query, sort, filter, offset, limit);
-					List<VoucherListResponse> voucherRes = toResponses(voucherList);
-					response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : voucherList.size()
-							, offset, limit, success + " Showing data voucher", voucherRes);
-	                return ok(Json.toJson(response));
+					Member member = Member.findByEmail(emailUser);
+					if (member != null) {
+						List<VoucherMerchant> responseList = VoucherUserRepository.findVoucherByMerchantAndMember(merchant, member, filter, offset, limit);
+//						Query<VoucherMerchant> query = VoucherMerchant.findAllVoucherMerchantAvailableAndMerchant(merchant);
+//						List<VoucherMerchant> totalData = VoucherMerchant.getTotalDataPage(query);
+//						List<VoucherMerchant> voucherList = VoucherMerchant.findVoucherMerchantWithPaging(query, sort, filter, offset, limit);
+						List<VoucherResponse> voucherRes = new ArrayList<>();
+						List<VoucherHowToUse> htu = VoucherHowToUse.findByVoucherMerchants(responseList);
+						for (VoucherMerchant data : responseList) {
+							for (VoucherHowToUse data1 : htu) {
+								if(data1.getVoucher().equals(data)) {
+									voucherRes.add(toResponse(data, data1));
+								}
+							}
+						}
+						response.setBaseResponse(responseList.size(), offset, limit, success + " Showing data voucher", voucherRes);
+		                return ok(Json.toJson(response));
+					}
+					response.setBaseResponse(0, 0, 0, "Member not found", null);
+					return notFound(Json.toJson(response));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
