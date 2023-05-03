@@ -296,7 +296,7 @@ public class VoucherController extends BaseController {
 		return unauthorized(Json.toJson(response));
 	}
 	
-	public static Result editVoucher (Long id) {
+	public static Result editVoucher (Long id) throws IOException {
 		Merchant merchant = checkMerchantAccessAuthorization();
 		if (merchant != null) {
 			Transaction txn = Ebean.beginTransaction();
@@ -322,10 +322,12 @@ public class VoucherController extends BaseController {
 					updateRes = ", No Changes Applied";
 				txn.commit();
 				response.setBaseResponse(updateRes.equalsIgnoreCase("No Changes Applied") ? 0 : 1 , 0 , 0, "Success","Success"+ updateRes);
-				txn.close();
 				return ok(Json.toJson(response));
 			} catch (Exception e) {
+				txn.rollback();
 				e.printStackTrace();
+			} finally {
+				txn.close();
 			}
 		}
 		return unauthorized(Json.toJson(response));
