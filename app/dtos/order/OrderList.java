@@ -24,6 +24,8 @@ public class OrderList {
 
     @JsonProperty("customer_name")
     private String customerName;
+    @JsonProperty("cashier_name")
+    private String cashierName;
     @JsonProperty("customer_phone")
     private String customerPhone;
 
