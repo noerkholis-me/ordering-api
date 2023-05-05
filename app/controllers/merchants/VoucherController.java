@@ -216,7 +216,7 @@ public class VoucherController extends BaseController {
 			Merchant merchant = Merchant.find.byId(merchantId);
 			if (merchant != null) {
 				try {
-					Member member = Member.findByEmail(emailUser);
+					Member member = Member.findByEmailAndMerchantId(emailUser, merchantId);
 					if (member != null) {
 						List<VoucherMerchant> responseList = VoucherUserRepository.findVoucherByMerchantAndMember(merchant, member, filter, offset, limit);
 //						Query<VoucherMerchant> query = VoucherMerchant.findAllVoucherMerchantAvailableAndMerchant(merchant);
