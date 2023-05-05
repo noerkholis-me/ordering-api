@@ -130,7 +130,7 @@ public class ImagesController extends BaseController {
             return unauthorized(Json.toJson(baseResponse));
         }
         baseResponse.setBaseResponse(0, 0, 0, error, null);
-        return ok(Json.toJson(baseResponse));
+        return badRequest(Json.toJson(baseResponse));
     }
 
 
