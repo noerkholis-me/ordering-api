@@ -12,6 +12,4 @@ public class VoucherPurchaseReq {
 	private String email;
 	@JsonProperty(value = "voucher_id")
 	private Long voucherId;
-	@JsonProperty(value = "voucher_price")
-	private double price;
 }
