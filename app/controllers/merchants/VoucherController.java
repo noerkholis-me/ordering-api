@@ -360,6 +360,23 @@ public class VoucherController extends BaseController {
 				if (json != null) {
 					ObjectMapper mapper = new ObjectMapper();
 					VoucherPurchaseReq req = mapper.readValue(json.toString(), VoucherPurchaseReq.class);
+					Member member = Member.findByEmail(req.getEmail());
+					VoucherMerchant voucherMerchant = VoucherMerchant.findById(req.getVoucherId());
+					if (voucherMerchant == null) {
+						response.setBaseResponse(0,0,0,"Voucher Tidak Ditemukan", null);
+						return badRequest(Json.toJson(response));
+					}
+					if (member == null) {
+						response.setBaseResponse(0,0,0,"Member Tidak Ditemukan", null);
+						return badRequest(Json.toJson(response));
+					}
+					BigDecimal loyaltyPoint = member.getLoyaltyPoint();
+					if (loyaltyPoint.compareTo(BigDecimal.ZERO) < 0) {
+						response.setBaseResponse(0,0,0,"Loyalty Point Anda Belum Cukup", null);
+						return badRequest(Json.toJson(response));
+					}
+
+
 				}
 			}
 		} catch (Exception e) {
