@@ -178,9 +178,12 @@ public class CheckoutOrderController extends BaseController {
 
                     storeIsClosed = currentTime.isAfter(openTime) && currentTime.isBefore(closeTime) ? false : true;
                 }
-
-                if(!store.getStatusOpenStore()) {
+                if(store.getStatusOpenStore() == null) {
                     storeIsClosed = true;
+                } else {
+                    if(!store.getStatusOpenStore()) {
+                        storeIsClosed = true;
+                    }
                 }
 
                 if(storeIsClosed) {
