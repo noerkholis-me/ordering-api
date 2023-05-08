@@ -382,10 +382,14 @@ public class StoreController extends BaseController {
             if(currentTime.isAfter(openTime) && currentTime.isBefore(closeTime) ) {
                  storeIsClosed = false;
             }
-        }   
+        }
 
-        if(!store.getStatusOpenStore()) {
+        if(store.getStatusOpenStore() == null) {
             storeIsClosed = true;
+        } else {
+            if(!store.getStatusOpenStore()) {
+                storeIsClosed = true;
+            }
         }
 
         return StoreResponse.builder()
