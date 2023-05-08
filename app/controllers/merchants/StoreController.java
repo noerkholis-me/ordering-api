@@ -381,8 +381,8 @@ public class StoreController extends BaseController {
             LocalTime closeTime = LocalTime.parse(store.getClosedAt());
             if(currentTime.isAfter(openTime) && currentTime.isBefore(closeTime) ) {
                  storeIsClosed = false;
-             }
-        }
+            }
+        }   
 
         if(!store.getStatusOpenStore()) {
             storeIsClosed = true;
