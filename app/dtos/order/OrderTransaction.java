@@ -65,7 +65,7 @@ public class OrderTransaction {
     @JsonProperty("use_voucher")
     private Boolean useVoucher;
     @JsonProperty("voucher_id")
-    private Long voucherId;
+    private List<Long> voucherId;
     
 
 }

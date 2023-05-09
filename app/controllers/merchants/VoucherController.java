@@ -30,6 +30,7 @@ import dtos.store.StoreResponse;
 import dtos.voucher.CreateVoucherRequest;
 import dtos.voucher.VoucherHowToUseResponse;
 import dtos.voucher.VoucherListResponse;
+import dtos.voucher.VoucherPurchaseReq;
 import dtos.voucher.VoucherResponse;
 import models.Member;
 import models.Merchant;
@@ -349,7 +350,40 @@ public class VoucherController extends BaseController {
 		}
 		return unauthorized(Json.toJson(response));
 	}
-	
+
+	private static Result buyVoucher () {
+		Merchant merchant = checkMerchantAccessAuthorization();
+		Transaction txn = Ebean.beginTransaction();
+		try {
+			if (merchant != null) {
+				JsonNode json = request().body().asJson();
+				if (json != null) {
+					ObjectMapper mapper = new ObjectMapper();
+					VoucherPurchaseReq req = mapper.readValue(json.toString(), VoucherPurchaseReq.class);
+					Member member = Member.findByEmail(req.getEmail());
+					VoucherMerchant voucherMerchant = VoucherMerchant.findById(req.getVoucherId());
+					if (voucherMerchant == null) {
+						response.setBaseResponse(0,0,0,"Voucher Tidak Ditemukan", null);
+						return badRequest(Json.toJson(response));
+					}
+					if (member == null) {
+						response.setBaseResponse(0,0,0,"Member Tidak Ditemukan", null);
+						return badRequest(Json.toJson(response));
+					}
+					BigDecimal loyaltyPoint = member.getLoyaltyPoint();
+					if (loyaltyPoint.compareTo(BigDecimal.ZERO) < 0) {
+						response.setBaseResponse(0,0,0,"Loyalty Point Anda Belum Cukup", null);
+						return badRequest(Json.toJson(response));
+					}
+
+
+				}
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		return unauthorized(Json.toJson(response));
+	}
 	private static VoucherResponse toResponse(VoucherMerchant voucher, VoucherHowToUse howToUse) {
 		Merchant merchant = voucher.getMerchant();
 		MerchantResponse merchantRes = MerchantResponse.builder()
@@ -464,4 +498,5 @@ public class VoucherController extends BaseController {
 		}
 		return "";
 	}
+
 }
