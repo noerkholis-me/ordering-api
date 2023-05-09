@@ -262,12 +262,25 @@ public class CheckoutOrderController extends BaseController {
                 }
                 
                 if (member != null && orderRequest.getUseVoucher()) {
-                	VoucherMerchant voucher = VoucherMerchant.findById(orderRequest.getVoucherId());
-                	if (voucher == null) {
-                    	response.setBaseResponse(0, 0, 0, "Voucher Tidak Ditemukan", null);
-                    	return notFound(Json.toJson(response));
-                	}
-                	order.setDiscountAmount(voucher.getValue());
+                    BigDecimal discount = BigDecimal.ZERO;
+                    List<VoucherMerchant> vouchers = new ArrayList<>();
+                    for (int i = 0; i < orderRequest.getVoucherId().size(); i++) {
+                        VoucherMerchant voucher = VoucherMerchant.findById(orderRequest.getVoucherId().get(i));
+                        vouchers.add(voucher);
+                    }
+                    if (vouchers.isEmpty()) {
+                        response.setBaseResponse(0, 0, 0, "Voucher Tidak Ditemukan", null);
+                        return notFound(Json.toJson(response));
+                    }
+                    for (VoucherMerchant data : vouchers) {
+                        if (data.getValueText().equalsIgnoreCase(VoucherMerchant.NOMINAL)) {
+                            discount = discount.add(data.getValue());
+                        } else if (data.getValueText().equalsIgnoreCase(VoucherMerchant.PERCENT)) {
+                            BigDecimal countDiscount = data.getValue().divide(new BigDecimal(100).setScale(2, RoundingMode.DOWN));
+                            discount = discount.add(countDiscount);
+                        }
+                    }
+                    order.setDiscountAmount(discount);
                 }
                 
                 if (member == null && orderRequest.getUseVoucher()) {
@@ -709,9 +722,9 @@ public class CheckoutOrderController extends BaseController {
                         member.update();
                     }
                     
-                    if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
-                    	FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order);
-                    }
+//                    if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
+//                    	FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order);
+//                    }
 
                     response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
                     return ok(Json.toJson(response));
