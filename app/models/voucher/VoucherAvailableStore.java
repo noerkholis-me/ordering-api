@@ -23,11 +23,10 @@ import models.Store;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class VoucherAvailableStore{
-	
-	@Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+public class VoucherAvailableStore extends BaseModel{
+
+    private static final long serialVersionUID = 1L;
+    public static Finder<Long, VoucherAvailableStore> find = new Finder<>(Long.class, VoucherAvailableStore.class);
 	
     @ManyToOne
     @JoinColumn(name = "voucher_id", referencedColumnName = "id")
@@ -40,5 +39,6 @@ public class VoucherAvailableStore{
     @Getter
     @Setter
     private Store storeId;
+
 	
 }
