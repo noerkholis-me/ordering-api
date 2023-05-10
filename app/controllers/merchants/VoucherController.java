@@ -1,51 +1,32 @@
 package controllers.merchants;
 
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Query;
+import com.avaje.ebean.Transaction;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hokeba.api.BaseResponse;
+import com.hokeba.mapping.request.MapVoucher;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import controllers.BaseController;
+import dtos.merchant.MerchantResponse;
+import dtos.store.StoreResponsePuP;
+import dtos.voucher.*;
+import models.*;
+import models.voucher.*;
+import play.Logger;
+import play.libs.Json;
+import play.mvc.BodyParser;
+import play.mvc.Result;
+import repository.VoucherUserRepository;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
-import org.checkerframework.checker.units.qual.A;
-
-import com.avaje.ebean.Ebean;
-import com.avaje.ebean.Query;
-import com.avaje.ebean.Transaction;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hokeba.api.BaseResponse;
-import com.hokeba.mapping.request.MapVoucher;
-import com.hokeba.util.CommonFunction;
-import com.hokeba.util.Helper;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-
-import controllers.BaseController;
-import dtos.merchant.MerchantResponse;
-import dtos.store.StoreResponse;
-import dtos.voucher.CreateVoucherRequest;
-import dtos.voucher.VoucherHowToUseResponse;
-import dtos.voucher.VoucherListResponse;
-import dtos.voucher.VoucherPurchaseReq;
-import dtos.voucher.VoucherResponse;
-import models.Member;
-import models.Merchant;
-import models.Store;
-import models.Voucher;
-import models.VoucherDetail;
-import models.voucher.VoucherHowToUse;
-import models.voucher.VoucherMerchant;
-import models.voucher.VoucherUser;
-import play.Logger;
-import play.libs.Json;
-import play.mvc.Result;
-import repository.VoucherUserRepository;
-import utils.ShipperHelper;
-import play.mvc.BodyParser;
 
 @Api(value = "/merchants/vouchers", description = "Vouchers")
 public class VoucherController extends BaseController {
@@ -351,7 +332,7 @@ public class VoucherController extends BaseController {
 		return unauthorized(Json.toJson(response));
 	}
 
-	private static Result buyVoucher () {
+	public static Result buyVoucher () throws IOException {
 		Merchant merchant = checkMerchantAccessAuthorization();
 		Transaction txn = Ebean.beginTransaction();
 		try {
@@ -370,19 +351,104 @@ public class VoucherController extends BaseController {
 						response.setBaseResponse(0,0,0,"Member Tidak Ditemukan", null);
 						return badRequest(Json.toJson(response));
 					}
+
 					BigDecimal loyaltyPoint = member.getLoyaltyPoint();
 					if (loyaltyPoint.compareTo(BigDecimal.ZERO) < 0) {
 						response.setBaseResponse(0,0,0,"Loyalty Point Anda Belum Cukup", null);
 						return badRequest(Json.toJson(response));
 					}
+					if (loyaltyPoint.compareTo(voucherMerchant.getPurchasePrice()) < 0) {
+						response.setBaseResponse(0,0,0,"Loyalty Point Anda Belum Cukup", null);
+						return badRequest(Json.toJson(response));
+					}
+					//voucher user
+					VoucherUser voucherUser = new VoucherUser();
+					voucherUser.setVoucherId(voucherMerchant);
+					voucherUser.setUserId(member);
+					voucherUser.setAvailable(true);
+					voucherUser.save();
 
+					//voucher purchase history
+					VoucherPurchaseHistory history = new VoucherPurchaseHistory();
+					history.setVoucherId(voucherMerchant);
+					history.setUserId(member);
+					history.setPrice(voucherMerchant.getPurchasePrice());
+					history.save();
 
+					member.loyaltyPoint = member.getLoyaltyPoint().subtract(voucherMerchant.getPurchasePrice());
+					member.update();
+
+					response.setBaseResponse(0,0,0,"Penukaran Voucher Berhasil", null);
+					txn.commit();
+					return ok(Json.toJson(response));
 				}
 			}
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
+			txn.rollback();
+			return internalServerError(Json.toJson(response));
+		}  finally {
+			txn.close();
 		}
 		return unauthorized(Json.toJson(response));
+	}
+
+	public static Result assignVoucherToStore () throws IOException {
+		Merchant merchant = checkMerchantAccessAuthorization();
+		Transaction txn = Ebean.beginTransaction();
+		try {
+			if (merchant == null) {
+				return unauthorized(Json.toJson(response));
+			}
+
+			JsonNode json = request().body().asJson();
+			if (json == null) {
+				response.setBaseResponse(0,0,0,"Request Body in null or empty", null);
+				return badRequest(Json.toJson(response));
+			}
+			int success = 0;
+			int failed = 0;
+
+			ObjectMapper mapper = new ObjectMapper();
+			AssignVoucherReq req = mapper.readValue(json.toString(), AssignVoucherReq.class);
+			List<VoucherAvailableStore> listAvailableStore = new ArrayList<>();
+			List<StoreResponsePuP> storeResponses = new ArrayList<>();
+			for (int i = 0; i < req.getStoreId().size(); i++) {
+				VoucherAvailableStore availableStore = new VoucherAvailableStore();
+				Store store = Store.findById(req.getStoreId().get(i));
+				if (store == null) {
+					failed += 1;
+					continue;
+				}
+				success += 1;
+				availableStore.setStoreId(store);
+				storeResponses.add(toStoreResponse(store));
+				listAvailableStore.add(availableStore);
+			}
+
+			VoucherMerchant voucherMerchant = VoucherMerchant.findById(req.getVoucherId());
+			if (voucherMerchant == null) {
+				response.setBaseResponse(0,0,0,"Voucher Tidak Ditemukan",null);
+				return notFound(Json.toJson(response));
+			}
+
+			for (VoucherAvailableStore obj : listAvailableStore) {
+				obj.setVoucherId(voucherMerchant);
+				obj.save();
+			}
+
+			txn.commit();
+			response.setBaseResponse(1,0,0,
+					"Voucher Berhasil Di Assign",failed == 0
+							? toResponseAvailableStore(voucherMerchant, storeResponses)
+							: "Success : " + success + "Failed : " + failed);
+		} catch (Exception e) {
+			e.printStackTrace();
+			txn.rollback();
+		} finally {
+			txn.close();
+		}
+		return ok(Json.toJson(response));
 	}
 	private static VoucherResponse toResponse(VoucherMerchant voucher, VoucherHowToUse howToUse) {
 		Merchant merchant = voucher.getMerchant();
@@ -437,6 +503,23 @@ public class VoucherController extends BaseController {
 		}
 		return null;
     }
+
+	private static VoucherAvailableStoreRes toResponseAvailableStore(VoucherMerchant data, List<StoreResponsePuP> storeResponses) {
+		return VoucherAvailableStoreRes.builder()
+				.store(storeResponses)
+				.voucherId(data.id)
+				.voucherName(data.getName())
+				.value(data.getValue().intValue())
+				.build();
+	}
+
+	private static StoreResponsePuP toStoreResponse (Store store) {
+		return StoreResponsePuP.builder()
+				.id(store.id)
+				.storeCode(store.storeCode)
+				.storeName(store.storeName)
+				.build();
+	}
 	
 	private static List<VoucherListResponse> toResponses(List<VoucherMerchant> voucher) {
 //		List<VoucherListResponse> response = new ArrayList<>();
