@@ -438,6 +438,9 @@ POST	 /merchant/voucher/create					controllers.merchants.VoucherController.creat
 POST	 /merchant/voucher/edit/:id					controllers.merchants.VoucherController.editVoucher(id:Long)
 DELETE	 /merchant/voucher/delete/:id				controllers.merchants.VoucherController.deleteVoucher(id:Long)
 GET		 /merchant/voucher/mobile-qr/list			controllers.merchants.VoucherController.getAllVoucherForMobileQr(merchantId: Long,emailUser: String ,filter: String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+POST     /merchant/voucher/assign-to-store          controllers.merchants.VoucherController.assignVoucherToStore()
+POST     /merchant/voucher/purchase-voucher         controllers.merchants.VoucherController.buyVoucher()
+
 #CONFIG SETTING
 GET    /master/config-setting/:key                  controllers.masters.ConfigSettingController.getConfigSettingByKey(key: String)
 
