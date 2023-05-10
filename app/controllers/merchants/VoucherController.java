@@ -1,46 +1,32 @@
 package controllers.merchants;
 
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Query;
+import com.avaje.ebean.Transaction;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hokeba.api.BaseResponse;
+import com.hokeba.mapping.request.MapVoucher;
+import com.wordnik.swagger.annotations.Api;
+import com.wordnik.swagger.annotations.ApiOperation;
+import controllers.BaseController;
+import dtos.merchant.MerchantResponse;
+import dtos.store.StoreResponsePuP;
+import dtos.voucher.*;
+import models.*;
+import models.voucher.*;
+import play.Logger;
+import play.libs.Json;
+import play.mvc.BodyParser;
+import play.mvc.Result;
+import repository.VoucherUserRepository;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
-import dtos.store.StoreResponsePuP;
-import dtos.voucher.*;
-import models.voucher.*;
-import org.checkerframework.checker.units.qual.A;
-
-import com.avaje.ebean.Ebean;
-import com.avaje.ebean.Query;
-import com.avaje.ebean.Transaction;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hokeba.api.BaseResponse;
-import com.hokeba.mapping.request.MapVoucher;
-import com.hokeba.util.CommonFunction;
-import com.hokeba.util.Helper;
-import com.wordnik.swagger.annotations.Api;
-import com.wordnik.swagger.annotations.ApiOperation;
-
-import controllers.BaseController;
-import dtos.merchant.MerchantResponse;
-import dtos.store.StoreResponse;
-import models.Member;
-import models.Merchant;
-import models.Store;
-import models.Voucher;
-import models.VoucherDetail;
-import play.Logger;
-import play.libs.Json;
-import play.mvc.Result;
-import repository.VoucherUserRepository;
-import utils.ShipperHelper;
-import play.mvc.BodyParser;
 
 @Api(value = "/merchants/vouchers", description = "Vouchers")
 public class VoucherController extends BaseController {
