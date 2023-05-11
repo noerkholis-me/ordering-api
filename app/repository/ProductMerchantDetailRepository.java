@@ -1,5 +1,6 @@
 package repository;
 
+import models.ProductStore;
 import models.merchant.ProductMerchant;
 import models.merchant.ProductMerchantDetail;
 import play.db.ebean.Model;
@@ -106,6 +107,75 @@ public class ProductMerchantDetailRepository extends Model {
 
         ExpressionList<ProductMerchantDetail> exp = query.where();
         return query.findPagingList(10).getPage(0).getList();
+    }
+
+    public static List<ProductMerchantDetail> findListProductStore(Long merchantId, Long storeId, String keyword, String filter, String sort, int offset, int limit) {
+        String querySql;
+
+        List<ProductStore> productStore = ProductStoreRepository.find.where().eq("t0.store_id", storeId).eq("t0.is_active", true).eq("t0.is_deleted", false).findList();
+        if (productStore.isEmpty()) {
+            querySql = "SELECT pmd.id FROM product_merchant_detail pmd "
+                + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
+                + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
+                + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
+                + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
+                + "AND bm.is_active = true "
+                + "ORDER BY pm.id DESC";
+        } else {
+            querySql = "SELECT pmd.id FROM product_merchant_detail pmd "
+                + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
+                + "LEFT JOIN product_store ps ON pm.id = ps.product_id "
+                + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
+                + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
+                + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
+                + "AND ps.store_id = " + storeId + " AND ps.is_active = true AND ps.is_deleted = false "
+                + "AND bm.is_active = true "
+                + "ORDER BY pm.id DESC";
+        }
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<ProductMerchantDetail> query = Ebean.find(ProductMerchantDetail.class).setRawSql(rawSql);
+
+        ExpressionList<ProductMerchantDetail> exp = query.where();
+        exp = exp.disjunction();
+        exp = exp.ilike("pm.product_name", "%" + keyword + "%");
+        exp = exp.endJunction();
+        query = exp.query();
+
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static List<ProductMerchantDetail> findListProductKiosk(Long brandId, Long merchantId, Long storeId, Long categoryId, String keyword, int offset, int limit) {
+        String category = "";
+        if (categoryId > 0) {
+            category = "AND pm.subs_category_merchant_id = " + categoryId + " ";
+        }
+
+        String product;
+        if (!brandId.equals(0L)) {
+            product = "AND pm.merchant_id = " + merchantId + " AND pm.is_deleted = false AND pm.is_active = true "
+                + "AND bm.is_active = true AND pm.brand_merchant_id = " + brandId + " " + category + " ";
+        } else {
+            product = "AND pm.merchant_id = " + merchantId + " AND pm.is_deleted = false AND pm.is_active = true ";
+        }
+
+        String querySql = "SELECT pmd.id FROM product_merchant_detail pmd "
+            + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
+            + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
+            + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
+            + product
+            + "ORDER BY pm.id ASC";
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<ProductMerchantDetail> query = Ebean.find(ProductMerchantDetail.class).setRawSql(rawSql);
+
+        ExpressionList<ProductMerchantDetail> exp = query.where();
+        exp = exp.disjunction();
+        exp = exp.ilike("pm.product_name", "%" + keyword + "%");
+        exp = exp.endJunction();
+        query = exp.query();
+
+        return query.findPagingList(limit).getPage(offset).getList();
     }
 
 }

@@ -419,48 +419,30 @@ public class BrandMerchantController extends BaseController {
                 response.setBaseResponse(0, 0, 0, "Store tidak ditemukan", null);
                 return badRequest(Json.toJson(response));
             }
-            Query<BrandMerchant> query = BrandMerchantRepository.find.where().eq("t0.is_deleted", false).eq("merchant", ownMerchant).eq("t0.is_active", true).order("t0.name");
             try {
-
+                Integer totalData = BrandMerchantRepository.findListBrand(merchantId, 0, 0).size();
+                List<BrandMerchant> data = BrandMerchantRepository.findListBrand(merchantId, offset, 0);
                 List<BrandMerchantResponse> responses = new ArrayList<>();
-                List<BrandMerchant> totalData = BrandMerchantRepository.getTotalData(query);
-                List<BrandMerchant> responseIndex = BrandMerchantRepository.getDataBrandHomepage(query, offset);
-                for (BrandMerchant data : responseIndex) {
-                    Integer totalProductAtBrand = 0;
-                    String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.brand_merchant_id = "+data.id+" and pm.is_active = "+true+" and pm.is_deleted = false )";
-                    Query<ProductMerchantDetail> queryProduct = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.id asc");
-                    List<ProductMerchantDetail> dataProductDetail = ProductMerchantDetailRepository.getAllDataKiosK(queryProduct);
-                    for (ProductMerchantDetail productMerchantDetail : dataProductDetail) {
-                        List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchantDetail.getProductMerchant().id).orderBy().desc("t0.id").findList();
-                        if (!listProductStore.isEmpty()) {
-                            for (ProductStore productStore : listProductStore) {
-                                if (productStore.getStore().id.equals(store.id)) {
-                                    totalProductAtBrand = totalProductAtBrand + 1;
-                                }
-                            }
-                        } else {
-                            totalProductAtBrand = totalProductAtBrand + 1;
-                        }
-                    }
-
+                for (BrandMerchant brandMerchant : data) {
+                    Integer totalProductBrand = BrandMerchantRepository.getTotalProductBrand(merchantId, brandMerchant.id);
                     BrandMerchantResponse response = new BrandMerchantResponse();
-                    response.setId(data.id);
-                    response.setBrandName(data.getBrandName());
-                    response.setBrandType(data.getBrandType());
-                    response.setBrandDescription(data.getBrandDescription());
-                    response.setImageWeb(data.getImageWeb());
-                    response.setImageMobile(data.getImageMobile());
-                    response.setIconWeb(data.getIconWeb());
-                    response.setIconMobile(data.getIconMobile());
-                    response.setIsDeleted(data.isDeleted);
-                    response.setIsActive(data.isActive());
-                    response.setMerchantId(data.getMerchant().id);
-                    response.setTotalProduct(totalProductAtBrand);
+                    response.setId(brandMerchant.id);
+                    response.setBrandName(brandMerchant.getBrandName());
+                    response.setBrandType(brandMerchant.getBrandType());
+                    response.setBrandDescription(brandMerchant.getBrandDescription());
+                    response.setImageWeb(brandMerchant.getImageWeb());
+                    response.setImageMobile(brandMerchant.getImageMobile());
+                    response.setIconWeb(brandMerchant.getIconWeb());
+                    response.setIconMobile(brandMerchant.getIconMobile());
+                    response.setIsDeleted(brandMerchant.isDeleted);
+                    response.setIsActive(brandMerchant.isActive());
+                    response.setMerchantId(brandMerchant.getMerchant().id);
+                    response.setTotalProduct(totalProductBrand);
                     responses.add(response);
                 }
-                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size() , offset, limit, success + " menampilkan data", responses);
+                response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data", responses);
                 return ok(Json.toJson(response));
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Logger.error("allDetail", e);
             }
         } else if (ownMerchant == null) {
