@@ -47,6 +47,8 @@ prepare-app:
   only:
     - staging
     - prod-do
+  tags:
+    - new-shared
   timeout: 180m
   artifacts:
     paths:
@@ -66,7 +68,7 @@ build:
   script:
     - ls -lah target
     - docker info
-    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry.stagingapps.net
+    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net
     - docker build -t "${CI_REGISTRY_IMAGE}:latest" .
     - docker tag "${CI_REGISTRY_IMAGE}:latest" "${CI_REGISTRY_IMAGE}:$CI_BUILD_REF"
     - docker push "${CI_REGISTRY_IMAGE}:latest"
@@ -74,6 +76,8 @@ build:
   only:
     - staging
     - prod-do
+  tags:
+    - new-shared
 
 deploy_staging:
   image: registry.cn-hangzhou.aliyuncs.com/haoshuwei24/kubectl:1.16.6
@@ -88,9 +92,9 @@ deploy_staging:
       if kubectl get secret | grep regcred; then
           echo "already exist"
           kubectl delete secret regcred
-          kubectl create secret docker-registry regcred --docker-server=registry.stagingapps.net --docker-username="${CI_REGISTRY_USER}" --docker-password="${CI_REGISTRY_PASSWORD}" || exit 1
+          kubectl create secret docker-registry regcred --docker-server=registry-v2.stagingapps.net --docker-username="${CI_REGISTRY_USER}" --docker-password="${CI_REGISTRY_PASSWORD}" || exit 1
       else
-         kubectl create secret docker-registry regcred --docker-server=registry.stagingapps.net --docker-username="${CI_REGISTRY_USER}" --docker-password="${CI_REGISTRY_PASSWORD}" || exit 1
+         kubectl create secret docker-registry regcred --docker-server=registry-v2.stagingapps.net --docker-username="${CI_REGISTRY_USER}" --docker-password="${CI_REGISTRY_PASSWORD}" || exit 1
       fi 
     - sed -i "s/__CI_ENVIRONMENT_SLUG__/${CI_ENVIRONMENT_SLUG}/" deployment.yaml service.yaml ingress.yaml
     - sed -i "s/__CI_PROJECT_NAME__/${CI_PROJECT_NAME}/" deployment.yaml service.yaml ingress.yaml pvc.yaml
@@ -111,7 +115,7 @@ deploy_production:
   script:
     - sed -i "s,_IMAGE:VERSION_,${CI_REGISTRY_IMAGE}:$CI_BUILD_REF," docker-compose.yml
     - scp -P 222 docker-compose.yml deploy@188.166.206.252:~/api/
-    - ssh -p 222 deploy@188.166.206.252 docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry.stagingapps.net
+    - ssh -p 222 deploy@188.166.206.252 docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net
     - ssh -p 222 deploy@188.166.206.252 "cd api && docker compose up -d"
   only:
     - prod-do
