@@ -47,6 +47,8 @@ prepare-app:
   only:
     - staging
     - prod-do
+  tags:
+    - new-shared
   timeout: 180m
   artifacts:
     paths:
@@ -74,7 +76,7 @@ build:
   only:
     - staging
     - prod-do
-  tag:
+  tags:
     - new-shared
 
 deploy_staging:
