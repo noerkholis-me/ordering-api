@@ -276,9 +276,9 @@ public class CheckoutOrderController extends BaseController {
                         return notFound(Json.toJson(response));
                     }
                     for (VoucherMerchant data : vouchers) {
-                        if (data.getValueText().equalsIgnoreCase(VoucherMerchant.NOMINAL)) {
+                        if (data.getValueText() != null && data.getValueText().equalsIgnoreCase(VoucherMerchant.NOMINAL)) {
                             discount = discount.add(data.getValue());
-                        } else if (data.getValueText().equalsIgnoreCase(VoucherMerchant.PERCENT)) {
+                        } else if (data.getValueText() != null && data.getValueText().equalsIgnoreCase(VoucherMerchant.PERCENT)) {
                             BigDecimal countDiscount = data.getValue().divide(new BigDecimal(100).setScale(2, RoundingMode.DOWN));
                             discount = discount.add(countDiscount);
                         }
@@ -709,6 +709,11 @@ public class CheckoutOrderController extends BaseController {
                     payDetail.setOrderPayment(orderPayment);
                     payDetail.save();
 
+                    if (member != null){
+                        member.lastPurchase = new Date();
+                        member.update();
+                    }
+
                     txn.commit();
 
                     OrderTransactionResponse orderTransactionResponse = new OrderTransactionResponse();
@@ -720,10 +725,6 @@ public class CheckoutOrderController extends BaseController {
                     orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
                     orderTransactionResponse.setMetadata(null);
 
-                    if (member != null){
-                        member.lastPurchase = new Date();
-                        member.update();
-                    }
                     
                     if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
                     	FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order);
