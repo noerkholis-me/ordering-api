@@ -450,6 +450,29 @@ public class VoucherController extends BaseController {
 		}
 		return ok(Json.toJson(response));
 	}
+
+	public static Result getListAvailableStore (Long voucherId) {
+		Merchant merchant = checkMerchantAccessAuthorization();
+		if (merchant != null) {
+			VoucherMerchant voucherMerchant = VoucherMerchant.findById(voucherId);
+			if (voucherMerchant == null) {
+				response.setBaseResponse(0,0,0,"Voucher Tidak Ditemukan", null);
+				return notFound(Json.toJson(response));
+			}
+			List<VoucherAvailableStore> availableStores = VoucherAvailableStore.findAllByVoucherId(voucherMerchant);
+			List<Long> storeId = new ArrayList<>();
+			for (VoucherAvailableStore data : availableStores) {
+				storeId.add(data.getStoreId().id);
+			}
+			AssignVoucherReq res = new AssignVoucherReq();
+			res.setVoucherId(voucherMerchant.id);
+			res.setStoreId(storeId);
+			response.setBaseResponse(availableStores.size(), 0, 0, "Showing Data Voucher", res);
+			return ok(Json.toJson(response));
+		}
+		return unauthorized(Json.toJson(response));
+	}
+
 	private static VoucherResponse toResponse(VoucherMerchant voucher, VoucherHowToUse howToUse) {
 		Merchant merchant = voucher.getMerchant();
 		MerchantResponse merchantRes = MerchantResponse.builder()
