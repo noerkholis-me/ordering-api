@@ -771,4 +771,8 @@ public class Member extends BaseModel {
     public String getThumbnailImageLink(){
         return thumbnailImageUrl==null || thumbnailImageUrl.isEmpty() ? "" : Constant.getInstance().getImageUrl() + thumbnailImageUrl;
     }
+
+    public BigDecimal getLoyaltyPoint () {
+        return this.loyaltyPoint;
+    }
 }

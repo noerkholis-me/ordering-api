@@ -60,5 +60,12 @@ public class OrderTransaction {
     
     @JsonProperty("reference_number")
     private String referenceNumber;
+    
+    // Voucher
+    @JsonProperty("use_voucher")
+    private Boolean useVoucher;
+    @JsonProperty("voucher_id")
+    private List<Long> voucherId;
+    
 
 }

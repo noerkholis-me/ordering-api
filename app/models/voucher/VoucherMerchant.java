@@ -1,4 +1,4 @@
-package models;
+package models.voucher;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -11,6 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.avaje.ebean.Expr;
+import com.avaje.ebean.Expression;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,6 +22,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import models.BaseModel;
+import models.Merchant;
 @Entity
 @Table(name = "voucher_merchant_new")
 @Getter
@@ -84,7 +87,7 @@ public class VoucherMerchant extends BaseModel{
     }
 	
 	public static Query<VoucherMerchant> findAllVoucherMerchantAvailableAndMerchant(Merchant merchant) {
-		return find.where().eq("isDeleted", Boolean.FALSE).eq("merchant", merchant).order("id");
+		return find.where().eq("isDeleted", false).eq("merchant", merchant).eq("available", true).order("id");
 	}
 	
 	public static List<VoucherMerchant> getTotalDataPage (Query<VoucherMerchant> reqQuery) {
@@ -101,7 +104,7 @@ public class VoucherMerchant extends BaseModel{
         if (!"".equals(sort)) {
             query = query.orderBy(sort);
         } else {
-            query = query.orderBy("t0.created_at desc");
+            query = query.orderBy("createdAt desc");
         }
 
         ExpressionList<VoucherMerchant> exp = query.where();
@@ -113,4 +116,12 @@ public class VoucherMerchant extends BaseModel{
         }
         return query.findPagingList(limit).getPage(offset).getList();
     }
+	
+	public static VoucherMerchant findByName (String name, Long id) {
+		return find.where().ieq("name", name).ne("id",id).setMaxRows(1).findUnique();
+	}
+	
+	public static VoucherMerchant findByName (String name) {
+		return find.where().ieq("name", name).setMaxRows(1).findUnique();
+	}
 }
