@@ -32,4 +32,5 @@ public class VoucherResponse {
 	private String valueText;
 	private MerchantResponse merchant;
 	private String voucherType;
+	private VoucherHowToUseResponse howToUse;
 }

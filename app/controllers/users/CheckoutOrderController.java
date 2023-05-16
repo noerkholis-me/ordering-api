@@ -34,6 +34,10 @@ import models.transaction.OrderPayment;
 import models.transaction.OrderStatus;
 import models.transaction.PaymentDetail;
 import models.transaction.PaymentStatus;
+import models.voucher.VoucherMerchant;
+
+import org.joda.time.DateTime;
+import java.time.LocalTime;
 import org.json.JSONObject;
 import play.Logger;
 import play.Play;
@@ -157,6 +161,36 @@ public class CheckoutOrderController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
 
+                Merchant merchant = Merchant.find.byId(store.getMerchant().id);
+                if (merchant.isActive == false) {
+                    response.setBaseResponse(0, 0, 0, "Merchant tidak aktif", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                Boolean storeIsClosed = false;
+
+                if(store.getOpenAt() == null && store.getClosedAt() == null) {
+                    storeIsClosed = true;
+                } else {
+                    LocalTime currentTime = LocalTime.now();
+                    LocalTime openTime = LocalTime.parse(store.getOpenAt());
+                    LocalTime closeTime = LocalTime.parse(store.getClosedAt());
+
+                    storeIsClosed = currentTime.isAfter(openTime) && currentTime.isBefore(closeTime) ? false : true;
+                }
+                if(store.getStatusOpenStore() == null) {
+                    storeIsClosed = true;
+                } else {
+                    if(!store.getStatusOpenStore()) {
+                        storeIsClosed = true;
+                    }
+                }
+
+                if(storeIsClosed) {
+                    response.setBaseResponse(0, 0, 0, "Toko sedang tutup", null);
+                    return badRequest(Json.toJson(response));
+                }
+
                 ((ObjectNode) jsonRequest.get("consigner")).put("name", store.storeName);
                 ((ObjectNode) jsonRequest.get("consigner")).put("phone_number", store.storePhone);
 
@@ -227,6 +261,33 @@ public class CheckoutOrderController extends BaseController {
 
                 if (member == null && orderRequest.getUseLoyalty() == true) {
                     response.setBaseResponse(0, 0, 0, "Ups, anda tidak dapat menggunakan loyalty point", null);
+                    return badRequest(Json.toJson(response));
+                }
+                
+                if (member != null && orderRequest.getUseVoucher()) {
+                    BigDecimal discount = BigDecimal.ZERO;
+                    List<VoucherMerchant> vouchers = new ArrayList<>();
+                    for (int i = 0; i < orderRequest.getVoucherId().size(); i++) {
+                        VoucherMerchant voucher = VoucherMerchant.findById(orderRequest.getVoucherId().get(i));
+                        vouchers.add(voucher);
+                    }
+                    if (vouchers.isEmpty()) {
+                        response.setBaseResponse(0, 0, 0, "Voucher Tidak Ditemukan", null);
+                        return notFound(Json.toJson(response));
+                    }
+                    for (VoucherMerchant data : vouchers) {
+                        if (data.getValueText() != null && data.getValueText().equalsIgnoreCase(VoucherMerchant.NOMINAL)) {
+                            discount = discount.add(data.getValue());
+                        } else if (data.getValueText() != null && data.getValueText().equalsIgnoreCase(VoucherMerchant.PERCENT)) {
+                            BigDecimal countDiscount = data.getValue().divide(new BigDecimal(100).setScale(2, RoundingMode.DOWN));
+                            discount = discount.add(countDiscount);
+                        }
+                    }
+                    order.setDiscountAmount(discount);
+                }
+                
+                if (member == null && orderRequest.getUseVoucher()) {
+                    response.setBaseResponse(0, 0, 0, "Ups, anda tidak dapat menggunakan voucher", null);
                     return badRequest(Json.toJson(response));
                 }
 
@@ -477,7 +538,6 @@ public class CheckoutOrderController extends BaseController {
                     }
 
                     ((ObjectNode) jsonRequest).put("external_id", orderNumber);
-
                     // please
                     PaymentServiceRequest paymentServiceRequest = PaymentServiceRequest.builder()
                             .paymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel())
@@ -488,6 +548,7 @@ public class CheckoutOrderController extends BaseController {
                     request.setPaymentServiceRequest(paymentServiceRequest);
                     request.setProductOrderDetails(productOrderDetails);
                     request.setStoreCode(store.storeCode);
+                    System.out.println(Json.toJson(paymentServiceRequest));
 
                     ServiceResponse serviceResponse = PaymentService.getInstance().initiatePayment(request);
 
@@ -648,6 +709,11 @@ public class CheckoutOrderController extends BaseController {
                     payDetail.setOrderPayment(orderPayment);
                     payDetail.save();
 
+                    if (member != null){
+                        member.lastPurchase = new Date();
+                        member.update();
+                    }
+
                     txn.commit();
 
                     OrderTransactionResponse orderTransactionResponse = new OrderTransactionResponse();
@@ -659,10 +725,6 @@ public class CheckoutOrderController extends BaseController {
                     orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
                     orderTransactionResponse.setMetadata(null);
 
-                    if (member != null){
-                        member.lastPurchase = new Date();
-                        member.update();
-                    }
                     
                     if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
                     	FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order);

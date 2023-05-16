@@ -1,5 +1,8 @@
 package repository;
 
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.RawSql;
+import com.avaje.ebean.RawSqlBuilder;
 import models.Merchant;
 import models.BrandMerchant;
 import play.db.ebean.Model;
@@ -110,5 +113,31 @@ public class BrandMerchantRepository extends Model {
 		List<BrandMerchant> resData = query.findPagingList(0).getPage(offset).getList();
 
 		return resData;
+	}
+
+	public static List<BrandMerchant> findListBrand(Long merchantId, int offset, int limit) {
+		String querySql = "SELECT bm.id FROM brand_merchant bm "
+			+ "WHERE bm.merchant_id = '" + merchantId + "' AND bm.is_deleted = false AND bm.is_active = true "
+			+ "ORDER BY bm.brand_name ASC";
+
+		RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+		Query<BrandMerchant> query = Ebean.find(BrandMerchant.class).setRawSql(rawSql);
+
+		return query.findPagingList(limit).getPage(offset).getList();
+	}
+
+	public static Integer getTotalProductBrand(Long merchantId, Long brandId) {
+		String querySql =  "SELECT pmd.id FROM product_merchant_detail pmd "
+			+ "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
+			+ "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
+			+ "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
+			+ "AND pm.merchant_id = " + merchantId + " AND pm.brand_merchant_id = " + brandId + " AND pm.is_active = true AND pm.is_deleted = false "
+			+ "AND bm.is_active = true "
+			+ "ORDER BY pm.id DESC";
+
+		RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+		Query<BrandMerchant> query = Ebean.find(BrandMerchant.class).setRawSql(rawSql);
+
+		return query.findPagingList(0).getPage(0).getList().size();
 	}
 }

@@ -37,6 +37,7 @@ import com.hokeba.util.Helper;
 import java.math.BigDecimal;
 
 import java.text.Normalizer;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -370,6 +371,27 @@ public class StoreController extends BaseController {
     }
 
     private static StoreResponse toResponse(Store store) {
+        Boolean storeIsClosed = false;
+
+        if(store.getOpenAt() == null && store.getClosedAt() == null) {
+            storeIsClosed = true;
+        } else {
+            LocalTime currentTime = LocalTime.now();
+            LocalTime openTime = LocalTime.parse(store.getOpenAt());
+            LocalTime closeTime = LocalTime.parse(store.getClosedAt());
+            if(currentTime.isAfter(openTime) && currentTime.isBefore(closeTime) ) {
+                 storeIsClosed = false;
+            }
+        }
+
+        if(store.getStatusOpenStore() == null) {
+            storeIsClosed = true;
+        } else {
+            if(!store.getStatusOpenStore()) {
+                storeIsClosed = true;
+            }
+        }
+
         return StoreResponse.builder()
                 .id(store.id)
                 .storeCode(store.storeCode)
@@ -389,6 +411,9 @@ public class StoreController extends BaseController {
                 .storeLogo(store.storeLogo)
                 .merchantType(store.merchant.merchantType)
                 .storeQueueUrl(Helper.MOBILEQR_URL + store.storeCode + "/queue")
+                .statusOpenStore(!storeIsClosed)
+                .openAt(store.getOpenAt())
+                .closedAt(store.getClosedAt())
                 .build();
     }
 

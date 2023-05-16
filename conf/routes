@@ -437,6 +437,10 @@ GET		 /merchant/voucher/:id						controllers.merchants.VoucherController.getVouc
 POST	 /merchant/voucher/create					controllers.merchants.VoucherController.createVoucher()
 POST	 /merchant/voucher/edit/:id					controllers.merchants.VoucherController.editVoucher(id:Long)
 DELETE	 /merchant/voucher/delete/:id				controllers.merchants.VoucherController.deleteVoucher(id:Long)
+GET		 /merchant/voucher/mobile-qr/list			controllers.merchants.VoucherController.getAllVoucherForMobileQr(merchantId: Long,emailUser: String ,filter: String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+POST     /merchant/voucher/assign-to-store          controllers.merchants.VoucherController.assignVoucherToStore()
+POST     /merchant/voucher/purchase-voucher         controllers.merchants.VoucherController.buyVoucher()
+
 #CONFIG SETTING
 GET    /master/config-setting/:key                  controllers.masters.ConfigSettingController.getConfigSettingByKey(key: String)
 
@@ -458,8 +462,8 @@ GET     /product/detail                             controllers.product.ProductM
 GET     /product/additional                         controllers.product.ProductMerchantController.productAdditional(product_id: Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0)
 GET     /pos/product/additional                         controllers.product.ProductMerchantController.posProductAdditional(product_id: Long ?= 0, store_id:Long ?= 0)
 
-GET     /product/kiosk/list                         controllers.product.ProductMerchantController.productListKiosk(brand_id:Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "")
-GET     /product/mobile-qr/list                     controllers.product.ProductMerchantController.productListKiosk(brand_id:Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "")
+GET     /product/kiosk/list                         controllers.product.ProductMerchantController.productListKiosk(brand_id:Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET     /product/mobile-qr/list                     controllers.product.ProductMerchantController.productListKiosk(brand_id:Long ?= 0, merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 
 #PRODUCT RECOMMENDATION
 GET     /product/recommendation                     controllers.product.ProductMerchantController.listRecommendedProduct(merchant_id: Long ?= 0)

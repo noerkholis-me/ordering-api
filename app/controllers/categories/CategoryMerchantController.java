@@ -408,117 +408,66 @@ public class CategoryMerchantController extends BaseController {
         }
 
     public static Result listCategoryFE(Long merchantId, Long storeId) {
-
-            Query<CategoryMerchant> query = CategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).order("t0.id");
             Store store = Store.find.byId(storeId);
             if (store == null) {
                 response.setBaseResponse(0, 0, 0, "Store tidak ditemukan", null);
                 return badRequest(Json.toJson(response));
             }
             try {
-
-
+                Integer totalData = CategoryMerchantRepository.findListCategory(merchantId, "", "", 0, 0).size();
+                List<CategoryMerchant> data = CategoryMerchantRepository.findListCategory(merchantId, "", "", 0, 0);
                 List<CategoryMerchantResponse> responses = new ArrayList<>();
-                List<CategoryMerchant> totalData = CategoryMerchantRepository.getTotalData(query);
-                List<CategoryMerchant> responseIndex = CategoryMerchantRepository.getDataCategory(query, "", "", 0, 0);
-                for (CategoryMerchant data : responseIndex) {
-                    Integer totalCategoryData = 0;
-                    String querySql = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.category_merchant_id = "+data.id+" and pm.is_active = "+true+" and pm.is_deleted = false )";
-                    Query<ProductMerchantDetail> queryProductCategory = ProductMerchantDetailRepository.find.where().raw(querySql).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.id asc");
-                    List<ProductMerchantDetail> dataProductDetailCategory = ProductMerchantDetailRepository.getAllDataKiosK(queryProductCategory);
-                    for (ProductMerchantDetail productMerchantDetail : dataProductDetailCategory) {
-                        List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchantDetail.getProductMerchant().id).orderBy().desc("t0.id").findList();
-                        if (listProductStore.size() > 0) {
-                            for (ProductStore productStore : listProductStore) {
-                                if (productStore.getStore().id.equals(store.id)) {
-                                    totalCategoryData = totalCategoryData + 1;
-                                }
-                            }
-                        } else {
-                            totalCategoryData = totalCategoryData + 1;
-                        }
-                    }
-
+                for (CategoryMerchant category : data) {
                     CategoryMerchantResponse response = new CategoryMerchantResponse();
-                    Query<SubCategoryMerchant> querySub = SubCategoryMerchantRepository.find.where().eq("t0.category_id", data.id).eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).order("t0.id");
-                    List<SubCategoryMerchant> dataSub = SubCategoryMerchantRepository.getDataForCategory(querySub);
-                    List<CategoryMerchantResponse.SubCategoryMerchant> responsesSub = new ArrayList<>();
-                    response.setId(data.id);
-                    response.setCategoryName(data.getCategoryName());
-                    response.setImageWeb(data.getImageWeb());
-                    response.setImageMobile(data.getImageMobile());
-                    response.setIsDeleted(data.isDeleted);
-                    response.setIsActive(data.isActive());
-                    response.setMerchantId(data.getMerchant().id);
+
+                    Integer totalCategoryData = CategoryMerchantRepository.getTotalProductCategory(merchantId, category.id);
+                    response.setId(category.id);
+                    response.setCategoryName(category.getCategoryName());
+                    response.setImageWeb(category.getImageWeb());
+                    response.setImageMobile(category.getImageMobile());
+                    response.setIsDeleted(category.isDeleted);
+                    response.setIsActive(category.isActive());
+                    response.setMerchantId(category.getMerchant().id);
                     response.setTotalProduct(totalCategoryData);
 
-                    for(SubCategoryMerchant dataSubs : dataSub) {
-                        Integer totalSubCategoryData = 0;
-                        String querySqlSubCategory = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.sub_category_merchant_id = "+dataSubs.id+" and pm.is_active = "+true+" and pm.is_deleted = false )";
-                        Query<ProductMerchantDetail> queryProductSubCategory = ProductMerchantDetailRepository.find.where().raw(querySqlSubCategory).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.id asc");
-                        List<ProductMerchantDetail> dataProductDetailSubCategory = ProductMerchantDetailRepository.getAllDataKiosK(queryProductSubCategory);
-                        for (ProductMerchantDetail productMerchantDetail : dataProductDetailSubCategory) {
-                            List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchantDetail.getProductMerchant().id).orderBy().desc("t0.id").findList();
-                            if (listProductStore.size() > 0) {
-                                for (ProductStore productStore : listProductStore) {
-                                    if (productStore.getStore().id.equals(store.id)) {
-                                        totalSubCategoryData = totalSubCategoryData + 1;
-                                    }
-                                }
-                            } else {
-                                totalSubCategoryData = totalSubCategoryData + 1;
-                            }
-                        }
-
+                    Query<SubCategoryMerchant> querySub = SubCategoryMerchantRepository.find.where().eq("t0.category_id", category.id).eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).order("t0.id");
+                    List<SubCategoryMerchant> dataSub = SubCategoryMerchantRepository.getDataForCategory(querySub);
+                    List<CategoryMerchantResponse.SubCategoryMerchant> responsesSub = new ArrayList<>();
+                    for(SubCategoryMerchant subCategory : dataSub) {
+                        Integer totalProductSubCategory = CategoryMerchantRepository.getTotalProductSubCategory(merchantId, subCategory.id);
                         CategoryMerchantResponse.SubCategoryMerchant responseSub = new CategoryMerchantResponse.SubCategoryMerchant();
-                        Query<SubsCategoryMerchant> querySubs = SubsCategoryMerchantRepository.find.where().eq("t0.subcategory_id", dataSubs.id).eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).order("t0.id");
-                        List<SubsCategoryMerchant> dataSubThree = SubsCategoryMerchantRepository.getDataForCategory(querySubs);
+                        responseSub.setId(subCategory.id);
+                        responseSub.setSubcategoryName(subCategory.getSubcategoryName());
+                        responseSub.setImageWeb(subCategory.getImageWeb());
+                        responseSub.setImageMobile(subCategory.getImageMobile());
+                        responseSub.setIsActive(subCategory.isActive);
+                        responseSub.setIsDeleted(subCategory.isDeleted);
+                        responseSub.setTotalProduct(totalProductSubCategory);
+
+                        Query<SubsCategoryMerchant> querySubs = SubsCategoryMerchantRepository.find.where().eq("t0.subcategory_id", subCategory.id).eq("t0.is_deleted", false).eq("t0.merchant_id", merchantId).order("t0.id");
+                        List<SubsCategoryMerchant> dataSubs = SubsCategoryMerchantRepository.getDataForCategory(querySubs);
                         List<CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant> responsesSubs = new ArrayList<>();
-                        responseSub.setId(dataSubs.id);
-                        responseSub.setSubcategoryName(dataSubs.getSubcategoryName());
-                        responseSub.setImageWeb(dataSubs.getImageWeb());
-                        responseSub.setImageMobile(dataSubs.getImageMobile());
-                        responseSub.setIsActive(dataSubs.isActive);
-                        responseSub.setIsDeleted(dataSubs.isDeleted);
-                        responseSub.setTotalProduct(totalSubCategoryData);
-
-                        for(SubsCategoryMerchant dataSubsThree : dataSubThree) {
-                            Integer totalSubsCategoryData = 0;
-                            String querySqlSubsCategory = "t0.product_merchant_id in (select pm.id from product_merchant pm where pm.merchant_id = "+merchantId+" and pm.subs_category_merchant_id = "+dataSubsThree.id+" and pm.is_active = "+true+" and pm.is_deleted = false )";
-                            Query<ProductMerchantDetail> queryProductSubsCategory = ProductMerchantDetailRepository.find.where().raw(querySqlSubsCategory).eq("t0.is_deleted", false).eq("t0.product_type", "MAIN").order("t0.id asc");
-                            List<ProductMerchantDetail> dataProductDetailSubsCategory = ProductMerchantDetailRepository.getAllDataKiosK(queryProductSubsCategory);
-                            for (ProductMerchantDetail productMerchantDetail : dataProductDetailSubsCategory) {
-                                List<ProductStore> listProductStore = ProductStoreRepository.find.where().eq("t0.is_deleted", false).eq("t0.is_active", true).eq("t0.product_id", productMerchantDetail.getProductMerchant().id).orderBy().desc("t0.id").findList();
-                                if (listProductStore.size() > 0) {
-                                    for (ProductStore productStore : listProductStore) {
-                                        if (productStore.getStore().id.equals(store.id)) {
-                                            totalSubsCategoryData = totalSubsCategoryData + 1;
-                                        }
-                                    }
-                                } else {
-                                    totalSubsCategoryData = totalSubsCategoryData + 1;
-                                }
-                            }
-
+                        for(SubsCategoryMerchant subsCategory : dataSubs) {
+                            Integer totalProductSubsCategory = CategoryMerchantRepository.getTotalProductSubCategory(merchantId, subsCategory.id);
                             CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant responseSubs = new CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant();
-                            responseSubs.setId(dataSubsThree.id);
-                            responseSubs.setSubscategoryName(dataSubsThree.getSubscategoryName());
-                            responseSubs.setImageWeb(dataSubsThree.getImageWeb());
-                            responseSubs.setImageMobile(dataSubsThree.getImageMobile());
-                            responseSubs.setIsActive(dataSubsThree.isActive);
-                            responseSubs.setIsDeleted(dataSubsThree.isDeleted);
-                            responseSubs.setSequence(dataSubsThree.getSequence());
-                            responseSubs.setTotalProduct(totalSubsCategoryData);
+                            responseSubs.setId(subsCategory.id);
+                            responseSubs.setSubscategoryName(subsCategory.getSubscategoryName());
+                            responseSubs.setImageWeb(subsCategory.getImageWeb());
+                            responseSubs.setImageMobile(subsCategory.getImageMobile());
+                            responseSubs.setIsActive(subsCategory.isActive);
+                            responseSubs.setIsDeleted(subsCategory.isDeleted);
+                            responseSubs.setSequence(subsCategory.getSequence());
+                            responseSubs.setTotalProduct(totalProductSubsCategory);
                             responsesSubs.add(responseSubs);
                             responseSub.setSubsCategory(responseSubs != null ? responsesSubs : null);
                         }
-                        
+
                         responsesSub.add(responseSub);
                         response.setSubCategory(responseSub != null ? responsesSub : null);
                     }
                     responses.add(response);
                 }
-                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size() , offset, limit, success + " menampilkan data", responses);
+                response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data", responses);
                 return ok(Json.toJson(response));
             } catch (IOException e) {
                 Logger.error("allDetail", e);
