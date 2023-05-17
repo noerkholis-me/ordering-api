@@ -460,14 +460,12 @@ public class VoucherController extends BaseController {
 				return notFound(Json.toJson(response));
 			}
 			List<VoucherAvailableStore> availableStores = VoucherAvailableStore.findAllByVoucherId(voucherMerchant);
-			List<Long> storeId = new ArrayList<>();
+			List<VoucherStoreResponse> storeRes = new ArrayList<>();
 			for (VoucherAvailableStore data : availableStores) {
-				storeId.add(data.getStoreId().id);
+				storeRes.add(toStoreResponse2(data.getStoreId()));
 			}
-			AssignVoucherReq res = new AssignVoucherReq();
-			res.setVoucherId(voucherMerchant.id);
-			res.setStoreId(storeId);
-			response.setBaseResponse(availableStores.size(), 0, 0, "Showing Data Voucher", res);
+			AvailableStoreByVoucherRes res = new AvailableStoreByVoucherRes(voucherMerchant.id, storeRes);
+			response.setBaseResponse(availableStores.size(), 0, availableStores.size(), "Showing Data : ", res);
 			return ok(Json.toJson(response));
 		}
 		return unauthorized(Json.toJson(response));
@@ -550,6 +548,10 @@ public class VoucherController extends BaseController {
 //	    voucher.forEach(voucherMerchant -> response.add(toResponse(voucherMerchant)));
 	    return response;
     }
+
+	private static VoucherStoreResponse toStoreResponse2(Store store) {
+		return new VoucherStoreResponse(store.id, store.storeName);
+	}
 	
 	private static String validateRequest (CreateVoucherRequest request) {
 		if (request == null)
