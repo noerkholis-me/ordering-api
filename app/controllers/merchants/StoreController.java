@@ -37,7 +37,9 @@ import com.hokeba.util.Helper;
 import java.math.BigDecimal;
 
 import java.text.Normalizer;
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -370,27 +372,41 @@ public class StoreController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    private static StoreResponse toResponse(Store store) {
+    private static Boolean IsStoreClosed(Store store) {
         Boolean storeIsClosed = false;
-
-        if(store.getOpenAt() == null && store.getClosedAt() == null) {
-            storeIsClosed = true;
-        } else {
-            LocalTime currentTime = LocalTime.now();
-            LocalTime openTime = LocalTime.parse(store.getOpenAt());
-            LocalTime closeTime = LocalTime.parse(store.getClosedAt());
-            if(currentTime.isAfter(openTime) && currentTime.isBefore(closeTime) ) {
-                 storeIsClosed = false;
-            }
-        }
 
         if(store.getStatusOpenStore() == null) {
             storeIsClosed = true;
+            String featureCreationDateStr = "2023-05-17";
+            LocalDate featureOnOfStoreCreationDate = LocalDate.parse(featureCreationDateStr);
+            if(store.merchant.createdAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(featureOnOfStoreCreationDate)) {
+                storeIsClosed = false;
+            }
         } else {
             if(!store.getStatusOpenStore()) {
                 storeIsClosed = true;
+            } else {
+                if(store.getOpenAt() == null && store.getClosedAt() == null) {
+                    storeIsClosed = false;
+                } else {
+                    LocalTime currentTime = LocalTime.now();
+                    LocalTime openTime = LocalTime.parse(store.getOpenAt());
+                    LocalTime closeTime = LocalTime.parse(store.getClosedAt());
+                    if(currentTime.isAfter(openTime) && currentTime.isBefore(closeTime) ) {
+                        storeIsClosed = false;
+                    } else {
+                        storeIsClosed = true;
+                    }
+                }
             }
         }
+
+        return storeIsClosed;
+    }
+
+    private static StoreResponse toResponse(Store store) {
+
+        Boolean storeIsClosed = IsStoreClosed(store);
 
         return StoreResponse.builder()
                 .id(store.id)
@@ -474,7 +490,7 @@ public class StoreController extends BaseController {
         store.storePhone = storeRequest.getStorePhone();
         store.storeAddress = storeRequest.getAddress();
         store.isActive = Boolean.TRUE;
-        store.statusOpenStore = Boolean.FALSE;
+        store.statusOpenStore = Boolean.TRUE;
         store.shipperProvince = ShipperProvince.findById(storeRequest.getProvinceId());
         store.shipperCity = ShipperCity.findById(storeRequest.getCityId());
         store.shipperSuburb = ShipperSuburb.findById(storeRequest.getSuburbId());
