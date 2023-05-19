@@ -37,7 +37,11 @@ import models.transaction.PaymentStatus;
 import models.voucher.VoucherMerchant;
 
 import org.joda.time.DateTime;
+
+import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
+
 import org.json.JSONObject;
 import play.Logger;
 import play.Play;
@@ -80,6 +84,38 @@ public class CheckoutOrderController extends BaseController {
     private static BaseResponse response = new BaseResponse();
 
     private static ObjectMapper objectMapper = new ObjectMapper();
+
+    private static Boolean IsStoreClosed(Store store) {
+        Boolean storeIsClosed = false;
+
+        if(store.getStatusOpenStore() == null) {
+            storeIsClosed = true;
+            String featureCreationDateStr = "2023-05-17";
+            LocalDate featureOnOfStoreCreationDate = LocalDate.parse(featureCreationDateStr);
+            if(store.merchant.createdAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(featureOnOfStoreCreationDate)) {
+                storeIsClosed = false;
+            }
+        } else {
+            if(!store.getStatusOpenStore()) {
+                storeIsClosed = true;
+            } else {
+                if(store.getOpenAt() == null && store.getClosedAt() == null) {
+                    storeIsClosed = false;
+                } else {
+                    LocalTime currentTime = LocalTime.now();
+                    LocalTime openTime = LocalTime.parse(store.getOpenAt());
+                    LocalTime closeTime = LocalTime.parse(store.getClosedAt());
+                    if(currentTime.isAfter(openTime) && currentTime.isBefore(closeTime) ) {
+                        storeIsClosed = false;
+                    } else {
+                        storeIsClosed = true;
+                    }
+                }
+            }
+        }
+
+        return storeIsClosed;
+    }
 
     public static Result checkoutOrder() {
         // int authority = checkAccessAuthorization("all");
@@ -167,24 +203,7 @@ public class CheckoutOrderController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
 
-                Boolean storeIsClosed = false;
-
-                if(store.getOpenAt() == null && store.getClosedAt() == null) {
-                    storeIsClosed = true;
-                } else {
-                    LocalTime currentTime = LocalTime.now();
-                    LocalTime openTime = LocalTime.parse(store.getOpenAt());
-                    LocalTime closeTime = LocalTime.parse(store.getClosedAt());
-
-                    storeIsClosed = currentTime.isAfter(openTime) && currentTime.isBefore(closeTime) ? false : true;
-                }
-                if(store.getStatusOpenStore() == null) {
-                    storeIsClosed = true;
-                } else {
-                    if(!store.getStatusOpenStore()) {
-                        storeIsClosed = true;
-                    }
-                }
+                Boolean storeIsClosed = IsStoreClosed(store);
 
                 if(storeIsClosed) {
                     response.setBaseResponse(0, 0, 0, "Toko sedang tutup", null);

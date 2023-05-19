@@ -17,6 +17,8 @@ import models.BaseModel;
 import models.Member;
 import models.Store;
 
+import java.util.List;
+
 @Entity
 @Table(name = "voucher_available_store")
 @Getter
@@ -39,6 +41,14 @@ public class VoucherAvailableStore extends BaseModel{
     @Getter
     @Setter
     private Store storeId;
+
+    public static List<VoucherAvailableStore> findAllByStore (Store store) {
+        return VoucherAvailableStore.find.where().eq("is_deleted", false).eq("storeId", store).findList();
+    }
+
+    public static List<VoucherAvailableStore> findAllByVoucherId (VoucherMerchant voucher) {
+        return VoucherAvailableStore.find.where().eq("is_deleted", false).eq("voucherId", voucher).findList();
+    }
 
 	
 }
