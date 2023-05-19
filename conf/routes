@@ -284,7 +284,7 @@ DELETE  /merchants/notification/:id				        controllers.merchants.Notificatio
 POST    /merchants/vouchers/save_json               controllers.merchants.VoucherController.saveJson()
 PATCH   /merchants/vouchers/update_json             controllers.merchants.VoucherController.updateJson()
 GET     /merchants/vouchers/lists              		controllers.merchants.VoucherController.lists(type:String ?="all", query:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 0)
-DELETE  /merchants/vouchers/delete/:id				controllers.merchants.VoucherController.delete(id: Long)
+#DELETE  /merchants/vouchers/delete/:id				controllers.merchants.VoucherController.delete(id: Long)
 
 POST 	/merchants/pickup/add						controllers.merchants.PickUpPointController.addEntry()
 GET 	/merchants/pickup/list						controllers.merchants.PickUpPointController.list()
@@ -431,16 +431,16 @@ GET      /merchant/group/:groupCode/product/list    controllers.merchants.QrGrou
 GET      /merchant/group/:groupCode/category        controllers.merchants.QrGroupController.getListCategoryFromGroup(groupCode:String)
 GET      /merchant/group/:groupCode/brand           controllers.merchants.QrGroupController.getListBrandFromGroup(groupCode:String, filter:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 
-#VOUCHER MERCHANT
-GET		 /merchant/voucher							controllers.merchants.VoucherController.getAllVoucher(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
-GET		 /merchant/voucher/:id						controllers.merchants.VoucherController.getVoucherById(id:Long)
-POST	 /merchant/voucher/create					controllers.merchants.VoucherController.createVoucher()
-POST	 /merchant/voucher/edit/:id					controllers.merchants.VoucherController.editVoucher(id:Long)
-DELETE	 /merchant/voucher/delete/:id				controllers.merchants.VoucherController.deleteVoucher(id:Long)
-GET		 /merchant/voucher/mobile-qr/list			controllers.merchants.VoucherController.getAllVoucherForMobileQr(merchantId: Long,emailUser: String ,filter: String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
-POST     /merchant/voucher/assign-to-store          controllers.merchants.VoucherController.assignVoucherToStore()
-POST     /merchant/voucher/purchase-voucher         controllers.merchants.VoucherController.buyVoucher()
-GET      /merchant/voucher/get-available-store/:id        controllers.merchants.VoucherController.getListAvailableStore(id: Long)
+#VOUCHER MERCHANT NEW
+GET		 /merchants/vouchers							controllers.merchants.VoucherController.getAllVoucher(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET		 /merchants/vouchers/:id						controllers.merchants.VoucherController.getVoucherById(id:Long)
+POST	 /merchants/vouchers/create					controllers.merchants.VoucherController.createVoucher()
+POST	 /merchants/vouchers/edit/:id					controllers.merchants.VoucherController.editVoucher(id:Long)
+DELETE	 /merchants/vouchers/delete/:id				controllers.merchants.VoucherController.deleteVoucher(id:Long)
+GET		 /merchants/vouchers/mobile-qr/list			controllers.merchants.VoucherController.getAllVoucherForMobileQr(merchantId: Long,emailUser: String ,filter: String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+POST     /merchants/vouchers/assign-to-store          controllers.merchants.VoucherController.assignVoucherToStore()
+POST     /merchants/vouchers/purchase-voucher         controllers.merchants.VoucherController.buyVoucher()
+GET      /merchants/vouchers/get-available-store/:id        controllers.merchants.VoucherController.getListAvailableStore(id: Long)
 
 #CONFIG SETTING
 GET    /master/config-setting/:key                  controllers.masters.ConfigSettingController.getConfigSettingByKey(key: String)

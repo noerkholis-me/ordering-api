@@ -453,22 +453,22 @@ public class VoucherController extends BaseController {
 
 	public static Result getListAvailableStore (Long voucherId) {
 		Merchant merchant = checkMerchantAccessAuthorization();
-		if (merchant != null) {
-			VoucherMerchant voucherMerchant = VoucherMerchant.findById(voucherId);
-			if (voucherMerchant == null) {
-				response.setBaseResponse(0,0,0,"Voucher Tidak Ditemukan", null);
-				return notFound(Json.toJson(response));
-			}
-			List<VoucherAvailableStore> availableStores = VoucherAvailableStore.findAllByVoucherId(voucherMerchant);
-			List<VoucherStoreResponse> storeRes = new ArrayList<>();
-			for (VoucherAvailableStore data : availableStores) {
-				storeRes.add(toStoreResponse2(data.getStoreId()));
-			}
-			AvailableStoreByVoucherRes res = new AvailableStoreByVoucherRes(voucherMerchant.id, storeRes);
-			response.setBaseResponse(availableStores.size(), 0, availableStores.size(), "Showing Data : ", res);
-			return ok(Json.toJson(response));
+		if (merchant == null) {
+			return unauthorized(Json.toJson(response));
 		}
-		return unauthorized(Json.toJson(response));
+		VoucherMerchant voucherMerchant = VoucherMerchant.findById(voucherId);
+		if (voucherMerchant == null) {
+			response.setBaseResponse(0,0,0,"Voucher Tidak Ditemukan", null);
+			return notFound(Json.toJson(response));
+		}
+		List<VoucherAvailableStore> availableStores = VoucherAvailableStore.findAllByVoucherId(voucherMerchant);
+		List<VoucherStoreResponse> storeRes = new ArrayList<>();
+		for (VoucherAvailableStore data : availableStores) {
+			storeRes.add(toStoreResponse2(data.getStoreId()));
+		}
+		AvailableStoreByVoucherRes res = new AvailableStoreByVoucherRes(voucherMerchant.id, storeRes);
+		response.setBaseResponse(availableStores.size(), 0, availableStores.size(), "Showing Data : ", res);
+		return ok(Json.toJson(response));
 	}
 
 	private static VoucherResponse toResponse(VoucherMerchant voucher, VoucherHowToUse howToUse) {
