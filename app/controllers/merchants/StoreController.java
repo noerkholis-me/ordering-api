@@ -210,6 +210,7 @@ public class StoreController extends BaseController {
                 response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : storeList.size(), offset, limit, success + " Showing data stores", storeResponses);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
+                e.printStackTrace();
                 Logger.info("Error: " + e.getMessage());
             }
         }
