@@ -249,10 +249,10 @@ public class StoreController extends BaseController {
                     response.setBaseResponse(0, 0, 0, " Store is not found.", null);
                     return badRequest(Json.toJson(response));
                 }
-                List<ProductMerchant> productMerchantList = ProductMerchantRepository.findProductMerchantIsActiveAndMerchant(ownMerchant, true);
-                System.out.println("Listnya : "+productMerchantList.size());
-                StoreResponse storeResponse = toResponse(store, productMerchantList);
-                response.setBaseResponse(1, 0, 0, success + " Showing data store", storeResponse);
+
+                List<ProductMerchant> productMerchantList = ProductMerchantRepository.findProductMerchant(ownMerchant.id, store.id);
+
+                response.setBaseResponse(1, 0, 0, success + " Showing data store", toResponse(store, productMerchantList));
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 Logger.info("Error: " + e.getMessage());
@@ -437,21 +437,18 @@ public class StoreController extends BaseController {
     private static StoreResponse toResponse(Store store, List<ProductMerchant> productMerchantList) {
         List<ProductStoreResponseForStore> list = new ArrayList<>();
         for (ProductMerchant productMerchant : productMerchantList) {
-            ProductStore productStore = ProductStoreRepository.findForCust(productMerchant.id, store.id, productMerchant.merchant);
-            if (productStore != null) {
-                ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productMerchant);
-                String linkQrProductMerchant = productMerchantDetail.getProductMerchantQrCode();
-                String qrProductMerchantUrl = null;
-                if (linkQrProductMerchant != null) {
-                    String[] parts = linkQrProductMerchant.split("/");
-                    qrProductMerchantUrl = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+"home/"+store.storeCode+"/"+store.id+"/"+productMerchant.getMerchant().id+"/"+parts[4]+"/"+parts[5];
-                }
-                ProductStoreResponseForStore productStoreResponse = new ProductStoreResponseForStore();
-                productStoreResponse.setProductId(productMerchant.id);
-                productStoreResponse.setProductName(productMerchant.getProductName());
-                productStoreResponse.setProductStoreQrCode(qrProductMerchantUrl);
-                list.add(productStoreResponse);
+            ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productMerchant);
+            String linkQrProductMerchant = productMerchantDetail.getProductMerchantQrCode();
+            String qrProductMerchantUrl = null;
+            if (linkQrProductMerchant != null) {
+                String[] parts = linkQrProductMerchant.split("/");
+                qrProductMerchantUrl = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+"home/"+store.storeCode+"/"+store.id+"/"+productMerchant.getMerchant().id+"/"+parts[4]+"/"+parts[5];
             }
+            ProductStoreResponseForStore productStoreResponse = new ProductStoreResponseForStore();
+            productStoreResponse.setProductId(productMerchant.id);
+            productStoreResponse.setProductName(productMerchant.getProductName());
+            productStoreResponse.setProductStoreQrCode(qrProductMerchantUrl);
+            list.add(productStoreResponse);
         }
         return StoreResponse.builder()
                 .id(store.id)

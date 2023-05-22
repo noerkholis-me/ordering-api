@@ -145,6 +145,62 @@ public class ProductMerchantDetailRepository extends Model {
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
+    public static List<ProductMerchantDetail> findListProductStoreByCategories(Long merchantId, Long storeId, Long categoryId, Long subCategoryId, Long subsCategoryId, String keyword, String filter, String sort, int offset, int limit) {
+        String queryCategory = "";
+        if (!categoryId.equals(0L) && !subCategoryId.equals(0L) && !subsCategoryId.equals(0L)) {
+            queryCategory = "AND pm.category_merchant_id = " + categoryId + " "
+                + "AND pm.sub_category_merchant_id = " + subCategoryId + " "
+                + "AND pm.subs_category_merchant_id = " + subsCategoryId + " ";
+        } else if (!categoryId.equals(0L) && !subCategoryId.equals(0L) && subsCategoryId.equals(0L)) {
+            queryCategory = "AND pm.category_merchant_id = " + categoryId + " "
+                + "AND pm.sub_category_merchant_id = " + subCategoryId + " ";
+        } else if (!categoryId.equals(0L) && subCategoryId.equals(0L) && !subsCategoryId.equals(0L)) {
+            queryCategory = "AND pm.category_merchant_id = " + categoryId + " "
+                + "AND pm.subs_category_merchant_id = " + subsCategoryId + " ";
+        } else if (categoryId.equals(0L) && !subCategoryId.equals(0L) && !subsCategoryId.equals(0L)) {
+            queryCategory = "AND pm.sub_category_merchant_id = " + subCategoryId + " "
+                + "AND pm.subs_category_merchant_id = " + subsCategoryId + " ";
+        } else if (categoryId.equals(0L) && subCategoryId.equals(0L) && !subsCategoryId.equals(0L)) {
+            queryCategory = "AND pm.subs_category_merchant_id = " + subsCategoryId + " ";
+        } else if (categoryId.equals(0L) && !subCategoryId.equals(0L) && subsCategoryId.equals(0L)) {
+            queryCategory = "AND pm.sub_category_merchant_id = " + subCategoryId + " ";
+        } else if (!categoryId.equals(0L) && subCategoryId.equals(0L) && subsCategoryId.equals(0L)) {
+            queryCategory = "AND pm.category_merchant_id = " + categoryId + " ";
+        }
+
+        String querySql;
+        List<ProductStore> productStore = ProductStoreRepository.find.where().eq("t0.store_id", storeId).eq("t0.is_active", true).eq("t0.is_deleted", false).findList();
+        if (productStore.size() > 0) {
+            querySql = "SELECT pmd.id FROM product_merchant_detail pmd "
+                + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
+                + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
+                + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
+                + queryCategory
+                + "ORDER BY pm.id DESC";
+        } else {
+            querySql = "SELECT pmd.id FROM product_merchant_detail pmd "
+                + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
+                + "JOIN product_store ps ON pm.id = ps.product_id "
+                + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
+                + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
+                + queryCategory
+                + "AND ps.store_id = " + storeId + " AND ps.is_active = true AND ps.is_deleted = false "
+                + "ORDER BY pm.id DESC";
+        }
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<ProductMerchantDetail> query = Ebean.find(ProductMerchantDetail.class).setRawSql(rawSql);
+
+        ExpressionList<ProductMerchantDetail> exp = query.where();
+        exp = exp.disjunction();
+        exp = exp.ilike("pm.product_name", "%" + keyword + "%");
+        exp = exp.endJunction();
+        query = exp.query();
+
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+
     public static List<ProductMerchantDetail> findListProductKiosk(Long brandId, Long merchantId, Long storeId, Long categoryId, String keyword, int offset, int limit) {
         String category = "";
         if (categoryId > 0) {
@@ -165,6 +221,31 @@ public class ProductMerchantDetailRepository extends Model {
             + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
             + product
             + "ORDER BY pm.id ASC";
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<ProductMerchantDetail> query = Ebean.find(ProductMerchantDetail.class).setRawSql(rawSql);
+
+        ExpressionList<ProductMerchantDetail> exp = query.where();
+        exp = exp.disjunction();
+        exp = exp.ilike("pm.product_name", "%" + keyword + "%");
+        exp = exp.endJunction();
+        query = exp.query();
+
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static List<ProductMerchantDetail> findListProductMiniPos(Long merchantId, Long storeId, Long categoryId, String keyword, int offset, int limit) {
+        String category = "";
+        if (categoryId > 0) {
+            category = "AND pm.subs_category_merchant_id = " + categoryId + " ";
+        }
+
+        String querySql = "SELECT pmd.id FROM product_merchant_detail pmd "
+            + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
+            + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
+            + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
+            + category
+            + "ORDER BY pm.id DESC";
 
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
         Query<ProductMerchantDetail> query = Ebean.find(ProductMerchantDetail.class).setRawSql(rawSql);

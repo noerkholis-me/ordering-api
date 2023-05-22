@@ -1,5 +1,8 @@
 package repository;
 
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.RawSql;
+import com.avaje.ebean.RawSqlBuilder;
 import models.CategoryMerchant;
 import models.Merchant;
 import models.SubCategoryMerchant;
@@ -177,5 +180,21 @@ public class SubsCategoryMerchantRepository extends Model {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	public static List<SubsCategoryMerchant> findListCategoryMiniPos(Long merchantId) {
+		String querySql = "SELECT scm.id FROM subs_category_merchant scm "
+			+ "JOIN product_merchant pm ON  scm.id = pm.subs_category_merchant_id "
+			+ "JOIN product_merchant_detail pmd ON pm.id = pmd.product_merchant_id "
+			+ "WHERE pm.is_deleted = false AND pm.is_active = true "
+			+ "AND pmd.is_deleted = false AND pmd.product_type = 'MAIN' "
+			+ "AND scm.merchant_id = " + merchantId + " AND scm.is_deleted = false AND scm.is_active = true "
+			+ "GROUP BY scm.id "
+			+ "ORDER BY scm.id ASC";
+
+		RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+		Query<SubsCategoryMerchant> query = Ebean.find(SubsCategoryMerchant.class).setRawSql(rawSql);
+
+		return query.findPagingList(0).getPage(0).getList();
 	}
 }
