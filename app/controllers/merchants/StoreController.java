@@ -37,9 +37,7 @@ import com.hokeba.util.Helper;
 import java.math.BigDecimal;
 
 import java.text.Normalizer;
-import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -373,41 +371,31 @@ public class StoreController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    private static Boolean IsStoreClosed(Store store) {
-        Boolean storeIsClosed = false;
-
-        if(store.getStatusOpenStore() == null) {
-            storeIsClosed = true;
-            String featureCreationDateStr = "2023-05-17";
-            LocalDate featureOnOfStoreCreationDate = LocalDate.parse(featureCreationDateStr);
-            if(store.merchant.createdAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(featureOnOfStoreCreationDate)) {
-                storeIsClosed = false;
-            }
-        } else {
-            if(!store.getStatusOpenStore()) {
-                storeIsClosed = true;
-            } else {
-                if(store.getOpenAt() == null && store.getClosedAt() == null) {
-                    storeIsClosed = false;
-                } else {
-                    LocalTime currentTime = LocalTime.now();
-                    LocalTime openTime = LocalTime.parse(store.getOpenAt());
-                    LocalTime closeTime = LocalTime.parse(store.getClosedAt());
-                    if(currentTime.isAfter(openTime) && currentTime.isBefore(closeTime) ) {
-                        storeIsClosed = false;
-                    } else {
-                        storeIsClosed = true;
-                    }
-                }
-            }
-        }
-
-        return storeIsClosed;
-    }
-
     private static StoreResponse toResponse(Store store) {
-
-        Boolean storeIsClosed = IsStoreClosed(store);
+//        boolean storeIsClosed = false;
+//
+//        if(store.getOpenAt() == null && store.getClosedAt() == null ||
+//                ("".equals(store.getOpenAt()) && "".equals(store.getClosedAt()))) {
+//            storeIsClosed = true;
+//        } else if ((store.getOpenAt() != null && !"".equals(store.getOpenAt()))
+//                && (store.getClosedAt() == null || "".equals(store.getClosedAt()))) {
+//            storeIsClosed = true;
+//        } else {
+//            storeIsClosed = true;
+//            LocalTime currentTime = LocalTime.now();
+//            LocalTime openTime = LocalTime.parse(store.getOpenAt());
+//            LocalTime closeTime = LocalTime.parse(store.getClosedAt());
+//            if(currentTime.isBefore(openTime) && currentTime.isAfter(closeTime) ) {
+//            }
+//        }
+//
+//        if(store.getStatusOpenStore() == null) {
+//            storeIsClosed = true;
+//        } else {
+//            if(!store.getStatusOpenStore()) {
+//                storeIsClosed = true;
+//            }
+//        }
 
         return StoreResponse.builder()
                 .id(store.id)
@@ -428,7 +416,7 @@ public class StoreController extends BaseController {
                 .storeLogo(store.storeLogo)
                 .merchantType(store.merchant.merchantType)
                 .storeQueueUrl(Helper.MOBILEQR_URL + store.storeCode + "/queue")
-                .statusOpenStore(!storeIsClosed)
+                .statusOpenStore(store.getStatusOpenStore())
                 .openAt(store.getOpenAt())
                 .closedAt(store.getClosedAt())
                 .build();
