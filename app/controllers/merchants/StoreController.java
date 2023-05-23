@@ -128,9 +128,9 @@ public class StoreController extends BaseController {
                         store.storePhone = storeRequest.getStorePhone();
                         store.storeAddress = storeRequest.getAddress();
                         store.isActive = Boolean.TRUE;
-                        store.setStatusOpenStore(storeRequest.getStatusOpenStore());
-                        store.setOpenAt(storeRequest.getOpenAt());
-                        store.setClosedAt(storeRequest.getClosedAt());
+                        store.setStatusOpenStore(storeRequest.getStatusOpenStore() != null && storeRequest.getStatusOpenStore());
+                        store.setOpenAt("".equals(storeRequest.getOpenAt()) ? null : storeRequest.getOpenAt());
+                        store.setClosedAt("".equals(storeRequest.getClosedAt()) ? null : storeRequest.getClosedAt());
                         store.shipperProvince = ShipperProvince.findById(storeRequest.getProvinceId());
                         store.shipperCity = ShipperCity.findById(storeRequest.getCityId());
                         store.shipperSuburb = ShipperSuburb.findById(storeRequest.getSuburbId());
