@@ -86,7 +86,7 @@ public class CheckoutOrderController extends BaseController {
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     private static Boolean IsStoreClosed(Store store) {
-        Boolean storeIsClosed = false;
+        boolean storeIsClosed = false;
 
         if(store.getStatusOpenStore() == null) {
             storeIsClosed = true;
@@ -99,7 +99,9 @@ public class CheckoutOrderController extends BaseController {
             if(!store.getStatusOpenStore()) {
                 storeIsClosed = true;
             } else {
-                if(store.getOpenAt() == null && store.getClosedAt() == null) {
+                if((store.getOpenAt() == null || store.getClosedAt() == null)
+                        || ("".equals(store.getOpenAt()) || "".equals(store.getClosedAt()))
+                ) {
                     storeIsClosed = false;
                 } else {
                     LocalTime currentTime = LocalTime.now();
