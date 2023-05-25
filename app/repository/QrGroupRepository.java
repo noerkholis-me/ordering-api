@@ -148,6 +148,7 @@ public class QrGroupRepository extends Model {
             + "WHERE qg.group_code = '" + groupCode + "' AND qg.is_deleted = false "
             + "AND qgs.is_deleted = false "
             + "AND ps.is_deleted = false AND ps.is_active = true "
+            + "AND pm.merchant_id = 107 and pm.is_deleted = false AND pm.is_active = true "
             + "AND pmd.is_deleted = false AND pmd.product_type = 'MAIN' "
             + product
             + "ORDER BY ps.product_id ASC";
@@ -165,18 +166,70 @@ public class QrGroupRepository extends Model {
     }
 
     public static List<CategoryMerchant> findListCategoryFromGroup(String groupCode, String filter, int offset, int limit) {
-        String querySql = "SELECT cm.id FROM qr_group qg "
-            + "JOIN merchant mc ON qg.merchant_id = mc.id "
-            + "JOIN category_merchant cm ON mc.id = cm.merchant_id "
-            + "JOIN product_merchant pm ON cm.id = pm.category_merchant_id "
-            + "WHERE qg.group_code = '" + groupCode + "' AND qg.is_deleted = false "
-            + "AND cm.is_deleted = false AND cm.is_active = true "
+        String querySql = "SELECT cm.id FROM product_store ps "
+            + "JOIN product_merchant pm ON ps.product_id = pm.id "
+            + "JOIN category_merchant cm ON pm.category_merchant_id = cm.id "
+            + "JOIN qr_group qg ON pm.merchant_id = qg.merchant_id "
+            + "JOIN qr_group_store qgs ON ps.store_id = qgs.store_id "
+            + "WHERE qg.group_code = '" + groupCode + "' AND qg.is_deleted = false AND qgs.is_deleted = false "
+            + "AND ps.is_deleted = false AND ps.is_active = true "
             + "AND pm.is_deleted = false AND pm.is_active = true "
+            + "AND cm.is_deleted = false AND cm.is_active = true "
             + "GROUP BY cm.id "
             + "ORDER BY cm.id DESC";
 
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
         Query<CategoryMerchant> query = Ebean.find(CategoryMerchant.class).setRawSql(rawSql);
+
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static List<ProductStore> findListProductByCategory(String groupCode, Long categoryId, Long subCategoryId, Long subsCategoryId, String keyword, String filter, String sort, int offset, int limit) {
+        String queryCategory = "";
+        if (!categoryId.equals(0L) && !subCategoryId.equals(0L) && !subsCategoryId.equals(0L)) {
+            queryCategory = "AND pm.category_merchant_id = " + categoryId + " "
+                + "AND pm.sub_category_merchant_id = " + subCategoryId + " "
+                + "AND pm.subs_category_merchant_id = " + subsCategoryId + " ";
+        } else if (!categoryId.equals(0L) && !subCategoryId.equals(0L) && subsCategoryId.equals(0L)) {
+            queryCategory = "AND pm.category_merchant_id = " + categoryId + " "
+                + "AND pm.sub_category_merchant_id = " + subCategoryId + " ";
+        } else if (!categoryId.equals(0L) && subCategoryId.equals(0L) && !subsCategoryId.equals(0L)) {
+            queryCategory = "AND pm.category_merchant_id = " + categoryId + " "
+                + "AND pm.subs_category_merchant_id = " + subsCategoryId + " ";
+        } else if (categoryId.equals(0L) && !subCategoryId.equals(0L) && !subsCategoryId.equals(0L)) {
+            queryCategory = "AND pm.sub_category_merchant_id = " + subCategoryId + " "
+                + "AND pm.subs_category_merchant_id = " + subsCategoryId + " ";
+        } else if (categoryId.equals(0L) && subCategoryId.equals(0L) && !subsCategoryId.equals(0L)) {
+            queryCategory = "AND pm.subs_category_merchant_id = " + subsCategoryId + " ";
+        } else if (categoryId.equals(0L) && !subCategoryId.equals(0L) && subsCategoryId.equals(0L)) {
+            queryCategory = "AND pm.sub_category_merchant_id = " + subCategoryId + " ";
+        } else if (!categoryId.equals(0L) && subCategoryId.equals(0L) && subsCategoryId.equals(0L)) {
+            queryCategory = "AND pm.category_merchant_id = " + categoryId + " ";
+        }
+
+        String querySql = "SELECT ps.id FROM product_store ps "
+            + "JOIN product_merchant pm ON ps.product_id = pm.id "
+            + "JOIN product_merchant_detail pmd ON pmd.product_merchant_id = pm.id "
+            + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
+            + "JOIN category_merchant cm ON pm.category_merchant_id = cm.id "
+            + "JOIN qr_group qg ON pm.merchant_id = qg.merchant_id "
+            + "JOIN qr_group_store qgs ON ps.store_id = qgs.store_id "
+            + "WHERE qg.group_code = '" + groupCode + "' AND qg.is_deleted = false AND qgs.is_deleted = false "
+            + "AND ps.is_deleted = false AND ps.is_active = true "
+            + "AND pm.is_deleted = false AND pm.is_active = true "
+            + "AND pmd.is_deleted = false AND pmd.product_type = 'MAIN' "
+            + "AND cm.is_deleted = false AND cm.is_active = true "
+            + queryCategory
+            + "ORDER BY ps.product_id DESC";
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<ProductStore> query = Ebean.find(ProductStore.class).setRawSql(rawSql);
+
+        ExpressionList<ProductStore> exp = query.where();
+        exp = exp.disjunction();
+        exp = exp.ilike("pm.product_name", "%" + keyword + "%");
+        exp = exp.endJunction();
+        query = exp.query();
 
         return query.findPagingList(limit).getPage(offset).getList();
     }
