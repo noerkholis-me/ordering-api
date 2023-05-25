@@ -573,6 +573,33 @@ public class QrGroupController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
+    public static Result getListProductByCategory(String groupCode, Long categoryId, Long subCategoryId, Long subsCategoryId, String keyword, String filter, String sort, int offset, int limit) {
+        int authority = checkAccessAuthorization("all");
+        if (authority == 200 || authority == 203) {
+            try {
+                QrGroup getQrGroup = QrGroupRepository.findByCode(groupCode);
+                if (getQrGroup == null) {
+                    response.setBaseResponse(0, 0, 0, "QR group tidak ditemukan.", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                List<ProductStore> productStore = QrGroupRepository.findListProductByCategory(groupCode, categoryId, subCategoryId, subsCategoryId, keyword, filter, sort, offset, limit);
+                Integer totalProduct = QrGroupRepository.findListProductByCategory(groupCode, categoryId, subCategoryId, subsCategoryId, keyword, filter, sort, 0, 0).size();
+
+                response.setBaseResponse(totalProduct, offset, limit, "Berhasil menampilkan daftar produk QR group.",
+                    toListProductResponse(productStore));
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                Logger.info("Error: " + e.getMessage());
+            }
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
     public static Result getListBrandFromGroup(String groupCode, String filter, int offset, int limit) {
         int authority = checkAccessAuthorization("all");
         if (authority == 200 || authority == 203) {

@@ -414,8 +414,8 @@ public class CategoryMerchantController extends BaseController {
                 return badRequest(Json.toJson(response));
             }
             try {
-                Integer totalData = CategoryMerchantRepository.findListCategory(merchantId, "", "", 0, 0).size();
-                List<CategoryMerchant> data = CategoryMerchantRepository.findListCategory(merchantId, "", "", 0, 0);
+                Integer totalData = CategoryMerchantRepository.findListCategory(merchantId, storeId, "", "", 0, 0).size();
+                List<CategoryMerchant> data = CategoryMerchantRepository.findListCategory(merchantId, storeId, "", "", 0, 0);
                 List<CategoryMerchantResponse> responses = new ArrayList<>();
                 for (CategoryMerchant category : data) {
                     CategoryMerchantResponse response = new CategoryMerchantResponse();
