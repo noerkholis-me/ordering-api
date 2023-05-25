@@ -253,6 +253,7 @@ public class ProductMerchantDetailRepository extends Model {
                     + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
                     + "AND bm.is_active = true "
                     + "AND ps.product_id IS NULL "
+                    + category
                     + "ORDER BY pm.id DESC";
         } else {
             querySql = "SELECT pmd.id FROM product_merchant_detail pmd "
@@ -263,6 +264,7 @@ public class ProductMerchantDetailRepository extends Model {
                     + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
                     + "AND ps.store_id = " + storeId + " AND ps.is_active = true AND ps.is_deleted = false "
                     + "AND bm.is_active = true "
+                    + category
                     + "ORDER BY pm.id DESC";
         }
 
