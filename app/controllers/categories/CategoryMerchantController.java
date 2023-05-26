@@ -448,7 +448,7 @@ public class CategoryMerchantController extends BaseController {
                         List<SubsCategoryMerchant> dataSubs = SubsCategoryMerchantRepository.getDataForCategory(querySubs);
                         List<CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant> responsesSubs = new ArrayList<>();
                         for(SubsCategoryMerchant subsCategory : dataSubs) {
-                            Integer totalProductSubsCategory = CategoryMerchantRepository.getTotalProductSubCategory(merchantId, subsCategory.id);
+                            Integer totalProductSubsCategory = CategoryMerchantRepository.getTotalProductSubsCategory(merchantId, subsCategory.id);
                             CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant responseSubs = new CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant();
                             responseSubs.setId(subsCategory.id);
                             responseSubs.setSubscategoryName(subsCategory.getSubscategoryName());
