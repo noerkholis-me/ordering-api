@@ -420,45 +420,38 @@ public class VoucherController extends BaseController {
 
             JsonNode json = request().body().asJson();
             if (json == null) {
-                response.setBaseResponse(0, 0, 0, "Request Body in null or empty", null);
+                response.setBaseResponse(0, 0, 0, "Request Body is null or empty", null);
                 return badRequest(Json.toJson(response));
             }
-            int success = 0;
-            int failed = 0;
+            String responseMessage = "";
 
             ObjectMapper mapper = new ObjectMapper();
             AssignVoucherReq req = mapper.readValue(json.toString(), AssignVoucherReq.class);
-            List<VoucherAvailableStore> listAvailableStore = new ArrayList<>();
-            List<StoreResponsePuP> storeResponses = new ArrayList<>();
-            for (int i = 0; i < req.getStoreId().size(); i++) {
-                VoucherAvailableStore availableStore = new VoucherAvailableStore();
-                Store store = Store.findById(req.getStoreId().get(i));
-                if (store == null) {
-                    failed += 1;
-                    continue;
-                }
-                success += 1;
-                availableStore.setStoreId(store);
-                storeResponses.add(toStoreResponse(store));
-                listAvailableStore.add(availableStore);
-            }
 
             VoucherMerchant voucherMerchant = VoucherMerchant.findById(req.getVoucherId());
             if (voucherMerchant == null) {
                 response.setBaseResponse(0, 0, 0, "Voucher Tidak Ditemukan", null);
                 return notFound(Json.toJson(response));
             }
-
-            for (VoucherAvailableStore obj : listAvailableStore) {
-                obj.setVoucherId(voucherMerchant);
-                obj.save();
+            List<VoucherAvailableStore> availableStores = VoucherAvailableStore.findAllByVoucherId(voucherMerchant);
+            List<Store> storeInReq = new ArrayList<>();
+            if (req.isEdit()) {
+                checkVoucherAvailableStore(req, voucherMerchant, availableStores, storeInReq);
+                List<VoucherAvailableStore> voucherNotInStoreList = VoucherAvailableStore.findAllStoreNotInList(storeInReq, voucherMerchant);
+                System.out.println(new ArrayList<>(voucherNotInStoreList));
+                for (VoucherAvailableStore data : voucherNotInStoreList) {
+                    data.isDeleted = true;
+                    data.save();
+                }
+                responseMessage += "Success Update Voucher";
+            } else {
+                checkVoucherAvailableStore(req, voucherMerchant, availableStores, storeInReq);
+                responseMessage += "Success Assigned Voucher";
             }
-
+            List<StoreResponsePuP> storeResponseMessage = storeInReq.stream()
+                    .map(VoucherController::toStoreResponse).collect(Collectors.toList());
             txn.commit();
-            response.setBaseResponse(1, 0, 0,
-                    "Voucher Berhasil Di Assign", failed == 0
-                            ? toResponseAvailableStore(voucherMerchant, storeResponses)
-                            : "Success : " + success + "Failed : " + failed);
+            response.setBaseResponse(1, 0, 0,responseMessage, toResponseAvailableStore(voucherMerchant, storeResponseMessage));
         } catch (Exception e) {
             e.printStackTrace();
             txn.rollback();
@@ -471,7 +464,7 @@ public class VoucherController extends BaseController {
     public static Result getListAvailableStore(Long voucherId) {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant == null) {
-            response.setBaseResponse(0,0,0,unauthorized,null);
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         }
         VoucherMerchant voucherMerchant = VoucherMerchant.findById(voucherId);
@@ -623,6 +616,28 @@ public class VoucherController extends BaseController {
             return ", Updated How To Use";
         }
         return "";
+    }
+
+    private static void checkVoucherAvailableStore(AssignVoucherReq req, VoucherMerchant voucherMerchant, List<VoucherAvailableStore> availableStores, List<Store> storeInReq) {
+        for (Long storeId : req.getStoreId()) {
+            Store store = Store.findById(storeId);
+            if (store == null) {
+                continue;
+            }
+            storeInReq.add(store);
+            VoucherAvailableStore checkAvailableStore = VoucherAvailableStore.findByStoreAndMerchant(voucherMerchant, store);
+            //create new
+            if (checkAvailableStore != null) {
+                checkAvailableStore.isDeleted = false;
+                checkAvailableStore.save();
+            } else {
+                VoucherAvailableStore newAvailableStore = new VoucherAvailableStore();
+                newAvailableStore.setStoreId(store);
+                newAvailableStore.setVoucherId(voucherMerchant);
+                newAvailableStore.isDeleted = false;
+                newAvailableStore.save();
+            }
+        }
     }
 
 }
