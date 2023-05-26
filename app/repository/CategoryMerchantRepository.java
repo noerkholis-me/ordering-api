@@ -97,7 +97,7 @@ public class CategoryMerchantRepository extends Model {
 		return resData;
 	}
 
-	public static List<CategoryMerchant> findListCategory(Long merchantId, String sort, String filter, int offset, int limit) {
+	public static List<CategoryMerchant> findListCategory(Long merchantId, Long storeId, String sort, String filter, int offset, int limit) {
 		String querySql = "SELECT cm.id FROM category_merchant cm "
 			+ "JOIN merchant mc ON cm.merchant_id = mc.id "
 			+ "JOIN product_merchant pm ON cm.id = pm.category_merchant_id "

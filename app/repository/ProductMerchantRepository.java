@@ -1,8 +1,11 @@
 package repository;
 
+import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Expr;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
+import com.avaje.ebean.RawSql;
+import com.avaje.ebean.RawSqlBuilder;
 import models.Merchant;
 import models.Product;
 import models.Store;
@@ -99,8 +102,18 @@ public class ProductMerchantRepository extends Model {
         return query.findPagingList(0).getPage(0).getList();
     }
 
-    public static List<ProductMerchant> findProductMerchantIsActiveAndMerchant(Merchant merchant, Boolean isActive) {
-        return find.where().eq("isDeleted", false).eq("isActive", isActive).eq("merchant", merchant).order("id").findList();
+    public static List<ProductMerchant> findProductMerchant(Long merchantId, Long storeId) {
+        String querySql = "SELECT pm.id FROM product_merchant pm "
+            + "JOIN product_merchant_detail pmd ON pm.id = pmd.product_merchant_id "
+            + "JOIN product_store ps ON pm.id = ps.product_id "
+            + "WHERE pm.merchant_id = " + merchantId + " AND pm.is_deleted = false AND pm.is_active = true "
+            + "AND pmd.is_deleted = false "
+            + "AND ps.store_id = " + storeId + " AND ps.is_deleted = false AND ps.is_active = true "
+            + "ORDER BY pm.id ASC";
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+
+        return Ebean.find(ProductMerchant.class).setRawSql(rawSql).findList();
     }
 
 }

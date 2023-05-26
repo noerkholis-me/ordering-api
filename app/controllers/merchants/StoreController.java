@@ -37,9 +37,7 @@ import com.hokeba.util.Helper;
 import java.math.BigDecimal;
 
 import java.text.Normalizer;
-import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,9 +128,9 @@ public class StoreController extends BaseController {
                         store.storePhone = storeRequest.getStorePhone();
                         store.storeAddress = storeRequest.getAddress();
                         store.isActive = Boolean.TRUE;
-                        store.setStatusOpenStore(storeRequest.getStatusOpenStore());
-                        store.setOpenAt(storeRequest.getOpenAt());
-                        store.setClosedAt(storeRequest.getClosedAt());
+                        store.setStatusOpenStore(storeRequest.getStatusOpenStore() != null && storeRequest.getStatusOpenStore());
+                        store.setOpenAt("".equals(storeRequest.getOpenAt()) ? null : storeRequest.getOpenAt());
+                        store.setClosedAt("".equals(storeRequest.getClosedAt()) ? null : storeRequest.getClosedAt());
                         store.shipperProvince = ShipperProvince.findById(storeRequest.getProvinceId());
                         store.shipperCity = ShipperCity.findById(storeRequest.getCityId());
                         store.shipperSuburb = ShipperSuburb.findById(storeRequest.getSuburbId());
@@ -210,6 +208,7 @@ public class StoreController extends BaseController {
                 response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : storeList.size(), offset, limit, success + " Showing data stores", storeResponses);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
+                e.printStackTrace();
                 Logger.info("Error: " + e.getMessage());
             }
         }
@@ -248,10 +247,10 @@ public class StoreController extends BaseController {
                     response.setBaseResponse(0, 0, 0, " Store is not found.", null);
                     return badRequest(Json.toJson(response));
                 }
-                List<ProductMerchant> productMerchantList = ProductMerchantRepository.findProductMerchantIsActiveAndMerchant(ownMerchant, true);
-                System.out.println("Listnya : "+productMerchantList.size());
-                StoreResponse storeResponse = toResponse(store, productMerchantList);
-                response.setBaseResponse(1, 0, 0, success + " Showing data store", storeResponse);
+
+                List<ProductMerchant> productMerchantList = ProductMerchantRepository.findProductMerchant(ownMerchant.id, store.id);
+
+                response.setBaseResponse(1, 0, 0, success + " Showing data store", toResponse(store, productMerchantList));
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 Logger.info("Error: " + e.getMessage());
@@ -372,41 +371,31 @@ public class StoreController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    private static Boolean IsStoreClosed(Store store) {
-        Boolean storeIsClosed = false;
-
-        if(store.getStatusOpenStore() == null) {
-            storeIsClosed = true;
-            String featureCreationDateStr = "2023-05-17";
-            LocalDate featureOnOfStoreCreationDate = LocalDate.parse(featureCreationDateStr);
-            if(store.merchant.createdAt.toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(featureOnOfStoreCreationDate)) {
-                storeIsClosed = false;
-            }
-        } else {
-            if(!store.getStatusOpenStore()) {
-                storeIsClosed = true;
-            } else {
-                if(store.getOpenAt() == null && store.getClosedAt() == null) {
-                    storeIsClosed = false;
-                } else {
-                    LocalTime currentTime = LocalTime.now();
-                    LocalTime openTime = LocalTime.parse(store.getOpenAt());
-                    LocalTime closeTime = LocalTime.parse(store.getClosedAt());
-                    if(currentTime.isAfter(openTime) && currentTime.isBefore(closeTime) ) {
-                        storeIsClosed = false;
-                    } else {
-                        storeIsClosed = true;
-                    }
-                }
-            }
-        }
-
-        return storeIsClosed;
-    }
-
     private static StoreResponse toResponse(Store store) {
-
-        Boolean storeIsClosed = IsStoreClosed(store);
+//        boolean storeIsClosed = false;
+//
+//        if(store.getOpenAt() == null && store.getClosedAt() == null ||
+//                ("".equals(store.getOpenAt()) && "".equals(store.getClosedAt()))) {
+//            storeIsClosed = true;
+//        } else if ((store.getOpenAt() != null && !"".equals(store.getOpenAt()))
+//                && (store.getClosedAt() == null || "".equals(store.getClosedAt()))) {
+//            storeIsClosed = true;
+//        } else {
+//            storeIsClosed = true;
+//            LocalTime currentTime = LocalTime.now();
+//            LocalTime openTime = LocalTime.parse(store.getOpenAt());
+//            LocalTime closeTime = LocalTime.parse(store.getClosedAt());
+//            if(currentTime.isBefore(openTime) && currentTime.isAfter(closeTime) ) {
+//            }
+//        }
+//
+//        if(store.getStatusOpenStore() == null) {
+//            storeIsClosed = true;
+//        } else {
+//            if(!store.getStatusOpenStore()) {
+//                storeIsClosed = true;
+//            }
+//        }
 
         return StoreResponse.builder()
                 .id(store.id)
@@ -427,7 +416,7 @@ public class StoreController extends BaseController {
                 .storeLogo(store.storeLogo)
                 .merchantType(store.merchant.merchantType)
                 .storeQueueUrl(Helper.MOBILEQR_URL + store.storeCode + "/queue")
-                .statusOpenStore(!storeIsClosed)
+                .statusOpenStore(store.getStatusOpenStore())
                 .openAt(store.getOpenAt())
                 .closedAt(store.getClosedAt())
                 .build();
@@ -436,21 +425,18 @@ public class StoreController extends BaseController {
     private static StoreResponse toResponse(Store store, List<ProductMerchant> productMerchantList) {
         List<ProductStoreResponseForStore> list = new ArrayList<>();
         for (ProductMerchant productMerchant : productMerchantList) {
-            ProductStore productStore = ProductStoreRepository.findForCust(productMerchant.id, store.id, productMerchant.merchant);
-            if (productStore != null) {
-                ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productMerchant);
-                String linkQrProductMerchant = productMerchantDetail.getProductMerchantQrCode();
-                String qrProductMerchantUrl = null;
-                if (linkQrProductMerchant != null) {
-                    String[] parts = linkQrProductMerchant.split("/");
-                    qrProductMerchantUrl = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+"home/"+store.storeCode+"/"+store.id+"/"+productMerchant.getMerchant().id+"/"+parts[4]+"/"+parts[5];
-                }
-                ProductStoreResponseForStore productStoreResponse = new ProductStoreResponseForStore();
-                productStoreResponse.setProductId(productMerchant.id);
-                productStoreResponse.setProductName(productMerchant.getProductName());
-                productStoreResponse.setProductStoreQrCode(qrProductMerchantUrl);
-                list.add(productStoreResponse);
+            ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productMerchant);
+            String linkQrProductMerchant = productMerchantDetail.getProductMerchantQrCode();
+            String qrProductMerchantUrl = null;
+            if (linkQrProductMerchant != null) {
+                String[] parts = linkQrProductMerchant.split("/");
+                qrProductMerchantUrl = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+"home/"+store.storeCode+"/"+store.id+"/"+productMerchant.getMerchant().id+"/"+parts[4]+"/"+parts[5];
             }
+            ProductStoreResponseForStore productStoreResponse = new ProductStoreResponseForStore();
+            productStoreResponse.setProductId(productMerchant.id);
+            productStoreResponse.setProductName(productMerchant.getProductName());
+            productStoreResponse.setProductStoreQrCode(qrProductMerchantUrl);
+            list.add(productStoreResponse);
         }
         return StoreResponse.builder()
                 .id(store.id)

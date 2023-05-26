@@ -18,4 +18,6 @@ public class AssignVoucherReq {
     private Long voucherId;
     @JsonProperty(value = "store_id")
     private List<Long> storeId;
+    @JsonProperty("is_edit")
+    private boolean isEdit;
 }
