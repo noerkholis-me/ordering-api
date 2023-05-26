@@ -209,20 +209,36 @@ public class ProductMerchantDetailRepository extends Model {
             category = "AND pm.subs_category_merchant_id = " + categoryId + " ";
         }
 
-        String product;
+        String product = "";
         if (!brandId.equals(0L)) {
-            product = "AND pm.merchant_id = " + merchantId + " AND pm.is_deleted = false AND pm.is_active = true "
-                + "AND bm.is_active = true AND pm.brand_merchant_id = " + brandId + " " + category + " ";
-        } else {
-            product = "AND pm.merchant_id = " + merchantId + " AND pm.is_deleted = false AND pm.is_active = true ";
+            product = "AND bm.is_active = true AND pm.brand_merchant_id = " + brandId + " " + category + " ";
         }
 
-        String querySql = "SELECT pmd.id FROM product_merchant_detail pmd "
-            + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
-            + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
-            + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
-            + product
-            + "ORDER BY pm.id ASC";
+        String querySql;
+        List<ProductStore> productStore = ProductStoreRepository.find.where().eq("t0.store_id", storeId).eq("t0.is_active", true).eq("t0.is_deleted", false).findList();
+        if (productStore.isEmpty()) {
+            querySql = "SELECT pmd.id FROM product_merchant_detail pmd "
+                + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
+                + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
+                + "LEFT JOIN product_store ps ON pm.id = ps.product_id "
+                + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
+                + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
+                + "AND bm.is_active = true "
+                + "AND ps.product_id IS NULL "
+                + product
+                + "ORDER BY pm.id DESC";
+        } else {
+            querySql = "SELECT pmd.id FROM product_merchant_detail pmd "
+                + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
+                + "JOIN product_store ps ON pm.id = ps.product_id "
+                + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
+                + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
+                + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
+                + "AND ps.store_id = " + storeId + " AND ps.is_active = true AND ps.is_deleted = false "
+                + "AND bm.is_active = true "
+                + product
+                + "ORDER BY pm.id DESC";
+        }
 
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
         Query<ProductMerchantDetail> query = Ebean.find(ProductMerchantDetail.class).setRawSql(rawSql);
