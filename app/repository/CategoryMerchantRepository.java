@@ -98,14 +98,13 @@ public class CategoryMerchantRepository extends Model {
 	}
 
 	public static List<CategoryMerchant> findListCategory(Long merchantId, Long storeId, String sort, String filter, int offset, int limit) {
-		String querySql = "SELECT cm.id FROM product_store ps "
-				+ "JOIN product_merchant pm ON ps.product_id = pm.id "
-				+ "JOIN category_merchant cm ON pm.category_merchant_id = cm.id "
-				+ "WHERE ps.store_id = " + storeId + " AND ps.is_deleted = false AND ps.is_active = true "
-				+ "AND  pm.merchant_id = '" + merchantId + "' AND pm.is_deleted = false AND pm.is_active = true "
-				+ "AND cm.is_deleted = false AND cm.is_active = true "
-				+ "GROUP BY cm.id "
-				+ "ORDER BY cm.id DESC";
+		String querySql = "SELECT cm.id FROM category_merchant cm "
+			+ "JOIN merchant mc ON cm.merchant_id = mc.id "
+			+ "JOIN product_merchant pm ON cm.id = pm.category_merchant_id "
+			+ "WHERE cm.merchant_id = '" + merchantId + "' AND cm.is_deleted = false AND cm.is_active = true "
+			+ "AND pm.is_deleted = false AND pm.is_active = true "
+			+ "GROUP BY cm.id "
+			+ "ORDER BY cm.id DESC";
 
 		RawSql rawSql = RawSqlBuilder.parse(querySql).create();
 		Query<CategoryMerchant> query = Ebean.find(CategoryMerchant.class).setRawSql(rawSql);
