@@ -414,8 +414,8 @@ public class CategoryMerchantController extends BaseController {
                 return badRequest(Json.toJson(response));
             }
             try {
-                Integer totalData = CategoryMerchantRepository.findListCategory(merchantId, "", "", 0, 0).size();
-                List<CategoryMerchant> data = CategoryMerchantRepository.findListCategory(merchantId, "", "", 0, 0);
+                Integer totalData = CategoryMerchantRepository.findListCategory(merchantId, storeId, "", "", 0, 0).size();
+                List<CategoryMerchant> data = CategoryMerchantRepository.findListCategory(merchantId, storeId, "", "", 0, 0);
                 List<CategoryMerchantResponse> responses = new ArrayList<>();
                 for (CategoryMerchant category : data) {
                     CategoryMerchantResponse response = new CategoryMerchantResponse();
@@ -448,7 +448,7 @@ public class CategoryMerchantController extends BaseController {
                         List<SubsCategoryMerchant> dataSubs = SubsCategoryMerchantRepository.getDataForCategory(querySubs);
                         List<CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant> responsesSubs = new ArrayList<>();
                         for(SubsCategoryMerchant subsCategory : dataSubs) {
-                            Integer totalProductSubsCategory = CategoryMerchantRepository.getTotalProductSubCategory(merchantId, subsCategory.id);
+                            Integer totalProductSubsCategory = CategoryMerchantRepository.getTotalProductSubsCategory(merchantId, subsCategory.id);
                             CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant responseSubs = new CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant();
                             responseSubs.setId(subsCategory.id);
                             responseSubs.setSubscategoryName(subsCategory.getSubscategoryName());
