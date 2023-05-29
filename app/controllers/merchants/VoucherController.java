@@ -438,7 +438,6 @@ public class VoucherController extends BaseController {
             if (req.isEdit()) {
                 checkVoucherAvailableStore(req, voucherMerchant, availableStores, storeInReq);
                 List<VoucherAvailableStore> voucherNotInStoreList = VoucherAvailableStore.findAllStoreNotInList(storeInReq, voucherMerchant);
-                System.out.println(new ArrayList<>(voucherNotInStoreList));
                 for (VoucherAvailableStore data : voucherNotInStoreList) {
                     data.isDeleted = true;
                     data.save();
@@ -455,6 +454,8 @@ public class VoucherController extends BaseController {
         } catch (Exception e) {
             e.printStackTrace();
             txn.rollback();
+            response.setBaseResponse(0,0,0, error, null);
+            return badRequest(Json.toJson(response));
         } finally {
             txn.close();
         }
