@@ -146,70 +146,63 @@ public class ProductStoreController extends BaseController {
     public static Result listProductStore(String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<ProductMerchant> query = ProductMerchantRepository.findProductIsActiveAndMerchant(ownMerchant, true);
             try {
+                int totalData = ProductMerchantRepository.findAllProduct(ownMerchant.id, true, sort, filter, 0, 0).size();
+                List<ProductMerchant> data = ProductMerchantRepository.findAllProduct(ownMerchant.id, true, sort, filter, offset, limit);
                 List<ProductResponseStore> responses = new ArrayList<>();
-                List<ProductMerchant> totalData = ProductMerchantRepository.getTotalDataPage(query);
-                List<ProductMerchant> productMerchants = ProductMerchantRepository.findProductWithPaging(query, sort,
-                        filter, offset, limit);
-                for (ProductMerchant data : productMerchants) {
+                for (ProductMerchant productMerchant : data) {
                     ProductResponseStore responseProd = new ProductResponseStore();
-                    Query<ProductStore> queryPS = ProductStoreRepository.find.where().eq("t0.product_id", data.id)
-                            .eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
-                    List<ProductStore> dataPS = ProductStoreRepository.getDataProductStore(queryPS);
-                    List<ProductResponseStore.ProductStore> responsesProductStore = new ArrayList<>();
-                    responseProd.setProductId(data.id);
-                    responseProd.setProductName(data.getProductName());
-                    responseProd.setIsActive(data.getIsActive());
-                    // ================================================================ //
+                    responseProd.setProductId(productMerchant.id);
+                    responseProd.setProductName(productMerchant.getProductName());
+                    responseProd.setIsActive(productMerchant.getIsActive());
+                    responseProd.setMerchantId(productMerchant.getMerchant().id);
 
-                    ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(data);
+                    ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productMerchant);
                     if (productMerchantDetail != null) {
                         ProductDetailResponse productDetailResponse = ProductDetailResponse.builder()
-                                .productType(productMerchantDetail.getProductType())
-                                .isCustomizable(productMerchantDetail.getIsCustomizable())
-                                .productPrice(productMerchantDetail.getProductPrice())
-                                .discountType(productMerchantDetail.getDiscountType())
-                                .discount(productMerchantDetail.getDiscount())
-                                .productPriceAfterDiscount(productMerchantDetail.getProductPriceAfterDiscount())
-                                .productImageMain(productMerchantDetail.getProductImageMain())
-                                .productImage1(productMerchantDetail.getProductImage1())
-                                .productImage2(productMerchantDetail.getProductImage2())
-                                .productImage3(productMerchantDetail.getProductImage3())
-                                .productImage4(productMerchantDetail.getProductImage4())
-                                .build();
+                            .productType(productMerchantDetail.getProductType())
+                            .isCustomizable(productMerchantDetail.getIsCustomizable())
+                            .productPrice(productMerchantDetail.getProductPrice())
+                            .discountType(productMerchantDetail.getDiscountType())
+                            .discount(productMerchantDetail.getDiscount())
+                            .productPriceAfterDiscount(productMerchantDetail.getProductPriceAfterDiscount())
+                            .productImageMain(productMerchantDetail.getProductImageMain())
+                            .productImage1(productMerchantDetail.getProductImage1())
+                            .productImage2(productMerchantDetail.getProductImage2())
+                            .productImage3(productMerchantDetail.getProductImage3())
+                            .productImage4(productMerchantDetail.getProductImage4())
+                            .build();
                         responseProd.setProductDetail(productDetailResponse);
                     }
 
-                    responseProd.setMerchantId(data.getMerchant().id);
-
-                    for (ProductStore dataPStore : dataPS) {
+                    List<ProductStore> getProductStore = ProductStoreRepository.find.where().eq("productMerchant", productMerchant).eq("merchant", ownMerchant).eq("isActive", true).eq("isDeleted", false).findList();
+                    List<ProductResponseStore.ProductStore> responsesProductStore = new ArrayList<>();
+                    for (ProductStore productStore : getProductStore) {
                         ProductResponseStore.ProductStore responsePStore = new ProductResponseStore.ProductStore();
-
-                        Store store = Store.findById(dataPStore.getStore().id);
+                        Store store = Store.findById(productStore.getStore().id);
                         if (store != null) {
-                            responsePStore.setId(dataPStore.id);
-                            responsePStore.setStoreId(dataPStore.getStore().id);
-                            responsePStore.setProductId(dataPStore.getProductMerchant().id);
-                            responsePStore.setIsActive(dataPStore.isActive);
-                            responsePStore.setStorePrice(dataPStore.getStorePrice());
-                            responsePStore.setDiscountType(dataPStore.getDiscountType());
-                            responsePStore.setDiscount(dataPStore.getDiscount());
-                            responsePStore.setIsDeleted(dataPStore.isDeleted);
-                            responsePStore.setFinalPrice(dataPStore.getFinalPrice());
+                            responsePStore.setId(productStore.id);
+                            responsePStore.setStoreId(productStore.getStore().id);
+                            responsePStore.setProductId(productStore.getProductMerchant().id);
+                            responsePStore.setIsActive(productStore.isActive);
+                            responsePStore.setStorePrice(productStore.getStorePrice());
+                            responsePStore.setDiscountType(productStore.getDiscountType());
+                            responsePStore.setDiscount(productStore.getDiscount());
+                            responsePStore.setIsDeleted(productStore.isDeleted);
+                            responsePStore.setFinalPrice(productStore.getFinalPrice());
                             responsePStore.setStoresName(store.storeName);
                             responsesProductStore.add(responsePStore);
                         }
                         responseProd.setProductStore(responsePStore != null ? responsesProductStore : null);
                     }
+
                     responses.add(responseProd);
                 }
-                response.setBaseResponse(
-                        filter == null || filter.equals("") ? totalData.size() : productMerchants.size(), offset, limit,
-                        success + " menampilkan data", responses);
+                response.setBaseResponse(totalData, offset, limit,
+                    success + " menampilkan data", responses);
                 return ok(Json.toJson(response));
-            } catch (IOException e) {
-                Logger.error("allDetail", e);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         } else if (ownMerchant == null) {
             response.setBaseResponse(0, 0, 0, forbidden, null);
