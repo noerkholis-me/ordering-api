@@ -1,5 +1,8 @@
 package repository;
 
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.RawSql;
+import com.avaje.ebean.RawSqlBuilder;
 import models.Merchant;
 import models.Banners;
 import play.db.ebean.Model;
@@ -29,38 +32,28 @@ public class BannersRepository extends Model {
 		}
 	}
 
-	public static List<Banners> getDataBanners(Query<Banners> reqQuery, String sort, String filter, int offset,
-			int limit)
-			throws IOException {
-		Query<Banners> query = reqQuery;
-
+	public static List<Banners> getDataBanners(Long merchantId, String sort, String filter, int offset, int limit) {
+		String sorting;
 		if (!"".equals(sort)) {
-			query = query.orderBy(sort);
+			sorting = sort;
 		} else {
-			query = query.orderBy("t0.updated_at desc");
+			sorting = "DESC";
 		}
+
+		String querySql = "SELECT b.id FROM banners b "
+			+ "WHERE b.merchant_id = " + merchantId + " AND b.is_deleted = false "
+			+ "ORDER BY b.updated_at " + sorting;
+
+		RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+		Query<Banners> query = Ebean.find(Banners.class).setRawSql(rawSql);
 
 		ExpressionList<Banners> exp = query.where();
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
 		exp = exp.disjunction();
-		exp = exp.ilike("t0.banner_name", "%" + filter + "%");
-		// exp = exp.endjunction();
-
+		exp = exp.ilike("b.banner_name", "%" + filter + "%");
+		exp = exp.endJunction();
 		query = exp.query();
 
-		int total = query.findList().size();
-
-		if (limit != 0) {
-			query = query.setMaxRows(limit);
-		}
-        if (filter != "" && filter != null) {
-            offset = 0;
-        }
-
-		List<Banners> resData = query.findPagingList(limit).getPage(offset).getList();
-
-		return resData;
+		return query.findPagingList(limit).getPage(offset).getList();
 	}
 
 	public static List<Banners> getForHomeBanners(Query<Banners> reqQuery)

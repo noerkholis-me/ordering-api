@@ -126,18 +126,17 @@ public class TableTypeController extends BaseController {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
-                Query<TableType> tableTypeQuery = TableTypeRepository.findByIsActiveAndMerchant(merchant);
-                List<TableType> totalDataPage = TableTypeRepository.getTotalDataPage(tableTypeQuery);
-                List<TableType> tableTypes = TableTypeRepository.findTableTypeWithPaging(tableTypeQuery, sort, filter, offset, limit);
+                int totalData = TableTypeRepository.findListTableType(merchant.id, sort, filter, 0, 0).size();
+                List<TableType> data = TableTypeRepository.findListTableType(merchant.id, sort, filter, offset, limit);
                 List<TableTypeResponse> tableTypeResponses = new ArrayList<>();
-                for (TableType tableType : tableTypes) {
+                for (TableType tableType : data) {
                     TableTypeResponse tableTypeResponse = new TableTypeResponse();
                     tableTypeResponse.setId(tableType.id);
                     tableTypeResponse.setName(tableType.getName());
                     tableTypeResponse.setTotalPerson(tableType.getMinimumTableCount() + " - " + tableType.getMaximumTableCount());
                     tableTypeResponses.add(tableTypeResponse);
                 }
-                response.setBaseResponse(filter == null || filter.equals("") ? totalDataPage.size() : tableTypeResponses.size(), offset, limit, success + " Showing data table types", tableTypeResponses);
+                response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data table types", tableTypeResponses);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 logger.error("Error while getting list table type", e);

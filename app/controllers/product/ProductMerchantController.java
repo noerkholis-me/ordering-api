@@ -576,15 +576,10 @@ public class ProductMerchantController extends BaseController {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
             try {
-                // Query<ProductMerchant> query = ProductMerchantRepository.findProductIsActiveAndMerchant(ownMerchant, isActive);
-                Query<ProductMerchant> query = ProductMerchantRepository.find.where()
-                                                .eq("isDeleted", false)
-                                                .eq("isActive", isActive)
-                                                .eq("merchant", ownMerchant).order("id");
-                List<ProductMerchant> totalData = ProductMerchantRepository.getTotalDataPage(query);
-                List<ProductMerchant> productMerchants = ProductMerchantRepository.findProductWithPaging(query, sort, filter, offset, limit);
+                int totalData = ProductMerchantRepository.findAllProduct(ownMerchant.id, isActive, sort, filter, 0, 0).size();
+                List<ProductMerchant> productMerchants = ProductMerchantRepository.findAllProduct(ownMerchant.id, isActive, sort, filter, offset, limit);
                 List<ProductResponse> productMerchantResponse = toResponses(productMerchants);
-                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : productMerchantResponse.size(), offset, limit, success + " Showing data products", productMerchantResponse);
+                response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data product", productMerchantResponse);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 Logger.info("Error: " + e.getMessage());
