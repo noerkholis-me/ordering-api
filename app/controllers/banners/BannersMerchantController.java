@@ -117,40 +117,37 @@ public class BannersMerchantController extends BaseController {
     public static Result listBanners(String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<Banners> query = BannersRepository.find.where().eq("t0.is_deleted", false).eq("merchant", ownMerchant)
-                    .order("t0.id");
             try {
+                int totalData = BannersRepository.getDataBanners(ownMerchant.id, sort, filter, 0, 0).size();
+                List<Banners> data = BannersRepository.getDataBanners(ownMerchant.id, sort, filter, offset, limit);
                 List<BannersResponse> responses = new ArrayList<>();
-                List<Banners> totalData = BannersRepository.getTotalData(query);
-                List<Banners> responseIndex = BannersRepository.getDataBanners(query, sort, filter, offset, limit);
-                for (Banners data : responseIndex) {
+                for (Banners banners : data) {
                     BannersResponse response = new BannersResponse();
-                    Banners dataBanner = BannersRepository.findByIdAndMerchantId(data.id, ownMerchant);
+                    Banners dataBanner = BannersRepository.findByIdAndMerchantId(banners.id, ownMerchant);
                     if (dataBanner != null) {
                         if (dataBanner.getDateTo().compareTo(new Date()) <= 0) {
                             dataBanner.setActive(Boolean.FALSE);
                             dataBanner.update();
                         }
                     }
-                    response.setId(data.id);
-                    response.setBannerName(data.getBannerName());
-                    response.setBannerImageWeb(data.getBannerImageWeb());
-                    response.setBannerImageMobile(data.getBannerImageMobile());
-                    response.setBannerImageKiosk(data.getBannerImageKiosk());
-                    response.setActive(data.isActive());
-                    response.setDeleted(data.isDeleted());
-                    response.setDateFrom(data.getDateFrom());
-                    response.setDateTo(data.getDateTo());
-                    response.setMerchantId(data.getMerchant().id);
+                    response.setId(banners.id);
+                    response.setBannerName(banners.getBannerName());
+                    response.setBannerImageWeb(banners.getBannerImageWeb());
+                    response.setBannerImageMobile(banners.getBannerImageMobile());
+                    response.setBannerImageKiosk(banners.getBannerImageKiosk());
+                    response.setActive(banners.isActive());
+                    response.setDeleted(banners.isDeleted());
+                    response.setDateFrom(banners.getDateFrom());
+                    response.setDateTo(banners.getDateTo());
+                    response.setMerchantId(banners.getMerchant().id);
                     responses.add(response);
                 }
-                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size(),
-                        offset, limit, success + " menampilkan data", responses);
+                response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data", responses);
                 return ok(Json.toJson(response));
-            } catch (IOException e) {
-                Logger.error("allDetail", e);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } else if (ownMerchant == null) {
+        } else {
             response.setBaseResponse(0, 0, 0, forbidden, null);
             return forbidden(Json.toJson(response));
         }

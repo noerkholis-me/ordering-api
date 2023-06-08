@@ -140,17 +140,10 @@ public class BrandMerchantController extends BaseController {
     public static Result listBrand(String filter, String sort, int offset, int limit, String isActive) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<BrandMerchant> query = null;
-            if (isActive == "" || isActive.isEmpty()) {
-                query = BrandMerchantRepository.find.where().eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
-            } else {
-                System.out.println(isActive == "true" ? true : false);
-                query = BrandMerchantRepository.find.where().eq("t0.is_deleted", false).eq("merchant", ownMerchant).eq("is_active", isActive.equals("true") ? true : false).order("t0.id");
-            }
             try {
+                int totalData = BrandMerchantRepository.getDataBrand(ownMerchant.id, isActive, sort, filter, 0, 0).size();
+                List<BrandMerchant> responseIndex = BrandMerchantRepository.getDataBrand(ownMerchant.id, isActive, sort, filter, offset, limit);
                 List<BrandMerchantResponse> responses = new ArrayList<>();
-                List<BrandMerchant> totalData = BrandMerchantRepository.getTotalData(query);
-                List<BrandMerchant> responseIndex = BrandMerchantRepository.getDataBrand(query, sort, filter, offset, limit);
                 for (BrandMerchant data : responseIndex) {
                     BrandMerchantResponse response = new BrandMerchantResponse();
                     response.setId(data.id);
@@ -166,10 +159,10 @@ public class BrandMerchantController extends BaseController {
                     response.setMerchantId(data.getMerchant().id);
                     responses.add(response);
                 }
-                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size() , offset, limit, success + " menampilkan data", responses);
+                response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data", responses);
                 return ok(Json.toJson(response));
-            } catch (IOException e) {
-                Logger.error("allDetail", e);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         } else if (ownMerchant == null) {
             response.setBaseResponse(0, 0, 0, forbidden, null);

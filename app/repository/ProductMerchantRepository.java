@@ -86,6 +86,31 @@ public class ProductMerchantRepository extends Model {
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
+    public static List<ProductMerchant> findAllProduct(Long merchantId, Boolean isActive, String sort, String filter, int offset, int limit) {
+        String sorting;
+        if (!"".equals(sort)) {
+            sorting = sort;
+        } else {
+            sorting = "DESC";
+        }
+
+        String querySql = "SELECT pm.id FROM product_merchant pm "
+            + "WHERE pm.merchant_id = " + merchantId + " AND pm.is_deleted = false AND pm.is_active = '" + isActive + "' "
+            + "ORDER BY pm.id " + sorting;
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<ProductMerchant> query = Ebean.find(ProductMerchant.class).setRawSql(rawSql);
+
+        ExpressionList<ProductMerchant> exp = query.where();
+        exp = exp.disjunction();
+        exp = exp.ilike("pm.product_name", "%" + filter + "%");
+        exp = exp.ilike("pm.no_sku", "%" + filter + "%");
+        exp = exp.endJunction();
+        query = exp.query();
+
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
     public static List<ProductMerchant> getProductRecommendation(Query<ProductMerchant> reqQuery) {
         Query<ProductMerchant> query = reqQuery;
 
@@ -103,6 +128,20 @@ public class ProductMerchantRepository extends Model {
     }
 
     public static List<ProductMerchant> findProductMerchant(Long merchantId, Long storeId) {
+        String querySql = "SELECT pm.id FROM product_merchant pm "
+            + "JOIN product_merchant_detail pmd ON pm.id = pmd.product_merchant_id "
+            + "JOIN product_store ps ON pm.id = ps.product_id "
+            + "WHERE pm.merchant_id = " + merchantId + " AND pm.is_deleted = false AND pm.is_active = true "
+            + "AND pmd.is_deleted = false "
+            + "AND ps.store_id = " + storeId + " AND ps.is_deleted = false AND ps.is_active = true "
+            + "ORDER BY pm.id ASC";
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+
+        return Ebean.find(ProductMerchant.class).setRawSql(rawSql).findList();
+    }
+
+    public static List<ProductMerchant> findAllProductMerchant(Long merchantId, Long storeId) {
         String querySql = "SELECT pm.id FROM product_merchant pm "
             + "JOIN product_merchant_detail pmd ON pm.id = pmd.product_merchant_id "
             + "JOIN product_store ps ON pm.id = ps.product_id "

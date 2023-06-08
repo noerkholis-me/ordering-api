@@ -61,7 +61,7 @@ public class DashboardController extends BaseController {
                 response.setBaseResponse(chartResponse.size(), 0, 0, success, chartResponse);
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
-                 ex.printStackTrace();
+                ex.printStackTrace();
                 response.setBaseResponse(0, 0, 0, error, null);
                 return unauthorized(Json.toJson(response));
             }

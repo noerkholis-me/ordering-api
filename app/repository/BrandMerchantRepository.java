@@ -45,56 +45,37 @@ public class BrandMerchantRepository extends Model {
 		}
     }
 
-    public static List<BrandMerchant> getDataBrand(Query<BrandMerchant> reqQuery, String sort, String filter, int offset, int limit)
-			throws IOException {
-		Query<BrandMerchant> query = reqQuery;
-
+	public static List<BrandMerchant> getDataBrand(Long merchantId, String isActive, String sort, String filter, int offset, int limit) {
+		String sorting;
 		if (!"".equals(sort)) {
-            query = query.orderBy(sort);
+			sorting = sort;
 		} else {
-			query = query.orderBy("t0.updated_at desc");
+			sorting = "DESC";
 		}
 
+		String querySql;
+		String _isActive = isActive.equals("true") ? "true" : "false";
+		if (isActive.isEmpty()) {
+			querySql = "SELECT bm.id FROM brand_merchant bm "
+				+ "WHERE bm.merchant_id = " + merchantId + " AND bm.is_deleted = false "
+				+ "ORDER BY bm.updated_at " + sorting;
+		} else {
+			querySql = "SELECT bm.id FROM brand_merchant bm "
+				+ "WHERE bm.merchant_id = " + merchantId + " AND bm.is_deleted = false "
+				+ "AND bm.is_active = " + _isActive + " "
+				+ "ORDER BY bm.updated_at " + sorting;
+		}
+
+		RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+		Query<BrandMerchant> query = Ebean.find(BrandMerchant.class).setRawSql(rawSql);
+
 		ExpressionList<BrandMerchant> exp = query.where();
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
-
 		exp = exp.disjunction();
-		exp = exp.ilike("t0.brand_name", "%" + filter + "%");
-        // exp = exp.endjunction();
-
+		exp = exp.ilike("bm.brand_name", "%" + filter + "%");
+		exp = exp.endJunction();
 		query = exp.query();
 
-		int total = query.findList().size();
-
-		if (limit != 0) {
-			query = query.setMaxRows(limit);
-		}
-        if (filter != "" && filter != null) {
-            offset = 0;
-        }
-
-		List<BrandMerchant> resData = query.findPagingList(limit).getPage(offset).getList();
-
-		return resData;
-	}
-
-	public static List<BrandMerchant> getTotalData(Query<BrandMerchant> reqQuery)
-			throws IOException {
-		Query<BrandMerchant> query = reqQuery;
-
-		query = query.orderBy("t0.created_at desc");
-
-		ExpressionList<BrandMerchant> exp = query.where();
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
-		query = exp.query();
-
-		int total = query.findList().size();
-
-		List<BrandMerchant> resData = query.findPagingList(0).getPage(0).getList();
-
-		return resData;
+		return query.findPagingList(limit).getPage(offset).getList();
 	}
 
 	public static List<BrandMerchant> getDataBrandHomepage(Query<BrandMerchant> reqQuery, int offset)
