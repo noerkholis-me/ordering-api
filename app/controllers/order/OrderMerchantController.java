@@ -451,6 +451,9 @@ public class OrderMerchantController extends BaseController {
                     endDate = simpleDateFormat.format(calEndDate.getTime());
                 }
 
+                if (statusOrder.equalsIgnoreCase("CANCELED"))
+                    statusOrder = "CANCELLED";
+
                 List<Order> orders = OrderRepository.getReportOrderMerchant(merchant.id, storeId, offset, limit, statusOrder, productType, startDate, endDate);
                 Integer totalData = OrderRepository.getTotalOrderReportMerchant(merchant.id, storeId, statusOrder, productType, startDate, endDate);
                 List<OrderList> orderLists = new ArrayList<>();
@@ -545,13 +548,11 @@ public class OrderMerchantController extends BaseController {
     }
 
     public static Result downloadTransaction(String startDate, String endDate, int offset, int limit,
-            String statusOrder, Long storeId) throws Exception {
+            String statusOrder, Long storeId, String productType) throws Exception {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                String startDateFormat = "";
-                String endDateFormat = "";
 
                 if(startDate != null && !startDate.trim().isEmpty()) {
                     Calendar calStartDate = Calendar.getInstance();
@@ -569,58 +570,29 @@ public class OrderMerchantController extends BaseController {
                     calEndDate.set(Calendar.MILLISECOND, 999);
 
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                    startDateFormat = sdf.format(calStartDate.getTime());
-                    endDateFormat = sdf.format(calEndDate.getTime());
+                    startDate = sdf.format(calStartDate.getTime());
+                    endDate = sdf.format(calEndDate.getTime());
                 }
 
-                Query<Order> query = null;
-                // default query find by merchant id
-                if(statusOrder != null && !statusOrder.trim().isEmpty()){
-                    if(startDate != null && !startDate.trim().isEmpty()){
-                        query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
-                    } else {
-                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDateFormat + "' and '" + endDateFormat + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
-                    }
-                } else {
-                    if(startDate != null && !startDate.trim().isEmpty()){
-                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDateFormat + "' and '" + endDateFormat + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
-                    } else {
-                        query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
-                    }
+                if (statusOrder.equalsIgnoreCase("CANCELED"))
+                    statusOrder = "CANCELLED";
 
-                }
-                // check store id --> mandatory
+                List<Order> orders = OrderRepository.getReportOrderMerchant(merchant.id, storeId, offset, limit, statusOrder, productType, startDate, endDate);
+                Integer totalData = OrderRepository.getTotalOrderReportMerchant(merchant.id, storeId, statusOrder, productType, startDate, endDate);
+                List<OrderList> orderLists = new ArrayList<>();
                 String storeName = "";
                 if (storeId != null && storeId != 0L) {
-                    query = null;
-                    Store store = Store.findById(storeId);
-                    if (store == null) {
+                    Store _store = Store.findById(storeId);
+                    if (_store == null) {
                         response.setBaseResponse(0, 0, 0, "store id does not exists", null);
                         return badRequest(Json.toJson(response));
                     }
-                    storeName = store.storeName;
-                    
-                    if(statusOrder != null && !statusOrder.trim().isEmpty()){
-                        if(startDate != null && !startDate.trim().isEmpty()){
-                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDateFormat + "' and '" + endDateFormat + "'").ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
-                        } else {
-                            query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
-                        } 
-                    } else {
-                        if(startDate != null && !startDate.trim().isEmpty()){
-                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDateFormat + "' and '" + endDateFormat + "'").ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
-                        } else {
-                            query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
-                        }
-                    }
-                }
+                    storeName = _store.storeName;
+                } else
+                    storeName = merchant.fullName;
 
-
-                List<OrderList> orderLists = new ArrayList<>();
-                List<Order> orders = query.findPagingList(limit).getPage(offset).getList();
-                Integer totalData = query.findList().size();
                 System.out.println(orders.size());
-                if (orders.isEmpty() || orders.size() == 0) {
+                if (orders.isEmpty()) {
                     response.setBaseResponse(totalData, offset, limit, success + " Showing data order",
                             orderLists);
                     return ok(Json.toJson(response));
@@ -640,6 +612,8 @@ public class OrderMerchantController extends BaseController {
             } catch (Exception ex) {
                 ex.printStackTrace();
                 LOGGER.error("Error while download order report ", ex);
+                response.setBaseResponse(0,0,0,error, null);
+                return badRequest(Json.toJson(response));
             }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);

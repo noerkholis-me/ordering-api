@@ -597,7 +597,7 @@ GET          /merchant/bankaccount/:id                          controllers.merc
 
 #ORDER REPORT MERCHANTS
 GET         /merchant/order/reports/data                controllers.order.OrderMerchantController.orderReportMerchant(start_date:String ?= "", end_date:String ?= "", offset:Int ?= 0, limit:Int ?= 0, status_order:String ?= "", store_id:Long ?= 0, product_type:String  ?= "ALL")
-GET         /merchant/order/reports/data/download       controllers.order.OrderMerchantController.downloadTransaction(start_date:String ?= "", end_date:String ?= "", offset:Int ?= 0, limit:Int ?= 0, status_order:String ?= "", store_id:Long ?= 0)
+GET         /merchant/order/reports/data/download       controllers.order.OrderMerchantController.downloadTransaction(start_date:String ?= "", end_date:String ?= "", offset:Int ?= 0, limit:Int ?= 0, status_order:String ?= "", store_id:Long ?= 0, product_type:String  ?= "ALL")
 
 #FINANCE TRANSACTION
 GET         /merchant/finance/transaction                       controllers.finance.FinanceTransactionController.getAllTransaction(store_id:Long ?= 0, start_date: String ?= "", end_date: String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, status: String?="")
