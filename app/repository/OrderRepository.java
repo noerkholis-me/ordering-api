@@ -422,7 +422,7 @@ public class OrderRepository extends Model {
         // default query find by merchant id
         if (statusOrder.equalsIgnoreCase("CANCELED")) {
             whereCondition = "WHERE str.merchant_id = " + merchantId + " "
-                + "AND ord.status = '" + statusOrder + "' ";
+                + "AND (ord.status = '" + statusOrder + "' OR ord.status = 'CANCELLED') ";
         } else if (statusOrder.equalsIgnoreCase("PENDING")) {
             whereCondition = "WHERE (ord.status != 'CANCELLED' OR ord.status != 'CANCELED') "
                 + "AND str.merchant_id = " + merchantId + " "

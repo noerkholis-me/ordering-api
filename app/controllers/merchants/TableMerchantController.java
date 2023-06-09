@@ -144,20 +144,14 @@ public class TableMerchantController extends BaseController {
     public static Result getAllTable(Long storeId, String filter, String sort, int offset, int limit) {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
-            Query<TableMerchant> tableMerchantQuery = null;
-            if (storeId == null || storeId == 0) {
-                tableMerchantQuery = TableMerchantRepository.findAllTablesQuery();
-            } else {
-                tableMerchantQuery = TableMerchantRepository.findAllTablesByStoreIdQuery(storeId);
-            }
-            List<TableMerchant> totalDataPage = TableMerchantRepository.getTotalPage(tableMerchantQuery);
-            List<TableMerchant> tableMerchants = TableMerchantRepository.findTablesWithPaging(tableMerchantQuery, sort, filter, offset, limit);
+            int totalData = TableMerchantRepository.findListTables(storeId, sort, filter, 0, 0).size();
+            List<TableMerchant> data = TableMerchantRepository.findListTables(storeId, sort, filter, offset, limit);
             List<TableMerchantResponse> tableMerchantResponses = new ArrayList<>();
-            for (TableMerchant tableMerchant : tableMerchants) {
+            for (TableMerchant tableMerchant : data) {
                 TableMerchantResponse tableMerchantResponse = toResponse(tableMerchant);
                 tableMerchantResponses.add(tableMerchantResponse);
             }
-            response.setBaseResponse(filter == null || filter.equals("") ? totalDataPage.size() : tableMerchantResponses.size(), offset, limit, success + " Showing data tables", tableMerchantResponses);
+            response.setBaseResponse(totalData, offset, limit, success + " Showing data tables", tableMerchantResponses);
             return ok(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);

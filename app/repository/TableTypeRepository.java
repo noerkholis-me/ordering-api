@@ -1,7 +1,10 @@
 package repository;
 
+import com.avaje.ebean.Ebean;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
+import com.avaje.ebean.RawSql;
+import com.avaje.ebean.RawSqlBuilder;
 import models.Merchant;
 import models.merchant.TableType;
 import play.db.ebean.Model;
@@ -29,32 +32,27 @@ public class TableTypeRepository extends Model {
         return find.where().eq("isDeleted", false).eq("merchant", merchant).order("id");
     }
 
-    public static List<TableType> getTotalDataPage (Query<TableType> reqQuery) {
-        Query<TableType> query = reqQuery;
-        ExpressionList<TableType> exp = query.where();
-        query = exp.query();
-        return query.findPagingList(0).getPage(0).getList();
-    }
-
-    public static List<TableType> findTableTypeWithPaging (Query<TableType> reqQuery, String sort, String filter, int offset, int limit) {
-        Query<TableType> query = reqQuery;
-
+    public static List<TableType> findListTableType (Long merchantId, String sort, String filter, int offset, int limit) {
+        String sorting;
         if (!"".equals(sort)) {
-            query = query.orderBy(sort);
+            sorting = sort;
         } else {
-            query = query.orderBy("t0.created_at desc");
+            sorting = "DESC";
         }
 
+        String querySql = "SELECT tp.id FROM table_type tp "
+            + "WHERE tp.merchant_id = " + merchantId + " AND tp.is_deleted = false "
+            + "ORDER BY tp.id " + sorting;
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<TableType> query = Ebean.find(TableType.class).setRawSql(rawSql);
+
         ExpressionList<TableType> exp = query.where();
-        if (filter != null && !filter.equals("")) {
-            offset = 0;
-        }
         exp = exp.disjunction();
-        exp = exp.ilike("t0.name", "%" + filter + "%");
+        exp = exp.ilike("tp.name", "%" + filter + "%");
+        exp = exp.endJunction();
         query = exp.query();
-        if (limit != 0) {
-            query = query.setMaxRows(limit);
-        }
+
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
