@@ -3,6 +3,7 @@ package repository;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
+import models.BrandMerchant;
 import models.Merchant;
 import models.CategoryMerchant;
 import play.db.ebean.Model;
@@ -45,38 +46,28 @@ public class CategoryMerchantRepository extends Model {
 		}
     }
 
-    public static List<CategoryMerchant> getDataCategory(Query<CategoryMerchant> reqQuery, String sort, String filter, int offset, int limit)
-			throws IOException {
-		Query<CategoryMerchant> query = reqQuery;
-
+	public static List<CategoryMerchant> getDataCategory(Long merchantId, String sort, String filter, int offset, int limit) {
+		String sorting;
 		if (!"".equals(sort)) {
-            query = query.orderBy(sort);
+			sorting = sort;
 		} else {
-			query = query.orderBy("t0.updated_at desc");
+			sorting = "DESC";
 		}
+
+		String querySql = "SELECT cm.id FROM category_merchant cm "
+				+ "WHERE cm.merchant_id = " + merchantId + " AND cm.is_deleted = false "
+				+ "ORDER BY cm.updated_at " + sorting;
+
+		RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+		Query<CategoryMerchant> query = Ebean.find(CategoryMerchant.class).setRawSql(rawSql);
 
 		ExpressionList<CategoryMerchant> exp = query.where();
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
-
 		exp = exp.disjunction();
-		exp = exp.ilike("t0.category_name", "%" + filter + "%");
-        // exp = exp.endjunction();
-
+		exp = exp.ilike("cm.category_name", "%" + filter + "%");
+		exp = exp.endJunction();
 		query = exp.query();
 
-		int total = query.findList().size();
-
-		if (limit != 0) {
-			query = query.setMaxRows(limit);
-		}
-        if (filter != "" && filter != null) {
-            offset = 0;
-        }
-
-		List<CategoryMerchant> resData = query.findPagingList(limit).getPage(offset).getList();
-
-		return resData;
+		return query.findPagingList(limit).getPage(offset).getList();
 	}
 
 	public static List<CategoryMerchant> getTotalData(Query<CategoryMerchant> reqQuery)

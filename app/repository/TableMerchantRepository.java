@@ -3,6 +3,8 @@ package repository;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
+import com.avaje.ebean.RawSql;
+import com.avaje.ebean.RawSqlBuilder;
 import models.merchant.TableMerchant;
 import models.transaction.Order;
 import play.db.ebean.Model;
@@ -51,30 +53,34 @@ public class TableMerchantRepository extends Model {
                 .order("id");
     }
 
-    public static List<TableMerchant> getTotalPage(Query<TableMerchant> reqQuery) {
-        Query<TableMerchant> query = reqQuery;
-        ExpressionList<TableMerchant> exp = query.where();
-        query = exp.query();
-        return query.findPagingList(0).getPage(0).getList();
-    }
-
-    public static List<TableMerchant> findTablesWithPaging(Query<TableMerchant> reqQuery, String sort, String filter, int offset, int limit){
-        Query<TableMerchant> query = reqQuery;
+    public static List<TableMerchant> findListTables(Long storeId, String sort, String filter, int offset, int limit){
+        String sorting;
         if (!"".equals(sort)) {
-            query = query.orderBy(sort);
+            sorting = sort;
         } else {
-            query = query.orderBy("t0.created_at desc");
+            sorting = "DESC";
         }
+
+        String querySql;
+        if (storeId == null || storeId == 0) {
+            querySql = "SELECT tm.id FROM table_merchant tm "
+                + "WHERE tm.is_deleted = false "
+                + "ORDER BY tm.id " + sorting;
+        } else {
+            querySql = "SELECT tm.id FROM table_merchant tm "
+                + "WHERE tm.store_id = " + storeId + " AND tm.is_deleted = false "
+                + "ORDER BY tm.id " + sorting;
+        }
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<TableMerchant> query = Ebean.find(TableMerchant.class).setRawSql(rawSql);
+
         ExpressionList<TableMerchant> exp = query.where();
-        if (filter != null && !filter.equals("")) {
-            offset = 0;
-        }
         exp = exp.disjunction();
-        exp = exp.ilike("t0.name", "%" + filter + "%");
+        exp = exp.ilike("tm.name", "%" + filter + "%");
+        exp = exp.endJunction();
         query = exp.query();
-        if (limit != 0) {
-            query = query.setMaxRows(limit);
-        }
+
         return query.findPagingList(limit).getPage(offset).getList();
     }
 

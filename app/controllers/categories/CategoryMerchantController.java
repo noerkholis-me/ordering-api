@@ -120,16 +120,12 @@ public class CategoryMerchantController extends BaseController {
     public static Result listCategory(String filter, String sort, int offset, int limit) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
-            Query<CategoryMerchant> query = CategoryMerchantRepository.find.where().eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
             try {
+                int totalData = CategoryMerchantRepository.getDataCategory(ownMerchant.id, sort, filter, 0, 0).size();
+                List<CategoryMerchant> responseIndex = CategoryMerchantRepository.getDataCategory(ownMerchant.id, sort, filter, offset, limit);
                 List<CategoryMerchantResponse> responses = new ArrayList<>();
-                List<CategoryMerchant> totalData = CategoryMerchantRepository.getTotalData(query);
-                List<CategoryMerchant> responseIndex = CategoryMerchantRepository.getDataCategory(query, sort, filter, offset, limit);
                 for (CategoryMerchant data : responseIndex) {
                     CategoryMerchantResponse response = new CategoryMerchantResponse();
-                    Query<SubCategoryMerchant> querySub = SubCategoryMerchantRepository.find.where().eq("t0.category_id", data.id).eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
-                    List<SubCategoryMerchant> dataSub = SubCategoryMerchantRepository.getDataForCategory(querySub);
-                    List<CategoryMerchantResponse.SubCategoryMerchant> responsesSub = new ArrayList<>();
                     response.setId(data.id);
                     response.setCategoryName(data.getCategoryName());
                     response.setImageWeb(data.getImageWeb());
@@ -137,17 +133,22 @@ public class CategoryMerchantController extends BaseController {
                     response.setIsDeleted(data.isDeleted);
                     response.setIsActive(data.isActive());
                     response.setMerchantId(data.getMerchant().id);
+
+                    Query<SubCategoryMerchant> querySub = SubCategoryMerchantRepository.find.where().eq("t0.category_id", data.id).eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
+                    List<SubCategoryMerchant> dataSub = SubCategoryMerchantRepository.getDataForCategory(querySub);
+                    List<CategoryMerchantResponse.SubCategoryMerchant> responsesSub = new ArrayList<>();
                     for(SubCategoryMerchant dataSubs : dataSub) {
                         CategoryMerchantResponse.SubCategoryMerchant responseSub = new CategoryMerchantResponse.SubCategoryMerchant();
-                        Query<SubsCategoryMerchant> querySubs = SubsCategoryMerchantRepository.find.where().eq("t0.subcategory_id", dataSubs.id).eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
-                        List<SubsCategoryMerchant> dataSubThree = SubsCategoryMerchantRepository.getDataForCategory(querySubs);
-                        List<CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant> responsesSubs = new ArrayList<>();
                         responseSub.setId(dataSubs.id);
                         responseSub.setSubcategoryName(dataSubs.getSubcategoryName());
                         responseSub.setImageWeb(dataSubs.getImageWeb());
                         responseSub.setImageMobile(dataSubs.getImageMobile());
                         responseSub.setIsActive(dataSubs.isActive);
                         responseSub.setIsDeleted(dataSubs.isDeleted);
+
+                        Query<SubsCategoryMerchant> querySubs = SubsCategoryMerchantRepository.find.where().eq("t0.subcategory_id", dataSubs.id).eq("t0.is_deleted", false).eq("merchant", ownMerchant).order("t0.id");
+                        List<SubsCategoryMerchant> dataSubThree = SubsCategoryMerchantRepository.getDataForCategory(querySubs);
+                        List<CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant> responsesSubs = new ArrayList<>();
                         for(SubsCategoryMerchant dataSubsThree : dataSubThree) {
                             CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant responseSubs = new CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant();
                             responseSubs.setId(dataSubsThree.id);
@@ -166,7 +167,7 @@ public class CategoryMerchantController extends BaseController {
                     }
                     responses.add(response);
                 }
-                response.setBaseResponse(filter == null || filter.equals("") ? totalData.size() : responseIndex.size() , offset, limit, success + " menampilkan data", responses);
+                response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data", responses);
                 return ok(Json.toJson(response));
             } catch (IOException e) {
                 Logger.error("allDetail", e);
