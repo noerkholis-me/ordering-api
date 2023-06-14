@@ -573,54 +573,22 @@ public class OrderMerchantController extends BaseController {
                     endDateFormat = sdf.format(calEndDate.getTime());
                 }
 
-                Query<Order> query = null;
-                // default query find by merchant id
-                if(statusOrder != null && !statusOrder.trim().isEmpty()){
-                    if(startDate != null && !startDate.trim().isEmpty()){
-                        query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
-                    } else {
-                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDateFormat + "' and '" + endDateFormat + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).eq("t0.status", statusOrder).order("t0.id desc");
-                    }
-                } else {
-                    if(startDate != null && !startDate.trim().isEmpty()){
-                        query = OrderRepository.find.where().raw("t0.order_date between '" + startDateFormat + "' and '" + endDateFormat + "'").ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
-                    } else {
-                        query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store.merchant", merchant).order("t0.id desc");
-                    }
+                List<Order> orders = OrderRepository.getReportOrderMerchant(merchant.id, storeId, 0, 0, statusOrder, "ALL", startDate, endDate);
+                int totalData = OrderRepository.getTotalOrderReportMerchant(merchant.id, storeId, statusOrder, "ALL", startDate, endDate);
+                List<OrderList> orderLists = new ArrayList<>();
 
-                }
                 // check store id --> mandatory
                 String storeName = "";
                 if (storeId != null && storeId != 0L) {
-                    query = null;
-                    Store store = Store.findById(storeId);
-                    if (store == null) {
+                    Store _store = Store.findById(storeId);
+                    if (_store == null) {
                         response.setBaseResponse(0, 0, 0, "store id does not exists", null);
                         return badRequest(Json.toJson(response));
                     }
-                    storeName = store.storeName;
-                    
-                    if(statusOrder != null && !statusOrder.trim().isEmpty()){
-                        if(startDate != null && !startDate.trim().isEmpty()){
-                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDateFormat + "' and '" + endDateFormat + "'").ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
-                        } else {
-                            query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store", store).eq("t0.status", statusOrder).order("t0.id desc");
-                        } 
-                    } else {
-                        if(startDate != null && !startDate.trim().isEmpty()){
-                            query = OrderRepository.find.where().raw("t0.order_date between '" + startDateFormat + "' and '" + endDateFormat + "'").ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
-                        } else {
-                            query = OrderRepository.find.where().ne("orderPayment.status", "PENDING").eq("store", store).order("t0.id desc");
-                        }
-                    }
+                    storeName = _store.storeName;
                 }
 
-
-                List<OrderList> orderLists = new ArrayList<>();
-                List<Order> orders = query.findPagingList(limit).getPage(offset).getList();
-                Integer totalData = query.findList().size();
-                System.out.println(orders.size());
-                if (orders.isEmpty() || orders.size() == 0) {
+                if (orders.isEmpty() || totalData == 0) {
                     response.setBaseResponse(totalData, offset, limit, success + " Showing data order",
                             orderLists);
                     return ok(Json.toJson(response));
