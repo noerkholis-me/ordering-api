@@ -574,12 +574,14 @@ public class OrderMerchantController extends BaseController {
                     endDate = sdf.format(calEndDate.getTime());
                 }
 
-                if (statusOrder.equalsIgnoreCase("CANCELED"))
-                    statusOrder = "CANCELLED";
+				if (statusOrder.equalsIgnoreCase("CANCELED"))
+				    statusOrder = "CANCELLED";
 
-                List<Order> orders = OrderRepository.getReportOrderMerchant(merchant.id, storeId, offset, limit, statusOrder, productType, startDate, endDate);
-                Integer totalData = OrderRepository.getTotalOrderReportMerchant(merchant.id, storeId, statusOrder, productType, startDate, endDate);
+				List<Order> orders = OrderRepository.getReportOrderMerchant(merchant.id, storeId, 0, 0, statusOrder, "ALL", startDate, endDate);
+				Integer totalData = OrderRepository.getTotalOrderReportMerchant(merchant.id, storeId, statusOrder, "ALL", startDate, endDate);
                 List<OrderList> orderLists = new ArrayList<>();
+
+                // check store id --> mandatory
                 String storeName = "";
                 if (storeId != null && storeId != 0L) {
                     Store _store = Store.findById(storeId);
@@ -588,11 +590,12 @@ public class OrderMerchantController extends BaseController {
                         return badRequest(Json.toJson(response));
                     }
                     storeName = _store.storeName;
+
                 } else
                     storeName = merchant.fullName;
 
                 System.out.println(orders.size());
-                if (orders.isEmpty()) {
+                if (orders.isEmpty() || totalData == 0) {
                     response.setBaseResponse(totalData, offset, limit, success + " Showing data order",
                             orderLists);
                     return ok(Json.toJson(response));
