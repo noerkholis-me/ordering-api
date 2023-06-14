@@ -451,6 +451,9 @@ public class OrderMerchantController extends BaseController {
                     endDate = simpleDateFormat.format(calEndDate.getTime());
                 }
 
+                if (statusOrder.equalsIgnoreCase("CANCELED"))
+                    statusOrder = "CANCELLED";
+
                 List<Order> orders = OrderRepository.getReportOrderMerchant(merchant.id, storeId, offset, limit, statusOrder, productType, startDate, endDate);
                 Integer totalData = OrderRepository.getTotalOrderReportMerchant(merchant.id, storeId, statusOrder, productType, startDate, endDate);
                 List<OrderList> orderLists = new ArrayList<>();
@@ -545,13 +548,11 @@ public class OrderMerchantController extends BaseController {
     }
 
     public static Result downloadTransaction(String startDate, String endDate, int offset, int limit,
-            String statusOrder, Long storeId) throws Exception {
+            String statusOrder, Long storeId, String productType) throws Exception {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                String startDateFormat = "";
-                String endDateFormat = "";
 
                 if(startDate != null && !startDate.trim().isEmpty()) {
                     Calendar calStartDate = Calendar.getInstance();
@@ -569,12 +570,15 @@ public class OrderMerchantController extends BaseController {
                     calEndDate.set(Calendar.MILLISECOND, 999);
 
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                    startDateFormat = sdf.format(calStartDate.getTime());
-                    endDateFormat = sdf.format(calEndDate.getTime());
+                    startDate = sdf.format(calStartDate.getTime());
+                    endDate = sdf.format(calEndDate.getTime());
                 }
 
-                List<Order> orders = OrderRepository.getReportOrderMerchant(merchant.id, storeId, 0, 0, statusOrder, "ALL", startDate, endDate);
-                int totalData = OrderRepository.getTotalOrderReportMerchant(merchant.id, storeId, statusOrder, "ALL", startDate, endDate);
+				if (statusOrder.equalsIgnoreCase("CANCELED"))
+				    statusOrder = "CANCELLED";
+
+				List<Order> orders = OrderRepository.getReportOrderMerchant(merchant.id, storeId, 0, 0, statusOrder, "ALL", startDate, endDate);
+				Integer totalData = OrderRepository.getTotalOrderReportMerchant(merchant.id, storeId, statusOrder, "ALL", startDate, endDate);
                 List<OrderList> orderLists = new ArrayList<>();
 
                 // check store id --> mandatory
@@ -586,8 +590,11 @@ public class OrderMerchantController extends BaseController {
                         return badRequest(Json.toJson(response));
                     }
                     storeName = _store.storeName;
-                }
 
+                } else
+                    storeName = merchant.fullName;
+
+                System.out.println(orders.size());
                 if (orders.isEmpty() || totalData == 0) {
                     response.setBaseResponse(totalData, offset, limit, success + " Showing data order",
                             orderLists);
@@ -608,6 +615,8 @@ public class OrderMerchantController extends BaseController {
             } catch (Exception ex) {
                 ex.printStackTrace();
                 LOGGER.error("Error while download order report ", ex);
+                response.setBaseResponse(0,0,0,error, null);
+                return badRequest(Json.toJson(response));
             }
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
