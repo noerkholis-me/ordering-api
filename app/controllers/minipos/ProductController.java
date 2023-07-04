@@ -45,7 +45,7 @@ public class ProductController extends BaseController {
                     scmResponse.setSubscategoryName(scm.getSubscategoryName());
                     scmResponse.setImageWeb(scm.getImageWeb());
                     scmResponse.setImageMobile(scm.getImageMobile());
-                    scmResponse.setIsActive(scm.isActive());
+                    scmResponse.setIsActive(scm.getIsActive());
                     scmResponse.setIsDeleted(scm.isDeleted());
                     scmResponse.setImageMobile(scm.getImageMobile());
                     scmResponse.setSequence(scm.getSequence());

@@ -197,4 +197,15 @@ public class SubsCategoryMerchantRepository extends Model {
 
 		return query.findPagingList(0).getPage(0).getList();
 	}
+
+	public static List<SubsCategoryMerchant> findAllByMerchantAndSubCategory(Long merchantId, Long subCategoryId) {
+		String querySql = "SELECT scm.id FROM subs_category_merchant scm "
+				+ "WHERE scm.merchant_id = " + merchantId + " AND scm.subcategory_id = " + subCategoryId + " AND scm.is_deleted = false "
+				+ "ORDER BY scm.id DESC";
+
+		RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+		Query<SubsCategoryMerchant> query = Ebean.find(SubsCategoryMerchant.class).setRawSql(rawSql);
+
+		return query.findPagingList(0).getPage(0).getList();
+	}
 }

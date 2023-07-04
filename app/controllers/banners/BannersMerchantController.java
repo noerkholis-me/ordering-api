@@ -54,19 +54,10 @@ public class BannersMerchantController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
-                        Banners newBanners = new Banners();
-                        newBanners.setBannerName(request.getBannerName());
-                        newBanners.setBannerImageWeb(request.getBannerImageWeb());
-                        newBanners.setBannerImageMobile(request.getBannerImageMobile());
-                        newBanners.setBannerImageKiosk(request.getBannerImageKiosk());
-                        newBanners.setMerchant(ownMerchant);
-                        newBanners.setActive(request.isActive());
-                        newBanners.setDateFrom(request.getDateFrom());
-                        newBanners.setDateTo(request.getDateTo());
-                        newBanners.save();
-
+                        Banners banners = new Banners(request, ownMerchant);
+                        banners.save();
                         trx.commit();
-                        response.setBaseResponse(1, offset, 1, success + " membuat banner", newBanners);
+                        response.setBaseResponse(1, offset, 1, success + " membuat banner", banners);
                         return ok(Json.toJson(response));
                     } catch (Exception e) {
                         logger.error("Error saat membuat banner", e);
@@ -122,7 +113,7 @@ public class BannersMerchantController extends BaseController {
                 List<Banners> data = BannersRepository.getDataBanners(ownMerchant.id, sort, filter, offset, limit);
                 List<BannersResponse> responses = new ArrayList<>();
                 for (Banners banners : data) {
-                    BannersResponse response = new BannersResponse();
+                    BannersResponse response = new BannersResponse(banners);
                     Banners dataBanner = BannersRepository.findByIdAndMerchantId(banners.id, ownMerchant);
                     if (dataBanner != null) {
                         if (dataBanner.getDateTo().compareTo(new Date()) <= 0) {
@@ -130,16 +121,6 @@ public class BannersMerchantController extends BaseController {
                             dataBanner.update();
                         }
                     }
-                    response.setId(banners.id);
-                    response.setBannerName(banners.getBannerName());
-                    response.setBannerImageWeb(banners.getBannerImageWeb());
-                    response.setBannerImageMobile(banners.getBannerImageMobile());
-                    response.setBannerImageKiosk(banners.getBannerImageKiosk());
-                    response.setActive(banners.isActive());
-                    response.setDeleted(banners.isDeleted());
-                    response.setDateFrom(banners.getDateFrom());
-                    response.setDateTo(banners.getDateTo());
-                    response.setMerchantId(banners.getMerchant().id);
                     responses.add(response);
                 }
                 response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data", responses);
@@ -267,16 +248,8 @@ public class BannersMerchantController extends BaseController {
                         response.setBaseResponse(0, 0, 0, error + " banner tidak tersedia.", null);
                         return badRequest(Json.toJson(response));
                     }
-                    BannersResponse bannersResponse = new BannersResponse();
-                    bannersResponse.setId(banners.id);
-                    bannersResponse.setBannerName(banners.getBannerName());
-                    bannersResponse.setBannerImageWeb(banners.getBannerImageWeb());
-                    bannersResponse.setBannerImageMobile(banners.getBannerImageMobile());
-                    bannersResponse.setBannerImageKiosk(banners.getBannerImageKiosk());
-                    bannersResponse.setMerchantId(banners.getMerchant().id);
-                    bannersResponse.setActive(banners.isActive());
-                    bannersResponse.setDateFrom(banners.getDateFrom());
-                    bannersResponse.setDateTo(banners.getDateTo());
+
+                    BannersResponse bannersResponse = new BannersResponse(banners);
 
                     response.setBaseResponse(1, offset, 1, success + " menampilkan detail banner", bannersResponse);
                     return ok(Json.toJson(response));
