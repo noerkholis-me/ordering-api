@@ -1,22 +1,24 @@
 package repository;
 
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.ExpressionList;
+import com.avaje.ebean.Query;
+import com.avaje.ebean.RawSql;
+import com.avaje.ebean.RawSqlBuilder;
 import models.CategoryMerchant;
 import models.Merchant;
 import models.SubCategoryMerchant;
 import play.db.ebean.Model;
-import com.avaje.ebean.Expr;
-import com.avaje.ebean.ExpressionList;
-import com.avaje.ebean.Query;
-import java.io.IOException;
 
 import javax.persistence.PersistenceException;
-import java.util.*;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SubCategoryMerchantRepository extends Model {
 
     public static Finder<Long, SubCategoryMerchant> find = new Finder<>(Long.class, SubCategoryMerchant.class);
-
 
 	public static SubCategoryMerchant findById(Long id) {
 		return find.where().eq("id", id).findUnique();
@@ -158,5 +160,16 @@ public class SubCategoryMerchantRepository extends Model {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	public static List<SubCategoryMerchant> findAllByMerchantAndCategory(Long merchantId, Long categoryId) {
+		String querySql = "SELECT scm.id FROM sub_category_merchant scm "
+				+ "WHERE scm.merchant_id = " + merchantId + " AND scm.category_id = " + categoryId + " AND scm.is_deleted = false "
+				+ "ORDER BY scm.id DESC";
+
+		RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+		Query<SubCategoryMerchant> query = Ebean.find(SubCategoryMerchant.class).setRawSql(rawSql);
+
+		return query.findPagingList(0).getPage(0).getList();
 	}
 }

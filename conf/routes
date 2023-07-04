@@ -405,8 +405,8 @@ GET     /master/domesticrates                       controllers.masters.ShipperC
 #STORE
 POST    /merchant/store                             controllers.merchants.StoreController.createStore()
 PUT    /merchant/store/:id                          controllers.merchants.StoreController.editStore(id:Long)
-GET    /merchant/store                              controllers.merchants.StoreController.getAllStore(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
-GET    /merchant/store/list                         controllers.merchants.StoreController.getAllStoreFromAllMerchant(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/store                              controllers.merchants.StoreController.getAllStoreFromMerchant(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET    /merchant/store/list                         controllers.merchants.StoreController.getAllStore(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET    /merchant/store/:id                          controllers.merchants.StoreController.getStoreById(id:Long)
 DELETE    /merchant/store/:id                       controllers.merchants.StoreController.deleteStore(id:Long)
 GET    /merchant/store/:storeCode/detail            controllers.merchants.StoreController.getStoreByStoreCode(storeCode: String)

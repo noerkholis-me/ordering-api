@@ -1,63 +1,95 @@
 package models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.hokeba.util.CommonFunction;
-import lombok.*;
-import models.merchant.*;
+import com.hokeba.util.Constant;
+import dtos.product.ProductStoreResponse;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import models.merchant.ProductMerchant;
 
-import javax.persistence.*;
-import javax.validation.constraints.Size;
-import java.util.Date;
-
-import utils.BigDecimalSerialize;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import java.math.BigDecimal;
 
+@NoArgsConstructor
 @Entity
+@Getter
+@Setter
 public class ProductStore extends BaseModel {
     private static final long serialVersionUID = 1L;
 
-    @Getter @Setter
     @JsonProperty("discount_type")
     public String discountType;
 
-    @Getter @Setter
     @JsonProperty("discount")
     public Double discount;
 
-    @Getter @Setter
     @JsonProperty("store_price")
     public BigDecimal storePrice;
 
-    @Getter @Setter
     @JsonProperty("final_price")
     public BigDecimal finalPrice;
 
-    @Setter @Getter
     @JsonProperty("is_active")
     @Column(name = "is_active")
     public boolean isActive;
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="merchant_id", referencedColumnName = "id")
-    @Getter @Setter
+    @JoinColumn(name = "merchant_id", referencedColumnName = "id")
     public Merchant merchant;
-    
+
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="product_id", referencedColumnName = "id")
-    @Getter @Setter
+    @JoinColumn(name = "product_id", referencedColumnName = "id")
     public ProductMerchant productMerchant;
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="store_id", referencedColumnName = "id")
-    @Getter @Setter
+    @JoinColumn(name = "store_id", referencedColumnName = "id")
     public Store store;
 
     @Column(name = "product_store_qr_code")
-    @Getter @Setter
     public String productStoreQrCode;
+
+    public ProductStore(Merchant merchant, Store store, ProductMerchant productMerchant, ProductStoreResponse productStoreRequest, Boolean isActive) {
+        this.setStore(store);
+        this.setProductMerchant(productMerchant);
+        this.setMerchant(merchant);
+        this.setActive(isActive != null || productStoreRequest.getIsActive());
+        this.setStorePrice(productStoreRequest.getStorePrice());
+        this.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode + "/" + store.id + "/" + merchant.id + "/product/" + productMerchant.id + "/detail"));
+        if (productStoreRequest.getDiscountType() != null) {
+            this.setDiscountType(productStoreRequest.getDiscountType());
+        }
+        if (productStoreRequest.getDiscount() != null) {
+            this.setDiscount(productStoreRequest.getDiscount());
+        }
+        if (productStoreRequest.getFinalPrice() != null) {
+            this.setFinalPrice(productStoreRequest.getFinalPrice());
+        }
+    }
+
+    public void setProductStore(ProductStore productStore, Merchant merchant, Store store, ProductMerchant productMerchant, ProductStoreResponse productStoreRequest) {
+        productStore.setStore(store);
+        productStore.setProductMerchant(productMerchant);
+        productStore.setMerchant(merchant);
+        productStore.setActive(productStoreRequest.getIsActive());
+        productStore.setStorePrice(productStoreRequest.getStorePrice());
+        productStore.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode + "/" + store.id + "/" + merchant.id + "/product/" + productMerchant.id + "/detail"));
+        if (productStoreRequest.getDiscountType() != null) {
+            productStore.setDiscountType(productStoreRequest.getDiscountType());
+        }
+        if (productStoreRequest.getDiscount() != null) {
+            productStore.setDiscount(productStoreRequest.getDiscount());
+        }
+        if (productStoreRequest.getFinalPrice() != null) {
+            productStore.setFinalPrice(productStoreRequest.getFinalPrice());
+        }
+    }
+
 }
