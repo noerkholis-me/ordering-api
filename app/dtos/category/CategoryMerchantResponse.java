@@ -1,16 +1,20 @@
 package dtos.category;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import models.CategoryMerchant;
+import models.SubCategoryMerchant;
+import models.SubsCategoryMerchant;
 
 import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
-public class CategoryMerchantResponse  {
+@Data
+public class CategoryMerchantResponse {
 
     @JsonProperty("id")
     public Long id;
@@ -35,16 +39,26 @@ public class CategoryMerchantResponse  {
 
     @JsonProperty("total_product")
     private Integer totalProduct;
-    
-    private List<SubCategoryMerchant> subCategory;
+
+    private List<SubCategoryMerchantResponse> subCategory;
+
+    public CategoryMerchantResponse(CategoryMerchant category) {
+        this.setId(category.id);
+        this.setCategoryName(category.getCategoryName());
+        this.setImageWeb(category.getImageWeb());
+        this.setImageMobile(category.getImageMobile());
+        this.setIsDeleted(category.isDeleted);
+        this.setIsActive(category.getIsActive());
+        this.setMerchantId(category.getMerchant() == null ? null : category.getMerchant().id);
+    }
 
     @AllArgsConstructor
     @NoArgsConstructor
-    @Getter
-    @Setter
+    @Data
     @Builder
-    public static class SubCategoryMerchant {
+    public static class SubCategoryMerchantResponse {
         private Long id;
+
         @JsonProperty("subcategory_name")
         private String subcategoryName;
 
@@ -63,14 +77,22 @@ public class CategoryMerchantResponse  {
         @JsonProperty("total_product")
         private Integer totalProduct;
 
-        private List<SubsCategoryMerchant> subsCategory;
+        private List<SubsCategoryMerchantResponse> subsCategory;
+
+        public SubCategoryMerchantResponse(SubCategoryMerchant subCategory) {
+            this.setId(subCategory.id);
+            this.setSubcategoryName(subCategory.getSubcategoryName());
+            this.setImageWeb(subCategory.getImageWeb());
+            this.setImageMobile(subCategory.getImageMobile());
+            this.setIsActive(subCategory.getIsActive());
+            this.setIsDeleted(subCategory.isDeleted);
+        }
 
         @AllArgsConstructor
         @NoArgsConstructor
-        @Getter
-        @Setter
+        @Data
         @Builder
-        public static class SubsCategoryMerchant {
+        public static class SubsCategoryMerchantResponse {
 
             @JsonProperty("id")
             public Long id;
@@ -95,6 +117,16 @@ public class CategoryMerchantResponse  {
 
             @JsonProperty("total_product")
             private Integer totalProduct;
+
+            public SubsCategoryMerchantResponse(SubsCategoryMerchant subsCategory) {
+                this.setId(subsCategory.id);
+                this.setSubscategoryName(subsCategory.getSubscategoryName());
+                this.setImageWeb(subsCategory.getImageWeb());
+                this.setImageMobile(subsCategory.getImageMobile());
+                this.setIsActive(subsCategory.getIsActive());
+                this.setIsDeleted(subsCategory.isDeleted);
+                this.setSequence(subsCategory.getSequence());
+            }
         }
     }
 

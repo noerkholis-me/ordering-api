@@ -6,6 +6,7 @@ import com.avaje.ebean.RawSqlBuilder;
 import models.BrandMerchant;
 import models.Merchant;
 import models.CategoryMerchant;
+import models.QrGroupStore;
 import play.db.ebean.Model;
 import com.avaje.ebean.Expr;
 import com.avaje.ebean.ExpressionList;
@@ -88,17 +89,29 @@ public class CategoryMerchantRepository extends Model {
 		return resData;
 	}
 
-	public static List<CategoryMerchant> findListCategory(Long merchantId, Long storeId, String sort, String filter, int offset, int limit) {
+	public static List<CategoryMerchant> findAllByMerchant(Long merchantId, String sort, String filter, int offset, int limit) {
+		String sorting;
+		if (!"".equals(sort)) {
+			sorting = sort;
+		} else {
+			sorting = "DESC";
+		}
+
 		String querySql = "SELECT cm.id FROM category_merchant cm "
 			+ "JOIN merchant mc ON cm.merchant_id = mc.id "
 			+ "JOIN product_merchant pm ON cm.id = pm.category_merchant_id "
 			+ "WHERE cm.merchant_id = '" + merchantId + "' AND cm.is_deleted = false AND cm.is_active = true "
 			+ "AND pm.is_deleted = false AND pm.is_active = true "
 			+ "GROUP BY cm.id "
-			+ "ORDER BY cm.id DESC";
+			+ "ORDER BY cm.id " + sorting;
 
 		RawSql rawSql = RawSqlBuilder.parse(querySql).create();
 		Query<CategoryMerchant> query = Ebean.find(CategoryMerchant.class).setRawSql(rawSql);
+
+		ExpressionList<CategoryMerchant> exp = query.where();
+		exp = exp.disjunction();
+		exp = exp.ilike("cm.category_name", "%" + filter + "%");
+		query = exp.query();
 
 		return query.findPagingList(limit).getPage(offset).getList();
 	}

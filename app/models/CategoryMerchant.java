@@ -1,46 +1,40 @@
 package models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.hokeba.util.CommonFunction;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
-import javax.validation.constraints.Size;
-import java.util.Date;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @Entity
+@Getter
+@Setter
 public class CategoryMerchant extends BaseModel {
     private static final long serialVersionUID = 1L;
 
-    @Getter @Setter
     @JsonProperty("category_name")
     public String categoryName;
 
-    @Getter @Setter
     @JsonProperty("image_web")
     public String imageWeb;
 
-    @Getter @Setter
     @JsonProperty("image_mobile")
     public String imageMobile;
 
-    @Setter @Getter
     @JsonProperty("is_active")
     @Column(name = "is_active")
-    public boolean isActive;
+    public Boolean isActive;
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name="merchant_id", referencedColumnName = "id")
-    @Getter @Setter
+    @JoinColumn(name = "merchant_id", referencedColumnName = "id")
     public Merchant merchant;
-    
-    @Getter @Setter
+
     public SubCategoryMerchant subCategory;
 
-    @Getter @Setter
     public SubsCategoryMerchant subsCategory;
 }
