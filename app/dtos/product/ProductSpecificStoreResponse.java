@@ -2,26 +2,25 @@ package dtos.product;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import models.BrandMerchant;
+import models.CategoryMerchant;
+import models.SubCategoryMerchant;
+import models.SubsCategoryMerchant;
+import models.merchant.ProductMerchant;
 import utils.BigDecimalSerialize;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.List;
 
-@AllArgsConstructor
 @NoArgsConstructor
-@Getter @Setter
+@Data
 public class ProductSpecificStoreResponse implements Serializable {
 
     @JsonProperty("product_id")
     private Long productId;
 
-    // ======== Name and Category ========== //
     @JsonProperty("product_name")
     private String productName;
 
@@ -45,42 +44,65 @@ public class ProductSpecificStoreResponse implements Serializable {
 
     private ProductSpecificStoreResponse.SubsCategory subsCategory;
 
-    @AllArgsConstructor
+
+    public ProductSpecificStoreResponse(ProductMerchant productMerchant) {
+        this.setProductId(productMerchant.id);
+        this.setProductName(productMerchant.getProductName());
+        this.setIsActive(productMerchant.getIsActive());
+        this.setMerchantId(productMerchant.getMerchant().id);
+    }
+
     @NoArgsConstructor
-    @Getter
-    @Setter
-    @Builder
+    @Data
     public static class ProductStore {
         @JsonProperty("id")
         private Long id;
+
         @JsonProperty("product_id")
         private Long productId;
+
         @JsonProperty("store_id")
         private Long storeId;
+
         @JsonProperty("store_name")
         private String storesName;
+
         @JsonProperty("store_price")
         @JsonSerialize(using = BigDecimalSerialize.class)
         private BigDecimal storePrice;
+
         @JsonProperty("discount_type")
         private String discountType;
+
         @JsonProperty("discount")
         private Double discount;
+
         @JsonProperty("final_price")
         @JsonSerialize(using = BigDecimalSerialize.class)
         private BigDecimal finalPrice;
 
         @JsonProperty("is_active")
         private Boolean isActive;
+
         @JsonProperty("is_deleted")
         private Boolean isDeleted;
+
+        public ProductStore(models.ProductStore productStore) {
+            this.setId(productStore.id);
+            this.setStoreId(productStore.getStore().id);
+            this.setProductId(productStore.getProductMerchant().id);
+            this.setIsActive(productStore.isActive);
+            this.setStorePrice(productStore.getStorePrice());
+            this.setDiscountType(productStore.getDiscountType());
+            this.setDiscount(productStore.getDiscount());
+            this.setIsDeleted(productStore.isDeleted);
+            this.setFinalPrice(productStore.getFinalPrice());
+            this.setStoresName(productStore.getStore().getStoreName());
+        }
     }
 
-    @AllArgsConstructor
     @NoArgsConstructor
-    @Getter
-    @Setter
-    @Builder
+    @Data
     public static class Brand {
 
         @JsonProperty("brand_id")
@@ -88,26 +110,30 @@ public class ProductSpecificStoreResponse implements Serializable {
 
         @JsonProperty("brand_name")
         public String brandName;
+
+        public Brand(BrandMerchant brand) {
+            this.setBrandId(brand.id);
+            this.setBrandName(brand.getBrandName());
+        }
     }
 
-    @AllArgsConstructor
     @NoArgsConstructor
-    @Getter
-    @Setter
-    @Builder
+    @Data
     public static class Category {
         @JsonProperty("category_id")
         private Long categoryId;
 
         @JsonProperty("category_name")
         public String categoryName;
+
+        public Category(CategoryMerchant category) {
+            this.setCategoryId(category.id);
+            this.setCategoryName(category.getCategoryName());
+        }
     }
 
-    @AllArgsConstructor
     @NoArgsConstructor
-    @Getter
-    @Setter
-    @Builder
+    @Data
     public static class SubCategory {
         @JsonProperty("sub_category_id")
         private Long subCategoryId;
@@ -115,18 +141,24 @@ public class ProductSpecificStoreResponse implements Serializable {
         @JsonProperty("sub_category_name")
         public String subCategoryName;
 
+        public SubCategory(SubCategoryMerchant subCategory) {
+            this.setSubCategoryId(subCategory.id);
+            this.setSubCategoryName(subCategory.getSubcategoryName());
+        }
     }
 
-    @AllArgsConstructor
     @NoArgsConstructor
-    @Getter
-    @Setter
-    @Builder
+    @Data
     public static class SubsCategory {
         @JsonProperty("subs_category_id")
         private Long subsCategoryId;
 
         @JsonProperty("subs_category_name")
         public String subsCategoryName;
+
+        public SubsCategory(SubsCategoryMerchant subsCategory) {
+            this.setSubsCategoryId(subsCategory.id);
+            this.setSubsCategoryName(subsCategory.getSubscategoryName());
+        }
     }
 }

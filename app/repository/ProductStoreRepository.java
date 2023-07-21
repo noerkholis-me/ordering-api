@@ -1,16 +1,20 @@
 package repository;
 
-import jdk.nashorn.internal.runtime.options.Option;
-import models.*;
-import play.db.ebean.Model;
-import com.avaje.ebean.Expr;
+import com.avaje.ebean.Ebean;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
-import java.io.IOException;
+import com.avaje.ebean.RawSql;
+import com.avaje.ebean.RawSqlBuilder;
+import models.Merchant;
+import models.ProductStore;
+import models.Store;
+import play.db.ebean.Model;
 
 import javax.persistence.PersistenceException;
-import java.util.*;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Optional;
 
 public class ProductStoreRepository extends Model {
 
@@ -126,5 +130,25 @@ public class ProductStoreRepository extends Model {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	public static ProductStore findByStoreAndProductMerchant(Long storeId, Long productId) {
+		return find.where()
+				.eq("t0.store_id", storeId)
+				.eq("t0.product_id", productId)
+				.eq("t0.is_active", true)
+				.eq("t0.is_deleted", false)
+				.findList().get(0);
+	}
+
+	public static List<ProductStore> findAllByProductIdAndMerchant(Long productId, Long merchantId) {
+		String querySql = "SELECT ps.id FROM product_store ps "
+				+ "WHERE ps.product_id = " + productId + " AND ps.merchant_id = " + merchantId + " AND ps.is_deleted = false "
+				+ "ORDER BY ps.updated_at DESC";
+
+		RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+		Query<ProductStore> query = Ebean.find(ProductStore.class).setRawSql(rawSql);
+
+		return query.findPagingList(0).getPage(0).getList();
 	}
 }

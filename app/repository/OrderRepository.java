@@ -483,6 +483,10 @@ public class OrderRepository extends Model {
     public static Query<Order> queryOrderReportMerchant(Long merchantId, Long storeId, String statusOrder, String productType, String startDate, String endDate) {
         String whereCondition;
 
+        if (statusOrder.equalsIgnoreCase("CANCEL") || statusOrder.equalsIgnoreCase("CANCELED")) {
+            statusOrder = "CANCELLED";
+        }
+
         // default query find by merchant id
         if(statusOrder != null && !statusOrder.trim().isEmpty()){
             if(startDate != null && !startDate.trim().isEmpty()){

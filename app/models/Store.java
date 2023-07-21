@@ -1,35 +1,39 @@
 package models;
 
-import com.avaje.ebean.*;
+import com.avaje.ebean.ExpressionList;
+import com.avaje.ebean.Page;
 import com.avaje.ebean.Query;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import lombok.EqualsAndHashCode;
+import com.hokeba.util.CommonFunction;
+import com.hokeba.util.Constant;
+import dtos.store.StoreRequest;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import play.libs.Json;
-import javax.persistence.*;
-import javax.validation.constraints.Size;
-
 import models.transaction.Order;
+import play.libs.Json;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.text.Normalizer;
 import java.util.HashMap;
-import play.data.validation.ValidationError;
+import java.util.List;
 
 /**
  * Created by Yuniar Kurniawan on 21 Juli 2021.
  */
+@NoArgsConstructor
 @Entity
 @Table(name = "store")
-public class Store extends BaseModel{
+@Getter
+@Setter
+public class Store extends BaseModel {
     public static final boolean ACTIVE = true;
     public static final boolean INACTIVE = false;
     private static final String LOG_TYPE = "ADMIN";
@@ -50,41 +54,42 @@ public class Store extends BaseModel{
     public String storePhone;
 
     @JsonIgnore
-    @JoinColumn(name="user_id")
+    @JoinColumn(name = "user_id")
     @ManyToOne
     public UserCms userCms;
 
     @JsonIgnore
-    @JoinColumn(name="province_id")
+    @JoinColumn(name = "province_id")
     @ManyToOne
     public ShipperProvince shipperProvince;
 
     @JsonIgnore
-    @JoinColumn(name="shipper_city_id")
+    @JoinColumn(name = "shipper_city_id")
     @ManyToOne
-    public ShipperCity shipperCity;    
+    public ShipperCity shipperCity;
 
     @JsonIgnore
-    @JoinColumn(name="suburb_id")
+    @JoinColumn(name = "suburb_id")
     @ManyToOne
     public ShipperSuburb shipperSuburb;
 
     @JsonIgnore
-    @JoinColumn(name="area_id")
+    @JoinColumn(name = "area_id")
     @ManyToOne
-    public ShipperArea shipperArea;    
+    public ShipperArea shipperArea;
 
-    @Column(name="store_gmap")
-    @Getter @Setter
+    @Column(name = "store_gmap")
+    @Getter
+    @Setter
     public String storeGmap;
 
-    @Column(name="store_long")
+    @Column(name = "store_long")
     public Double storeLongitude;
 
-    @Column(name="store_lat")
+    @Column(name = "store_lat")
     public Double storeLatitude;
 
-    @ManyToOne(cascade = { CascadeType.ALL })
+    @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "merchant_id", referencedColumnName = "id")
     @JsonIgnore
     @Getter
@@ -92,14 +97,16 @@ public class Store extends BaseModel{
     public Merchant merchant;
 
     @Column(name = "store_qr_code")
-    @Getter @Setter
+    @Getter
+    @Setter
     public String storeQrCode;
 
     @Column(name = "is_active")
     public Boolean isActive;
 
     @Column(name = "active_balance")
-    @Getter @Setter
+    @Getter
+    @Setter
     public BigDecimal activeBalance;
 
     @OneToMany(mappedBy = "store")
@@ -131,43 +138,125 @@ public class Store extends BaseModel{
     public Long area_id;
 
     @Column(name = "status_open_store")
-    @Getter @Setter
+    @Getter
+    @Setter
     public Boolean statusOpenStore;
 
     @Column(name = "open_at")
-    @Getter @Setter
+    @Getter
+    @Setter
     public String openAt;
 
     @Column(name = "closed_at")
-    @Getter @Setter
+    @Getter
+    @Setter
     public String closedAt;
 
-    public Store() {
+    public Store(StoreRequest request, Merchant merchant) {
+        this.setMerchant(merchant);
+        this.setStoreName(request.getStoreName());
+        this.setStorePhone(request.getStorePhone());
+        this.setStoreAddress(request.getAddress());
+        this.setStoreLogo(request.getStoreLogo());
+        this.setIsActive(true);
+        this.setStatusOpenStore(true);
+        this.setShipperProvince(ShipperProvince.findById(request.getProvinceId()));
+        this.setShipperCity(ShipperCity.findById(request.getCityId()));
+        this.setShipperSuburb(ShipperSuburb.findById(request.getSuburbId()));
+        this.setShipperArea(ShipperArea.findById(request.getAreaId()));
+        this.setActiveBalance(BigDecimal.ZERO);
+        this.setStoreCode(CommonFunction.generateRandomString(8));
+        this.setStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(this.getStoreCode()));
+
+        this.setStoreGmap(request.getGoogleMapsUrl());
+        String[] finalLotLang = getLongitudeLatitude(this.getStoreGmap());
+        this.setStoreLatitude(Double.parseDouble(finalLotLang[0]));
+        this.setStoreLongitude(Double.parseDouble(finalLotLang[1]));
+
+        String storeAlias = slugGenerate(request.getStoreName());
+        Store alias = Store.find.where().raw("store_alias ~ '^" + storeAlias + "-[0-9]*$' ORDER BY store_alias DESC limit 1").findUnique();
+
+        if (alias != null) {
+            String[] tmpAlias = alias.storeAlias.split("-");
+            String aliasName = tmpAlias[0];
+            int currentindex = Integer.parseInt(tmpAlias[1]);
+            int nextIndex = currentindex + 1;
+
+            this.setStoreAlias(aliasName + "-" + nextIndex);
+        } else {
+            this.setStoreAlias(storeAlias + "-1");
+        }
 
     }
 
-    public Store(String storeCode, String storeName, String storeAddress, String storePhone) {
-        super();
-        this.storeCode = storeCode;
-        this.storeName = storeName;
-        this.storeAddress = storeAddress;
-        this.storePhone = storePhone;
-        //this.isActive = true;
+    public void setStore(StoreRequest request, Store store) {
+        store.setStoreName(request.getStoreName());
+        store.setStorePhone(request.getStorePhone());
+        store.setStoreAddress(request.getAddress());
+        store.setStoreLogo(request.getStoreLogo());
+        store.setIsActive(true);
+        store.setStatusOpenStore(request.getStatusOpenStore() != null && request.getStatusOpenStore());
+        store.setOpenAt("".equals(request.getOpenAt()) ? null : request.getOpenAt());
+        store.setClosedAt("".equals(request.getClosedAt()) ? null : request.getClosedAt());
+        store.setShipperProvince(ShipperProvince.findById(request.getProvinceId()));
+        store.setShipperCity(ShipperCity.findById(request.getCityId()));
+        store.setShipperSuburb(ShipperSuburb.findById(request.getSuburbId()));
+        store.setShipperArea(ShipperArea.findById(request.getAreaId()));
+        store.setStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.getStoreCode()));
+
+        store.setStoreGmap(request.getGoogleMapsUrl());
+        String[] finalLotLang = getLongitudeLatitude(store.getStoreGmap());
+        store.setStoreLatitude(Double.parseDouble(finalLotLang[0]));
+        store.setStoreLongitude(Double.parseDouble(finalLotLang[1]));
+
+        String storeAlias = slugGenerate(request.getStoreName());
+        Store alias = Store.find.where().raw("store_alias ~ '^" + storeAlias + "-[0-9]*$' ORDER BY store_alias DESC limit 1").findUnique();
+
+        // if alias exist, check store alias
+        if (alias != null) {
+            String[] tmpAlias = alias.storeAlias.split("-");
+            String aliasName = tmpAlias[0];
+            int currentindex = Integer.parseInt(tmpAlias[1]);
+            int nextIndex = currentindex + 1;
+
+            // if store alias == existing alias, check again
+            if (storeAlias.equalsIgnoreCase(aliasName)) {
+                Store getStore = Store.find.byId(id);
+                if (getStore.storeAlias == null || getStore.storeAlias.trim().isEmpty()) {
+                    store.setStoreAlias(storeAlias + "-" + nextIndex);
+                } else {
+                    String[] tmpCurrentAlias = getStore.storeAlias.split("-");
+                    String currentAliasName = tmpCurrentAlias[0];
+                    // if store alias != current store alias update store alias (e.g mystore != mynewstore)
+                    if (!storeAlias.equalsIgnoreCase(currentAliasName)) {
+                        store.setStoreAlias(storeAlias + "-" + nextIndex);
+                    }
+                }
+            }
+        } else {
+            // create new store alias
+            store.setStoreAlias(storeAlias + "-1");
+        }
 
     }
 
-    // public Store(String storeCode, String storeName, String storeAddress, 
-    //     ShipperProvince shipperProvince, ShipperCity shipperCity, String storePhone) {
-    //     super();
-    //     this.storeCode = storeCode;
-    //     this.storeName = storeName;
-    //     this.storeAddress = storeAddress;
-    //     this.shipperProvince = shipperProvince;
-    //     this.shipperCity = shipperCity;
-    //     this.storePhone = storePhone;
-    //     //this.isActive = true;
+    public static String[] getLongitudeLatitude(String paramGmap) {
+        //String tmpString = "https://www.google.com/maps/place/Toko+Ne/@-6.9326603,107.6011616,515m/data=!3m1!1e3!4m13!1m7!3m6!1s0x2e68e899de51f023:0x40cea56365748dcf!2sAstanaanyar,+Bandung+City,+West+Java!3b1!8m2!3d-6.9299008!4d107.5993373!3m4!1s0x2e68e89eebc34b29:0x2e8c9826fb62b77e!8m2!3d-6.9327152!4d107.6020338";
+        String[] tmpLongLat = paramGmap.split("@");
+        String[] finalLotLang = tmpLongLat[1].split("/");
+        return finalLotLang[0].split(",");
+    }
 
-    // }
+    public static String slugGenerate(String input) {
+        String slug = Normalizer.normalize(input.toLowerCase(), Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .replaceAll("[^\\p{Alnum}]+", "");
+        if (slug.length() != 0 && slug.charAt(slug.length() - 1) == '-') {
+            return slug.substring(0, slug.length() - 1);
+        } else {
+            return slug;
+        }
+    }
 
     public static Store findById(Long id) {
         return find.where().eq("id", id).eq("is_deleted", false).eq("isActive", true).findUnique();
@@ -178,23 +267,19 @@ public class Store extends BaseModel{
     }
 
     public static Integer RowCount() {
-        return find.where()
-                        .eq("is_deleted", false)
-                        .findRowCount();
+        return find.where().eq("is_deleted", false).findRowCount();
     }
 
     public static Page<Store> page(int page, int pageSize, String sortBy, String order, String filter) {
-        ExpressionList<Store> qry = Store.find
-                .where()
+        ExpressionList<Store> qry = Store.find.where()
                 .ilike("storeName", "%" + filter + "%")
                 .eq("is_deleted", false)
                 .eq("is_active", true);
 
-        return
-                qry.orderBy(sortBy + " " + order)
-                    .findPagingList(pageSize)
-                    .setFetchAhead(false)
-                    .getPage(page);
+        return qry.orderBy(sortBy + " " + order)
+                .findPagingList(pageSize)
+                .setFetchAhead(false)
+                .getPage(page);
     }
 
     public static Page<Store> getPage(String filter, String sort, int offset, int limit, Merchant merchant) {
@@ -209,66 +294,22 @@ public class Store extends BaseModel{
                 .getPage(offset);
     }
 
-    public static Query<Store> findAllStoreFromAllMerchant() {
-        return find.where().eq("isDeleted", false).order("id");
-    }
-
-    public static Query<Store> findStoreIsActiveAndMerchant(Merchant merchant) {
-        return find.where().eq("isDeleted", false).eq("merchant", merchant).order("id");
-    }
-
     public static List<Store> findAllStoreIsActiveByMerchant(Merchant merchant) {
         return find.where().eq("isDeleted", false).eq("merchant", merchant).eq("isActive", true).findList();
     }
 
-    public static List<Store> getTotalDataPage (Query<Store> reqQuery) {
+    public static List<Store> getTotalDataPage(Query<Store> reqQuery) {
         Query<Store> query = reqQuery;
         ExpressionList<Store> exp = query.where();
         query = exp.query();
         return query.findPagingList(0).getPage(0).getList();
     }
 
-    public static List<Store> findStoreWithPaging(Query<Store> reqQuery, String sort, String filter, int offset, int limit) {
-        Query<Store> query = reqQuery;
-
-        if (!"".equals(sort)) {
-            query = query.orderBy(sort);
-        } else {
-            query = query.orderBy("t0.created_at desc");
-        }
-
-        ExpressionList<Store> exp = query.where();
-        exp = exp.disjunction();
-        exp = exp.or(Expr.ilike("t0.store_name", "%" + filter + "%"), Expr.ilike("t0.store_code", "%" + filter + "%"));
-        query = exp.query();
-        if (limit != 0) {
-            query = query.setMaxRows(limit);
-        }
-        return query.findPagingList(limit).getPage(offset).getList();
-    }
-    
-    public static List<Store> findAllStore(Query<Store> reqQuery) {
-        Query<Store> query = reqQuery;
-
-        query = query.orderBy("t0.store_name asc");
-
-        ExpressionList<Store> exp = query.where();
-        query = exp.query();
-        
-        return query.findPagingList(0).getPage(0).getList();
-    }
-
-    public String getChangeLogData(Store data){
+    public String getChangeLogData(Store data) {
         HashMap<String, String> map = new HashMap<>();
-        map.put("store_code",(data.storeCode == null)? "":data.storeCode);
-        
+        map.put("store_code", (data.storeCode == null) ? "" : data.storeCode);
+
         return Json.toJson(map).toString();
     }
 
-//    @Override
-//    public void save() {
-//        super.save();
-//        ChangeLog changeLog = new ChangeLog(LOG_TYPE, this.userCms.id, LOG_TABLE_NAME, this.id, "ADD", null, getChangeLogData(this));
-//        changeLog.save();
-//    }
 }

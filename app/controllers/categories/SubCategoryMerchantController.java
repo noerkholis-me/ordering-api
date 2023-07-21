@@ -90,7 +90,7 @@ public class SubCategoryMerchantController extends BaseController {
                         newSubCategoryMerchant.setSubcategoryName(request.getSubcategoryName());
                         newSubCategoryMerchant.setMerchant(ownMerchant);
                         newSubCategoryMerchant.setCategoryMerchant(categoryMerchant);
-                        newSubCategoryMerchant.setActive(request.getIsActive());
+                        newSubCategoryMerchant.setIsActive(request.getIsActive());
                         newSubCategoryMerchant.setSequence(lastSequence);
 
                         // // ========================== update with image ========================== //
@@ -182,7 +182,7 @@ public class SubCategoryMerchantController extends BaseController {
                         subCategoryMerchant.setSubcategoryName(request.getSubcategoryName());
                         subCategoryMerchant.setMerchant(ownMerchant);
                         subCategoryMerchant.setCategoryMerchant(categoryMerchant);
-                        subCategoryMerchant.setActive(request.getIsActive());
+                        subCategoryMerchant.setIsActive(request.getIsActive());
 
                         // // ========================== update with image ========================== //
                         // /*
@@ -359,7 +359,7 @@ public class SubCategoryMerchantController extends BaseController {
                     response.setImageWeb(data.getImageWeb());
                     response.setImageMobile(data.getImageMobile());
                     response.setIsDeleted(data.isDeleted);
-                    response.setIsActive(data.isActive());
+                    response.setIsActive(data.getIsActive());
                     response.setSequence(data.getSequence());
                     response.setMerchantId(data.getMerchant().id);
                     response.setCategoryId(data.getCategoryMerchant().id);
@@ -440,7 +440,7 @@ public class SubCategoryMerchantController extends BaseController {
                             response.setBaseResponse(0, 0, 0, error + " sub category tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
                         }
-                        subCategoryMerchant.setActive(request.getIsActive());
+                        subCategoryMerchant.setIsActive(request.getIsActive());
                         subCategoryMerchant.update();
     
                         trx.commit();
@@ -509,7 +509,7 @@ public class SubCategoryMerchantController extends BaseController {
                             newSubsCategoryMerchant.setMerchant(ownMerchant);
                             newSubsCategoryMerchant.setCategoryMerchant(categoryMerchant);
                             newSubsCategoryMerchant.setSubCategoryMerchant(subcategoryMerchant);
-                            newSubsCategoryMerchant.setActive(request.getIsActive());
+                            newSubsCategoryMerchant.setIsActive(request.getIsActive());
                             newSubsCategoryMerchant.setSequence(lastSequence);
                             newSubsCategoryMerchant.setImageWeb(request.getImageWeb());
                             newSubsCategoryMerchant.setImageMobile(request.getImageMobile());
@@ -573,7 +573,7 @@ public class SubCategoryMerchantController extends BaseController {
                             subsCategoryMerchant.setMerchant(ownMerchant);
                             subsCategoryMerchant.setCategoryMerchant(categoryMerchant);
                             subsCategoryMerchant.setSubCategoryMerchant(subCategoryMerchant);
-                            subsCategoryMerchant.setActive(request.getIsActive());
+                            subsCategoryMerchant.setIsActive(request.getIsActive());
                             if(request.getImageWeb() != null){
                                 subsCategoryMerchant.setImageWeb(request.getImageWeb());
                             }
@@ -631,7 +631,7 @@ public class SubCategoryMerchantController extends BaseController {
                             response.setBaseResponse(0, 0, 0, error + " sub kategori tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
                         }
-                        subsCategoryMerchant.setActive(request.getIsActive());
+                        subsCategoryMerchant.setIsActive(request.getIsActive());
                         subsCategoryMerchant.update();
 
                         trx.commit();
