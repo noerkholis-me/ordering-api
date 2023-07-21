@@ -91,7 +91,7 @@ public class DownloadOrderReport {
                     cashier = UserMerchantRepository.find.byId(data.getUserMerchant().id);
                 }
                 
-                if(getOrderPayment.getStatus().equalsIgnoreCase("PAID") || getOrderPayment.getStatus().equalsIgnoreCase("CANCEL") || getOrderPayment.getStatus().equalsIgnoreCase("CANCELED")){
+                if(getOrderPayment.getStatus().equalsIgnoreCase("PAID") || getOrderPayment.getStatus().equalsIgnoreCase("CANCELLED") || getOrderPayment.getStatus().equalsIgnoreCase("CANCELED")){
                     // GET PRODUCT DETAIL ORDER ON MAIN PRODUCT
                     List<OrderDetail> orderDetails = OrderRepository.findOrderDetailByOrderId(data.id);
                     for(OrderDetail oDetail : orderDetails) {

@@ -1,15 +1,18 @@
 package dtos.banners;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import models.Banners;
 
-import java.util.*;
+import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
-@Setter
+@Data
 @Builder
 public class BannersResponse {
 
@@ -45,5 +48,16 @@ public class BannersResponse {
     @JsonProperty("merchant_id")
     private Long merchantId;
 
-
+    public BannersResponse(Banners banners) {
+        this.setId(banners.id);
+        this.setBannerName(banners.getBannerName());
+        this.setBannerImageWeb(banners.getBannerImageWeb());
+        this.setBannerImageMobile(banners.getBannerImageMobile());
+        this.setBannerImageKiosk(banners.getBannerImageKiosk());
+        this.setActive(banners.isActive());
+        this.setDeleted(banners.isDeleted());
+        this.setDateFrom(banners.getDateFrom());
+        this.setDateTo(banners.getDateTo());
+        this.setMerchantId(banners.getMerchant().id);
+    }
 }

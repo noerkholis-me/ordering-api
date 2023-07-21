@@ -1,8 +1,6 @@
 package controllers.merchants;
 
 import com.avaje.ebean.Ebean;
-import com.avaje.ebean.Expr;
-import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -16,10 +14,10 @@ import controllers.BaseController;
 import dtos.brand.BrandMerchantResponse;
 import dtos.category.CategoryMerchantResponse;
 import dtos.merchant.qrgroup.request.QrGroupRequest;
-import dtos.merchant.qrgroup.response.QrGroupResponse;
 import dtos.merchant.qrgroup.request.QrGroupStoreRequest;
-import dtos.merchant.qrgroup.response.QrGroupStoreResponse;
+import dtos.merchant.qrgroup.response.QrGroupResponse;
 import dtos.merchant.qrgroup.response.QrGroupResponseList;
+import dtos.merchant.qrgroup.response.QrGroupStoreResponse;
 import dtos.product.ProductDetailResponse;
 import dtos.product.ProductSpecificStoreResponse;
 import models.BrandMerchant;
@@ -41,7 +39,6 @@ import play.libs.Json;
 import play.mvc.Result;
 import repository.CategoryMerchantRepository;
 import repository.ProductMerchantDetailRepository;
-import repository.ProductStoreRepository;
 import repository.QrGroupRepository;
 import repository.SubCategoryMerchantRepository;
 import repository.SubsCategoryMerchantRepository;
@@ -62,7 +59,7 @@ public class QrGroupController extends BaseController {
         if (ownMerchant != null) {
             try {
                 List<QrGroup> listQrGroup = QrGroupRepository.findAllQrGroup(ownMerchant.id, filter, offset ,limit);
-                Integer totalQrGroup = QrGroupRepository.findAllQrGroup(ownMerchant.id, filter, offset ,limit).size();
+                int totalQrGroup = QrGroupRepository.findAllQrGroup(ownMerchant.id, filter, 0 ,0).size();
 
                 List<QrGroupResponseList> listData = new ArrayList<>();
                 for (QrGroup qrGroup : listQrGroup) {
@@ -102,7 +99,7 @@ public class QrGroupController extends BaseController {
                 }
 
                 List<QrGroupStore> listQrGroupStore = QrGroupRepository.findQrGroupStoreByGroupId(getQrGroup.id, filter, offset, limit);
-                Integer storeCount = QrGroupRepository.findQrGroupStoreByGroupId(getQrGroup.id, filter, 0, 0).size();
+                int storeCount = QrGroupRepository.findQrGroupStoreByGroupId(getQrGroup.id, filter, 0, 0).size();
 
                 response.setBaseResponse(storeCount, offset, limit, "Berhasil menampilkan data QR group.",
                     toQrGroupResponse(getQrGroup, listQrGroupStore));
@@ -396,7 +393,7 @@ public class QrGroupController extends BaseController {
                 }
 
                 List<QrGroupStore> listQrGroupStore = QrGroupRepository.findQrGroupStoreByGroupId(getQrGroup.id, filter, offset, limit);
-                Integer storeCount = QrGroupRepository.findQrGroupStoreByGroupId(getQrGroup.id, filter, 0, 0).size();
+                int storeCount = QrGroupRepository.findQrGroupStoreByGroupId(getQrGroup.id, filter, 0, 0).size();
 
                 response.setBaseResponse(storeCount, offset, limit, "Berhasil menampilkan data QR group.",
                     toQrGroupResponse(getQrGroup, listQrGroupStore));
@@ -423,7 +420,7 @@ public class QrGroupController extends BaseController {
                 }
 
                 List<QrGroupStore> listQrGroupStore = QrGroupRepository.findListStoreFromGroup(getQrGroup.id, filter, sortName, sortStore,  offset, limit);
-                Integer storeCount = QrGroupRepository.findListStoreFromGroup(getQrGroup.id, filter, sortName, sortStore, 0, 0).size();
+                int storeCount = QrGroupRepository.findListStoreFromGroup(getQrGroup.id, filter, sortName, sortStore, 0, 0).size();
 
                 response.setBaseResponse(storeCount, offset, limit, "Berhasil menampilkan data QR group.",
                     toListStoreResponse(listQrGroupStore));
@@ -450,7 +447,7 @@ public class QrGroupController extends BaseController {
                 }
 
                 List<ProductStore> productStore = QrGroupRepository.findListProductFromGroupCode(groupCode, filter, offset, limit);
-                Integer totalProduct = QrGroupRepository.findListProductFromGroupCode(groupCode, filter, 0, 0).size();
+                int totalProduct = QrGroupRepository.findListProductFromGroupCode(groupCode, filter, 0, 0).size();
 
                 response.setBaseResponse(totalProduct, offset, limit, "Berhasil menampilkan daftar produk QR group.",
                     toListProductResponse(productStore));
@@ -477,7 +474,7 @@ public class QrGroupController extends BaseController {
                 }
 
                 List<ProductStore> productStore = QrGroupRepository.findAllProductFromGroup(groupCode, brandId, categoryId, keyword, offset, limit);
-                Integer totalProduct = QrGroupRepository.findAllProductFromGroup(groupCode, brandId, categoryId, keyword, 0, 0).size();
+                int totalProduct = QrGroupRepository.findAllProductFromGroup(groupCode, brandId, categoryId, keyword, 0, 0).size();
 
                 response.setBaseResponse(totalProduct, offset, limit, "Berhasil menampilkan daftar produk QR group.",
                     toListProductResponse(productStore));
@@ -504,63 +501,42 @@ public class QrGroupController extends BaseController {
                 }
 
                 List<CategoryMerchant> data = QrGroupRepository.findListCategoryFromGroup(groupCode, "", 0, 0);
-                Integer totalData = QrGroupRepository.findListCategoryFromGroup(groupCode, "", 0, 0).size();
+                int totalData = QrGroupRepository.findListCategoryFromGroup(groupCode, "", 0, 0).size();
 
                 List<CategoryMerchantResponse> responses = new ArrayList<>();
                 for (CategoryMerchant category : data) {
-                    CategoryMerchantResponse response = new CategoryMerchantResponse();
+                    int totalProductCategory = QrGroupRepository.getTotalProductCategory(groupCode, category.id);
+                    CategoryMerchantResponse categoryRes = new CategoryMerchantResponse(category);
+                    categoryRes.setTotalProduct(totalProductCategory);
 
-                    Integer totalProductCategory = QrGroupRepository.getTotalProductCategory(groupCode, category.id);
-                    response.setId(category.id);
-                    response.setCategoryName(category.getCategoryName());
-                    response.setImageWeb(category.getImageWeb());
-                    response.setImageMobile(category.getImageMobile());
-                    response.setIsDeleted(category.isDeleted);
-                    response.setIsActive(category.isActive());
-                    response.setMerchantId(category.getMerchant().id);
-                    response.setTotalProduct(totalProductCategory);
+                    List<SubCategoryMerchant> subCategoryMerchants = SubCategoryMerchantRepository.findAllByMerchantAndCategory(category.getMerchant().id, category.id);
 
-                    Query<SubCategoryMerchant> querySub = SubCategoryMerchantRepository.find.where().eq("t0.category_id", category.id).eq("t0.is_deleted", false).eq("t0.merchant_id", category.getMerchant().id).order("t0.id");
-                    List<SubCategoryMerchant> dataSub = SubCategoryMerchantRepository.getDataForCategory(querySub);
-                    List<CategoryMerchantResponse.SubCategoryMerchant> responsesSub = new ArrayList<>();
-                    for(SubCategoryMerchant subCategory : dataSub) {
-                        Integer totalProductSubCategory = QrGroupRepository.getTotalProductSubCategory(groupCode, subCategory.id);
-                        CategoryMerchantResponse.SubCategoryMerchant responseSub = new CategoryMerchantResponse.SubCategoryMerchant();
-                        responseSub.setId(subCategory.id);
-                        responseSub.setSubcategoryName(subCategory.getSubcategoryName());
-                        responseSub.setImageWeb(subCategory.getImageWeb());
-                        responseSub.setImageMobile(subCategory.getImageMobile());
-                        responseSub.setIsActive(subCategory.isActive);
-                        responseSub.setIsDeleted(subCategory.isDeleted);
-                        responseSub.setTotalProduct(totalProductSubCategory);
+                    List<CategoryMerchantResponse.SubCategoryMerchantResponse> subResponses = new ArrayList<>();
+                    for(SubCategoryMerchant subCategory : subCategoryMerchants) {
+                        int totalProductSubCategory = QrGroupRepository.getTotalProductSubCategory(groupCode, subCategory.id);
+                        CategoryMerchantResponse.SubCategoryMerchantResponse subRes = new CategoryMerchantResponse.SubCategoryMerchantResponse(subCategory);
+                        subRes.setTotalProduct(totalProductSubCategory);
 
-                        Query<SubsCategoryMerchant> querySubs = SubsCategoryMerchantRepository.find.where().eq("t0.subcategory_id", subCategory.id).eq("t0.is_deleted", false).eq("t0.merchant_id", subCategory.getMerchant().id).order("t0.id");
-                        List<SubsCategoryMerchant> dataSubs = SubsCategoryMerchantRepository.getDataForCategory(querySubs);
-                        List<CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant> responsesSubs = new ArrayList<>();
-                        for(SubsCategoryMerchant subsCategory : dataSubs) {
-                            Integer totalProductSubsCategory = QrGroupRepository.getTotalProductSubsCategory(groupCode, subsCategory.id);
-                            CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant responseSubs = new CategoryMerchantResponse.SubCategoryMerchant.SubsCategoryMerchant();
-                            responseSubs.setId(subsCategory.id);
-                            responseSubs.setSubscategoryName(subsCategory.getSubscategoryName());
-                            responseSubs.setImageWeb(subsCategory.getImageWeb());
-                            responseSubs.setImageMobile(subsCategory.getImageMobile());
-                            responseSubs.setIsActive(subsCategory.isActive);
-                            responseSubs.setIsDeleted(subsCategory.isDeleted);
-                            responseSubs.setSequence(subsCategory.getSequence());
-                            responseSubs.setTotalProduct(totalProductSubsCategory);
-                            responsesSubs.add(responseSubs);
-                            responseSub.setSubsCategory(responseSubs != null ? responsesSubs : null);
+                        List<SubsCategoryMerchant> subsCategoryMerchants = SubsCategoryMerchantRepository.findAllByMerchantAndSubCategory(subCategory.getMerchant().id, subCategory.id);
+
+                        List<CategoryMerchantResponse.SubCategoryMerchantResponse.SubsCategoryMerchantResponse> subsResponses = new ArrayList<>();
+                        for(SubsCategoryMerchant subsCategory : subsCategoryMerchants) {
+                            int totalProductSubsCategory = QrGroupRepository.getTotalProductSubsCategory(groupCode, subsCategory.id);
+                            CategoryMerchantResponse.SubCategoryMerchantResponse.SubsCategoryMerchantResponse subsRes = new CategoryMerchantResponse.SubCategoryMerchantResponse.SubsCategoryMerchantResponse(subsCategory);
+                            subsRes.setTotalProduct(totalProductSubsCategory);
+
+                            subsResponses.add(subsRes);
+                            subRes.setSubsCategory(subsRes != null ? subsResponses : null);
                         }
 
-                        responsesSub.add(responseSub);
-                        response.setSubCategory(responseSub != null ? responsesSub : null);
+                        subResponses.add(subRes);
+                        categoryRes.setSubCategory(subRes != null ? subResponses : null);
                     }
 
-                    responses.add(response);
+                    responses.add(categoryRes);
                 }
 
-                response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan category.",
-                    responses);
+                response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan category.", responses);
                 return ok(Json.toJson(response));
             } catch (Exception e) {
                 Logger.info("Error: " + e.getMessage());
@@ -584,7 +560,7 @@ public class QrGroupController extends BaseController {
                 }
 
                 List<ProductStore> productStore = QrGroupRepository.findListProductByCategory(groupCode, categoryId, subCategoryId, subsCategoryId, keyword, filter, sort, offset, limit);
-                Integer totalProduct = QrGroupRepository.findListProductByCategory(groupCode, categoryId, subCategoryId, subsCategoryId, keyword, filter, sort, 0, 0).size();
+                int totalProduct = QrGroupRepository.findListProductByCategory(groupCode, categoryId, subCategoryId, subsCategoryId, keyword, filter, sort, 0, 0).size();
 
                 response.setBaseResponse(totalProduct, offset, limit, "Berhasil menampilkan daftar produk QR group.",
                     toListProductResponse(productStore));
@@ -611,7 +587,7 @@ public class QrGroupController extends BaseController {
                 }
 
                 List<BrandMerchant> brandMerchant = QrGroupRepository.findListBrandFromGroup(groupCode, filter, offset, limit);
-                Integer totalBrand = QrGroupRepository.findListBrandFromGroup(groupCode, filter, 0, 0).size();
+                int totalBrand = QrGroupRepository.findListBrandFromGroup(groupCode, filter, 0, 0).size();
 
                 List<BrandMerchantResponse> responses = new ArrayList<>();
                 for (BrandMerchant data : brandMerchant) {
@@ -805,62 +781,29 @@ public class QrGroupController extends BaseController {
     private static List<ProductSpecificStoreResponse> toListProductResponse(List<ProductStore> listProductStore) {
         List<ProductSpecificStoreResponse> listProductResponses = new ArrayList<>();
         for(ProductStore productStore : listProductStore) {
-            ProductSpecificStoreResponse res = new ProductSpecificStoreResponse();
             ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productStore.getProductMerchant());
-            res.setProductId(productMerchantDetail.getProductMerchant().id);
-            res.setProductName(productMerchantDetail.getProductMerchant().getProductName());
-            res.setIsActive(productMerchantDetail.getProductMerchant().getIsActive());
-            res.setMerchantId(productMerchantDetail.getProductMerchant().getMerchant().id);
 
-            ProductDetailResponse productDetailResponse = ProductDetailResponse.builder()
-                .productType(productMerchantDetail.getProductType())
-                .isCustomizable(productMerchantDetail.getIsCustomizable())
-                .productPrice(productStore.getStorePrice())
-                .discountType(productStore.getDiscountType())
-                .discount(productStore.getDiscount())
-                .productPriceAfterDiscount(productStore.getFinalPrice())
-                .productImageMain(productMerchantDetail.getProductImageMain())
-                .productImage1(productMerchantDetail.getProductImage1())
-                .productImage2(productMerchantDetail.getProductImage2())
-                .productImage3(productMerchantDetail.getProductImage3())
-                .productImage4(productMerchantDetail.getProductImage4())
-                .build();
-            res.setProductDetail(productDetailResponse);
+            ProductSpecificStoreResponse response = new ProductSpecificStoreResponse(productStore.getProductMerchant());
 
-            ProductSpecificStoreResponse.Brand brand =  new ProductSpecificStoreResponse.Brand();
-            brand.setBrandId(productMerchantDetail.getProductMerchant().getBrandMerchant().id);
-            brand.setBrandName(productMerchantDetail.getProductMerchant().getBrandMerchant().getBrandName());
-            res.setBrand(brand);
+            ProductDetailResponse productDetailResponse = new ProductDetailResponse(productMerchantDetail, productStore);
+            response.setProductDetail(productDetailResponse);
 
-            ProductSpecificStoreResponse.Category category = new ProductSpecificStoreResponse.Category();
-            category.setCategoryId(productMerchantDetail.getProductMerchant().getCategoryMerchant().id);
-            category.setCategoryName(productMerchantDetail.getProductMerchant().getCategoryMerchant().getCategoryName());
-            res.setCategory(category);
+            ProductSpecificStoreResponse.Brand brand = new ProductSpecificStoreResponse.Brand(productMerchantDetail.getProductMerchant().getBrandMerchant());
+            response.setBrand(brand);
 
-            ProductSpecificStoreResponse.SubCategory subCategory = new ProductSpecificStoreResponse.SubCategory();
-            subCategory.setSubCategoryId(productMerchantDetail.getProductMerchant().getSubCategoryMerchant().id);
-            subCategory.setSubCategoryName(productMerchantDetail.getProductMerchant().getSubCategoryMerchant().getSubcategoryName());
-            res.setSubCategory(subCategory);
+            ProductSpecificStoreResponse.Category category = new ProductSpecificStoreResponse.Category(productMerchantDetail.getProductMerchant().getCategoryMerchant());
+            response.setCategory(category);
 
-            ProductSpecificStoreResponse.SubsCategory subsCategory = new ProductSpecificStoreResponse.SubsCategory();
-            subsCategory.setSubsCategoryId(productMerchantDetail.getProductMerchant().getSubsCategoryMerchant().id);
-            subsCategory.setSubsCategoryName(productMerchantDetail.getProductMerchant().getSubsCategoryMerchant().getSubscategoryName());
-            res.setSubsCategory(subsCategory);
+            ProductSpecificStoreResponse.SubCategory subCategory = new ProductSpecificStoreResponse.SubCategory(productMerchantDetail.getProductMerchant().getSubCategoryMerchant());
+            response.setSubCategory(subCategory);
 
-            ProductSpecificStoreResponse.ProductStore resStore = new  ProductSpecificStoreResponse.ProductStore();
-            resStore.setId(productStore.id);
-            resStore.setStoreId(productStore.getStore().id);
-            resStore.setProductId(productStore.getProductMerchant().id);
-            resStore.setIsActive(productStore.isActive);
-            resStore.setStorePrice(productStore.getStorePrice());
-            resStore.setDiscountType(productStore.getDiscountType());
-            resStore.setDiscount(productStore.getDiscount());
-            resStore.setIsDeleted(productStore.isDeleted);
-            resStore.setFinalPrice(productStore.getFinalPrice());
-            resStore.setStoresName(productStore.getStore().storeName);
-            res.setProductStore(resStore);
+            ProductSpecificStoreResponse.SubsCategory subsCategory = new ProductSpecificStoreResponse.SubsCategory(productMerchantDetail.getProductMerchant().getSubsCategoryMerchant());
+            response.setSubsCategory(subsCategory);
 
-            listProductResponses.add(res);
+            ProductSpecificStoreResponse.ProductStore pStore = new ProductSpecificStoreResponse.ProductStore(productStore);
+            response.setProductStore(pStore);
+
+            listProductResponses.add(response);
         }
 
         return listProductResponses;
