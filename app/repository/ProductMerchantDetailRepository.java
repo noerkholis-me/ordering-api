@@ -117,11 +117,9 @@ public class ProductMerchantDetailRepository extends Model {
             querySql = "SELECT pmd.id FROM product_merchant_detail pmd "
                 + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
                 + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
-                + "LEFT JOIN product_store ps ON pm.id = ps.product_id "
                 + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
                 + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
                 + "AND bm.is_active = true "
-                + "AND ps.product_id IS NULL "
                 + "ORDER BY pm.id DESC";
         } else {
             querySql = "SELECT pmd.id FROM product_merchant_detail pmd "
@@ -172,23 +170,23 @@ public class ProductMerchantDetailRepository extends Model {
 
         String querySql;
         List<ProductStore> productStore = ProductStoreRepository.find.where().eq("t0.store_id", storeId).eq("t0.is_active", true).eq("t0.is_deleted", false).findList();
-        if (productStore.size() > 0) {
+//        if (productStore.size() == 0) {
             querySql = "SELECT pmd.id FROM product_merchant_detail pmd "
                 + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
                 + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
                 + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
                 + queryCategory
                 + "ORDER BY pm.id DESC";
-        } else {
-            querySql = "SELECT pmd.id FROM product_merchant_detail pmd "
-                + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
-                + "JOIN product_store ps ON pm.id = ps.product_id "
-                + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
-                + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
-                + queryCategory
-                + "AND ps.store_id = " + storeId + " AND ps.is_active = true AND ps.is_deleted = false "
-                + "ORDER BY pm.id DESC";
-        }
+//        } else {
+//            querySql = "SELECT pmd.id FROM product_merchant_detail pmd "
+//                + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
+//                + "JOIN product_store ps ON pm.id = ps.product_id "
+//                + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
+//                + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
+//                + queryCategory
+//                + "AND ps.store_id = " + storeId + " AND ps.is_active = true AND ps.is_deleted = false "
+//                + "ORDER BY pm.id DESC";
+//        }
 
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
         Query<ProductMerchantDetail> query = Ebean.find(ProductMerchantDetail.class).setRawSql(rawSql);
@@ -220,11 +218,9 @@ public class ProductMerchantDetailRepository extends Model {
             querySql = "SELECT pmd.id FROM product_merchant_detail pmd "
                 + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
                 + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
-                + "LEFT JOIN product_store ps ON pm.id = ps.product_id "
                 + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
                 + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
                 + "AND bm.is_active = true "
-                + "AND ps.product_id IS NULL "
                 + product
                 + "ORDER BY pm.id DESC";
         } else {

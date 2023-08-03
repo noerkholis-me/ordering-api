@@ -852,7 +852,7 @@ public class ProductStoreController extends BaseController {
                 }
 
                 List<ProductMerchantDetail> data = ProductMerchantDetailRepository.findListProductStoreByCategories(merchantId, storeId, categoryId, subCategoryId, subsCategoryId, keyword, filter, sort, offset, limit);
-                Integer totalData = ProductMerchantDetailRepository.findListProductStoreByCategories(merchantId, storeId, categoryId, subCategoryId, subsCategoryId, keyword, filter, sort, 0, 0).size();
+                int totalData = ProductMerchantDetailRepository.findListProductStoreByCategories(merchantId, storeId, categoryId, subCategoryId, subsCategoryId, keyword, filter, sort, 0, 0).size();
 
                 response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data",
                     toListProductStoreResponse(data, store));
@@ -1190,21 +1190,21 @@ public class ProductStoreController extends BaseController {
     }
 
     public static Result importProductStore() {
-    	Merchant merchant = checkMerchantAccessAuthorization();
-    	if (merchant != null) {
-    		Http.MultipartFormData body = request().body().asMultipartFormData();
-			Http.MultipartFormData.FilePart file = body.getFile("import");
-			if(file == null) {
-				response.setBaseResponse(0, 0, 0, "File Is Null", null);
-				return badRequest(Json.toJson(response));
-			}
-			ProductExcelService productImport = new ProductExcelService();
-			if(!productImport.importProductStore(file, merchant, response)) {
-				return badRequest(Json.toJson(response));
-			}
-			return ok(Json.toJson(response));
-    	}
-    	response.setBaseResponse(0, 0, 0, unauthorized, null);
+        Merchant merchant = checkMerchantAccessAuthorization();
+        if (merchant != null) {
+            Http.MultipartFormData body = request().body().asMultipartFormData();
+            Http.MultipartFormData.FilePart file = body.getFile("import");
+            if(file == null) {
+                response.setBaseResponse(0, 0, 0, "File Is Null", null);
+                return badRequest(Json.toJson(response));
+            }
+            ProductExcelService productImport = new ProductExcelService();
+            if(!productImport.importProductStore(file, merchant, response)) {
+                return badRequest(Json.toJson(response));
+            }
+            return ok(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
     }
     
@@ -1220,7 +1220,7 @@ public class ProductStoreController extends BaseController {
 //    	}
 //    	response.setBaseResponse(0, 0, 0, unauthorized, null);
 //        return unauthorized(Json.toJson(response));
-    	return null;
+        return null;
     }
 
     private static List<ProductSpecificStoreResponse> toListProductStoreResponse(List<ProductMerchantDetail> data, Store store) {
@@ -1228,7 +1228,7 @@ public class ProductStoreController extends BaseController {
         for (ProductMerchantDetail productMerchantDetail : data) {
             ProductStore productStore = ProductStoreRepository.findByStoreAndProductMerchant(store.id, productMerchantDetail.getProductMerchant().id);
 
-            ProductSpecificStoreResponse response = new ProductSpecificStoreResponse(productStore.getProductMerchant());
+            ProductSpecificStoreResponse response = new ProductSpecificStoreResponse(productMerchantDetail.getProductMerchant());
 
             ProductDetailResponse productDetailResponse = new ProductDetailResponse(productMerchantDetail, productStore);
             response.setProductDetail(productDetailResponse);
@@ -1245,8 +1245,10 @@ public class ProductStoreController extends BaseController {
             ProductSpecificStoreResponse.SubsCategory subsCategory = new ProductSpecificStoreResponse.SubsCategory(productMerchantDetail.getProductMerchant().getSubsCategoryMerchant());
             response.setSubsCategory(subsCategory);
 
-            ProductSpecificStoreResponse.ProductStore pStore = new ProductSpecificStoreResponse.ProductStore(productStore);
-            response.setProductStore(pStore);
+            if (productStore != null) {
+                ProductSpecificStoreResponse.ProductStore pStore = new ProductSpecificStoreResponse.ProductStore(productStore);
+                response.setProductStore(pStore);
+            }
 
             responses.add(response);
         }

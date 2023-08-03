@@ -1089,7 +1089,7 @@ public class ProductMerchantController extends BaseController {
             for (ProductMerchantDetail productMerchantDetail : data) {
                 ProductStore productStore = ProductStoreRepository.findByStoreAndProductMerchant(storeId, productMerchantDetail.getProductMerchant().id);
 
-                ProductSpecificStoreResponse response = new ProductSpecificStoreResponse(productStore.getProductMerchant());
+                ProductSpecificStoreResponse response = new ProductSpecificStoreResponse(productMerchantDetail.getProductMerchant());
 
                 ProductDetailResponse productDetailResponse = new ProductDetailResponse(productMerchantDetail, productStore);
                 response.setProductDetail(productDetailResponse);
@@ -1106,11 +1106,10 @@ public class ProductMerchantController extends BaseController {
                 ProductSpecificStoreResponse.SubsCategory subsCategory = new ProductSpecificStoreResponse.SubsCategory(productMerchantDetail.getProductMerchant().getSubsCategoryMerchant());
                 response.setSubsCategory(subsCategory);
 
-                ProductSpecificStoreResponse.ProductStore pStore = new ProductSpecificStoreResponse.ProductStore(productStore);
                 if (productStore != null) {
+                    ProductSpecificStoreResponse.ProductStore pStore = new ProductSpecificStoreResponse.ProductStore(productStore);
                     response.setProductStore(pStore);
                 }
-                response.setProductStore(productStore != null ? pStore : null);
 
                 responses.add(response);
             }
