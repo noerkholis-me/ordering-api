@@ -138,17 +138,13 @@ public class FinanceTransactionController extends BaseController {
                         activeBalanceStore = store.getActiveBalance();
                     }
 
-                    Query<FinanceTransaction> query = null;
                     // default query find by merchant id
-                    query = FinanceTransactionRepository.findAllTransactionByMerchantId(merchant.id);
+                    List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findAllTransactionByMerchantIdAndOrderClosed(merchant.id);
                     if (store != null) {
-                        query = FinanceTransactionRepository.findAllTransactionByStoreId(store.id);
+                        financeTransactions = FinanceTransactionRepository.findAllTransactionByStoreIdAndOrderClosed(store.id);
                     }
-                    List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findAllTransaction(query, "", "", "", 0, 0, "");
-                    List<FinanceTransactionResponse> financeTransactionResponses = new ArrayList<>();
                     String refNumber = "";
                     for (FinanceTransaction transaction : financeTransactions) {
-                        FinanceTransactionResponse trxRes = new FinanceTransactionResponse();
                         if (!transaction.getReferenceNumber().equals(refNumber)){
                             System.out.println("1");
                             System.out.println(transaction.getStatus());
