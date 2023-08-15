@@ -136,6 +136,9 @@ public class FinanceWithdrawController extends BaseController {
 
                     // do minus from merchant
                     BigDecimal currentTotalBalance = merchant.totalActiveBalance;
+                    if (!merchant.totalActiveBalance.equals(currentActiveBalance())) {
+                        currentTotalBalance = currentActiveBalance();
+                    }
                     LOGGER.info("current total balance : " + currentTotalBalance);
                     BigDecimal lastTotalBalance = currentTotalBalance.subtract(request.getAmount());
                     LOGGER.info("last total balance : " + lastTotalBalance);
@@ -214,6 +217,27 @@ public class FinanceWithdrawController extends BaseController {
     	}
     	response.setBaseResponse(0, 0, 0, "Error", null);
     	return badRequest(Json.toJson(response));
+    }
+
+    public static BigDecimal currentActiveBalance() {
+        Merchant merchant = checkMerchantAccessAuthorization();
+        BigDecimal totalActiveBalance = BigDecimal.ZERO;
+        if (merchant != null) {
+            List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findAllTransactionByMerchantIdAndOrderClosed(merchant.id);
+            String refNumber = "";
+            for (FinanceTransaction transaction : financeTransactions) {
+                if (!transaction.getReferenceNumber().equals(refNumber)) {
+                    refNumber = transaction.getReferenceNumber();
+                    if (transaction.getStatus().equals("IN")) {
+                        totalActiveBalance = totalActiveBalance.add(transaction.getAmount());
+                    } else if (transaction.getStatus().equals("OUT") || transaction.getStatus().equals("WITHDRAW")) {
+                        totalActiveBalance = totalActiveBalance.subtract(transaction.getAmount());
+                    }
+                }
+            }
+        }
+
+        return totalActiveBalance;
     }
 
 }

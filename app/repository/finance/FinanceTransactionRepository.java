@@ -97,6 +97,30 @@ public class FinanceTransactionRepository extends BaseModel {
                 .query();
     }
 
+    public static List<FinanceTransaction> findAllTransactionByMerchantIdAndOrderClosed(Long merchantId) {
+        String querySql = "SELECT ft.id FROM finance_transaction ft "
+                + "JOIN orders ord ON ft.reference_number = ord.order_number "
+                + "JOIN store st ON ft.store_id = st.id "
+                + "WHERE st.merchant_id = " + merchantId + " AND ord.status = 'CLOSED' "
+                + "ORDER BY ft.date DESC";
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<FinanceTransaction> query =  Ebean.find(FinanceTransaction.class).setRawSql(rawSql);
+
+        return query.findPagingList(0).getPage(0).getList();
+    }
+
+    public static List<FinanceTransaction> findAllTransactionByStoreIdAndOrderClosed(Long storeId) {
+        String querySql = "SELECT ft.id FROM finance_transaction ft "
+                + "JOIN orders ord ON ft.reference_number = ord.order_number "
+                + "JOIN store st ON ft.store_id = st.id "
+                + "WHERE st.id = " + storeId + " AND ord.status = 'CLOSED' "
+                + "ORDER BY ft.date DESC";
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<FinanceTransaction> query =  Ebean.find(FinanceTransaction.class).setRawSql(rawSql);
+
+        return query.findPagingList(0).getPage(0).getList();
+    }
+
     public static Integer getTotalTransaction(Long merchantId, String startDate, String endDate, Long storeId) throws Exception {
         Query<FinanceTransaction> finance = null;
         if (storeId != 0L && storeId != null){
@@ -146,7 +170,7 @@ public class FinanceTransactionRepository extends BaseModel {
         if(!sort.equals("")) {
             query = query.orderBy(sort);
         } else {
-            query = query.orderBy("t0.date desc");
+            query = query.orderBy("ft.date desc");
         }
 
         ExpressionList<FinanceTransaction> exp = query.where();
@@ -157,10 +181,10 @@ public class FinanceTransactionRepository extends BaseModel {
 
             Timestamp startTimestamp = new Timestamp(start.getTime());
             Timestamp endTimestamp = new Timestamp(end.getTime());
-            exp.between("t0.date", startTimestamp, endTimestamp);
+            exp.between("ft.date", startTimestamp, endTimestamp);
         }
         if (!status.equalsIgnoreCase("")) {
-            exp = exp.eq("t0.status", status);
+            exp = exp.eq("ft.status", status);
         }
         query = exp.query();
         if (limit != 0) {
