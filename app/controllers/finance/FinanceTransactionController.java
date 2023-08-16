@@ -144,28 +144,38 @@ public class FinanceTransactionController extends BaseController {
                         financeTransactions = FinanceTransactionRepository.findAllTransactionByStoreIdAndOrderClosed(store.id);
                     }
                     String refNumber = "";
+                    int in = 0;
+                    int out = 0;
+                    int with = 0;
                     for (FinanceTransaction transaction : financeTransactions) {
                         if (!transaction.getReferenceNumber().equals(refNumber)){
-                            System.out.println("1");
+                            System.out.println("1 - ");
                             System.out.println(transaction.getStatus());
                             refNumber = transaction.getReferenceNumber();
                             if (transaction.getStatus().equals("IN")){
+                                in++;
                                 totalActiveBalance = totalActiveBalance.add(transaction.getAmount());
-                                System.out.print("2");
+                                System.out.print("2 - ");
                                 System.out.println(totalActiveBalance);
                             } else if (transaction.getStatus().equals("OUT")) {
+                                out++;
                                 totalActiveBalance = totalActiveBalance.subtract(transaction.getAmount());
-                                System.out.print("3");
+                                System.out.print("3 - ");
                                 System.out.println(totalActiveBalance);
                             } else if (transaction.getStatus().equals("WITHDRAW")) {
+                                with++;
                                 totalActiveBalance = totalActiveBalance.subtract(transaction.getAmount());
-                                System.out.print("4");
+                                System.out.print("4 - ");
                                 System.out.println(totalActiveBalance);
                             }
                         }
                     }
 
                     // totalActiveBalance = merchant.totalActiveBalance;
+
+                    System.out.println("IN : " + in);
+                    System.out.println("OUT : " + out);
+                    System.out.println("WITH : " + with);
 
                     ActiveBalanceResponse activeBalanceResponse = new ActiveBalanceResponse();
                     activeBalanceResponse.setActiveBalance(totalActiveBalance);

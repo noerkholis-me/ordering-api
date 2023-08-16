@@ -59,6 +59,9 @@ public class FinanceWithdrawController extends BaseController {
                 }
                 List<FinanceWithdraw> financeWithdraws = FinanceWithdrawRepository.findAllWithdraw(query, startDate, endDate, sort, offset, limit, status);
                 Integer totalData = FinanceWithdrawRepository.getTotalPage(query);
+
+                BigDecimal withdrawalFees = BigDecimal.valueOf(10000);
+
                 List<FinanceWithdrawResponse> financeWithdrawResponses = new ArrayList<>();
                 for (FinanceWithdraw financeWithdraw : financeWithdraws) {
                     FinanceWithdrawResponse financeWithdrawResponse = new FinanceWithdrawResponse();
@@ -66,6 +69,7 @@ public class FinanceWithdrawController extends BaseController {
                     financeWithdrawResponse.setDate(financeWithdraw.getDate());
                     financeWithdrawResponse.setStatus(financeWithdraw.getStatus());
                     financeWithdrawResponse.setAmount(financeWithdraw.getAmount());
+                    financeWithdrawResponse.setAmountReceived(financeWithdraw.getAmount().subtract(withdrawalFees));
                     financeWithdrawResponse.setStoreId(financeWithdraw.getStore().id);
                     financeWithdrawResponse.setStoreName(financeWithdraw.getStore().storeName);
                     financeWithdrawResponse.setRequestBy(financeWithdraw.getRequestBy());
