@@ -99,9 +99,9 @@ public class FinanceTransactionRepository extends BaseModel {
 
     public static List<FinanceTransaction> findAllTransactionByMerchantIdAndOrderClosed(Long merchantId) {
         String querySql = "SELECT ft.id FROM finance_transaction ft "
-                + "JOIN orders ord ON ft.reference_number = ord.order_number "
+                + "LEFT JOIN orders ord ON ft.reference_number = ord.order_number "
                 + "JOIN store st ON ft.store_id = st.id "
-                + "WHERE st.merchant_id = " + merchantId + " AND ord.status = 'CLOSED' "
+                + "WHERE st.merchant_id = " + merchantId + " AND (ord.status = 'CLOSED' AND ft.status = 'IN' OR ft.status != 'IN') "
                 + "ORDER BY ft.date DESC";
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
         Query<FinanceTransaction> query =  Ebean.find(FinanceTransaction.class).setRawSql(rawSql);
@@ -111,9 +111,9 @@ public class FinanceTransactionRepository extends BaseModel {
 
     public static List<FinanceTransaction> findAllTransactionByStoreIdAndOrderClosed(Long storeId) {
         String querySql = "SELECT ft.id FROM finance_transaction ft "
-                + "JOIN orders ord ON ft.reference_number = ord.order_number "
+                + "LEFT JOIN orders ord ON ft.reference_number = ord.order_number "
                 + "JOIN store st ON ft.store_id = st.id "
-                + "WHERE st.id = " + storeId + " AND ord.status = 'CLOSED' "
+                + "WHERE st.id = " + storeId + " AND (ord.status = 'CLOSED' AND ft.status = 'IN' OR ft.status != 'IN') "
                 + "ORDER BY ft.date DESC";
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
         Query<FinanceTransaction> query =  Ebean.find(FinanceTransaction.class).setRawSql(rawSql);
@@ -170,7 +170,7 @@ public class FinanceTransactionRepository extends BaseModel {
         if(!sort.equals("")) {
             query = query.orderBy(sort);
         } else {
-            query = query.orderBy("ft.date desc");
+            query = query.orderBy("t0.date desc");
         }
 
         ExpressionList<FinanceTransaction> exp = query.where();
@@ -181,10 +181,10 @@ public class FinanceTransactionRepository extends BaseModel {
 
             Timestamp startTimestamp = new Timestamp(start.getTime());
             Timestamp endTimestamp = new Timestamp(end.getTime());
-            exp.between("ft.date", startTimestamp, endTimestamp);
+            exp.between("t0.date", startTimestamp, endTimestamp);
         }
         if (!status.equalsIgnoreCase("")) {
-            exp = exp.eq("ft.status", status);
+            exp = exp.eq("t0.status", status);
         }
         query = exp.query();
         if (limit != 0) {
