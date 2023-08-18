@@ -97,6 +97,30 @@ public class FinanceTransactionRepository extends BaseModel {
                 .query();
     }
 
+    public static List<FinanceTransaction> findAllTransactionByMerchantIdAndOrderClosed(Long merchantId) {
+        String querySql = "SELECT ft.id FROM finance_transaction ft "
+                + "LEFT JOIN orders ord ON ft.reference_number = ord.order_number "
+                + "JOIN store st ON ft.store_id = st.id "
+                + "WHERE st.merchant_id = " + merchantId + " AND (ord.status = 'CLOSED' AND ft.status = 'IN' OR ft.status != 'IN') "
+                + "ORDER BY ft.date DESC";
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<FinanceTransaction> query =  Ebean.find(FinanceTransaction.class).setRawSql(rawSql);
+
+        return query.findPagingList(0).getPage(0).getList();
+    }
+
+    public static List<FinanceTransaction> findAllTransactionByStoreIdAndOrderClosed(Long storeId) {
+        String querySql = "SELECT ft.id FROM finance_transaction ft "
+                + "LEFT JOIN orders ord ON ft.reference_number = ord.order_number "
+                + "JOIN store st ON ft.store_id = st.id "
+                + "WHERE st.id = " + storeId + " AND (ord.status = 'CLOSED' AND ft.status = 'IN' OR ft.status != 'IN') "
+                + "ORDER BY ft.date DESC";
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<FinanceTransaction> query =  Ebean.find(FinanceTransaction.class).setRawSql(rawSql);
+
+        return query.findPagingList(0).getPage(0).getList();
+    }
+
     public static Integer getTotalTransaction(Long merchantId, String startDate, String endDate, Long storeId) throws Exception {
         Query<FinanceTransaction> finance = null;
         if (storeId != 0L && storeId != null){

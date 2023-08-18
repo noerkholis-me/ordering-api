@@ -138,7 +138,7 @@ public class ProductStoreRepository extends Model {
 				.eq("t0.product_id", productId)
 				.eq("t0.is_active", true)
 				.eq("t0.is_deleted", false)
-				.findList().get(0);
+				.findUnique();
 	}
 
 	public static List<ProductStore> findAllByProductIdAndMerchant(Long productId, Long merchantId) {
