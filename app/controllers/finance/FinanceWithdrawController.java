@@ -59,6 +59,9 @@ public class FinanceWithdrawController extends BaseController {
                 }
                 List<FinanceWithdraw> financeWithdraws = FinanceWithdrawRepository.findAllWithdraw(query, startDate, endDate, sort, offset, limit, status);
                 Integer totalData = FinanceWithdrawRepository.getTotalPage(query);
+
+                BigDecimal withdrawalFees = BigDecimal.valueOf(10000);
+
                 List<FinanceWithdrawResponse> financeWithdrawResponses = new ArrayList<>();
                 for (FinanceWithdraw financeWithdraw : financeWithdraws) {
                     FinanceWithdrawResponse financeWithdrawResponse = new FinanceWithdrawResponse();
@@ -66,6 +69,7 @@ public class FinanceWithdrawController extends BaseController {
                     financeWithdrawResponse.setDate(financeWithdraw.getDate());
                     financeWithdrawResponse.setStatus(financeWithdraw.getStatus());
                     financeWithdrawResponse.setAmount(financeWithdraw.getAmount());
+                    financeWithdrawResponse.setAmountReceived(financeWithdraw.getAmount().subtract(withdrawalFees));
                     financeWithdrawResponse.setStoreId(financeWithdraw.getStore().id);
                     financeWithdrawResponse.setStoreName(financeWithdraw.getStore().storeName);
                     financeWithdrawResponse.setRequestBy(financeWithdraw.getRequestBy());
@@ -136,6 +140,9 @@ public class FinanceWithdrawController extends BaseController {
 
                     // do minus from merchant
                     BigDecimal currentTotalBalance = merchant.totalActiveBalance;
+                    if (!merchant.totalActiveBalance.equals(currentActiveBalance())) {
+                        currentTotalBalance = currentActiveBalance();
+                    }
                     LOGGER.info("current total balance : " + currentTotalBalance);
                     BigDecimal lastTotalBalance = currentTotalBalance.subtract(request.getAmount());
                     LOGGER.info("last total balance : " + lastTotalBalance);
@@ -214,6 +221,27 @@ public class FinanceWithdrawController extends BaseController {
     	}
     	response.setBaseResponse(0, 0, 0, "Error", null);
     	return badRequest(Json.toJson(response));
+    }
+
+    public static BigDecimal currentActiveBalance() {
+        Merchant merchant = checkMerchantAccessAuthorization();
+        BigDecimal totalActiveBalance = BigDecimal.ZERO;
+        if (merchant != null) {
+            List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findAllTransactionByMerchantIdAndOrderClosed(merchant.id);
+            String refNumber = "";
+            for (FinanceTransaction transaction : financeTransactions) {
+                if (!transaction.getReferenceNumber().equals(refNumber)) {
+                    refNumber = transaction.getReferenceNumber();
+                    if (transaction.getStatus().equals("IN")) {
+                        totalActiveBalance = totalActiveBalance.add(transaction.getAmount());
+                    } else if (transaction.getStatus().equals("OUT") || transaction.getStatus().equals("WITHDRAW")) {
+                        totalActiveBalance = totalActiveBalance.subtract(transaction.getAmount());
+                    }
+                }
+            }
+        }
+
+        return totalActiveBalance;
     }
 
 }

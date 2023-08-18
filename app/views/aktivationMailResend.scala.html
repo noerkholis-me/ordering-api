@@ -8,317 +8,331 @@
     <title>Aktifasi Email - Inline</title>
     <!-- CSS -->
     <style>
-    *{
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+    @@import url('https://fonts.cdnfonts.com/css/d-din');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    body{
-        background-color: #cccc;
-        font-family: D-DIN Exp;
+    body {
+      background-color: #cccc;
+      font-family: D-DIN Exp;
     }
 
-    .container{
-        width: 600px;
-        height: auto;
-        background-color: #E6F2FF;
-        margin: auto;
+    .container {
+      width: 600px;
+      height: auto;
+      background-color: #fcd983;
+      margin: auto;
     }
 
     /* Start Header */
-    .banner{
-        width: 600px;
-        height: 115px;
-        padding: 28px 20px;
-        background-image: url(@path/assets/email-Invoice/bg-header.jpg);
+    .banner {
+      width: 100%;
+      padding: 28px 20px;
+      background-color: #ffffff;
+      position: relative;
     }
 
     /* End Banner */
 
     /* Start Section Header */
-    .section-header{
-        width: 400px;
-        height: 424px;
-        margin: 40px auto;
+    .section-header {
+      width: 400px;
+      height: 424px;
+      margin: 40px auto;
     }
 
-    .title-header{
-        margin-bottom: 30px;
+    .title-header {
+      margin-bottom: 30px;
     }
 
-    .title-header p{
-        font-size: 28px;
-        text-align: center;
+    .title-header p {
+      font-size: 28px;
+      text-align: center;
     }
 
-    .icon-header{
-        display: flex;
-        justify-content: center;
+    .icon-header {
+      display: flex;
+      justify-content: center;
     }
+
     .icon-header img {
-        margin: auto;
+      margin: auto;
     }
 
-    .text-header{
-        margin-top: 30px;
-        text-align: center;
+    .text-header {
+      margin-top: 30px;
+      text-align: center;
     }
 
-    .text-header p:nth-child(1){
-        font-size: 22px;
-        font-weight: bold;
+    .text-header p:nth-child(1) {
+      font-size: 22px;
+      font-weight: bold;
     }
 
-    .text-header p:nth-child(2){
-        width: 100%;
-        font-size: 16px;
+    .text-header p:nth-child(2) {
+      width: 100%;
+      font-size: 16px;
     }
 
-    .text-header p:nth-child(2) span{
-        font-weight: bold;
+    .text-header p:nth-child(2) span {
+      font-weight: bold;
     }
 
-    .akun-customer{
-        display: flex;
-        flex-direction: column;
-        margin: 30px auto;
+    .akun-customer {
+      display: flex;
+      flex-direction: column;
+      margin: 30px auto;
     }
 
-    .title-akun{
-        width: 300px;
-        height: 30px;
-        display: flex;
-        flex-direction: row;
-        border: 1px solid red;
+    .title-akun {
+      width: 300px;
+      height: 30px;
+      display: flex;
+      flex-direction: row;
+      border: 1px solid red;
     }
 
-    table{
-        display: flex;
-        margin: auto;
+    table {
+      display: flex;
+      margin: auto;
     }
 
-    table td{
-        font-size: 18px;
-        font-weight: bold;
-        padding: 0 10px;
+    table td {
+      font-size: 18px;
+      font-weight: bold;
+      padding: 0 10px;
     }
 
-    .line{
-        width: 400px;
-        border: 2px solid #bababa;
-        margin: auto;
+    .line {
+      width: 400px;
+      border: 2px solid #bababa;
+      margin: auto;
     }
+
     /* End Section Header */
 
     /* Start Section Link */
-    .section-link{
-        width: 560px;
-        height: 340px;
-        margin: 50px auto;
+    .section-link {
+      width: 560px;
+      height: 340px;
+      margin: 50px auto;
     }
 
-    .section-link p{
-        text-align: center;
-        font-size: 18px;
+    .section-link p {
+      text-align: center;
+      font-size: 18px;
     }
 
-    .section-link p span{
-        font-weight: bold;
+    .section-link p span {
+      font-weight: bold;
     }
 
-    .link{
-        width: 400px;
-        height: 265px;
-        margin: 50px auto 0 auto;
+    .link {
+      width: 400px;
+      height: 265px;
+      margin: 50px auto 0 auto;
     }
 
-    .title-sort-link p:nth-child(1){
-        font-size: 22px;
-        font-weight: bold;
+    .title-sort-link p:nth-child(1) {
+      font-size: 22px;
+      font-weight: bold;
     }
 
-    .title-sort-link p:nth-child(2){
-        font-size: 18px;
+    .title-sort-link p:nth-child(2) {
+      font-size: 18px;
     }
 
-    .sort-link button{
-        width: 400px;
-        height: 55px;
-        border-radius: 50px;
-        background-color: #16479C;
-        border: none;
-        cursor: pointer;
-        margin-top: 10px;
-        font-size: 14px;
-        color: #fff;
-        font-weight: bold;
-        margin-bottom: 35px;
+    .sort-link button {
+      width: 400px;
+      height: 55px;
+      border-radius: 50px;
+      background-color: #f8b40d;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #fff;
+      font-weight: bold;
+      margin-bottom: 35px;
     }
 
-    .sort-link button a{
-        text-decoration: none;
-        color: inherit;
+    .sort-link button a {
+      text-decoration: none;
+      color: inherit;
     }
+
     /* End Section Link */
-
-
 
     /* Footer */
 
-    footer{
-        width: 600px;
-        height: 291px;
-        background-color: #D6E9FF;
-        margin-top: 100px;
+    footer {
+      width: 600px;
+      height: 291px;
+      background-color: #ffffff;
+      margin-top: 100px;
+      position: relative;
     }
 
-    .service{
-        width: 524px;
-        display: flex;
-        justify-content: space-between;
-        margin: auto;
-        padding: 30px 0;
+    .service {
+      width: 524px;
+      display: flex;
+      justify-content: space-between;
+      margin: auto;
+      padding: 30px 0;
     }
 
     .service .us {
-        margin-right: auto;
+      margin-right: auto;
     }
 
-    .us p:nth-child(1){
-        font-size: 22px;
-        font-weight: bold;
-        margin-bottom: 10px;
-        color: #16479C;
+    .us p:nth-child(1) {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 10px;
     }
 
-    .us p:nth-child(2){
-        font-size: 18px;
-        font-weight: 100;
-        color: #16479C;
+    .us p:nth-child(2) {
+      font-size: 18px;
+      font-weight: 100;
     }
 
-    .cs p:nth-child(1){
-        font-size: 22px;
-        font-weight: bold;
-        margin-bottom: 10px;
-        color: #16479C;
-        text-align: right;
+    .cs p:nth-child(1) {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: right;
     }
 
-    .cs .phone p{
-        font-size: 18px;
-        font-weight: 100;
-        color: #16479C;
-        text-align: right;
+    .cs .phone p {
+      font-size: 18px;
+      font-weight: 100;
+      text-align: right;
     }
 
-    .title-footer p{
-        font-size: 18px;
-        color: #16479C;
-        text-align: center;
-        margin-bottom: 20px;
+    .title-footer p {
+      font-size: 18px;
+      text-align: center;
+      margin-bottom: 20px;
     }
 
-    .title-footer p span{
-        font-weight: bold;
+    .title-footer p span {
+      font-weight: bold;
     }
 
-    .line-2{
-        width: 500px;
-        margin: auto;
-        border: 1px solid #16479C;
-        margin-bottom: 30px;
+    .line-2 {
+      width: 500px;
+      margin: auto;
+      border: 1px solid #bababa;
+      margin-bottom: 30px;
     }
+
     /* Footer */
+
 
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <!-- Start Banner -->
-        <div class="banner">
-            <img src="@path/assets/images/Logo-Pagii-Sandbox.png" alt="">
-        </div>
-        <!-- End Banner -->
-
-        <!-- Start Section Header-->
-        <div class="section-header">
-            <div class="title-header">
-                <p>Hello, @name</p>
-            </div>
-            <div class="icon-header">
-                <img src="@path/assets/email-Invoice/icon-header.png" alt="">
-            </div>
-
-            <div class="text-header">
-                <p>Aktifasi Akun</p>
-                <p>Selamat akun <span>Sandbox</span> anda berhasil di aktifkan</p>
-            </div>
-
-            <div class="akun-customer">
-                <table>
-                    <tr>
-                        <td>Email</td>
-                        <td>:</td>
-                        <td>@email</td>
-                    </tr>
-                    <tr>
-                        <td>Nama</td>
-                        <td>:</td>
-                        <td>@name</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-        <!-- End Section Header-->
-        <div class="line"></div>
-
-        <!-- Start Section Link -->
-        <div class="section-link">
-            <p>Untuk mengakses pada setiap <span>aplikasi</span>, silahkan klik untuk login.</p>
-
-            <div class="link">
-                <div class="sort-link">
-                    <div class="title-sort-link">
-                        <p>CMS Hellobisnis</p>
-                        <p>Manage Konten & Penjualan Anda</p>
-                    </div>
-                    <a href="@urlCms"><button>Login CMS</button></a>
-                </div>
-                <div class="sort-link">
-                    <div class="title-sort-link">
-                        <p>MiniPOS</p>
-                        <p>Aplikasi kasir sederhana untuk anda</p>
-                    </div>
-                    <a href="@urlMiniPos"><button>Login MiniPOS</button></a>
-                </div>
-            </div>
-        </div>
-        <!-- End Section Link -->
-
-        <!-- Footer -->
-        <footer>
-            <div class="service">
-                <div class="us">
-                    <p>Kunjungi Kami</p>
-                    <p>www.sandbox.com</p>
-                </div>
-                <div class="cs">
-                    <p>Customer Services</p>
-                    <div class="phone">
-                        <p>021 - 23452345</p>
-                        <p>082323456789</p>
-                    </div>
-                </div>
-            </div>
-            <div class="line-2"></div>
-            <div class="title-footer">
-                <p>Email ini di buat Otomatis, jika anda membutuhkan bantuan silahkan hubungi <span>Customer Service.</span> </p>
-                <p>2023 Hello<span>Bisnis</span>.com | All Rights Reserved.</p>
-            </div>
-        </footer>
-        <!-- Footer -->
+<div class="container">
+    <!-- Start Banner -->
+    <div class="banner">
+        <img src="@path/assets/images/Logo-Pagii-Sandbox.png" alt="" height="64px"/>
+        <img src="@path/assets/email-Invoice/bg-header.png" alt=""
+             style="position: absolute;right: 0;top: 0;height: 100%;"/>
     </div>
+    <!-- End Banner -->
+
+    <!-- Start Section Header-->
+    <div class="section-header">
+        <div class="title-header">
+            <p>Hello, @name</p>
+        </div>
+        <div class="icon-header">
+            <img src="@path/assets/email-Invoice/icon-header.png" alt=""/>
+        </div>
+
+        <div class="text-header">
+            <p>Aktifasi Akun</p>
+            <p>Selamat akun <span>Sandbox</span> anda berhasil di aktifkan</p>
+        </div>
+
+        <div class="akun-customer">
+            <table>
+                <tr>
+                    <td>Email</td>
+                    <td>:</td>
+                    <td>@email</td>
+                </tr>
+                <tr>
+                    <td>Nama</td>
+                    <td>:</td>
+                    <td>@name</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <!-- End Section Header-->
+    <div class="line"></div>
+
+    <!-- Start Section Link -->
+    <div class="section-link">
+        <p>Untuk mengakses pada setiap <span>aplikasi</span>, silahkan klik untuk login.</p>
+
+        <div class="link">
+            <div class="sort-link">
+                <div class="title-sort-link">
+                    <p>CMS Hellobisnis</p>
+                    <p>Manage Konten & Penjualan Anda</p>
+                </div>
+                <a href="@urlCms">
+                    <button>Login CMS</button>
+                </a>
+            </div>
+            <div class="sort-link">
+                <div class="title-sort-link">
+                    <p>MiniPOS</p>
+                    <p>Aplikasi kasir sederhana untuk anda</p>
+                </div>
+                <a href="@urlMiniPos">
+                    <button>Login MiniPOS</button>
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- End Section Link -->
+
+    <!-- Footer -->
+    <footer>
+        <div class="service">
+            <div class="us">
+                <p>Kunjungi Kami</p>
+                <p>www.sandbox.com</p>
+            </div>
+            <div class="cs">
+                <p>Customer Services</p>
+                <div class="phone">
+                    <p>021 - 23452345</p>
+                    <p>082323456789</p>
+                </div>
+            </div>
+        </div>
+        <div class="line-2"></div>
+        <div class="title-footer">
+            <p>
+                Email ini di buat Otomatis, jika anda membutuhkan bantuan silahkan hubungi
+                <span>Customer Service.</span>
+            </p>
+            <p>2023 Pagii Sandbox | All Rights Reserved.</p>
+        </div>
+        <img src="@path/assets/images/Logo-Pagii-Sandbox-Footer.png" alt=""
+             style="position: absolute; bottom: 0; left: 0; height: 96px;">
+    </footer>
+    <!-- Footer -->
+</div>
 </body>
+
 </html>
