@@ -11,7 +11,6 @@ import dtos.feesetting.FeeSettingRequest;
 import dtos.feesetting.FeeSettingResponse;
 import models.Merchant;
 import models.Store;
-import models.UserMerchant;
 import models.merchant.FeeSettingMerchant;
 import play.Logger;
 import play.libs.Json;
@@ -43,7 +42,7 @@ public class FeeSettingMerchantController extends BaseController {
                     feeSetting.setService(feeSettingRequest.getService());
                     feeSetting.setPlatformFeeType(feeSettingRequest.getPlatformFeeType());
                     feeSetting.setPlatformFee(feeSettingRequest.getPlatformFee());
-                    feeSetting.setPaymentFeeType(feeSettingRequest.getPaymentFeeType());
+                    feeSetting.setPaymentFeeType("OWNER");
                     feeSetting.setPaymentFee(feeSettingRequest.getPaymentFee());
                     feeSetting.setUpdatedBy(feeSettingRequest.getUpdatedBy());
                     feeSetting.setMerchant(merchant);
