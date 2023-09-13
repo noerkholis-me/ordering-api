@@ -20,5 +20,9 @@ public class ActiveBalanceResponse {
     @JsonProperty("total_active_balance")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal totalActiveBalance;
+    @JsonProperty("filtered_active_balance")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal filteredActiveBalance;
+
 
 }

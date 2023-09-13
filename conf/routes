@@ -605,7 +605,7 @@ GET         /merchant/finance/transaction/download              controllers.fina
 GET         /merchant/finance/withdraw                          controllers.finance.FinanceWithdrawController.getAllWithdraw(store_id:Long ?= 0, start_date: String ?= "", end_date: String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, status: String?="")
 POST        /merchant/finance/withdraw/request-withdraw                  controllers.finance.FinanceWithdrawController.requestWithdraw()
 GET         /merchant/finance/withdraw/download                 controllers.finance.FinanceWithdrawController.downloadWithdraw(store_id:Long ?= 0, start_date: String ?= "", end_date: String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, status: String?="")
-GET         /merchant/finance/transaction/active-balance                 controllers.finance.FinanceTransactionController.getActiveBalance(store_id:Long ?= 0)
+GET         /merchant/finance/transaction/active-balance                 controllers.finance.FinanceTransactionController.getActiveBalance(store_id:Long ?= 0, start_date: String ?= "", end_date: String ?= "", status: String?="")
 GET			/merchant/finance/withdraw/success/:reqNum				controllers.finance.FinanceWithdrawController.callbackWithdrawSuccess(reqNum: String)
 
 # ORDER LIST
