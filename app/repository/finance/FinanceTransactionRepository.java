@@ -5,6 +5,8 @@ import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
+import com.avaje.ebean.SqlQuery;
+import com.avaje.ebean.SqlRow;
 import models.BaseModel;
 import models.finance.FinanceTransaction;
 import play.Logger;
@@ -44,7 +46,7 @@ public class FinanceTransactionRepository extends BaseModel {
             sorting = "ORDER BY ft.date DESC";
         }
 
-        String filterDate = "";
+        String transactionDate = "";
         if (!startDate.equalsIgnoreCase("") && !endDate.equalsIgnoreCase("")) {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             Date start = simpleDateFormat.parse(startDate.concat(" 00:00:00.0"));
@@ -53,12 +55,12 @@ public class FinanceTransactionRepository extends BaseModel {
             Timestamp startTimestamp = new Timestamp(start.getTime());
             Timestamp endTimestamp = new Timestamp(end.getTime());
 
-            filterDate = "AND ft.date BETWEEN '" + startTimestamp + "' AND '" + endTimestamp + "' ";
+            transactionDate = "AND ft.date BETWEEN '" + startTimestamp + "' AND '" + endTimestamp + "' ";
         }
 
-        String filterStatus = "";
+        String transactionStatus = "";
         if (!status.equalsIgnoreCase("")) {
-            filterStatus = "AND ft.status = '" + status + "' ";
+            transactionStatus = "AND ft.status = '" + status + "' ";
         }
 
         String querySql = "SELECT ord.id FROM finance_transaction ft "
@@ -66,8 +68,8 @@ public class FinanceTransactionRepository extends BaseModel {
                 + "JOIN merchant mc ON st.merchant_id = mc.id "
                 + "JOIN orders ord ON ft.reference_number = ord.order_number "
                 + condition
-                + filterDate
-                + filterStatus
+                + transactionDate
+                + transactionStatus
                 + "GROUP BY ft.reference_number, ft.date, ord.id "
                 + sorting;
 
@@ -211,7 +213,7 @@ public class FinanceTransactionRepository extends BaseModel {
         return query.findList();
     }
 
-    public static List<FinanceTransaction> filteredActiveBalance(Long merchantId, Long storeId, String startDate, String endDate, String status) throws Exception {
+    public static List<FinanceTransaction> filteredActiveBalance(Long merchantId, Long storeId, String startDate, String endDate, String status, String statusOrder) throws Exception {
         String condition;
         if (storeId != null && storeId != 0L) {
             condition = "WHERE st.id = " + storeId + " ";
@@ -219,7 +221,7 @@ public class FinanceTransactionRepository extends BaseModel {
             condition = "WHERE mc.id = " + merchantId + " ";
         }
 
-        String filterDate = "";
+        String transactionDate = "";
         if (!startDate.equalsIgnoreCase("") && !endDate.equalsIgnoreCase("")) {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             Date start = simpleDateFormat.parse(startDate.concat(" 00:00:00.0"));
@@ -228,12 +230,17 @@ public class FinanceTransactionRepository extends BaseModel {
             Timestamp startTimestamp = new Timestamp(start.getTime());
             Timestamp endTimestamp = new Timestamp(end.getTime());
 
-            filterDate = "AND ft.date BETWEEN '" + startTimestamp + "' AND '" + endTimestamp + "' ";
+            transactionDate = "AND ft.date BETWEEN '" + startTimestamp + "' AND '" + endTimestamp + "' ";
         }
 
-        String filterStatus = "";
+        String transactionStatus = "";
         if (!status.equalsIgnoreCase("")) {
-            filterStatus = "AND ft.status = '" + status + "' ";
+            transactionStatus = "AND ft.status = '" + status + "' ";
+        }
+
+        String orderStatus = "";
+        if (!statusOrder.equalsIgnoreCase("")) {
+            transactionStatus = "AND ord.status = '" + statusOrder + "' ";
         }
 
         String querySql = "SELECT ft.id FROM finance_transaction ft "
@@ -241,8 +248,10 @@ public class FinanceTransactionRepository extends BaseModel {
                 + "JOIN merchant mc ON st.merchant_id = mc.id "
                 + "JOIN orders ord ON ft.reference_number = ord.order_number "
                 + condition
-                + filterDate
-                + filterStatus;
+                + orderStatus
+                + transactionDate
+                + transactionStatus
+                + "ORDER BY ft.date DESC";
 
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
         Query<FinanceTransaction> query = Ebean.find(FinanceTransaction.class).setRawSql(rawSql);
