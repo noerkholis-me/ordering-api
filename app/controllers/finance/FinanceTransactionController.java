@@ -123,7 +123,7 @@ public class FinanceTransactionController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result getActiveBalance(Long storeId, String startDate, String endDate, String status) {
+    public static Result getActiveBalance(Long storeId, String startDate, String endDate, String status, String statusOrder) {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
@@ -131,6 +131,8 @@ public class FinanceTransactionController extends BaseController {
                 try {
                     BigDecimal totalActiveBalance = BigDecimal.ZERO;
                     BigDecimal activeBalanceStore = BigDecimal.ZERO;
+                    BigDecimal filteredActiveBalance = BigDecimal.ZERO;
+
                     Store store = Store.findById(storeId);
                     if (store == null) {
                         activeBalanceStore = BigDecimal.ZERO;
@@ -143,41 +145,57 @@ public class FinanceTransactionController extends BaseController {
                     if (store != null) {
                         financeTransactions = FinanceTransactionRepository.findAllTransactionByStoreIdAndOrderClosed(store.id);
                     }
+
                     String refNumber = "";
+                    System.out.println("=== ACTIVE BALANCE ===");
                     for (FinanceTransaction transaction : financeTransactions) {
                         if (!transaction.getReferenceNumber().equals(refNumber)){
-                            System.out.println("1 - ");
-                            System.out.println(transaction.getStatus());
+                            System.out.print("STATUS : " + transaction.getStatus());
                             refNumber = transaction.getReferenceNumber();
                             if (transaction.getStatus().equals("IN")){
                                 totalActiveBalance = totalActiveBalance.add(transaction.getAmount());
-                                System.out.print("2 - ");
-                                System.out.println(totalActiveBalance);
+                                System.out.println(" + Rp " + transaction.getAmount() + " , total = Rp " + totalActiveBalance);
                             } else if (transaction.getStatus().equals("OUT")) {
                                 totalActiveBalance = totalActiveBalance.subtract(transaction.getAmount());
-                                System.out.print("3 - ");
-                                System.out.println(totalActiveBalance);
+                                System.out.println(" - Rp " + transaction.getAmount() + " , total = Rp " + totalActiveBalance);
                             } else if (transaction.getStatus().equals("WITHDRAW")) {
                                 totalActiveBalance = totalActiveBalance.subtract(transaction.getAmount());
-                                System.out.print("4 - ");
-                                System.out.println(totalActiveBalance);
+                                System.out.println(" - Rp " + transaction.getAmount() + " , total = Rp " + totalActiveBalance);
                             }
                         }
                     }
 
-                    // totalActiveBalance = merchant.totalActiveBalance;
-
-                    BigDecimal filteredActiveBalance = BigDecimal.ZERO;
-                    String refNumberTransaction = "";
-                    BigDecimal a = BigDecimal.ZERO;
-                    List<FinanceTransaction> transactions = FinanceTransactionRepository.filteredActiveBalance(merchant.id, storeId, startDate, endDate, status);
+                    String refNumberFilter = "";
+                    List<FinanceTransaction> transactions = FinanceTransactionRepository.filteredActiveBalance(merchant.id, storeId, startDate, endDate, status, statusOrder);
+                    System.out.println("\n=== FILTER ACTIVE BALANCE BY : status = '" + status + "' - order = '" + statusOrder + "'  ===");
                     for (FinanceTransaction transaction : transactions) {
-                            System.out.println("ID : " +transaction.id+ " - amount : " + transaction.getAmount());
-                            a = filteredActiveBalance.add(transaction.getAmount());
-                            filteredActiveBalance = filteredActiveBalance.add(transaction.getAmount());
+                        if (!transaction.getReferenceNumber().equals(refNumberFilter)) {
+                            refNumberFilter = transaction.getReferenceNumber();
+                            if (status.equalsIgnoreCase("IN")) {
+                                if (transaction.getStatus().equals("IN")){
+                                    filteredActiveBalance = filteredActiveBalance.add(transaction.getAmount());
+                                    System.out.println("STATUS : " + transaction.getStatus() + " + Rp " + transaction.getAmount() + " , total = Rp " + filteredActiveBalance);
+                                }
+                            } else if (status.equalsIgnoreCase("OUT")){
+                                if (transaction.getStatus().equals("OUT")) {
+                                    filteredActiveBalance = filteredActiveBalance.add(transaction.getAmount());
+                                    System.out.println("STATUS : " + transaction.getStatus() + " - Rp " + transaction.getAmount() + " , total = Rp " + filteredActiveBalance);
+                                }
+                            } else {
+                                System.out.print("STATUS : " + transaction.getStatus());
+                                if (transaction.getStatus().equals("IN")){
+                                    filteredActiveBalance = filteredActiveBalance.add(transaction.getAmount());
+                                    System.out.println(" + Rp " + transaction.getAmount() + " , total = Rp " + filteredActiveBalance);
+                                } else if (transaction.getStatus().equals("OUT")) {
+                                    filteredActiveBalance = filteredActiveBalance.subtract(transaction.getAmount());
+                                    System.out.println(" - Rp " + transaction.getAmount() + " , total = Rp " + filteredActiveBalance);
+                                } else if (transaction.getStatus().equals("WITHDRAW")) {
+                                    filteredActiveBalance = filteredActiveBalance.subtract(transaction.getAmount());
+                                    System.out.println(" - Rp " + transaction.getAmount() + " , total = Rp " + filteredActiveBalance);
+                                }
+                            }
+                        }
                     }
-
-                    System.out.println("TOTAL : " + a);
 
                     ActiveBalanceResponse activeBalanceResponse = new ActiveBalanceResponse();
                     activeBalanceResponse.setActiveBalance(totalActiveBalance);
