@@ -32,7 +32,7 @@ public class FinanceTransactionController extends BaseController {
     private static BaseResponse response = new BaseResponse();
 
     public static Result getAllTransaction(Long storeId, String startDate, String endDate, String sort,
-                                           int offset, int limit, String status) {
+                                           int offset, int limit, String status, String statusOrder) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
             try {
@@ -48,8 +48,8 @@ public class FinanceTransactionController extends BaseController {
                     }
                 }
 
-                List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.getAllTransactions(ownMerchant.id, storeId, startDate, endDate, status, sort, offset, limit);
-                Integer totalData = FinanceTransactionRepository.getAllTransactions(ownMerchant.id, storeId, startDate, endDate, status, sort, 0, 0).size();
+                List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.getAllTransactions(ownMerchant.id, storeId, startDate, endDate, status, statusOrder, sort, offset, limit);
+                Integer totalData = FinanceTransactionRepository.getAllTransactions(ownMerchant.id, storeId, startDate, endDate, status, statusOrder, sort, 0, 0).size();
                 List<FinanceTransactionResponse> financeTransactionResponses = new ArrayList<>();
                 for (FinanceTransaction transaction : financeTransactions) {
                     FinanceTransactionResponse trxRes = new FinanceTransactionResponse();
@@ -79,7 +79,7 @@ public class FinanceTransactionController extends BaseController {
     }
 
     public static Result downloadTransaction(Long storeId, String startDate, String endDate, String sort,
-                                             int offset, int limit, String status) {
+                                             int offset, int limit, String status, String statusOrder) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
             try {                
@@ -95,7 +95,7 @@ public class FinanceTransactionController extends BaseController {
                     }
                 }
 
-                List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.getAllTransactions(ownMerchant.id, storeId, startDate, endDate, status, sort, 0, 0);
+                List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.getAllTransactions(ownMerchant.id, storeId, startDate, endDate, status, statusOrder, sort, 0, 0);
                 List<FinanceTransaction> financeTransactionResponses = new ArrayList<>();
                 for (FinanceTransaction transaction : financeTransactions) {
                     FinanceTransaction trxRes = new FinanceTransaction();
