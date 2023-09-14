@@ -5,8 +5,6 @@ import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
-import com.avaje.ebean.SqlQuery;
-import com.avaje.ebean.SqlRow;
 import models.BaseModel;
 import models.finance.FinanceTransaction;
 import play.Logger;
@@ -31,7 +29,7 @@ public class FinanceTransactionRepository extends BaseModel {
         return query.findPagingList(0).getPage(0).getList().size();
     }
 
-    public static List<FinanceTransaction> getAllTransactions(Long merchantId, Long storeId, String startDate, String endDate, String status, String sort, int offset, int limit) throws Exception {
+    public static List<FinanceTransaction> getAllTransactions(Long merchantId, Long storeId, String startDate, String endDate, String status, String statusOrder, String sort, int offset, int limit) throws Exception {
         String condition;
         if (storeId != null && storeId != 0L) {
             condition = "WHERE st.id = " + storeId + " ";
@@ -63,11 +61,17 @@ public class FinanceTransactionRepository extends BaseModel {
             transactionStatus = "AND ft.status = '" + status + "' ";
         }
 
+        String orderStatus = "";
+        if (!statusOrder.equalsIgnoreCase("")) {
+            orderStatus = "AND ord.status = '" + statusOrder + "' ";
+        }
+
         String querySql = "SELECT ord.id FROM finance_transaction ft "
                 + "JOIN store st ON ft.store_id = st.id "
                 + "JOIN merchant mc ON st.merchant_id = mc.id "
                 + "JOIN orders ord ON ft.reference_number = ord.order_number "
                 + condition
+                + orderStatus
                 + transactionDate
                 + transactionStatus
                 + "GROUP BY ft.reference_number, ft.date, ord.id "
@@ -240,7 +244,7 @@ public class FinanceTransactionRepository extends BaseModel {
 
         String orderStatus = "";
         if (!statusOrder.equalsIgnoreCase("")) {
-            transactionStatus = "AND ord.status = '" + statusOrder + "' ";
+            orderStatus = "AND ord.status = '" + statusOrder + "' ";
         }
 
         String querySql = "SELECT ft.id FROM finance_transaction ft "
