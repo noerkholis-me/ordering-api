@@ -2,15 +2,10 @@ package repository.finance;
 
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.ExpressionList;
-import com.avaje.ebean.FetchConfig;
 import com.avaje.ebean.Query;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
-import controllers.finance.FinanceTransactionController;
 import models.BaseModel;
-import models.Merchant;
-import models.ProductStore;
-import models.Store;
 import models.finance.FinanceTransaction;
 import play.Logger;
 
@@ -34,7 +29,7 @@ public class FinanceTransactionRepository extends BaseModel {
         return query.findPagingList(0).getPage(0).getList().size();
     }
 
-    public static List<FinanceTransaction> getAllTransactions(Long merchantId, Long storeId, String startDate, String endDate, String status, String sort, int offset, int limit) throws Exception {
+    public static List<FinanceTransaction> getAllTransactions(Long merchantId, Long storeId, String startDate, String endDate, String status, String statusOrder, String sort, int offset, int limit) throws Exception {
         String condition;
         if (storeId != null && storeId != 0L) {
             condition = "WHERE st.id = " + storeId + " ";
@@ -49,19 +44,7 @@ public class FinanceTransactionRepository extends BaseModel {
             sorting = "ORDER BY ft.date DESC";
         }
 
-        String querySql = "SELECT ord.id FROM finance_transaction ft "
-            + "JOIN store st ON ft.store_id = st.id "
-            + "JOIN merchant mc ON st.merchant_id = mc.id "
-            + "JOIN orders ord ON ft.reference_number = ord.order_number "
-            + condition
-            + "GROUP BY ft.reference_number, ft.date, ord.id "
-            + sorting;
-
-        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
-        Query<FinanceTransaction> query = Ebean.find(FinanceTransaction.class).setRawSql(rawSql);
-
-        ExpressionList<FinanceTransaction> exp = query.where();
-        exp = exp.disjunction();
+        String transactionDate = "";
         if (!startDate.equalsIgnoreCase("") && !endDate.equalsIgnoreCase("")) {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
             Date start = simpleDateFormat.parse(startDate.concat(" 00:00:00.0"));
@@ -69,13 +52,33 @@ public class FinanceTransactionRepository extends BaseModel {
 
             Timestamp startTimestamp = new Timestamp(start.getTime());
             Timestamp endTimestamp = new Timestamp(end.getTime());
-            exp.between("ft.date", startTimestamp, endTimestamp);
+
+            transactionDate = "AND ft.date BETWEEN '" + startTimestamp + "' AND '" + endTimestamp + "' ";
         }
+
+        String transactionStatus = "";
         if (!status.equalsIgnoreCase("")) {
-            exp.eq("ft.status", status);
+            transactionStatus = "AND ft.status = '" + status + "' ";
         }
-        exp = exp.endJunction();
-        query = exp.query();
+
+        String orderStatus = "";
+        if (!statusOrder.equalsIgnoreCase("")) {
+            orderStatus = "AND ord.status = '" + statusOrder + "' ";
+        }
+
+        String querySql = "SELECT ord.id FROM finance_transaction ft "
+                + "JOIN store st ON ft.store_id = st.id "
+                + "JOIN merchant mc ON st.merchant_id = mc.id "
+                + "JOIN orders ord ON ft.reference_number = ord.order_number "
+                + condition
+                + orderStatus
+                + transactionDate
+                + transactionStatus
+                + "GROUP BY ft.reference_number, ft.date, ord.id "
+                + sorting;
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<FinanceTransaction> query = Ebean.find(FinanceTransaction.class).setRawSql(rawSql);
 
         return query.findPagingList(limit).getPage(offset).getList();
     }
@@ -212,6 +215,52 @@ public class FinanceTransactionRepository extends BaseModel {
         query = exp.query();
 
         return query.findList();
+    }
+
+    public static List<FinanceTransaction> filteredActiveBalance(Long merchantId, Long storeId, String startDate, String endDate, String status, String statusOrder) throws Exception {
+        String condition;
+        if (storeId != null && storeId != 0L) {
+            condition = "WHERE st.id = " + storeId + " ";
+        } else {
+            condition = "WHERE mc.id = " + merchantId + " ";
+        }
+
+        String transactionDate = "";
+        if (!startDate.equalsIgnoreCase("") && !endDate.equalsIgnoreCase("")) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            Date start = simpleDateFormat.parse(startDate.concat(" 00:00:00.0"));
+            Date end = simpleDateFormat.parse(endDate.concat(" 23:59:00.0"));
+
+            Timestamp startTimestamp = new Timestamp(start.getTime());
+            Timestamp endTimestamp = new Timestamp(end.getTime());
+
+            transactionDate = "AND ft.date BETWEEN '" + startTimestamp + "' AND '" + endTimestamp + "' ";
+        }
+
+        String transactionStatus = "";
+        if (!status.equalsIgnoreCase("")) {
+            transactionStatus = "AND ft.status = '" + status + "' ";
+        }
+
+        String orderStatus = "";
+        if (!statusOrder.equalsIgnoreCase("")) {
+            orderStatus = "AND ord.status = '" + statusOrder + "' ";
+        }
+
+        String querySql = "SELECT ft.id FROM finance_transaction ft "
+                + "JOIN store st ON ft.store_id = st.id "
+                + "JOIN merchant mc ON st.merchant_id = mc.id "
+                + "JOIN orders ord ON ft.reference_number = ord.order_number "
+                + condition
+                + orderStatus
+                + transactionDate
+                + transactionStatus
+                + "ORDER BY ft.date DESC";
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<FinanceTransaction> query = Ebean.find(FinanceTransaction.class).setRawSql(rawSql);
+
+        return query.findPagingList(0).getPage(0).getList();
     }
 
 }
