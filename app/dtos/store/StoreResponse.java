@@ -44,6 +44,12 @@ public class StoreResponse {
     @JsonProperty("store_queue_url")
     private String storeQueueUrl;
 
+    @JsonProperty("store_qr_code_alias")
+    private String storeQrCodeAlias;
+
+    @JsonProperty("store_queue_url_alias")
+    private String storeQueueUrlAlias;
+
     @JsonProperty("address")
     private String address;
 
@@ -91,6 +97,8 @@ public class StoreResponse {
         this.setStoreLogo(store.getStoreLogo());
         this.setStoreQrCode(store.getStoreQrCode());
         this.setStoreQueueUrl(Helper.MOBILEQR_URL + store.storeCode + "/queue");
+        this.setStoreQrCodeAlias(Helper.MOBILEQR_URL + store.storeAlias);
+        this.setStoreQueueUrlAlias(Helper.MOBILEQR_URL + store.storeAlias + "/queue");
         this.setAddress(store.getStoreAddress());
         this.setProvince(ShipperHelper.toProvinceResponse(store.shipperProvince));
         this.setCity(ShipperHelper.toCityResponse(store.shipperCity));
