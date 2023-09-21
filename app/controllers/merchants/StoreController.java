@@ -407,10 +407,16 @@ public class StoreController extends BaseController {
                 String[] parts = linkQrProductMerchant.split("/");
                 qrProductMerchantUrl = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+"home/"+store.storeCode+"/"+store.id+"/"+productMerchant.getMerchant().id+"/"+parts[4]+"/"+parts[5];
             }
+            String qrProductMerchantUrlAlias = null;
+            if (linkQrProductMerchant != null) {
+                String[] parts = linkQrProductMerchant.split("/");
+                qrProductMerchantUrlAlias = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+"home/"+store.getStoreAlias()+"/"+store.id+"/"+productMerchant.getMerchant().id+"/"+parts[4]+"/"+parts[5];
+            }
             ProductStoreResponseForStore productStoreResponse = new ProductStoreResponseForStore();
             productStoreResponse.setProductId(productMerchant.id);
             productStoreResponse.setProductName(productMerchant.getProductName());
             productStoreResponse.setProductStoreQrCode(qrProductMerchantUrl);
+            productStoreResponse.setProductStoreQrCodeAlias(qrProductMerchantUrlAlias);
             list.add(productStoreResponse);
         }
 
