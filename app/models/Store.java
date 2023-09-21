@@ -298,6 +298,15 @@ public class Store extends BaseModel {
         return find.where().eq("isDeleted", false).eq("merchant", merchant).eq("isActive", true).findList();
     }
 
+    public static List<Store> findAllStoreByMerchant(Long merchantId) {
+        return find.where()
+                .eq("t0.is_deleted", false)
+                .eq("t0.merchant_id", merchantId)
+                .eq("t0.is_active", true)
+                .orderBy().asc("t0.id")
+                .findList();
+    }
+
     public static List<Store> getTotalDataPage(Query<Store> reqQuery) {
         Query<Store> query = reqQuery;
         ExpressionList<Store> exp = query.where();
