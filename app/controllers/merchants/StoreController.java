@@ -98,16 +98,16 @@ public class StoreController extends BaseController {
                     response.setBaseResponse(0, 0, 0, validation, null);
                     return badRequest(Json.toJson(response));
                 }
+                Store store = Store.findById(id);
+                if (store == null) {
+                    response.setBaseResponse(0, 0, 0, "Store is not found.", null);
+                    return badRequest(Json.toJson(response));
+                }
                 Transaction trx = Ebean.beginTransaction();
                 try {
-                    Store store = Store.findById(id);
-                    if (store == null) {
-                        response.setBaseResponse(0, 0, 0, " Store is not found.", null);
-                        return badRequest(Json.toJson(response));
-                    } else {
-                        store.setStore(storeRequest, store);
-                        store.update();
-                    }
+                    store.setStore(storeRequest, store);
+                    store.update();
+
                     trx.commit();
 
                     response.setBaseResponse(1, 0, 1, success + " Store updated successfully", store);
@@ -121,7 +121,7 @@ public class StoreController extends BaseController {
                 }
             } catch (Exception e) {
                 Logger.info("Error: " + e.getMessage());
-                response.setBaseResponse(0, 0, 0, error, null);
+                response.setBaseResponse(0, 0, 0, error + ": " + e.getMessage(), null);
                 return internalServerError(Json.toJson(response));
             }
         }
