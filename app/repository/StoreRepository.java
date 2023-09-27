@@ -13,6 +13,17 @@ import java.util.List;
 public class StoreRepository {
     public static Model.Finder<Long, Store> find = new Model.Finder<Long, Store>(Long.class, Store.class);
 
+    public static Store findByName(String storeName) {
+        String querySql = "SELECT s.id FROM store s "
+                + "WHERE LOWER(s.store_name) = '" + storeName.toLowerCase() + "' "
+                + "AND s.is_deleted = false AND s.is_active = true ";
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<Store> query = Ebean.find(Store.class).setRawSql(rawSql);
+
+        return query.findUnique();
+    }
+
     public static List<Store> findAllStore(String filter, String sort, int offset, int limit) {
         String sorting;
         if (!"".equals(sort)) {
