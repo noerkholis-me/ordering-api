@@ -58,6 +58,11 @@ public class StoreController extends BaseController {
                     response.setBaseResponse(0, 0, 0, validation, null);
                     return badRequest(Json.toJson(response));
                 } else {
+                    Store storeName = StoreRepository.findByName(storeRequest.getStoreName());
+                    if (storeName != null) {
+                        response.setBaseResponse(0, 0, 0, "Nama toko sudah digunakan.", null);
+                        return badRequest(Json.toJson(response));
+                    }
                     Transaction trx = Ebean.beginTransaction();
                     try {
                         Store store = new Store(storeRequest, ownMerchant);
@@ -93,18 +98,24 @@ public class StoreController extends BaseController {
             JsonNode json = request().body().asJson();
             try {
                 StoreRequest storeRequest = objectMapper.readValue(json.toString(), StoreRequest.class);
-                String validation = validateRequest(storeRequest);
-                if (validation != null) {
-                    response.setBaseResponse(0, 0, 0, validation, null);
-                    return badRequest(Json.toJson(response));
-                }
-                Store store = Store.findById(id);
-                if (store == null) {
-                    response.setBaseResponse(0, 0, 0, "Store is not found.", null);
-                    return badRequest(Json.toJson(response));
-                }
                 Transaction trx = Ebean.beginTransaction();
                 try {
+                    String validation = validateRequest(storeRequest);
+                    if (validation != null) {
+                        response.setBaseResponse(0, 0, 0, validation, null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    Store store = Store.findById(id);
+                    if (store == null) {
+                        response.setBaseResponse(0, 0, 0, "Store is not found.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    Store storeName = StoreRepository.findByName(storeRequest.getStoreName());
+                    if (storeName != null) {
+                        response.setBaseResponse(0, 0, 0, "Nama toko sudah digunakan.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+
                     store.setStore(storeRequest, store);
                     store.update();
 
