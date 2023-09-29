@@ -10,7 +10,6 @@ import dtos.store.StoreRequest;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import models.transaction.Order;
 import play.libs.Json;
 
 import javax.persistence.*;
@@ -73,8 +72,6 @@ public class Store extends BaseModel {
     public ShipperArea shipperArea;
 
     @Column(name = "store_gmap")
-    @Getter
-    @Setter
     public String storeGmap;
 
     @Column(name = "store_long")
@@ -86,27 +83,19 @@ public class Store extends BaseModel {
     @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "merchant_id", referencedColumnName = "id")
     @JsonIgnore
-    @Getter
-    @Setter
     public Merchant merchant;
 
     @Column(name = "store_qr_code")
-    @Getter
-    @Setter
     public String storeQrCode;
 
     @Column(name = "is_active")
     public Boolean isActive;
 
     @Column(name = "active_balance")
-    @Getter
-    @Setter
     public BigDecimal activeBalance;
 
-    @OneToMany(mappedBy = "store")
-    @Getter
-    @Setter
-    private List<Order> orders;
+//    @OneToMany(mappedBy = "store")
+//    private List<Order> orders;
 
     @Column(name = "store_logo")
     public String storeLogo;
@@ -132,18 +121,12 @@ public class Store extends BaseModel {
     public Long area_id;
 
     @Column(name = "status_open_store")
-    @Getter
-    @Setter
     public Boolean statusOpenStore;
 
     @Column(name = "open_at")
-    @Getter
-    @Setter
     public String openAt;
 
     @Column(name = "closed_at")
-    @Getter
-    @Setter
     public String closedAt;
 
     public Store(StoreRequest request, Merchant merchant) {
