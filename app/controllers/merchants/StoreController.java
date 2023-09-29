@@ -111,7 +111,7 @@ public class StoreController extends BaseController {
                         return badRequest(Json.toJson(response));
                     }
                     Store storeName = StoreRepository.findByName(storeRequest.getStoreName());
-                    if (storeName != null) {
+                    if (storeName != null && !storeName.id.equals(id)) {
                         response.setBaseResponse(0, 0, 0, "Nama toko sudah digunakan.", null);
                         return badRequest(Json.toJson(response));
                     }
