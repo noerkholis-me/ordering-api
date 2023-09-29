@@ -282,10 +282,10 @@ public class ShipperController extends BaseController {
                 ((ObjectNode) jsonNode).put("cod", false);
                 ((ObjectNode) jsonNode).put("for_order", true);
                 ((ObjectNode) jsonNode).put("item_value", price);
-                ((ObjectNode) jsonNode.get("origin")).put("area_id", objStore.shipperArea.id);
-                ((ObjectNode) jsonNode.get("origin")).put("lat", String.valueOf(objStore.storeLatitude));
-                ((ObjectNode) jsonNode.get("origin")).put("lng", String.valueOf(objStore.storeLongitude));
-                ((ObjectNode) jsonNode.get("origin")).put("suburb_id", objStore.shipperSuburb.id);
+                ((ObjectNode) jsonNode.get("origin")).put("area_id", objStore.getShipperArea().id);
+                ((ObjectNode) jsonNode.get("origin")).put("lat", String.valueOf(objStore.getStoreLatitude()));
+                ((ObjectNode) jsonNode.get("origin")).put("lng", String.valueOf(objStore.getStoreLongitude()));
+                ((ObjectNode) jsonNode.get("origin")).put("suburb_id", objStore.getShipperSuburb().id);
                 ((ObjectNode) jsonNode.get("destination")).put("area_id", destinationAreaId);
                 ((ObjectNode) jsonNode.get("destination")).put("lat", lattitude);
                 ((ObjectNode) jsonNode.get("destination")).put("lng", longitude);
