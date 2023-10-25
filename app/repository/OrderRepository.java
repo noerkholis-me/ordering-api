@@ -1,6 +1,10 @@
 package repository;
 
-import com.avaje.ebean.*;
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.ExpressionList;
+import com.avaje.ebean.Query;
+import com.avaje.ebean.RawSql;
+import com.avaje.ebean.RawSqlBuilder;
 import models.Merchant;
 import models.UserMerchant;
 import models.internal.DeviceType;
@@ -424,7 +428,7 @@ public class OrderRepository extends Model {
             whereCondition = "WHERE (ord.status != 'CANCELLED' AND ord.status != 'CANCELED' AND ord.status != 'CLOSED') "
                 + "AND str.merchant_id = " + merchantId + " "
                 + "AND op.status = '" + statusOrder + "' ";
-        } if (statusOrder.equalsIgnoreCase("CLOSED")){
+        } else if (statusOrder.equalsIgnoreCase("CLOSED")){
             whereCondition = "WHERE str.id = " + storeId + " "
                     + "AND ord.status = '" + statusOrder + "' ";
         } else {
@@ -442,7 +446,7 @@ public class OrderRepository extends Model {
                 whereCondition = "WHERE (ord.status != 'CANCELLED' AND ord.status != 'CANCELED' AND ord.status != 'CLOSED') "
                     + "AND str.id = " + storeId + " "
                     + "AND op.status = '" + statusOrder + "' ";
-            } if (statusOrder.equalsIgnoreCase("CLOSED")){
+            } else if (statusOrder.equalsIgnoreCase("CLOSED")){
                 whereCondition = "WHERE str.id = " + storeId + " "
                     + "AND ord.status = '" + statusOrder + "' ";
             } else {
@@ -472,9 +476,6 @@ public class OrderRepository extends Model {
 
     public static List<Order> getOrderListWithFilter(Long merchantId, Long storeId, int offset, int limit, String statusOrder, String filter, String productType) {
         Query<Order> query = queryGetOrderListWithFilter(merchantId, storeId, statusOrder, filter, productType);
-        if (filter != "" && filter != null) {
-            offset = 0;
-        }
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
