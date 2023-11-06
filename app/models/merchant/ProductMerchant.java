@@ -56,6 +56,8 @@ public class ProductMerchant extends BaseModel {
     @JoinColumn(name = "merchant_id", referencedColumnName = "id")
     public Merchant merchant;
 
+    private Double rating;
+
     public SubsCategoryMerchant subsCategory;
 
     public ProductMerchant(Merchant merchant, CategoryMerchant categoryMerchant, SubCategoryMerchant subCategoryMerchant, SubsCategoryMerchant subsCategoryMerchant, BrandMerchant brandMerchant, ProductRequest productRequest) {

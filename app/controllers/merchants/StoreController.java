@@ -9,10 +9,7 @@ import com.hokeba.util.CommonFunction;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
-import dtos.store.ProductStoreResponseForStore;
-import dtos.store.StoreRequest;
-import dtos.store.StoreResponse;
-import dtos.store.StoreResponsePuP;
+import dtos.store.*;
 import models.Merchant;
 import models.ProductStore;
 import models.ShipperArea;
@@ -25,6 +22,7 @@ import models.merchant.ProductMerchantDetail;
 import models.merchant.TableMerchant;
 import models.pupoint.PickUpPointMerchant;
 import models.store.StoreAccessDetail;
+import models.store.StoreTaggings;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
@@ -35,9 +33,11 @@ import repository.StoreAccessRepository;
 import repository.StoreRepository;
 import repository.TableMerchantRepository;
 import repository.pickuppoint.PickUpPointRepository;
+import repository.store.StoreTaggingsRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Api(value = "/merchants/store", description = "Store Management")
 public class StoreController extends BaseController {
@@ -322,6 +322,36 @@ public class StoreController extends BaseController {
             } catch (Exception e) {
                 Logger.info("Error: " + e.getMessage());
             }
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    @ApiOperation(value = "Get all tagging of store for rating.", notes = "Returns all list of tagging in store.\n" + swaggerInfo
+            + "", responseContainer = "List", httpMethod = "GET")
+    public static Result getAllTagings(Long storeId) {
+        int authority = checkAccessAuthorization("all");
+        Logger.info("AUTHORITY : "+authority);
+        if (authority == 200 || authority == 203) {
+            try {
+                Store store = Store.find.where().eq("id", storeId).eq("isDeleted", false).eq("isActive", true).findUnique();
+                if (store == null) {
+                    response.setBaseResponse(0, 0, 0, "Store is not found.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                List<StoreTaggings> data = StoreTaggingsRepository.findByStore(store);
+                int totalData = data.size();
+                logger.info("TEST");
+                List<StoreTaggingsResponse> results = data.stream().map(x -> StoreTaggingsResponse.builder().name(x.getName()).id(x.id).build() ).collect(Collectors.toList());
+                response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data toko", results);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                Logger.info("Error: " + e.getMessage());
+            }
+
         } else if (authority == 403) {
             response.setBaseResponse(0, 0, 0, forbidden, null);
             return forbidden(Json.toJson(response));

@@ -370,7 +370,7 @@ public class CheckoutOrderController extends BaseController {
                 List<ProductOrderDetail> productOrderDetails = orderRequest.getProductOrderDetail();
                 StringBuilder message = new StringBuilder();
                 ArrayNode countersNode = ((ObjectNode) jsonRequest.get("package")).putArray("items");
-//                ArrayNode countersNode = nodeBaru.putArray("itemName");
+//                ArrayNodtexte countersNode = nodeBaru.putArray("itemName");
                 List<OrderForLoyaltyData> listOrderData = new ArrayList<>();
                 for (ProductOrderDetail productOrderDetail : productOrderDetails) {
                     OrderForLoyaltyData listDataOrder = new OrderForLoyaltyData();

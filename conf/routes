@@ -411,6 +411,7 @@ GET    /merchant/store/:id                          controllers.merchants.StoreC
 DELETE    /merchant/store/:id                       controllers.merchants.StoreController.deleteStore(id:Long)
 GET    /merchant/store/:storeCode/detail            controllers.merchants.StoreController.getStoreByStoreCode(storeCode: String)
 GET    /merchant/store/v2/:storeAlias/detail        controllers.merchants.StoreController.getStoreByAlias(storeAlias: String)
+GET    /merchant/store/v2/taggings/:storeId          controllers.merchants.StoreController.getAllTagings(storeId: Long)
 GET    /merchant/allstore                           controllers.merchants.StoreController.getAllStoreMerchant()
 
 GET    /merchant/detail/:merchantCode				controllers.merchants.MerchantController.getMerchantDetail(merchantCode: String)
@@ -673,6 +674,9 @@ POST        /users/send-invoice                                  controllers.pay
 GET         /users/:storeId/display-table                            controllers.merchants.TableMerchantController.getDisplayTable(storeId: Long)
 PUT         /merchant/:tableId/change-availability-table        controllers.merchants.TableMerchantController.changeAvailabilityTable(tableId: Long)
 
+POST        /ratings/store                                  controllers.ratings.ordering.RatingController.rateStore()
+POST        /ratings/product                                controllers.ratings.ordering.RatingController.rateProduct()
+POST        /ratings/store/myrate                           controllers.ratings.ordering.RatingController.getMyRateStore
 
 # Webhook
 GET         /external/:orderNumber/get-order-detail         controllers.webhook.OrderWebHookController.getOrderDetailWebhook(orderNumber: String)
