@@ -76,6 +76,7 @@ public class ProductStoreController extends BaseController {
                     Transaction trx = Ebean.beginTransaction();
                     try {
                         ProductStore newProductStore = new ProductStore(ownMerchant, store, productMerchant, request, null);
+                        newProductStore.setStock(request.getStock());
                         newProductStore.save();
 
                         trx.commit();
@@ -907,6 +908,7 @@ public class ProductStoreController extends BaseController {
                         }
 
                         productStore.setProductStore(productStore, ownMerchant, store, productMerchant, request);
+                        productStore.setStock(request.getStock());
                         productStore.update();
 
                         trx.commit();
@@ -1017,8 +1019,8 @@ public class ProductStoreController extends BaseController {
 
                     for (ProductStore dataPStore : dataPS) {
                         ProductResponseStore.ProductStore responsePStore = new ProductResponseStore.ProductStore();
-
                         responsePStore.setId(dataPStore.id);
+                        responsePStore.setStock(dataPStore.getStock());
                         responsePStore.setStoreId(dataPStore.getStore().id);
                         responsePStore.setProductId(dataPStore.getProductMerchant().id);
                         responsePStore.setIsActive(dataPStore.isActive);
@@ -1027,7 +1029,6 @@ public class ProductStoreController extends BaseController {
                         responsePStore.setDiscount(dataPStore.getDiscount());
                         responsePStore.setIsDeleted(dataPStore.isDeleted);
                         responsePStore.setFinalPrice(dataPStore.getFinalPrice());
-
                         Store store = Store.findById(dataPStore.getStore().id);
                         if (store == null) {
                             response.setBaseResponse(0, 0, 0, " Store tidak ditemukan.", null);
@@ -1118,6 +1119,7 @@ public class ProductStoreController extends BaseController {
                         responsePStore.setDiscount(dataPStore.getDiscount());
                         responsePStore.setIsDeleted(dataPStore.isDeleted);
                         responsePStore.setFinalPrice(dataPStore.getFinalPrice());
+                        responsePStore.setStock(dataPStore.getStock());
 
                         Store store = Store.findById(dataPStore.getStore().id);
                         if (store == null) {
@@ -1247,6 +1249,7 @@ public class ProductStoreController extends BaseController {
 
             if (productStore != null) {
                 ProductSpecificStoreResponse.ProductStore pStore = new ProductSpecificStoreResponse.ProductStore(productStore);
+                pStore.setStock(productStore.getStock());
                 response.setProductStore(pStore);
             }
 

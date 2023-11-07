@@ -835,6 +835,7 @@ public class ProductMerchantController extends BaseController {
                                 .productImage2(productMerchantDetail.getProductImage2())
                                 .productImage3(productMerchantDetail.getProductImage3())
                                 .productImage4(productMerchantDetail.getProductImage4())
+                                .stock(productStore != null ? productStore.getStock() : 0)
                                 .build();
                     productResponse.setProductDetail(productDetailResponse);
 
@@ -1108,6 +1109,7 @@ public class ProductMerchantController extends BaseController {
 
                 if (productStore != null) {
                     ProductSpecificStoreResponse.ProductStore pStore = new ProductSpecificStoreResponse.ProductStore(productStore);
+                    pStore.setStock(productStore.getStock());
                     response.setProductStore(pStore);
                 }
 

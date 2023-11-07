@@ -47,11 +47,7 @@ import play.Logger;
 import play.Play;
 import play.libs.Json;
 import play.mvc.Result;
-import repository.OrderPaymentRepository;
-import repository.OrderRepository;
-import repository.ProductAddOnRepository;
-import repository.ProductMerchantRepository;
-import repository.TableMerchantRepository;
+import repository.*;
 import repository.loyalty.LoyaltyPointHistoryRepository;
 import repository.loyalty.LoyaltyPointMerchantRepository;
 import repository.pickuppoint.PickUpPointRepository;
@@ -376,6 +372,18 @@ public class CheckoutOrderController extends BaseController {
                     OrderForLoyaltyData listDataOrder = new OrderForLoyaltyData();
                     ProductMerchant productMerchant = ProductMerchantRepository.findById(productOrderDetail.getProductId());
                     if (productMerchant != null) {
+                        ProductStore psStore = ProductStoreRepository.findForCust(productMerchant.id, store.id, store.getMerchant());
+                        if(psStore.getStock() == null) {
+                            response.setBaseResponse(0, 0, 0, "Stok Produk Kosong", null);
+                            return notFound(Json.toJson(response));
+                        }
+
+                        if(productOrderDetail.getProductQty().longValue() > psStore.getStock()) {
+                            response.setBaseResponse(0, 0, 0, "Stok Produk Kurang", null);
+                            return notFound(Json.toJson(response));
+                        }
+                        psStore.setStock(psStore.getStock() - productOrderDetail.getProductQty().longValue());
+                        psStore.update();
                         OrderDetail orderDetail = new OrderDetail();
                         orderDetail.setProductMerchant(productMerchant);
                         orderDetail.setProductName(productMerchant.getProductName());

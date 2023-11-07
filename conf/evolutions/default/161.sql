@@ -31,7 +31,7 @@ CREATE TABLE product_ratings(
 
 ALTER TABLE product_ratings add constraint fk_product_ratings_store_id foreign key (store_id) references store(id);
 ALTER TABLE product_ratings add constraint fk_product_ratings_member_id foreign key (member_id) references member(id);
-ALTER TABLE product_ratings add constraint fk_product_ratings_product_merchant_id foreign key (product_merchant_id) references product_merhant(id);
+ALTER TABLE product_ratings add constraint fk_product_ratings_product_merchant_id foreign key (product_merchant_id) references product_merchant(id);
 
 CREATE SEQUENCE product_ratings_seq
     INCREMENT 1

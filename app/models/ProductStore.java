@@ -34,6 +34,8 @@ public class ProductStore extends BaseModel {
     @JsonProperty("final_price")
     public BigDecimal finalPrice;
 
+    public Long stock;
+
     @JsonProperty("is_active")
     @Column(name = "is_active")
     public boolean isActive;

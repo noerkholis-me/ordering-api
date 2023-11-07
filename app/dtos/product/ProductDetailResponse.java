@@ -53,6 +53,8 @@ public class ProductDetailResponse implements Serializable {
     @JsonProperty("product_image_4")
     private String productImage4;
 
+    private Long stock;
+
     public ProductDetailResponse(ProductMerchantDetail productMerchantDetail, models.ProductStore productStore) {
         this.setProductType(productMerchantDetail.getProductType());
         this.setIsCustomizable(productMerchantDetail.getIsCustomizable());

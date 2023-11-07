@@ -21,6 +21,6 @@ public class StoreRatingRepository {
 
     public static float getRatings(Store store) {
         find.select("AVG(rate)").where().eq("store",store).findUnique();
-
+        return 0;
     }
 }
