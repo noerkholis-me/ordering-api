@@ -360,6 +360,8 @@ GET     /merchant/brand/:id/detail                  controllers.brand.BrandMerch
 PUT     /merchant/brand/:id/status                  controllers.brand.BrandMerchantController.setStatus(id: Long)
 GET     /brand/:merchantId                          controllers.brand.BrandMerchantController.listBrandHomepage(merchantId: Long, store_id:Long ?= 0, offset:Int ?= 0)
 
+GET     /pos/brand/list                        controllers.brand.BrandMerchantController.listBrandPOS(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, isActive:String ?= "")
+
 #BRAND DETAIL CUSTOMER
 GET     /brand/:id/detail                           controllers.brand.BrandMerchantController.detailBrandHome(id:Long, merchant_id:Long ?= 0, store_id:Long ?= 0)
 
@@ -370,6 +372,8 @@ DELETE  /merchant/category/:id/delete                  controllers.categories.Ca
 PUT     /merchant/category/:id/update                  controllers.categories.CategoryMerchantController.editCategory(id:Long)
 GET     /merchant/category/:id/detail                  controllers.categories.CategoryMerchantController.viewCategory(id:Long)
 PUT     /merchant/category/:id/status                  controllers.categories.CategoryMerchantController.setStatus(id: Long)
+
+GET     /pos/category/list                        controllers.categories.CategoryMerchantController.listCategoryPOS(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 
 #CATEGORY KIOSK
 GET     /data/category/list                            controllers.categories.CategoryMerchantController.listCategoryFE(merchant_id:Long ?= 0, store_id:Long ?= 0)
