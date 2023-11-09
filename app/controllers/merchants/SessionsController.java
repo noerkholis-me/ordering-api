@@ -58,6 +58,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
+import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -250,7 +251,7 @@ public class SessionsController extends BaseController {
                     for (Merchant memberByEmail : memberList) {
                         System.out.println("Or guys?");
                         logger.info("Member email : " + memberByEmail);
-                        
+
                         System.out.println("Or Here guys?");
 //                        if (memberByEmail != null) {
 //                            if(!Merchant.isPasswordValid(member.password, password)){
@@ -438,15 +439,54 @@ public class SessionsController extends BaseController {
                                 response.setBaseResponse(0, 0, 0, inputParameter, null);
                                 return badRequest(Json.toJson(response));
                             }
+
                             // modify session response for merchant can be reusable for property
                             MerchantSessionResponse profileData = toMerchantSessionResponse(member);
                             DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                             ObjectMapper om = new ObjectMapper();
                             om.addMixIn(Merchant.class, JsonMask.class);
-//                        HashMap<String, Boolean> features = member.checkPrivilegeList();
+
+                            // HashMap<String, Boolean> features = member.checkPrivilegeList();
                             List<FeatureAndPermissionSession> featureAndPermissionSessions = member.checkFeatureAndPermissions();
                             UserSession session = new UserSession(log.token, df.format(log.expiredDate), log.memberType, Json.parse(om.writeValueAsString(profileData)), featureAndPermissionSessions);
-//                        session.setProfile_data(Json.parse(om.writeValueAsString(profileData)));
+
+                            // ====== AUTO GENERATE STORE ALIAS ===== //
+                            List<Store> stores = Store.findAllStoreByMerchant(id);
+                            for (Store store : stores) {
+                                String storeAlias = slugGenerate(store.getStoreName());
+                                Store alias = Store.find.where().raw("store_alias ~ '^" + storeAlias + "-[0-9]*$' ORDER BY store_alias DESC limit 1").findUnique();
+
+                                // if alias exist, check store alias
+                                if (alias != null) {
+                                    String[] tmpAlias = alias.getStoreAlias().split("-");
+                                    String aliasName = tmpAlias[0];
+                                    int currentindex = Integer.parseInt(tmpAlias[1]);
+                                    int nextIndex = currentindex + 1;
+
+                                    // if store alias == existing alias, check again
+                                    Store getStore = Store.find.byId(store.id);
+                                    if (storeAlias.equalsIgnoreCase(aliasName)) {
+                                        if (getStore.getStoreAlias() == null || getStore.getStoreAlias().trim().isEmpty()) {
+                                            store.setStoreAlias(storeAlias + "-" + nextIndex);
+                                        } else {
+                                            String[] tmpCurrentAlias = getStore.getStoreAlias().split("-");
+                                            String currentAliasName = tmpCurrentAlias[0];
+                                            // if store alias != current store alias update store alias (e.g mystore != mynewstore)
+                                            if (!storeAlias.equalsIgnoreCase(currentAliasName)) {
+                                                store.setStoreAlias(storeAlias + "-" + nextIndex);
+                                            }
+                                        }
+                                    }
+                                    store.update();
+                                } else {
+                                    // create new store alias
+                                    store.setStoreAlias(storeAlias + "-1");
+                                    store.update();
+                                }
+                            }
+                            // ====== AUTO GENERATE STORE ALIAS ===== //
+
+                            // session.setProfile_data(Json.parse(om.writeValueAsString(profileData)));
                             response.setBaseResponse(1, 0, 1, success, session);
                             return ok(Json.toJson(response));
                         } catch (Exception e) {
@@ -649,7 +689,7 @@ public class SessionsController extends BaseController {
                     try {
                         Merchant newMember = new Merchant(map);
                         newMember.save();
-                        
+
                         //odoo
 //                        OdooService.getInstance().createVendor(newMember);
 
@@ -786,7 +826,7 @@ public class SessionsController extends BaseController {
                 member.activationCode = "";
                 member.isActive = true;
                 member.save();
-                
+
                 Thread thread = new Thread( () -> {
                 	try {
                         MailConfig.sendmail(member.email, MailConfig.subjectSuccessActivation,
@@ -1182,7 +1222,7 @@ public class SessionsController extends BaseController {
             return unauthorized(Json.toJson(response));
         }
     }
-    
+
     public static Result sendCallbackEmailActivation(Long id) {
     	Merchant merchant = Merchant.find.where().eq("id", id).eq("isDeleted", Boolean.FALSE).findUnique();
     	if(merchant != null) {
@@ -1192,7 +1232,18 @@ public class SessionsController extends BaseController {
     	}
     	response.setBaseResponse(0, 0, 0, "Error", null);
     	return badRequest(Json.toJson(response));
-    		
+
+    }
+
+    public static String slugGenerate(String input) {
+        String slug = Normalizer.normalize(input.toLowerCase(), Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .replaceAll("[^\\p{Alnum}]+", "");
+        if (slug.length() != 0 && slug.charAt(slug.length() - 1) == '-') {
+            return slug.substring(0, slug.length() - 1);
+        } else {
+            return slug;
+        }
     }
 
 

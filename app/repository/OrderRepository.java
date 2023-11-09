@@ -1,20 +1,21 @@
 package repository;
 
 import com.avaje.ebean.Ebean;
-import com.avaje.ebean.Expr;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
+import models.Merchant;
+import models.UserMerchant;
 import models.internal.DeviceType;
-import models.transaction.*;
-import models.*;
+import models.transaction.Order;
+import models.transaction.OrderDetail;
+import models.transaction.OrderDetailAddOn;
+import models.transaction.OrderPayment;
 import play.db.ebean.Model;
-import play.libs.Json;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -424,9 +425,12 @@ public class OrderRepository extends Model {
             whereCondition = "WHERE str.merchant_id = " + merchantId + " "
                 + "AND (ord.status = '" + statusOrder + "' OR ord.status = 'CANCELLED') ";
         } else if (statusOrder.equalsIgnoreCase("PENDING")) {
-            whereCondition = "WHERE (ord.status != 'CANCELLED' OR ord.status != 'CANCELED') "
+            whereCondition = "WHERE (ord.status != 'CANCELLED' AND ord.status != 'CANCELED' AND ord.status != 'CLOSED') "
                 + "AND str.merchant_id = " + merchantId + " "
                 + "AND op.status = '" + statusOrder + "' ";
+        } else if (statusOrder.equalsIgnoreCase("CLOSED")){
+            whereCondition = "WHERE str.id = " + storeId + " "
+                    + "AND ord.status = '" + statusOrder + "' ";
         } else {
             whereCondition = "WHERE op.status = 'PAID' "
                 + "AND str.merchant_id = " + merchantId + " "
@@ -437,11 +441,14 @@ public class OrderRepository extends Model {
         if (storeId != null && storeId != 0L) {
             if (statusOrder.equalsIgnoreCase("CANCELED")) {
                 whereCondition = "WHERE str.id = " + storeId + " "
-                    + "AND ord.status = '" + statusOrder + "' ";
+                    + "AND (ord.status = '" + statusOrder + "' OR ord.status = 'CANCELLED') ";
             } else if (statusOrder.equalsIgnoreCase("PENDING")) {
-                whereCondition = "WHERE (ord.status != 'CANCELLED' OR ord.status != 'CANCELED') "
+                whereCondition = "WHERE (ord.status != 'CANCELLED' AND ord.status != 'CANCELED' AND ord.status != 'CLOSED') "
                     + "AND str.id = " + storeId + " "
                     + "AND op.status = '" + statusOrder + "' ";
+            } else if (statusOrder.equalsIgnoreCase("CLOSED")){
+                whereCondition = "WHERE str.id = " + storeId + " "
+                    + "AND ord.status = '" + statusOrder + "' ";
             } else {
                 whereCondition = "WHERE op.status = 'PAID' "
                     + "AND str.id = " + storeId + " "
@@ -469,9 +476,6 @@ public class OrderRepository extends Model {
 
     public static List<Order> getOrderListWithFilter(Long merchantId, Long storeId, int offset, int limit, String statusOrder, String filter, String productType) {
         Query<Order> query = queryGetOrderListWithFilter(merchantId, storeId, statusOrder, filter, productType);
-        if (filter != "" && filter != null) {
-            offset = 0;
-        }
         return query.findPagingList(limit).getPage(offset).getList();
     }
 

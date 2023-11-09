@@ -10,16 +10,9 @@ import dtos.store.StoreRequest;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import models.transaction.Order;
 import play.libs.Json;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.util.HashMap;
@@ -79,8 +72,6 @@ public class Store extends BaseModel {
     public ShipperArea shipperArea;
 
     @Column(name = "store_gmap")
-    @Getter
-    @Setter
     public String storeGmap;
 
     @Column(name = "store_long")
@@ -92,27 +83,19 @@ public class Store extends BaseModel {
     @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "merchant_id", referencedColumnName = "id")
     @JsonIgnore
-    @Getter
-    @Setter
     public Merchant merchant;
 
     @Column(name = "store_qr_code")
-    @Getter
-    @Setter
     public String storeQrCode;
 
     @Column(name = "is_active")
     public Boolean isActive;
 
     @Column(name = "active_balance")
-    @Getter
-    @Setter
     public BigDecimal activeBalance;
 
-    @OneToMany(mappedBy = "store")
-    @Getter
-    @Setter
-    private List<Order> orders;
+//    @OneToMany(mappedBy = "store")
+//    private List<Order> orders;
 
     @Column(name = "store_logo")
     public String storeLogo;
@@ -138,23 +121,18 @@ public class Store extends BaseModel {
     public Long area_id;
 
     @Column(name = "status_open_store")
-    @Getter
-    @Setter
     public Boolean statusOpenStore;
 
     @Column(name = "open_at")
-    @Getter
-    @Setter
     public String openAt;
 
     @Column(name = "closed_at")
-    @Getter
-    @Setter
     public String closedAt;
 
     public Store(StoreRequest request, Merchant merchant) {
         this.setMerchant(merchant);
         this.setStoreName(request.getStoreName());
+        this.setStoreAlias(slugGenerate(request.getStoreName()));
         this.setStorePhone(request.getStorePhone());
         this.setStoreAddress(request.getAddress());
         this.setStoreLogo(request.getStoreLogo());
@@ -172,25 +150,11 @@ public class Store extends BaseModel {
         String[] finalLotLang = getLongitudeLatitude(this.getStoreGmap());
         this.setStoreLatitude(Double.parseDouble(finalLotLang[0]));
         this.setStoreLongitude(Double.parseDouble(finalLotLang[1]));
-
-        String storeAlias = slugGenerate(request.getStoreName());
-        Store alias = Store.find.where().raw("store_alias ~ '^" + storeAlias + "-[0-9]*$' ORDER BY store_alias DESC limit 1").findUnique();
-
-        if (alias != null) {
-            String[] tmpAlias = alias.storeAlias.split("-");
-            String aliasName = tmpAlias[0];
-            int currentindex = Integer.parseInt(tmpAlias[1]);
-            int nextIndex = currentindex + 1;
-
-            this.setStoreAlias(aliasName + "-" + nextIndex);
-        } else {
-            this.setStoreAlias(storeAlias + "-1");
-        }
-
     }
 
     public void setStore(StoreRequest request, Store store) {
         store.setStoreName(request.getStoreName());
+        store.setStoreAlias(slugGenerate(request.getStoreName()));
         store.setStorePhone(request.getStorePhone());
         store.setStoreAddress(request.getAddress());
         store.setStoreLogo(request.getStoreLogo());
@@ -208,36 +172,6 @@ public class Store extends BaseModel {
         String[] finalLotLang = getLongitudeLatitude(store.getStoreGmap());
         store.setStoreLatitude(Double.parseDouble(finalLotLang[0]));
         store.setStoreLongitude(Double.parseDouble(finalLotLang[1]));
-
-        String storeAlias = slugGenerate(request.getStoreName());
-        Store alias = Store.find.where().raw("store_alias ~ '^" + storeAlias + "-[0-9]*$' ORDER BY store_alias DESC limit 1").findUnique();
-
-        // if alias exist, check store alias
-        if (alias != null) {
-            String[] tmpAlias = alias.storeAlias.split("-");
-            String aliasName = tmpAlias[0];
-            int currentindex = Integer.parseInt(tmpAlias[1]);
-            int nextIndex = currentindex + 1;
-
-            // if store alias == existing alias, check again
-            if (storeAlias.equalsIgnoreCase(aliasName)) {
-                Store getStore = Store.find.byId(id);
-                if (getStore.storeAlias == null || getStore.storeAlias.trim().isEmpty()) {
-                    store.setStoreAlias(storeAlias + "-" + nextIndex);
-                } else {
-                    String[] tmpCurrentAlias = getStore.storeAlias.split("-");
-                    String currentAliasName = tmpCurrentAlias[0];
-                    // if store alias != current store alias update store alias (e.g mystore != mynewstore)
-                    if (!storeAlias.equalsIgnoreCase(currentAliasName)) {
-                        store.setStoreAlias(storeAlias + "-" + nextIndex);
-                    }
-                }
-            }
-        } else {
-            // create new store alias
-            store.setStoreAlias(storeAlias + "-1");
-        }
-
     }
 
     public static String[] getLongitudeLatitude(String paramGmap) {
@@ -296,6 +230,15 @@ public class Store extends BaseModel {
 
     public static List<Store> findAllStoreIsActiveByMerchant(Merchant merchant) {
         return find.where().eq("isDeleted", false).eq("merchant", merchant).eq("isActive", true).findList();
+    }
+
+    public static List<Store> findAllStoreByMerchant(Long merchantId) {
+        return find.where()
+                .eq("t0.is_deleted", false)
+                .eq("t0.merchant_id", merchantId)
+                .eq("t0.is_active", true)
+                .orderBy().asc("t0.id")
+                .findList();
     }
 
     public static List<Store> getTotalDataPage(Query<Store> reqQuery) {
