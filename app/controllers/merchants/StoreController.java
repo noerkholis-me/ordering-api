@@ -58,6 +58,11 @@ public class StoreController extends BaseController {
                     response.setBaseResponse(0, 0, 0, validation, null);
                     return badRequest(Json.toJson(response));
                 } else {
+                    Store storeName = StoreRepository.findByName(storeRequest.getStoreName());
+                    if (storeName != null) {
+                        response.setBaseResponse(0, 0, 0, "Nama toko sudah digunakan.", null);
+                        return badRequest(Json.toJson(response));
+                    }
                     Transaction trx = Ebean.beginTransaction();
                     try {
                         Store store = new Store(storeRequest, ownMerchant);
@@ -93,21 +98,27 @@ public class StoreController extends BaseController {
             JsonNode json = request().body().asJson();
             try {
                 StoreRequest storeRequest = objectMapper.readValue(json.toString(), StoreRequest.class);
-                String validation = validateRequest(storeRequest);
-                if (validation != null) {
-                    response.setBaseResponse(0, 0, 0, validation, null);
-                    return badRequest(Json.toJson(response));
-                }
                 Transaction trx = Ebean.beginTransaction();
                 try {
+                    String validation = validateRequest(storeRequest);
+                    if (validation != null) {
+                        response.setBaseResponse(0, 0, 0, validation, null);
+                        return badRequest(Json.toJson(response));
+                    }
                     Store store = Store.findById(id);
                     if (store == null) {
-                        response.setBaseResponse(0, 0, 0, " Store is not found.", null);
+                        response.setBaseResponse(0, 0, 0, "Store is not found.", null);
                         return badRequest(Json.toJson(response));
-                    } else {
-                        store.setStore(storeRequest, store);
-                        store.update();
                     }
+                    Store storeName = StoreRepository.findByName(storeRequest.getStoreName());
+                    if (storeName != null && !storeName.id.equals(id)) {
+                        response.setBaseResponse(0, 0, 0, "Nama toko sudah digunakan.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+
+                    store.setStore(storeRequest, store);
+                    store.update();
+
                     trx.commit();
 
                     response.setBaseResponse(1, 0, 1, success + " Store updated successfully", store);
@@ -121,7 +132,7 @@ public class StoreController extends BaseController {
                 }
             } catch (Exception e) {
                 Logger.info("Error: " + e.getMessage());
-                response.setBaseResponse(0, 0, 0, error, null);
+                response.setBaseResponse(0, 0, 0, error + ": " + e.getMessage(), null);
                 return internalServerError(Json.toJson(response));
             }
         }
@@ -407,10 +418,16 @@ public class StoreController extends BaseController {
                 String[] parts = linkQrProductMerchant.split("/");
                 qrProductMerchantUrl = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+"home/"+store.storeCode+"/"+store.id+"/"+productMerchant.getMerchant().id+"/"+parts[4]+"/"+parts[5];
             }
+            String qrProductMerchantUrlAlias = null;
+            if (linkQrProductMerchant != null) {
+                String[] parts = linkQrProductMerchant.split("/");
+                qrProductMerchantUrlAlias = parts[0]+"/"+parts[1]+"/"+parts[2]+"/"+"home/"+store.getStoreAlias()+"/"+store.id+"/"+productMerchant.getMerchant().id+"/"+parts[4]+"/"+parts[5];
+            }
             ProductStoreResponseForStore productStoreResponse = new ProductStoreResponseForStore();
             productStoreResponse.setProductId(productMerchant.id);
             productStoreResponse.setProductName(productMerchant.getProductName());
             productStoreResponse.setProductStoreQrCode(qrProductMerchantUrl);
+            productStoreResponse.setProductStoreQrCodeAlias(qrProductMerchantUrlAlias);
             list.add(productStoreResponse);
         }
 

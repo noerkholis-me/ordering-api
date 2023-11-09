@@ -20,4 +20,7 @@ public class ProductStoreResponseForStore {
 
     @JsonProperty("product_store_qr_code")
     public String productStoreQrCode;
+
+    @JsonProperty("product_store_qr_code_alias")
+    public String productStoreQrCodeAlias;
 }

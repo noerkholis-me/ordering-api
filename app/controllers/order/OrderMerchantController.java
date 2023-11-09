@@ -77,11 +77,6 @@ public class OrderMerchantController extends BaseController {
                     }
                 }
 
-                if (orders.isEmpty() || totalData == 0) {
-                    response.setBaseResponse(totalData, offset, limit, success + " Showing data order", orderLists);
-                    return ok(Json.toJson(response));
-                }
-
                 response.setBaseResponse(totalData, offset, limit, success + " Berhasil menampilkan data order", listResponses(orders, productType));
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
