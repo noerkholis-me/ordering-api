@@ -1,6 +1,7 @@
 package controllers.brand;
 
 import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Query;
 import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,26 +11,30 @@ import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
-import dtos.brand.*;
-import models.*;
-import models.merchant.*;
+import dtos.brand.BrandDetailResponse;
+import dtos.brand.BrandMerchantResponse;
+import models.BrandMerchant;
+import models.Merchant;
+import models.ProductStore;
+import models.Store;
+import models.SubsCategoryMerchant;
+import models.merchant.ProductMerchant;
+import models.merchant.ProductMerchantDescription;
+import models.merchant.ProductMerchantDetail;
 import play.Logger;
 import play.libs.Json;
-import play.mvc.BodyParser;
 import play.mvc.Http;
 import play.mvc.Result;
-import repository.*;
-import dtos.product.*;
+import repository.BrandMerchantRepository;
+import repository.ProductMerchantDescriptionRepository;
+import repository.ProductMerchantDetailRepository;
 import repository.ProductMerchantRepository;
-import models.merchant.ProductMerchant;
+import repository.ProductStoreRepository;
+import repository.SubsCategoryMerchantRepository;
 
-import java.io.File;
-import java.util.*;
-import com.avaje.ebean.Query;
-import utils.ImageDirectory;
-import utils.ImageUtil;
-
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Api(value = "/merchants/brand", description = "Brand Merchant")
 public class BrandMerchantController extends BaseController {
@@ -138,6 +143,41 @@ public class BrandMerchantController extends BaseController {
     @ApiOperation(value = "Get all brand list.", notes = "Returns list of brand.\n" + swaggerInfo
             + "", response = BrandMerchant.class, responseContainer = "List", httpMethod = "GET")
     public static Result listBrand(String filter, String sort, int offset, int limit, String isActive) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            try {
+                int totalData = BrandMerchantRepository.getDataBrand(ownMerchant.id, isActive, sort, filter, 0, 0).size();
+                List<BrandMerchant> responseIndex = BrandMerchantRepository.getDataBrand(ownMerchant.id, isActive, sort, filter, offset, limit);
+                List<BrandMerchantResponse> responses = new ArrayList<>();
+                for (BrandMerchant data : responseIndex) {
+                    BrandMerchantResponse response = new BrandMerchantResponse();
+                    response.setId(data.id);
+                    response.setBrandName(data.getBrandName());
+                    response.setBrandType(data.getBrandType());
+                    response.setBrandDescription(data.getBrandDescription());
+                    response.setImageWeb(data.getImageWeb());
+                    response.setImageMobile(data.getImageMobile());
+                    response.setIconWeb(data.getIconWeb());
+                    response.setIconMobile(data.getIconMobile());
+                    response.setIsDeleted(data.isDeleted);
+                    response.setIsActive(data.isActive());
+                    response.setMerchantId(data.getMerchant().id);
+                    responses.add(response);
+                }
+                response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data", responses);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } else if (ownMerchant == null) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    public static Result listBrandPOS(String filter, String sort, int offset, int limit, String isActive) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant != null) {
             try {
