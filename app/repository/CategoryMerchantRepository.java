@@ -3,10 +3,7 @@ package repository;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
-import models.BrandMerchant;
-import models.Merchant;
-import models.CategoryMerchant;
-import models.QrGroupStore;
+import models.*;
 import play.db.ebean.Model;
 import com.avaje.ebean.Expr;
 import com.avaje.ebean.ExpressionList;
@@ -21,6 +18,17 @@ public class CategoryMerchantRepository extends Model {
 
     public static Finder<Long, CategoryMerchant> find = new Finder<>(Long.class, CategoryMerchant.class);
 
+	public static CategoryMerchant findById(Long id) {
+		try {
+			return find.where()
+					.eq("t0.id", id)
+					.eq("t0.is_deleted", Boolean.FALSE)
+					.findUnique();
+		} catch (PersistenceException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
     public static CategoryMerchant findByIdAndMerchantId(Long id, Merchant merchant) {
         try {
 			return find.where()
@@ -141,5 +149,39 @@ public class CategoryMerchantRepository extends Model {
 		Query<CategoryMerchant> query = Ebean.find(CategoryMerchant.class).setRawSql(rawSql);
 
 		return query.findPagingList(0).getPage(0).getList().size();
+	}
+
+	public static List<CategoryMerchant> getTotalDataApp(Query<CategoryMerchant> reqQuery, String sort, String filter, int offset, int limit)
+			throws IOException {
+		Query<CategoryMerchant> query = reqQuery;
+
+		if (!"".equals(sort)) {
+			query = query.orderBy(sort);
+		} else {
+			query = query.orderBy("t0.updated_at desc");
+		}
+
+		ExpressionList<CategoryMerchant> exp = query.where();
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+
+		exp = exp.disjunction();
+		exp = exp.ilike("t0.category_name", "%" + filter + "%");
+		// exp = exp.endjunction();
+
+		query = exp.query();
+
+		int total = query.findList().size();
+
+		if (limit != 0) {
+			query = query.setMaxRows(limit);
+		}
+		if (filter != "" && filter != null) {
+			offset = 0;
+		}
+
+		List<CategoryMerchant> resData = query.findPagingList(limit).getPage(offset).getList();
+
+		return resData;
 	}
 }
