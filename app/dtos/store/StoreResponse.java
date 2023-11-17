@@ -37,6 +37,9 @@ public class StoreResponse {
 
     @JsonProperty("store_logo")
     public String storeLogo;
+    
+    @JsonProperty("store_banner")
+    public String storeBanner;
 
     @JsonProperty("store_qr_code")
     private String storeQrCode;
@@ -95,6 +98,7 @@ public class StoreResponse {
         this.setStoreAlias(store.getStoreAlias());
         this.setStorePhone(store.getStorePhone());
         this.setStoreLogo(store.getStoreLogo());
+        this.setStoreBanner(store.getStoreBanner());
         this.setStoreQrCode(store.getStoreQrCode());
         this.setStoreQueueUrl(Helper.MOBILEQR_URL + store.storeCode + "/queue");
         this.setStoreQrCodeAlias(Helper.MOBILEQR_URL + store.storeAlias);
