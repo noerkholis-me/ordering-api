@@ -100,6 +100,9 @@ public class Store extends BaseModel {
     @Column(name = "store_logo")
     public String storeLogo;
 
+    @Column(name = "store_banner")
+    public String storeBanner;
+
     @Column(name = "store_alias")
     public String storeAlias;
 
@@ -136,6 +139,7 @@ public class Store extends BaseModel {
         this.setStorePhone(request.getStorePhone());
         this.setStoreAddress(request.getAddress());
         this.setStoreLogo(request.getStoreLogo());
+        this.setStoreBanner(request.getStoreBanner());
         this.setIsActive(true);
         this.setStatusOpenStore(true);
         this.setShipperProvince(ShipperProvince.findById(request.getProvinceId()));
@@ -158,6 +162,7 @@ public class Store extends BaseModel {
         store.setStorePhone(request.getStorePhone());
         store.setStoreAddress(request.getAddress());
         store.setStoreLogo(request.getStoreLogo());
+        store.setStoreBanner(request.getStoreBanner());
         store.setIsActive(true);
         store.setStatusOpenStore(request.getStatusOpenStore() != null && request.getStatusOpenStore());
         store.setOpenAt("".equals(request.getOpenAt()) ? null : request.getOpenAt());
