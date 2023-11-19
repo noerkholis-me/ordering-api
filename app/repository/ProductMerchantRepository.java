@@ -1,15 +1,13 @@
 package repository;
 
 import com.avaje.ebean.Ebean;
-import com.avaje.ebean.Expr;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
 import models.Merchant;
-import models.Product;
-import models.Store;
-import models.merchant.*;
+import models.UserMerchant;
+import models.merchant.ProductMerchant;
 import play.db.ebean.Model;
 
 import java.sql.Timestamp;
@@ -27,6 +25,10 @@ public class ProductMerchantRepository extends Model {
 
     public static ProductMerchant findById(Long id, Merchant merchant) {
         return find.where().eq("id", id).eq("merchant", merchant).findUnique();
+    }
+
+    public static ProductMerchant findById(Long id, UserMerchant userMerchant) {
+        return find.where().eq("id", id).eq("merchant", userMerchant.getRole().getMerchant()).findUnique();
     }
 
     public static ProductMerchant findByIdProductRecommend(Long id, Long merchantId) {
@@ -54,7 +56,7 @@ public class ProductMerchantRepository extends Model {
         return productMerchantQuery.findList().size();
     }
 
-    public static List<ProductMerchant> getTotalDataPage (Query<ProductMerchant> reqQuery) {
+    public static List<ProductMerchant> getTotalDataPage(Query<ProductMerchant> reqQuery) {
         Query<ProductMerchant> query = reqQuery;
         ExpressionList<ProductMerchant> exp = query.where();
         query = exp.query();
@@ -71,10 +73,10 @@ public class ProductMerchantRepository extends Model {
         }
 
         ExpressionList<ProductMerchant> exp = query.where();
-        
+
         exp = exp.disjunction();
-		exp = exp.ilike("t0.product_name", "%" + filter + "%");
-		exp = exp.ilike("t0.no_sku", "%" + filter + "%");
+        exp = exp.ilike("t0.product_name", "%" + filter + "%");
+        exp = exp.ilike("t0.no_sku", "%" + filter + "%");
 
         query = exp.query();
         if (limit != 0) {
@@ -95,8 +97,8 @@ public class ProductMerchantRepository extends Model {
         }
 
         String querySql = "SELECT pm.id FROM product_merchant pm "
-            + "WHERE pm.merchant_id = " + merchantId + " AND pm.is_deleted = false AND pm.is_active = '" + isActive + "' "
-            + "ORDER BY pm.id " + sorting;
+                + "WHERE pm.merchant_id = " + merchantId + " AND pm.is_deleted = false AND pm.is_active = '" + isActive + "' "
+                + "ORDER BY pm.id " + sorting;
 
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
         Query<ProductMerchant> query = Ebean.find(ProductMerchant.class).setRawSql(rawSql);
@@ -129,12 +131,12 @@ public class ProductMerchantRepository extends Model {
 
     public static List<ProductMerchant> findProductMerchant(Long merchantId, Long storeId) {
         String querySql = "SELECT pm.id FROM product_merchant pm "
-            + "JOIN product_merchant_detail pmd ON pm.id = pmd.product_merchant_id "
-            + "JOIN product_store ps ON pm.id = ps.product_id "
-            + "WHERE pm.merchant_id = " + merchantId + " AND pm.is_deleted = false AND pm.is_active = true "
-            + "AND pmd.is_deleted = false "
-            + "AND ps.store_id = " + storeId + " AND ps.is_deleted = false AND ps.is_active = true "
-            + "ORDER BY pm.id ASC";
+                + "JOIN product_merchant_detail pmd ON pm.id = pmd.product_merchant_id "
+                + "JOIN product_store ps ON pm.id = ps.product_id "
+                + "WHERE pm.merchant_id = " + merchantId + " AND pm.is_deleted = false AND pm.is_active = true "
+                + "AND pmd.is_deleted = false "
+                + "AND ps.store_id = " + storeId + " AND ps.is_deleted = false AND ps.is_active = true "
+                + "ORDER BY pm.id ASC";
 
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
 
@@ -143,12 +145,12 @@ public class ProductMerchantRepository extends Model {
 
     public static List<ProductMerchant> findAllProductMerchant(Long merchantId, Long storeId) {
         String querySql = "SELECT pm.id FROM product_merchant pm "
-            + "JOIN product_merchant_detail pmd ON pm.id = pmd.product_merchant_id "
-            + "JOIN product_store ps ON pm.id = ps.product_id "
-            + "WHERE pm.merchant_id = " + merchantId + " AND pm.is_deleted = false AND pm.is_active = true "
-            + "AND pmd.is_deleted = false "
-            + "AND ps.store_id = " + storeId + " AND ps.is_deleted = false AND ps.is_active = true "
-            + "ORDER BY pm.id ASC";
+                + "JOIN product_merchant_detail pmd ON pm.id = pmd.product_merchant_id "
+                + "JOIN product_store ps ON pm.id = ps.product_id "
+                + "WHERE pm.merchant_id = " + merchantId + " AND pm.is_deleted = false AND pm.is_active = true "
+                + "AND pmd.is_deleted = false "
+                + "AND ps.store_id = " + storeId + " AND ps.is_deleted = false AND ps.is_active = true "
+                + "ORDER BY pm.id ASC";
 
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
 
