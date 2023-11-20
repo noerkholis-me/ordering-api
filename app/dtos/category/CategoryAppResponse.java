@@ -16,10 +16,10 @@ public class CategoryAppResponse {
     @JsonProperty("category_name")
     public String categoryName;
 
-    @JsonProperty("icon")
+    @JsonProperty("banner")
     public String imageWeb;
 
-    @JsonProperty("banner")
+    @JsonProperty("icon")
     public String imageMobile;
 
 }
