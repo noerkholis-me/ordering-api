@@ -33,6 +33,9 @@ public class ProductMerchantDescription extends BaseModel {
     @JoinColumn(name = "product_merchant_detail_id", referencedColumnName = "id")
     private ProductMerchantDetail productMerchantDetail;
 
+    public static Finder<Long, ProductMerchantDescription> find = new Finder<Long, ProductMerchantDescription>(Long.class, ProductMerchantDescription.class);
+
+
     public ProductMerchantDescription(ProductMerchantDetail productMerchantDetail, ProductRequest productRequest) {
         this.setShortDescription(productRequest.getProductDescriptionRequest().getShortDescription());
         this.setLongDescription(productRequest.getProductDescriptionRequest().getLongDescription());

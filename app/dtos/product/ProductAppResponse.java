@@ -30,5 +30,22 @@ public class ProductAppResponse {
     @com.fasterxml.jackson.annotation.JsonProperty("discount")
     public double discount;
 
+    @com.fasterxml.jackson.annotation.JsonProperty("category_merchant_id")
+    public Long categoryId;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("sub_category_merchant_id")
+    public Long subCategoryId;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("subs_category_merchant_id")
+    public Long subsCategoryId;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("brand_merchant_id")
+    public Long brandId;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("description")
+    public String description;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("long_description")
+    public String longDescription;
 }
 

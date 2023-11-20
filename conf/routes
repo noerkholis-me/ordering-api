@@ -693,4 +693,4 @@ GET     /data/subcategory/list                         controllers.categories.Su
 GET     /data/subscategory/list                        controllers.categories.SubCategoryMerchantController.listSubsCategoryApp(subcategory_id:Long ?= 0, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 
 # Product App
-GET     /data/product/list                             controllers.product.ProductAppController.listProduct(merchant_id:Long ?= 0, store_id:Long ?= 0, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET     /data/product/list                             controllers.product.ProductAppController.listProduct(merchant_id:Long ?= 0, store_id:Long ?= 0, key:String ?= null, value:String ?= null, sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
