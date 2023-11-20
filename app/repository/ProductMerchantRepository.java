@@ -6,12 +6,14 @@ import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
+import models.CategoryMerchant;
 import models.Merchant;
 import models.Product;
 import models.Store;
 import models.merchant.*;
 import play.db.ebean.Model;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -153,6 +155,40 @@ public class ProductMerchantRepository extends Model {
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
 
         return Ebean.find(ProductMerchant.class).setRawSql(rawSql).findList();
+    }
+
+    public static List<ProductMerchant> getTotalDataApp(Query<ProductMerchant> reqQuery, String sort, String filter, int offset, int limit)
+            throws IOException {
+        Query<ProductMerchant> query = reqQuery;
+
+        if (!"".equals(sort)) {
+            query = query.orderBy(sort);
+        } else {
+            query = query.orderBy("t0.updated_at desc");
+        }
+
+        ExpressionList<ProductMerchant> exp = query.where();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+
+        exp = exp.disjunction();
+        exp = exp.ilike("t0.product_name", "%" + filter + "%");
+        // exp = exp.endjunction();
+
+        query = exp.query();
+
+        int total = query.findList().size();
+
+        if (limit != 0) {
+            query = query.setMaxRows(limit);
+        }
+        if (filter != "" && filter != null) {
+            offset = 0;
+        }
+
+        List<ProductMerchant> resData = query.findPagingList(limit).getPage(offset).getList();
+
+        return resData;
     }
 
 }
