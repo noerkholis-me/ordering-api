@@ -371,12 +371,6 @@ PUT     /merchant/category/:id/update                  controllers.categories.Ca
 GET     /merchant/category/:id/detail                  controllers.categories.CategoryMerchantController.viewCategory(id:Long)
 PUT     /merchant/category/:id/status                  controllers.categories.CategoryMerchantController.setStatus(id: Long)
 
-#CATEGORY KIOSK
-GET     /data/category/list                            controllers.categories.CategoryMerchantController.listCategoryApp(merchant_id:Long ?= 0, store_id:Long ?= 0, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
-GET     /data/subcategory/list                         controllers.categories.SubCategoryMerchantController.listSubCategoryApp(category_id:Long ?= 0, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
-GET     /data/subscategory/list                        controllers.categories.SubCategoryMerchantController.listSubsCategoryApp(subcategory_id:Long ?= 0, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
-
-
 #SUB CATEGORY
 GET     /merchant/subcategory/list                        controllers.categories.SubCategoryMerchantController.listSubCategory(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 POST    /merchant/subcategory/:id                         controllers.categories.SubCategoryMerchantController.createSubCategory(id:Long)
@@ -692,3 +686,11 @@ POST 	/webhook/shipper-status 							controllers.users.WebhookShipperController.
 ####### for tracking shipper Sandbox ###########
 GET 	/shipper/tracking-shipper 				            controllers.users.CheckoutOrderController.getTrackingShipper(id:String)
 GET 	/shipper/tracking-shipment-status 				    controllers.users.CheckoutOrderController.getShipmentStatus(id:String)
+
+#CATEGORY KIOSK
+GET     /data/category/list                            controllers.categories.CategoryMerchantController.listCategoryApp(merchant_id:Long ?= 0, store_id:Long ?= 0, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET     /data/subcategory/list                         controllers.categories.SubCategoryMerchantController.listSubCategoryApp(category_id:Long ?= 0, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET     /data/subscategory/list                        controllers.categories.SubCategoryMerchantController.listSubsCategoryApp(subcategory_id:Long ?= 0, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+
+# Product App
+GET     /data/product/list                             controllers.product.ProductAppController.listProduct(merchant_id:Long ?= 0, store_id:Long ?= 0, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
