@@ -662,6 +662,12 @@ GET         /pos/:storeId/get-order-information                       controller
 GET         /pos/category-list                             controllers.minipos.ProductController.listCategoryMiniPOS()
 GET         /pos/product-list                             controllers.minipos.ProductController.listProductMiniPos(offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "")
 
+GET         /pos/product/list                                       controllers.product.ProductPosController.getAllProducts(merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET         /pos/product/:id                                        controllers.product.ProductPosController.getProductById(id: Long)
+POST        /pos/product                                            controllers.product.ProductPosController.createProduct()
+PUT         /pos/product/:id                                        controllers.product.ProductPosController.editProduct(id: Long)
+DELETE      /pos/product/:id                                        controllers.product.ProductPosController.deleteProduct(id: Long)
+
 GET         /pos/session-cashier                   controllers.merchants.CashierHistoryController.getSessionCashier()
 GET         /pos/:storeId/get-total-amount-cashier          controllers.merchants.CashierHistoryController.getAmountCashier(storeId : Long)
 
