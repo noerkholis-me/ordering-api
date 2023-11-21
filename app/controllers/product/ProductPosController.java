@@ -173,7 +173,7 @@ public class ProductPosController extends BaseController {
 
     public static Result editProduct(Long id) {
         UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
-        if (userMerchant != null) {
+        if (userMerchant == null) {
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return notFound(Json.toJson(response));
         }
@@ -182,22 +182,6 @@ public class ProductPosController extends BaseController {
         JsonNode json = request().body().asJson();
         try {
             ProductPosRequest productRequest = objectMapper.readValue(json.toString(), ProductPosRequest.class);
-            if (productRequest.getProductName().length() > 50) {
-                response.setBaseResponse(0, 0, 0, "Jumlah karakter tidak boleh melebihi 50 karakter", null);
-                return badRequest(Json.toJson(response));
-            }
-            if ((productRequest.getProductDetailRequest().getProductPrice() != null) && productRequest.getProductDetailRequest().getProductPrice().compareTo(BigDecimal.ZERO) < 0) {
-                response.setBaseResponse(0, 0, 0, "Harga tidak boleh kurang dari 0", null);
-                return badRequest(Json.toJson(response));
-            }
-            if ((productRequest.getProductDetailRequest().getDiscount() != null) && productRequest.getProductDetailRequest().getDiscount().compareTo(0D) < 0) {
-                response.setBaseResponse(0, 0, 0, "Diskon tidak boleh kurang dari 0", null);
-                return badRequest(Json.toJson(response));
-            }
-            if ((productRequest.getProductDetailRequest().getProductPriceAfterDiscount() != null) && productRequest.getProductDetailRequest().getProductPriceAfterDiscount().compareTo(BigDecimal.ZERO) < 0) {
-                response.setBaseResponse(0, 0, 0, "Harga Product Setelah Diskon Cashback tidak boleh kurang dari 0", null);
-                return badRequest(Json.toJson(response));
-            }
             String validateRequest = ProductValidator.validateRequest(productRequest);
             if (validateRequest != null) {
                 response.setBaseResponse(0, 0, 0, validateRequest, null);
