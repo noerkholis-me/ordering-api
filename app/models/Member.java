@@ -207,6 +207,10 @@ public class Member extends BaseModel {
         return find.where().raw("t0.email = '" + email + "' or t0.phone = '" + phoneNumber + "'").eq("t0.is_deleted", false).findUnique();
     }
 
+    public static Member findDataCustomerByName(String name, String phoneNumber){
+        return find.where().raw("t0.full_name = '" + name + "' AND t0.phone = '" + phoneNumber + "'").eq("t0.is_deleted", false).findUnique();
+    }
+
     public static Member findByIdMember(Long idUser){
         return find.where().raw("t0.id = " + idUser).eq("t0.is_deleted", false).findUnique();
     }
