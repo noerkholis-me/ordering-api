@@ -170,17 +170,16 @@ public class ProductMerchantRepository extends Model {
         ExpressionList<ProductMerchant> exp = query.where();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
-        exp = exp.disjunction();
-        exp = exp.ilike("t0.product_name", "%" + filter + "%");
-
         if (key != null && value != null) {
             try {
-                exp = exp.disjunction();
                 exp = exp.eq("t0." + key, Long.parseLong(value));
             } catch (Exception e) {
-                exp = exp.disjunction();
                 exp = exp.ilike("t0." + key, "%" + value + "%");
             }
+        }
+
+        if (filter != null) {
+            exp = exp.ilike("t0.product_name", "%" + filter + "%");
         }
 
         query = exp.query();
