@@ -58,6 +58,7 @@ public class ProductAppController extends BaseController {
                 response.setBrandId(product.getBrandMerchant().id);
                 response.setDescription(description.getShortDescription());
                 response.setLongDescription(description.getLongDescription());
+                response.setPrice(detail.getProductPrice().intValue());
                 responses.add(response);
 
             }
