@@ -157,7 +157,7 @@ public class ProductMerchantRepository extends Model {
         return Ebean.find(ProductMerchant.class).setRawSql(rawSql).findList();
     }
 
-    public static List<ProductMerchant> getTotalDataApp(Query<ProductMerchant> reqQuery, String sort, String key, String value, int offset, int limit)
+    public static List<ProductMerchant> getTotalDataApp(Query<ProductMerchant> reqQuery, String sort, String filter, String key, String value, int offset, int limit)
             throws IOException {
         Query<ProductMerchant> query = reqQuery;
 
@@ -170,6 +170,8 @@ public class ProductMerchantRepository extends Model {
         ExpressionList<ProductMerchant> exp = query.where();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
+        exp = exp.disjunction();
+        exp = exp.ilike("t0.product_name", "%" + filter + "%");
 
         if (key != null && value != null) {
             try {
@@ -189,6 +191,9 @@ public class ProductMerchantRepository extends Model {
             query = query.setMaxRows(limit);
         }
         if (key != "" && key != null) {
+            offset = 0;
+        }
+        if (filter != "" && filter != null) {
             offset = 0;
         }
 

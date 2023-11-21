@@ -26,7 +26,7 @@ public class ProductAppController extends BaseController {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static Result listProduct(Long merchantId, Long storeId, String key, String value, String sort, int offset, int limit) {
+    public static Result listProduct(Long merchantId, Long storeId, String filter, String key, String value, String sort, int offset, int limit) {
 
         Store store = Store.find.byId(storeId);
         if (store == null) {
@@ -38,7 +38,7 @@ public class ProductAppController extends BaseController {
 
             Query<ProductMerchant> query = ProductMerchantRepository.find.order("created_at");
             int totalData = query.findRowCount();
-            List<ProductMerchant> products = ProductMerchantRepository.getTotalDataApp(query, sort, key, value, offset, limit);
+            List<ProductMerchant> products = ProductMerchantRepository.getTotalDataApp(query, sort, filter, key, value, offset, limit);
 
             List<ProductAppResponse> responses = new ArrayList<>();
 
