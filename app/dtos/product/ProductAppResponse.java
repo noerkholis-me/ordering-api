@@ -21,6 +21,9 @@ public class ProductAppResponse {
     @com.fasterxml.jackson.annotation.JsonProperty("image")
     public String image;
 
+    @com.fasterxml.jackson.annotation.JsonProperty("base_price")
+    public int basePrice;
+
     @com.fasterxml.jackson.annotation.JsonProperty("price")
     public int price;
 
