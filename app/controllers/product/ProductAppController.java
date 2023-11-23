@@ -13,6 +13,7 @@ import models.merchant.ProductMerchantDetail;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import repository.ProductMerchantDetailRepository;
 import repository.ProductMerchantRepository;
 
 import java.util.ArrayList;
@@ -36,29 +37,27 @@ public class ProductAppController extends BaseController {
 
         try {
 
-            Query<ProductMerchant> query = ProductMerchantRepository.find.order("created_at");
-            int totalData = query.findRowCount();
-            List<ProductMerchant> products = ProductMerchantRepository.getTotalDataApp(query, sort, filter, key, value, offset, limit);
+            int totalData = ProductMerchantDetailRepository.countTotalDataApp(merchantId, storeId, sort, filter, key, value);
+            List<ProductMerchantDetail> products = ProductMerchantDetailRepository.getTotalDataApp(merchantId, storeId, sort, filter, key, value, offset, limit);
 
             List<ProductAppResponse> responses = new ArrayList<>();
 
-            for(ProductMerchant product : products) {
+            for(ProductMerchantDetail product : products) {
 
-                ProductMerchantDetail detail = ProductMerchantDetail.find.where().eq("product_merchant_id", product.id).findUnique();
-                ProductMerchantDescription description = ProductMerchantDescription.find.where().eq("product_merchant_detail_id", detail.id).findUnique();
+                ProductMerchantDescription description = ProductMerchantDescription.find.where().eq("product_merchant_detail_id", product.id).findUnique();
 
                 ProductAppResponse response = new ProductAppResponse();
                 response.setId(product.id);
-                response.setProductName(product.getProductName());
-                response.setDiscount(detail.getDiscount());
-                response.setImage(detail.getProductImageMain());
-                response.setCategoryId(product.getCategoryMerchant().id);
-                response.setSubCategoryId(product.getSubCategoryMerchant().id);
-                response.setSubsCategoryId(product.getSubsCategoryMerchant().id);
-                response.setBrandId(product.getBrandMerchant().id);
+                response.setProductName(product.getProductMerchant().getProductName());
+                response.setDiscount(product.getDiscount());
+                response.setImage(product.getProductImageMain());
+                response.setCategoryId(product.getProductMerchant().getCategoryMerchant().id);
+                response.setSubCategoryId(product.getProductMerchant().getSubCategoryMerchant().id);
+                response.setSubsCategoryId(product.getProductMerchant().getSubsCategoryMerchant().id);
+                response.setBrandId(product.getProductMerchant().getBrandMerchant().id);
                 response.setDescription(description.getShortDescription());
                 response.setLongDescription(description.getLongDescription());
-                response.setPrice(detail.getProductPrice().intValue());
+                response.setPrice(product.getProductPrice().intValue());
                 responses.add(response);
 
             }
