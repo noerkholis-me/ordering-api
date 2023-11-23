@@ -13,12 +13,7 @@ import models.Merchant;
 import models.SubCategoryMerchant;
 import models.SubsCategoryMerchant;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "product_merchant")
@@ -55,6 +50,10 @@ public class ProductMerchant extends BaseModel {
     @ManyToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name = "merchant_id", referencedColumnName = "id")
     public Merchant merchant;
+
+    @OneToOne(cascade = {CascadeType.ALL})
+    @JoinColumn(name = "id")
+    public ProductMerchantDetail productMerchantDetail;
 
     private Double rating;
 
