@@ -52,7 +52,7 @@ public class ProductMerchant extends BaseModel {
     public Merchant merchant;
 
     @OneToOne(cascade = {CascadeType.ALL})
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "product_merchant_detail_id")
     public ProductMerchantDetail productMerchantDetail;
 
     private Double rating;
