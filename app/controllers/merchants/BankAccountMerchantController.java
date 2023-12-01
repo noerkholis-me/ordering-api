@@ -48,9 +48,10 @@ public class BankAccountMerchantController extends BaseController {
                     }
                 }
 
-                Optional<BankAccountMerchant> bankAccountNumberMerchant = BankAccountMerchantRepository.findByAccountNumberNotPrimary(request.getAccountNumber());
+                // # Validasi account bank only for one merchant
+                Optional<BankAccountMerchant> bankAccountNumberMerchant = BankAccountMerchantRepository.findByAccountNumberInSameMerchant(merchant, request.getAccountNumber());
                 if (bankAccountNumberMerchant.isPresent()) {
-                    response.setBaseResponse(0, 0, 0, "account number "+ request.getAccountNumber() +" already exist", null);
+                    response.setBaseResponse(0, 0, 0, "Rekening bank "+ request.getAccountNumber() +" sudah terdaftar di merchant ini.", null);
                     return badRequest(Json.toJson(response));
                 }
 
