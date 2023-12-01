@@ -42,7 +42,7 @@ public class FeeSettingMerchantController extends BaseController {
                     feeSetting.setService(feeSettingRequest.getService());
                     feeSetting.setPlatformFeeType(feeSettingRequest.getPlatformFeeType());
                     feeSetting.setPlatformFee(feeSettingRequest.getPlatformFee());
-                    feeSetting.setPaymentFeeType("OWNER");
+                    feeSetting.setPaymentFeeType(feeSettingRequest.getPaymentFeeType());
                     feeSetting.setPaymentFee(feeSettingRequest.getPaymentFee());
                     feeSetting.setUpdatedBy(feeSettingRequest.getUpdatedBy());
                     feeSetting.setMerchant(merchant);
