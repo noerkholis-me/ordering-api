@@ -5,7 +5,6 @@ import com.avaje.ebean.Query;
 import models.BaseModel;
 import models.Merchant;
 import models.merchant.BankAccountMerchant;
-import models.merchant.TableMerchant;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +23,10 @@ public class BankAccountMerchantRepository extends BaseModel {
 
     public static Optional<BankAccountMerchant> findByAccountNumberNotPrimary(String accountNumber) {
         return Optional.ofNullable(find.where().eq("accountNumber", accountNumber).findUnique());
+    }
+
+    public static Optional<BankAccountMerchant> findByAccountNumberInSameMerchant(Merchant merchant, String accountNumber) {
+        return Optional.ofNullable(find.where().eq("merchant", merchant).eq("accountNumber", accountNumber).findUnique());
     }
 
     public static List<BankAccountMerchant> findAll(Merchant merchant) {
@@ -65,7 +68,6 @@ public class BankAccountMerchantRepository extends BaseModel {
         }
         return query.findPagingList(limit).getPage(offset).getList();
     }
-
 
 
 }
