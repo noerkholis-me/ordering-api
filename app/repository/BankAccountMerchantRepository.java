@@ -1,10 +1,14 @@
 package repository;
 
+import com.avaje.ebean.Ebean;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
+import com.avaje.ebean.RawSql;
+import com.avaje.ebean.RawSqlBuilder;
 import models.BaseModel;
 import models.Merchant;
 import models.merchant.BankAccountMerchant;
+import models.transaction.Order;
 
 import java.util.List;
 import java.util.Optional;
@@ -69,5 +73,19 @@ public class BankAccountMerchantRepository extends BaseModel {
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
+    public static BankAccountMerchant findByMerchantAccountNumberPrimary(Merchant merchant) {
+        return find.where()
+                .eq("merchant", merchant)
+                .eq("isDeleted", false)
+                .eq("isPrimary",true)
+                .findUnique();
+    }
+
+    public static BankAccountMerchant findByIdIsNotDeleted(Long id) {
+        return find.where()
+                .eq("id", id)
+                .eq("isDeleted", false)
+                .findUnique();
+    }
 
 }

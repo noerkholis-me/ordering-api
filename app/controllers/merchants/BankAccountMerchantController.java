@@ -258,24 +258,23 @@ public class BankAccountMerchantController extends BaseController {
                 ChangePrimaryAccount changePrimaryAccount = objectMapper.readValue(json.toString(), ChangePrimaryAccount.class);
                 Transaction trx = Ebean.beginTransaction();
                 try {
-                    List<BankAccountMerchant> bankAccountMerchants = BankAccountMerchantRepository.findAll(merchant);
-                    if (bankAccountMerchants.isEmpty()) {
-                        response.setBaseResponse(0, 0, 0, notFound, null);
-                        return notFound(Json.toJson(response));
+                    // set current account primary to false
+                    BankAccountMerchant bankAccountPrimary = BankAccountMerchantRepository.findByMerchantAccountNumberPrimary(merchant);
+                    if (bankAccountPrimary != null) {
+                        bankAccountPrimary.setIsPrimary(false);
+                        bankAccountPrimary.update();
                     }
-                    bankAccountMerchants.stream().forEach(o -> {
-                        if (changePrimaryAccount.getId() == o.id && o.getIsPrimary() != Boolean.TRUE) {
-                            o.setIsPrimary(changePrimaryAccount.getIsPrimary());
-                            o.update();
-                        } else {
-                            o.setIsPrimary(Boolean.FALSE);
-                            o.update();
-                        }
-                    });
+
+                    // set account primary by request
+                    BankAccountMerchant bankAccountMerchant = BankAccountMerchantRepository.findByIdIsNotDeleted(changePrimaryAccount.getId());
+                    if (bankAccountMerchant != null) {
+                        bankAccountMerchant.setIsPrimary(changePrimaryAccount.getIsPrimary());
+                        bankAccountMerchant.update();
+                    }
 
                     trx.commit();
 
-                    response.setBaseResponse(1, offset, 1, success + " Change Is Priamry Bank Account", changePrimaryAccount.getId());
+                    response.setBaseResponse(1, offset, 1, "Berhasil mengubah rekening utama", changePrimaryAccount.getId());
                     return ok(Json.toJson(response));
                 } catch (Exception e) {
                     logger.error("Error while creating bank account", e);
