@@ -157,8 +157,10 @@ public class Store extends BaseModel {
     }
 
     public void setStore(StoreRequest request, Store store) {
+        if(!store.getStoreName().equals(request.getStoreName())) {
+            store.setStoreAlias(slugGenerateForUpdate(request.getStoreName()));
+        }
         store.setStoreName(request.getStoreName());
-        store.setStoreAlias(slugGenerate(request.getStoreName()));
         store.setStorePhone(request.getStorePhone());
         store.setStoreAddress(request.getAddress());
         store.setStoreLogo(request.getStoreLogo());
@@ -196,6 +198,17 @@ public class Store extends BaseModel {
             return slug;
         }
     }
+
+    public static String slugGenerateForUpdate(String input) {
+        String slug = Normalizer.normalize(input.toLowerCase(), Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .replaceAll("[^\\p{Alnum}]+", "");
+        slug = slug+"-1";
+        System.out.println("SLUG"+slug);
+
+        return slug;
+    }
+
 
     public static Store findById(Long id) {
         return find.where().eq("id", id).eq("is_deleted", false).eq("isActive", true).findUnique();
