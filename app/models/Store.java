@@ -204,7 +204,6 @@ public class Store extends BaseModel {
                 .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
                 .replaceAll("[^\\p{Alnum}]+", "");
         slug = slug+"-1";
-        System.out.println("SLUG"+slug);
 
         return slug;
     }

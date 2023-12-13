@@ -41,6 +41,15 @@ public class CategoryMerchantRepository extends Model {
 			return null;
 		}
     }
+
+		public static List<CategoryMerchant> findMerchantIdWithStatus(Long merchantId) {
+			return find.where()
+							.eq("t0.is_deleted", false)
+							.eq("t0.merchant_id", merchantId)
+							.eq("t0.is_active", true)
+							.orderBy().asc("t0.id")
+							.findList();
+		}
     
     public static CategoryMerchant findByNameAndMerchantId(String name, Merchant merchant) {
     	try {
