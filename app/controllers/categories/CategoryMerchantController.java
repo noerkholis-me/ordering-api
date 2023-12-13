@@ -24,6 +24,7 @@ import play.libs.Json;
 import play.mvc.Result;
 import repository.CategoryMerchantRepository;
 import repository.ProductMerchantRepository;
+import repository.StoreRepository;
 import repository.SubCategoryMerchantRepository;
 import repository.SubsCategoryMerchantRepository;
 
@@ -329,9 +330,8 @@ public class CategoryMerchantController extends BaseController {
             return badRequest(Json.toJson(response));
         }
         try {
-            Query<CategoryMerchant> query = CategoryMerchantRepository.find.where().eq("merchant_id", merchantId).order("sequence");
-            int totalData = query.findRowCount();
-            List<CategoryMerchant> categoryMerchants = CategoryMerchantRepository.getTotalDataApp(query, sort, filter, offset, limit);
+            int totalData = CategoryMerchantRepository.findMerchantIdWithStatus(merchantId).size();
+            List<CategoryMerchant> categoryMerchants = CategoryMerchantRepository.findMerchantIdWithStatus(merchantId);
 
             List<CategoryAppResponse> responses = new ArrayList<>();
 
