@@ -293,8 +293,10 @@ public class ProductMerchantDetailRepository extends Model {
     }
 
 
-    public static List<ProductMerchantDetail> getTotalDataApp(Long merchantId, Long storeId, String sort, String filter, String key, String value, int offset, int limit) {
+    public static List<ProductMerchantDetail> getTotalDataApp(Long merchantId, Long storeId, String filter, String search, String key, String value, int offset, int limit) {
         String querySql;
+
+        System.out.println("FILTER"+filter);
 
         List<ProductStore> productStore = ProductStoreRepository.find.where().eq("t0.store_id", storeId).eq("t0.is_active", true).eq("t0.is_deleted", false).findList();
         if (productStore.isEmpty()) {
@@ -320,8 +322,16 @@ public class ProductMerchantDetailRepository extends Model {
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
         Query<ProductMerchantDetail> query = Ebean.find(ProductMerchantDetail.class).setRawSql(rawSql);
 
-        if (!"".equals(sort)) {
-            query = query.orderBy(sort);
+         if (!"".equals(filter)) {
+            if (filter.equals("baru")) {
+                query = query.orderBy("created_at desc");
+            } else if (filter.equals("hemat")) {
+                query = query.orderBy("product_price_after_discount asc");
+            } else {
+                query = query.orderBy("created_at asc");
+            }
+        } else {
+            query = query.orderBy("created_at asc");
         }
 
         ExpressionList<ProductMerchantDetail> exp = query.where();
@@ -334,14 +344,14 @@ public class ProductMerchantDetailRepository extends Model {
             }
         }
 
-        if (filter != null) {
-            exp = exp.ilike("pm.product_name", "%" + filter + "%");
+        if (search != null) {
+            exp = exp.ilike("pm.product_name", "%" + search + "%");
         }
 
         if (key != "" && key != null) {
             offset = 0;
         }
-        if (filter != "" && filter != null) {
+        if (search != "" && search != null) {
             offset = 0;
         }
 
@@ -351,7 +361,7 @@ public class ProductMerchantDetailRepository extends Model {
     }
 
 
-    public static int countTotalDataApp(Long merchantId, Long storeId, String sort, String filter, String key, String value) {
+    public static int countTotalDataApp(Long merchantId, Long storeId, String filter, String search, String key, String value) {
         String querySql;
 
         List<ProductStore> productStore = ProductStoreRepository.find.where().eq("t0.store_id", storeId).eq("t0.is_active", true).eq("t0.is_deleted", false).findList();
@@ -378,8 +388,16 @@ public class ProductMerchantDetailRepository extends Model {
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
         Query<ProductMerchantDetail> query = Ebean.find(ProductMerchantDetail.class).setRawSql(rawSql);
 
-        if (!"".equals(sort)) {
-            query = query.orderBy(sort);
+        if (!"".equals(filter)) {
+            if (filter.equals("baru")) {
+                query = query.orderBy("created_at desc");
+            } else if (filter.equals("hemat")) {
+                query = query.orderBy("product_price_after_discount asc");
+            } else {
+                query = query.orderBy("created_at asc");
+            }
+        } else {
+            query = query.orderBy("created_at asc");
         }
 
         ExpressionList<ProductMerchantDetail> exp = query.where();
@@ -392,8 +410,8 @@ public class ProductMerchantDetailRepository extends Model {
             }
         }
 
-        if (filter != null) {
-            exp = exp.ilike("pm.product_name", "%" + filter + "%");
+        if (search != null) {
+            exp = exp.ilike("pm.product_name", "%" + search + "%");
         }
 
         query = exp.query();
