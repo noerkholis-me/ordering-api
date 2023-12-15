@@ -258,7 +258,7 @@ public class LoyaltyPointController extends BaseController {
                         response.setBaseResponse(0, 0, 0, "Email tidak valid", null);
                         return badRequest(Json.toJson(response));
                     }
-                    memberData = Member.find.where().eq("t0.email", email).eq("merchant", store.getMerchant()).eq("t0.is_active", true).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
+                    memberData = Member.find.where().eq("t0.email", email).eq("merchant", store.getMerchant()).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
                 }
 
                 if(email.isEmpty() && memberData == null && phoneNumber != null && !phoneNumber.isEmpty()){
@@ -266,7 +266,7 @@ public class LoyaltyPointController extends BaseController {
                         response.setBaseResponse(0, 0, 0, "Nomor telepon tidak valid", null);
                         return badRequest(Json.toJson(response));
                     }
-                    memberData = Member.find.where().eq("t0.phone", phoneNumber).eq("merchant", store.getMerchant()).eq("t0.is_active", true).eq("t0.is_deleted", false).findUnique();
+                    memberData = Member.find.where().eq("t0.phone", phoneNumber).eq("merchant", store.getMerchant()).eq("t0.is_deleted", false).findUnique();
                 }
                 
                 if(memberData != null){
