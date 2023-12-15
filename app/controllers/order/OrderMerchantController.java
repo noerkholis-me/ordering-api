@@ -572,9 +572,10 @@ public class OrderMerchantController extends BaseController {
                 invoicePrintResponse.setPaymentFeeType(orderPayment.getPaymentFeeType());
                 invoicePrintResponse.setPaymentFeeOwner(orderPayment.getPaymentFeeOwner());
                 invoicePrintResponse.setPaymentFeeCustomer(orderPayment.getPaymentFeeCustomer());
+                invoicePrintResponse.setPaymentStatus(orderPayment.getStatus());
+                invoicePrintResponse.setPaymentMethod(orderPayment.getPaymentType());
                 invoicePrintResponse.setTotal(getOrder.getTotalPrice());
                 invoicePrintResponse.setOrderQueue(getOrder.getOrderQueue());
-                invoicePrintResponse.setPaymentStatus(orderPayment.getStatus());
                 invoicePrintResponse.setReferenceNumber("-");
                 
                 Member memberTarget = getOrder.getMember();
