@@ -296,18 +296,6 @@ public class ProductMerchantDetailRepository extends Model {
     public static List<ProductMerchantDetail> getTotalDataApp(Long merchantId, Long storeId, String filter, String search, String key, String value, int offset, int limit) {
         String querySql;
 
-        System.out.println("FILTER"+filter);
-
-        List<ProductStore> productStore = ProductStoreRepository.find.where().eq("t0.store_id", storeId).eq("t0.is_active", true).eq("t0.is_deleted", false).findList();
-        if (productStore.isEmpty()) {
-            querySql = "SELECT pmd.id, pm.created_at FROM product_merchant_detail pmd "
-                    + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
-                    + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
-                    + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
-                    + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
-                    + "AND bm.is_active = true "
-                    + "ORDER BY pm.id DESC";
-        } else {
             querySql = "SELECT pmd.id, pm.created_at FROM product_merchant_detail pmd "
                     + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
                     + "JOIN product_store ps ON pm.id = ps.product_id "
@@ -317,12 +305,11 @@ public class ProductMerchantDetailRepository extends Model {
                     + "AND ps.store_id = " + storeId + " AND ps.is_active = true AND ps.is_deleted = false "
                     + "AND bm.is_active = true "
                     + "ORDER BY pm.id DESC";
-        }
-
+        
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
         Query<ProductMerchantDetail> query = Ebean.find(ProductMerchantDetail.class).setRawSql(rawSql);
 
-         if (!"".equals(filter)) {
+        if (!"".equals(filter)) {
             if (filter.equals("baru")) {
                 query = query.orderBy("created_at desc");
             } else if (filter.equals("hemat")) {
@@ -363,17 +350,6 @@ public class ProductMerchantDetailRepository extends Model {
 
     public static int countTotalDataApp(Long merchantId, Long storeId, String filter, String search, String key, String value) {
         String querySql;
-
-        List<ProductStore> productStore = ProductStoreRepository.find.where().eq("t0.store_id", storeId).eq("t0.is_active", true).eq("t0.is_deleted", false).findList();
-        if (productStore.isEmpty()) {
-            querySql = "SELECT pmd.id, pm.created_at FROM product_merchant_detail pmd "
-                    + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
-                    + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
-                    + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
-                    + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
-                    + "AND bm.is_active = true "
-                    + "ORDER BY pm.id DESC";
-        } else {
             querySql = "SELECT pmd.id, pm.created_at FROM product_merchant_detail pmd "
                     + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
                     + "JOIN product_store ps ON pm.id = ps.product_id "
@@ -383,7 +359,6 @@ public class ProductMerchantDetailRepository extends Model {
                     + "AND ps.store_id = " + storeId + " AND ps.is_active = true AND ps.is_deleted = false "
                     + "AND bm.is_active = true "
                     + "ORDER BY pm.id DESC";
-        }
 
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
         Query<ProductMerchantDetail> query = Ebean.find(ProductMerchantDetail.class).setRawSql(rawSql);

@@ -548,6 +548,7 @@ GET     /merchant/setup/pickuppoint/listdata              controllers.pickuppoin
 POST    /merchant/feesetting                       controllers.merchants.FeeSettingMerchantController.addFeeSetting()
 GET    /merchant/feesetting                         controllers.merchants.FeeSettingMerchantController.getAllFeeSetting(store_id:Long ?= 0L, user_type:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET     /users/feesetting/:id                           controllers.merchants.FeeSettingMerchantController.getFeeSetting(id: Long, user_type:String ?= "")
+GET     /users/feesettingV2/:total                           controllers.merchants.FeeSettingMerchantController.platformFee(total: Int)
 
 #FEESETTINGCONFIG
 GET     /master/feesettingconfig                   controllers.masters.FeeSettingConfigController.getFeeSettingConfig()
