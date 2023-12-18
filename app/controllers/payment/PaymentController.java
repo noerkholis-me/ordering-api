@@ -145,42 +145,46 @@ public class PaymentController extends BaseController {
     }
 
     public static Result sendMailInvoice() {
-        Boolean checkService = checkInternalServiceKey();
-        if (checkService == Boolean.TRUE) {
-            response.setBaseResponse(0, 0, 0, unauthorized, null);
-            return unauthorized(Json.toJson(response));
-        } else {
-            JsonNode json = request().body().asJson();
-            String orderNumber = json.get("order_number").asText();
-            String toAdmin = json.get("admin").asText();
-            System.out.println(toAdmin);
-            if (orderNumber == null) {
-                response.setBaseResponse(0, 0, 0, "order number tidak boleh kosong", null);
-                return badRequest(Json.toJson(response));
-            }
-
-            Optional<Order> order = OrderRepository.findByOrderNumber(orderNumber);
-            if (!order.isPresent()) {
-                response.setBaseResponse(0, 0, 0, "order number tidak ditemukan", null);
-                return badRequest(Json.toJson(response));
-            }
-            
-            if(Boolean.parseBoolean(toAdmin)) {
-            	EmailService.handleCallbackAndSendEmail(order.get(), true);
-            	
-            	FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order.get());
-            	
-            	response.setBaseResponse(1, 0, 0, success, "SENT");
-                return ok(Json.toJson(response));
+        try {
+            Boolean checkService = checkInternalServiceKey();
+            if (checkService == Boolean.TRUE) {
+                response.setBaseResponse(0, 0, 0, unauthorized, null);
+                return unauthorized(Json.toJson(response));
             } else {
-            	EmailService.handleCallbackAndSendEmail(order.get(), false);
-            	
-            	response.setBaseResponse(1, 0, 0, success, "SENT");
-                return ok(Json.toJson(response));
-            }
+                JsonNode json = request().body().asJson();
+                String orderNumber = json.get("order_number").asText();
+                String toAdmin = json.get("admin").asText();
+                System.out.println(toAdmin);
+                if (orderNumber == null) {
+                    response.setBaseResponse(0, 0, 0, "order number tidak boleh kosong", null);
+                    return badRequest(Json.toJson(response));
+                }
 
-            
+                Optional<Order> order = OrderRepository.findByOrderNumber(orderNumber);
+                if (!order.isPresent()) {
+                    response.setBaseResponse(0, 0, 0, "order number tidak ditemukan", null);
+                    return badRequest(Json.toJson(response));
+                }
+                
+                if(Boolean.parseBoolean(toAdmin)) {
+                    EmailService.handleCallbackAndSendEmail(order.get(), true);
+                    
+                    FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order.get());
+                    
+                    response.setBaseResponse(1, 0, 0, success, "SENT");
+                    return ok(Json.toJson(response));
+                } else {
+                    EmailService.handleCallbackAndSendEmail(order.get(), false);
+                    
+                    response.setBaseResponse(1, 0, 0, success, "SENT");
+                    return ok(Json.toJson(response));
+                }     
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
+        
 
     }
 
