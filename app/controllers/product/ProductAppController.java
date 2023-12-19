@@ -47,7 +47,7 @@ public class ProductAppController extends BaseController {
                 ProductMerchantDescription description = ProductMerchantDescription.find.where().eq("product_merchant_detail_id", product.id).findUnique();
 
                 ProductAppResponse response = new ProductAppResponse();
-                response.setId(product.id);
+                response.setId(product.getProductMerchant().id);
                 response.setProductName(product.getProductMerchant().getProductName());
                 response.setDiscount(product.getDiscount());
                 response.setImage(product.getProductImageMain());
