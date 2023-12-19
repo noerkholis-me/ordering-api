@@ -200,7 +200,7 @@ public class Order extends BaseModel {
     }
     
     public String scalaFetchOrderDate () {
-    	SimpleDateFormat formatter = new SimpleDateFormat("EEEE, dd MMMM yyyy - HH : mm : ss", new Locale("id", "ID"));
+    	SimpleDateFormat formatter = new SimpleDateFormat("EEEE, dd MMMM yyyy HH : mm : ss", new Locale("id", "ID"));
     	return formatter.format(this.orderDate);
     }
     
@@ -235,10 +235,14 @@ public class Order extends BaseModel {
     public String scalaFetchStorePhone() {
     	return this.store.storePhone;
     }
+
+    public String scalaFetchStoreBanner() {
+    	return this.store.storeBanner;
+    }
     
     public String scalaFetchStoreQrUrl() {
     	String feUrl = Constant.getInstance().getFrontEndUrl();
-    	String url = feUrl.concat(this.store.storeCode).concat("/").concat(this.orderNumber);
+    	String url = feUrl.concat(this.store.storeCode);
     	System.out.println("URL Link Cek Order >>> "+url);
     	return url;
     }
