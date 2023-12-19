@@ -37,6 +37,9 @@ public class OrderList {
     @JsonProperty("customer_name")
     private String customerName;
 
+    @JsonProperty("customer_email")
+    private String customerEmail;
+
     @JsonProperty("cashier_name")
     private String cashierName;
 
@@ -56,6 +59,12 @@ public class OrderList {
     @JsonProperty("status_order")
     private String statusOrder;
 
+    @JsonProperty("table_id")
+    private Long tableId;
+
+    @JsonProperty("table_name")
+    private String tableName;
+
     @JsonProperty("order_queue")
     private Integer orderQueue;
 
@@ -70,6 +79,9 @@ public class OrderList {
 
     @JsonProperty("payment_channel")
     private String paymentChannel;
+
+    @JsonProperty("bank_code")
+    private String bankCode;
 
     @JsonProperty("total_amount_payment")
     @JsonSerialize(using = BigDecimalSerialize.class)
