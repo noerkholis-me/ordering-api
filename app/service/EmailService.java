@@ -66,12 +66,12 @@ public class EmailService {
 	        System.out.println("email >>> " + order.getMember().email);
 	//        String urlLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/hellobisnisnewlogo.png";
 	//        String urlEmailLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/email.png";
-	        SimpleDateFormat formatter = new SimpleDateFormat("EEEE, dd MMMM yyyy - HH : mm : ss", new Locale("id", "ID"));
+	        SimpleDateFormat formatter = new SimpleDateFormat("EEEE, dd MMMM yyyy HH:mm:ss", new Locale("id", "ID"));
 	        List<String> emails = new ArrayList<>();
 	        String orderDate = formatter.format(order.getOrderDate());
 					Store store = Store.findById(order.getStore().id);
 	        String storeUrl = Constant.getInstance().getFrontEndUrl().concat(store.storeCode);
-	        String invoiceUrl = Constant.getInstance().getFrontEndUrl().concat(order.getStore().storeCode).concat("/")
+	        String invoiceUrl = Constant.getInstance().getFrontEndUrl().concat(store.storeCode).concat("/")
 	        		.concat(order.getOrderNumber());
 	        Optional<OrderPayment> optionalOrderPayment = OrderPaymentRepository.findByOrderId(order.id);
 	        OrderPayment orderPayment = optionalOrderPayment.get();

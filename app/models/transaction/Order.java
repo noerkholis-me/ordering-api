@@ -225,7 +225,7 @@ public class Order extends BaseModel {
     }
     
     public String scalaFetchStoreName() {
-    	return this.store.storeName;
+    	return this.store.getStoreName();
     }
     
     public String scalaFetchStoreAddress() {
@@ -237,7 +237,7 @@ public class Order extends BaseModel {
     }
 
     public String scalaFetchStoreBanner() {
-    	return this.store.storeBanner;
+    	return this.store.getStoreBanner();
     }
     
     public String scalaFetchStoreQrUrl() {

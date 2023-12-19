@@ -45,6 +45,8 @@ public class PaymentController extends BaseController {
             OrderPayment getOrderPayment = orderPayment.get();
             OrderPaymentResponse orderPaymentResponse = OrderPaymentResponse.builder()
                     .orderNumber(getOrderPayment.getOrder().getOrderNumber())
+                    .tableId(getOrderPayment.getOrder().getTable_id())
+                    .tableName(getOrderPayment.getOrder().getTableName())
                     .invoiceNo(getOrderPayment.getInvoiceNo())
                     .status(getOrderPayment.getStatus())
                     .paymentChannel(getOrderPayment.getPaymentChannel())
