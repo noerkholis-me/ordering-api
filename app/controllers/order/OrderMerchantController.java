@@ -319,6 +319,7 @@ public class OrderMerchantController extends BaseController {
                     if (order.getMember() != null) {
                         member = Member.findByIdMember(order.getMember().id);
                         orderRes.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL CUSTOMER (" + order.getStore().storeName + ")");
+                        orderRes.setCustomerEmail(member.email);
                     } else {
                         String customerName = "GENERAL CUSTOMER (" + order.getStore().storeName + ")";
                         orderRes.setCustomerName(customerName);
@@ -333,10 +334,13 @@ public class OrderMerchantController extends BaseController {
                     orderRes.setOrderQueue(order.getOrderQueue());
                     orderRes.setStatusOrder(order.getStatus());
                     orderRes.setStatus(order.getStatus());
+                    orderRes.setTableId(order.getTableId());
+                    orderRes.setTableName(order.getTableName());
                     orderRes.setPaymentType(getOrderPayment.getPaymentType());
                     orderRes.setPaymentChannel(getOrderPayment.getPaymentChannel());
                     orderRes.setTotalAmountPayment(getOrderPayment.getTotalAmount());
                     orderRes.setPaymentDate(getOrderPayment.getPaymentDate());
+                    orderRes.setBankCode(getOrderPayment.getBankCode());
 
                     List<OrderDetail> orderDetails = OrderRepository.findOrderDetailByOrderId(order.id);
                     List<OrderList.ProductOrderDetail> productOrderDetails = new ArrayList<>();
