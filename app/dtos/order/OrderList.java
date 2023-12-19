@@ -49,6 +49,9 @@ public class OrderList {
     @JsonProperty("merchant_name")
     private String merchantName;
 
+    @JsonProperty("merchant_address")
+    private String merchantAddress;
+
     @JsonProperty("total_amount")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal totalAmount;

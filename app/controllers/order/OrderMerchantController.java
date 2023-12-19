@@ -328,6 +328,7 @@ public class OrderMerchantController extends BaseController {
 
                     // get store
                     orderRes.setMerchantName(order.getStore().getMerchant().name != null || order.getStore().getMerchant().name != "" ? order.getStore().getMerchant().name : null);
+                    orderRes.setMerchantAddress(order.getStore().getMerchant().address != null || order.getStore().getMerchant().address != "" ? order.getStore().getMerchant().address : null);
 
                     orderRes.setTotalAmount(order.getTotalPrice());
                     orderRes.setOrderType(order.getOrderType());
