@@ -20,6 +20,10 @@ public class OrderPaymentResponse {
 
     @JsonProperty("order_number")
     private String orderNumber;
+    @JsonProperty("table_id")
+    private Long tableId;
+    @JsonProperty("table_name")
+    private String tableName;
     private String status;
     @JsonProperty("invoice_no")
     private String invoiceNo;
