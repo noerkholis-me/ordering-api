@@ -32,10 +32,17 @@
          mso-table-rspace: 0pt !important;
          }
          table {
-         border-spacing: 0 !important;
-         border-collapse: collapse !important;
-         table-layout: fixed !important;
-         margin: 0 auto !important;
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0px;
+      }
+
+         table .left {
+         text-align: left;
+         }
+
+         table .right {
+         text-align: right;
          }
          img {
          -ms-interpolation-mode:bicubic;
@@ -423,72 +430,66 @@
                      <p style="margin-bottom: 0;  color: #464646;">Hello @order.scalaFetchMemberFullname(),</p>
                      <p style="margin-bottom: 0; margin-top: -10px;  color: #333; font-size: 24px; font-style: normal; font-weight: 700;">Terima kasih telah melakukan pembayaran</p>
                      <p style="color: #464646; margin-top: -10px; font-size: 14px; font-weight: 400;">Pembayaran telah terverifikasi dan pesanan telah diteruskan ke <b>Penjual</b>.</p>
-                     <div style="display: flex;  margin-top: 32px; justify-content: space-between;">
-                      <div style="font-size: 12px;
-                      font-style: normal;
-                      font-weight: 400;
-                      line-height: normal;
-                      color: #464646;">
-                        <p style="color: #464646; margin-top: -10px; font-size: 14px; font-weight: 400;">Nomor Pesanan</p>
-                        <p style="color: #464646; margin-top: -10px; font-size: 14px; font-weight: 600;">@order.scalaFetchOrderNumber()</p>
+                     <div class="bg_light" style="padding: 24px; border-style: groove; border: 1px solid; margin-top: 28px;">
+                        <table>
+                          <tbody>
+                           <p style="color: #333; font-size: 20px; font-style: normal; font-weight: 700; line-height: normal;">Rincian Pembayaran</p>
+                              <tr style="color: #464646; font-size: 14px; font-weight: 400;">
+                                <td class="left">Nomor Pesanan</td>
+                                <td></td>
+                                <td class="right">Waktu Pemesanan</td>
+                              </tr>
+                              <tr style="color: #464646; font-size: 14px; font-weight: 600;">
+                                <td class="left">@order.scalaFetchOrderNumber()</td>
+                                <td></td>
+                                <td class="right">@order.scalaFetchOrderDate()</td>
+                              </tr>
+                              
+                              <tr><td colspan ="3"><hr style="border: 1px #DEE3ED; border-style: dashed"></td></tr>
+
+                              @for(o <- order.getProductDetail()){
+                              <tr style="color: #464646; font-size: 14px; font-weight: 600;">
+                                 <td style="width:25%">@o.fetchQuantity()</td>
+                                 <td class="left">@o.getNamaProduk()</td>
+                                 <td class="right">@o.fetchPrice()</td>
+                              </tr>
+                              }
+
+                              <tr><td colspan ="3"><hr style="border: 1px #DEE3ED; border-style: dashed"></td></tr>
+
+                              <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                 <td colspan="2" style=" color: #737373;">Subtotal</td>
+                                 <td class="right">@order.scalaFetchSubTotal()</td>
+                              </tr>
+                              <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                 <td colspan="2" style=" color: #737373;">Pajak (@orderPayment.scalaFetchTaxPercentage()%)</td>
+                                 <td class="right"> @orderPayment.scalaFetchTaxPrice()</td>
+                              </tr>
+                              <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                 <td colspan="2" style=" color: #737373;">Layanan (@orderPayment.scalaFetchServicePercentage()%)</td>
+                                 <td class="right">@orderPayment.scalaFetchServicePrice()</td>
+                              </tr>
+                              <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                 <td colspan="2" style=" color: #737373;">Biaya Pemesanan</td>
+                                 <td class="right">@orderPayment.scalaFetchFeeCustomer()</td>
+                              </tr>
+
+                              <tr><td colspan ="3"><hr style="border: 1px #DEE3ED; border-style: dashed"></td></tr>
+
+                              <tr style="color: #464646; font-size: 14px; font-weight: 700;">
+                                 <td colspan="2" style=" color: #737373;">Total</td>
+                                 <td class="right">@order.scalaFetchTotalPrice()</td>
+                              </tr>
+
+                              <tr><td colspan ="3"><hr style="border: 1px #DEE3ED; border-style: dashed"></td></tr>
+
+                              <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                 <td colspan="2" style=" color: #737373;">Metode Pembayaran</td>
+                                 <td class="right">@order.getJenisTransaksi()</td>
+                              </tr>
+                          </tbody>
+                        </table>
                       </div>
-                      <div style="font-style: normal; font-weight: 400; line-height: normal; color: #464646; width: 200px;">
-                        <p style="color: #464646; margin-top: -10px; font-size: 14px; font-weight: 400;">Waktu Pemesanan</p>
-                        <p style="color: #464646; margin-top: -10px; font-size: 14px; font-weight: 600;">@order.scalaFetchOrderDate()</p>  
-                      </div>
-                   </div>
-
-                   <div class="heading-section bg_light" style="padding: 24px; border-style: groove; border: 1px solid;">
-                    <p style="color: #333; font-size: 20px; font-style: normal; font-weight: 700; line-height: normal;">Rincian Pembayaran</p>
-                    <div class="account-info" style="display: flex; justify-content: space-between;">
-                       <p class="title" style="font-size: 14px; font-weight: 500; color: #737373;">Tipe Pesanan</p>
-                       <p class="description" style=" font-size: 14px; font-weight: 500; color: #464646;">@order.scalaFetchOrderType()</p>
-                    </div>
-
-                    <hr style="border: 1px #DEE3ED; border-style: dashed">
-                    @for(o <- order.getProductDetail()){
-                    <div class="account-info" style="display: flex; justify-content: space-between;">
-                      <p class="title" style="font-size: 14px; font-weight: 500; color: #737373;">@o.fetchQuantity()</p>
-                      <p style=" font-size: 14px; font-weight: 500; color: #464646; align-self: start;">@o.getNamaProduk()</p>
-                      <p class="description" style=" font-size: 14px; font-weight: 500; color: #464646;">@o.fetchPrice()</p>
-                    </div>
-                    }
-                   <hr style="border: 1px #DEE3ED; border-style: dashed">
-
-                   <div class="account-info" style="display: flex; justify-content: space-between;">
-                    <p class="title" style="font-size: 14px; font-weight: 500; color: #737373;">Subtotal (2 menu)</p>
-                    <p class="description" style=" font-size: 14px; font-weight: 500; color: #464646;">@order.scalaFetchSubTotal()</p>
-                   </div>
-
-                   <div class="account-info" style="display: flex; justify-content: space-between;">
-                    <p class="title" style="font-size: 14px; font-weight: 500; color: #737373;">Pajak (@orderPayment.scalaFetchTaxPercentage()%)</p>
-                    <p class="description" style=" font-size: 14px; font-weight: 500; color: #464646;"> @orderPayment.scalaFetchTaxPrice()</p>
-                   </div>
-
-                   <div class="account-info" style="display: flex; justify-content: space-between;">
-                    <p class="title" style="font-size: 14px; font-weight: 500; color: #737373;">Layanan (@orderPayment.scalaFetchServicePercentage()%)</p>
-                    <p class="description" style=" font-size: 14px; font-weight: 500; color: #464646;">@orderPayment.scalaFetchServicePrice()</p>
-                   </div>
-
-                   <div class="account-info" style="display: flex; justify-content: space-between;">
-                    <p class="title" style="font-size: 14px; font-weight: 500; color: #737373;">Biaya Pemesanan</p>
-                    <p class="description" style=" font-size: 14px; font-weight: 500; color: #464646;">@orderPayment.scalaFetchFeeCustomer()</p>
-                   </div>
-
-                   <hr style="border: 1px #DEE3ED; border-style: dashed">
-
-                   <div class="account-info" style="display: flex; justify-content: space-between;">
-                    <p class="title" style="font-size: 16px; font-weight: 700; color: #464646;">Total</p>
-                    <p class="description" style=" font-size: 16px; font-weight: 700; color: #464646;">@order.scalaFetchTotalPrice()</p>
-                   </div>
-
-                   <hr style="border: 1px #DEE3ED; border-style: dashed; margin-bottom: 24px;">
-
-                   <div class="account-info" style="display: flex; justify-content: space-between;">
-                    <p class="title" style="font-size: 14px; font-weight: 500; color: #737373;">Metode Pembayaran</p>
-                    <p class="description" style=" font-size: 14px; font-weight: 500; color: #464646;">@order.getJenisTransaksi()</p>
-                   </div>
-                 </div>
 
                  <p style="color: #464646; margin-top: 32px; font-size: 14px; font-weight: 400;">Kamu bisa lihat status pesanan dengan klik tombol berikut.</p>
                  <center>
