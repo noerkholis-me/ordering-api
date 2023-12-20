@@ -1,6 +1,7 @@
 package models.merchant;
 
 import com.hokeba.util.Constant;
+import dtos.product.ProductPosRequest;
 import dtos.product.ProductRequest;
 import dtos.product.ProductWithProductStoreRequest;
 import lombok.AllArgsConstructor;
@@ -103,6 +104,22 @@ public class ProductMerchantDetail extends BaseModel {
         this.setProductMerchantQrCode(Constant.getInstance().getFrontEndUrl().concat("product/" + productMerchant.id + "/detail"));
     }
 
+    public ProductMerchantDetail(ProductMerchant productMerchant, ProductPosRequest productRequest) {
+        this.setProductType(productRequest.getProductDetailRequest().getProductType());
+        this.setIsCustomizable(productRequest.getProductDetailRequest().getIsCustomizable());
+        this.setProductPrice(productRequest.getProductStoreRequests().getStorePrice());
+        this.setDiscountType(productRequest.getProductStoreRequests().getDiscountType());
+        this.setDiscount(0D);
+        this.setProductPriceAfterDiscount(productRequest.getProductStoreRequests().getStorePrice());
+        this.setProductImageMain(productRequest.getProductDetailRequest().getProductImageMain());
+        this.setProductImage1(productRequest.getProductDetailRequest().getProductImage1());
+        this.setProductImage2(productRequest.getProductDetailRequest().getProductImage2());
+        this.setProductImage3(productRequest.getProductDetailRequest().getProductImage3());
+        this.setProductImage4(productRequest.getProductDetailRequest().getProductImage4());
+        this.setProductMerchant(productMerchant);
+        this.setProductMerchantQrCode(Constant.getInstance().getFrontEndUrl().concat("product/" + productMerchant.id + "/detail"));
+    }
+
     public void setProductMerchantDetail(ProductMerchantDetail productMerchantDetail, ProductMerchant productMerchant, ProductRequest productRequest) {
         productMerchantDetail.setProductType(productRequest.getProductDetailRequest().getProductType());
         productMerchantDetail.setIsCustomizable(productRequest.getProductDetailRequest().getIsCustomizable());
@@ -126,6 +143,22 @@ public class ProductMerchantDetail extends BaseModel {
         productMerchantDetail.setDiscountType(productRequest.getProductDetailRequest().getDiscountType());
         productMerchantDetail.setDiscount(productRequest.getProductDetailRequest().getDiscount() != null ? productRequest.getProductDetailRequest().getDiscount() : 0D);
         productMerchantDetail.setProductPriceAfterDiscount(productRequest.getProductDetailRequest().getProductPriceAfterDiscount() != null ? productRequest.getProductDetailRequest().getProductPriceAfterDiscount() : productRequest.getProductDetailRequest().getProductPrice());
+        productMerchantDetail.setProductImageMain(productRequest.getProductDetailRequest().getProductImageMain());
+        productMerchantDetail.setProductImage1(productRequest.getProductDetailRequest().getProductImage1());
+        productMerchantDetail.setProductImage2(productRequest.getProductDetailRequest().getProductImage2());
+        productMerchantDetail.setProductImage3(productRequest.getProductDetailRequest().getProductImage3());
+        productMerchantDetail.setProductImage4(productRequest.getProductDetailRequest().getProductImage4());
+        productMerchantDetail.setProductMerchant(productMerchant);
+        productMerchantDetail.setProductMerchantQrCode(Constant.getInstance().getFrontEndUrl().concat("product/" + productMerchant.id + "/detail"));
+    }
+
+    public void setProductMerchantDetail(ProductMerchantDetail productMerchantDetail, ProductMerchant productMerchant, ProductPosRequest productRequest) {
+        productMerchantDetail.setProductType(productRequest.getProductDetailRequest().getProductType());
+        productMerchantDetail.setIsCustomizable(productRequest.getProductDetailRequest().getIsCustomizable());
+        productMerchantDetail.setProductPrice(productRequest.getProductStoreRequests().getStorePrice());
+        productMerchantDetail.setDiscountType(productRequest.getProductStoreRequests().getDiscountType());
+        productMerchantDetail.setDiscount(0D);
+        productMerchantDetail.setProductPriceAfterDiscount(productRequest.getProductStoreRequests().getStorePrice());
         productMerchantDetail.setProductImageMain(productRequest.getProductDetailRequest().getProductImageMain());
         productMerchantDetail.setProductImage1(productRequest.getProductDetailRequest().getProductImage1());
         productMerchantDetail.setProductImage2(productRequest.getProductDetailRequest().getProductImage2());

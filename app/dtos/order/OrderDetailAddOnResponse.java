@@ -14,5 +14,7 @@ public class OrderDetailAddOnResponse {
     private String noSku;
     @JsonProperty("product_name")
     private String productName;
+    @JsonProperty("product_price")
+    private String productPrice;
 
 }

@@ -3,6 +3,7 @@ package models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hokeba.util.Constant;
+import dtos.product.ProductPosRequest;
 import dtos.product.ProductStoreResponse;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -76,6 +77,24 @@ public class ProductStore extends BaseModel {
         }
     }
 
+    public ProductStore(Merchant merchant, Store store, ProductMerchant productMerchant, ProductPosRequest productRequest, Boolean isActive) {
+        this.setStore(store);
+        this.setProductMerchant(productMerchant);
+        this.setMerchant(merchant);
+        this.setActive(isActive);
+        this.setStorePrice(productRequest.getProductStoreRequests().getStorePrice());
+        this.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode + "/" + store.id + "/" + merchant.id + "/product/" + productMerchant.id + "/detail"));
+        if (productRequest.getProductStoreRequests().getDiscountType() != null) {
+            this.setDiscountType(productRequest.getProductStoreRequests().getDiscountType());
+        }
+        if (productRequest.getProductStoreRequests().getDiscount() != null) {
+            this.setDiscount(productRequest.getProductStoreRequests().getDiscount());
+        }
+        if (productRequest.getProductStoreRequests().getFinalPrice() != null) {
+            this.setFinalPrice(productRequest.getProductStoreRequests().getFinalPrice());
+        }
+    }
+
     public void setProductStore(ProductStore productStore, Merchant merchant, Store store, ProductMerchant productMerchant, ProductStoreResponse productStoreRequest) {
         productStore.setStore(store);
         productStore.setProductMerchant(productMerchant);
@@ -94,4 +113,21 @@ public class ProductStore extends BaseModel {
         }
     }
 
+    public void setProductStore(ProductStore productStore, Merchant merchant, Store store, ProductMerchant productMerchant, ProductPosRequest productRequest) {
+        productStore.setStore(store);
+        productStore.setProductMerchant(productMerchant);
+        productStore.setMerchant(merchant);
+        productStore.setActive(productRequest.getProductStoreRequests().getIsActive());
+        productStore.setStorePrice(productRequest.getProductStoreRequests().getStorePrice());
+        productStore.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode + "/" + store.id + "/" + merchant.id + "/product/" + productMerchant.id + "/detail"));
+        if (productRequest.getProductStoreRequests().getDiscountType() != null) {
+            productStore.setDiscountType(productRequest.getProductStoreRequests().getDiscountType());
+        }
+        if (productRequest.getProductStoreRequests().getDiscount() != null) {
+            productStore.setDiscount(productRequest.getProductStoreRequests().getDiscount());
+        }
+        if (productRequest.getProductStoreRequests().getFinalPrice() != null) {
+            productStore.setFinalPrice(productRequest.getProductStoreRequests().getFinalPrice());
+        }
+    }
 }

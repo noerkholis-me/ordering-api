@@ -1,5 +1,6 @@
 package models.merchant;
 
+import dtos.product.ProductPosRequest;
 import dtos.product.ProductRequest;
 import dtos.product.ProductWithProductStoreRequest;
 import lombok.AllArgsConstructor;
@@ -81,6 +82,17 @@ public class ProductMerchant extends BaseModel {
         this.setMerchant(merchant);
     }
 
+    public ProductMerchant(Merchant merchant, CategoryMerchant categoryMerchant, SubCategoryMerchant subCategoryMerchant, SubsCategoryMerchant subsCategoryMerchant, BrandMerchant brandMerchant, ProductPosRequest productRequest) {
+        this.setNoSKU(productRequest.getNoSKU());
+        this.setProductName(productRequest.getProductName());
+        this.setIsActive(true);
+        this.setCategoryMerchant(categoryMerchant);
+        this.setSubCategoryMerchant(subCategoryMerchant);
+        this.setSubsCategoryMerchant(subsCategoryMerchant);
+        this.setBrandMerchant(brandMerchant);
+        this.setMerchant(merchant);
+    }
+
     public void setProductMerchant(ProductMerchant productMerchant, Merchant merchant, CategoryMerchant categoryMerchant, SubCategoryMerchant subCategoryMerchant, SubsCategoryMerchant subsCategoryMerchant, BrandMerchant brandMerchant, ProductRequest productRequest) {
         productMerchant.setNoSKU(productRequest.getNoSKU());
         productMerchant.setProductName(productRequest.getProductName());
@@ -93,6 +105,17 @@ public class ProductMerchant extends BaseModel {
     }
 
     public void setProductMerchant(ProductMerchant productMerchant, Merchant merchant, CategoryMerchant categoryMerchant, SubCategoryMerchant subCategoryMerchant, SubsCategoryMerchant subsCategoryMerchant, BrandMerchant brandMerchant, ProductWithProductStoreRequest productRequest) {
+        productMerchant.setNoSKU(productRequest.getNoSKU());
+        productMerchant.setProductName(productRequest.getProductName());
+        productMerchant.setIsActive(true);
+        productMerchant.setCategoryMerchant(categoryMerchant);
+        productMerchant.setSubCategoryMerchant(subCategoryMerchant);
+        productMerchant.setSubsCategoryMerchant(subsCategoryMerchant);
+        productMerchant.setBrandMerchant(brandMerchant);
+        productMerchant.setMerchant(merchant);
+    }
+
+    public void setProductMerchant(ProductMerchant productMerchant, Merchant merchant, CategoryMerchant categoryMerchant, SubCategoryMerchant subCategoryMerchant, SubsCategoryMerchant subsCategoryMerchant, BrandMerchant brandMerchant, ProductPosRequest productRequest) {
         productMerchant.setNoSKU(productRequest.getNoSKU());
         productMerchant.setProductName(productRequest.getProductName());
         productMerchant.setIsActive(true);

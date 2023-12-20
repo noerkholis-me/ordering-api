@@ -360,6 +360,8 @@ GET     /merchant/brand/:id/detail                  controllers.brand.BrandMerch
 PUT     /merchant/brand/:id/status                  controllers.brand.BrandMerchantController.setStatus(id: Long)
 GET     /brand/:merchantId                          controllers.brand.BrandMerchantController.listBrandHomepage(merchantId: Long, store_id:Long ?= 0, offset:Int ?= 0)
 
+GET     /pos/brand/list                        controllers.brand.BrandMerchantController.listBrandPOS(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, isActive:String ?= "")
+
 #BRAND DETAIL CUSTOMER
 GET     /brand/:id/detail                           controllers.brand.BrandMerchantController.detailBrandHome(id:Long, merchant_id:Long ?= 0, store_id:Long ?= 0)
 
@@ -370,6 +372,11 @@ DELETE  /merchant/category/:id/delete                  controllers.categories.Ca
 PUT     /merchant/category/:id/update                  controllers.categories.CategoryMerchantController.editCategory(id:Long)
 GET     /merchant/category/:id/detail                  controllers.categories.CategoryMerchantController.viewCategory(id:Long)
 PUT     /merchant/category/:id/status                  controllers.categories.CategoryMerchantController.setStatus(id: Long)
+
+GET     /pos/category/list                        controllers.categories.CategoryMerchantController.listCategoryPOS(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+
+#CATEGORY KIOSK
+GET     /data/category/list                            controllers.categories.CategoryMerchantController.listCategoryFE(merchant_id:Long ?= 0, store_id:Long ?= 0)
 
 #SUB CATEGORY
 GET     /merchant/subcategory/list                        controllers.categories.SubCategoryMerchantController.listSubCategory(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
@@ -657,6 +664,12 @@ GET         /pos/:storeId/get-total-cash                        controllers.dash
 GET         /pos/:storeId/get-order-information                       controllers.dashboard.DashboardPOSController.getOrderInformation(storeId: Long)
 GET         /pos/category-list                             controllers.minipos.ProductController.listCategoryMiniPOS()
 GET         /pos/product-list                             controllers.minipos.ProductController.listProductMiniPos(offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "")
+
+GET         /pos/product/list                                       controllers.product.ProductPosController.getAllProducts(merchant_id:Long ?= 0, store_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET         /pos/product/:id                                        controllers.product.ProductPosController.getProductById(id: Long)
+POST        /pos/product                                            controllers.product.ProductPosController.createProduct()
+PUT         /pos/product/:id                                        controllers.product.ProductPosController.editProduct(id: Long)
+DELETE      /pos/product/:id                                        controllers.product.ProductPosController.deleteProduct(id: Long)
 
 GET         /pos/session-cashier                   controllers.merchants.CashierHistoryController.getSessionCashier()
 GET         /pos/:storeId/get-total-amount-cashier          controllers.merchants.CashierHistoryController.getAmountCashier(storeId : Long)

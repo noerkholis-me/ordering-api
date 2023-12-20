@@ -78,11 +78,6 @@ public class OrderMerchantController extends BaseController {
                     }
                 }
 
-                if (orders.isEmpty() || totalData == 0) {
-                    response.setBaseResponse(totalData, offset, limit, success + " Showing data order", orderLists);
-                    return ok(Json.toJson(response));
-                }
-
                 response.setBaseResponse(totalData, offset, limit, success + " Berhasil menampilkan data order", listResponses(orders, productType));
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
@@ -716,6 +711,7 @@ public class OrderMerchantController extends BaseController {
                         OrderDetailAddOnResponse orderDetailAddOnResponse = new OrderDetailAddOnResponse();
                         orderDetailAddOnResponse.setProductName(orderDetailAddOn.getProductName());
                         orderDetailAddOnResponse.setNoSku(orderDetailAddOn.getProductAddOn().getProductMerchant().getNoSKU());
+                        orderDetailAddOnResponse.setProductPrice(orderDetailAddOn.getProductPrice().toPlainString());
                         orderDetailAddOns.add(orderDetailAddOnResponse);
                     }
                     orderDetailResponse.setOrderDetailAddOns(orderDetailAddOns);
@@ -743,9 +739,10 @@ public class OrderMerchantController extends BaseController {
                 invoicePrintResponse.setPaymentFeeType(orderPayment.getPaymentFeeType());
                 invoicePrintResponse.setPaymentFeeOwner(orderPayment.getPaymentFeeOwner());
                 invoicePrintResponse.setPaymentFeeCustomer(orderPayment.getPaymentFeeCustomer());
+                invoicePrintResponse.setPaymentStatus(orderPayment.getStatus());
+                invoicePrintResponse.setPaymentMethod(orderPayment.getPaymentType());
                 invoicePrintResponse.setTotal(getOrder.getTotalPrice());
                 invoicePrintResponse.setOrderQueue(getOrder.getOrderQueue());
-                invoicePrintResponse.setPaymentStatus(orderPayment.getStatus());
                 invoicePrintResponse.setReferenceNumber("-");
                 
                 Member memberTarget = getOrder.getMember();

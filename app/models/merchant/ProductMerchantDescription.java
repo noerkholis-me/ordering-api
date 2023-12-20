@@ -1,5 +1,6 @@
 package models.merchant;
 
+import dtos.product.ProductPosRequest;
 import dtos.product.ProductRequest;
 import dtos.product.ProductWithProductStoreRequest;
 import lombok.AllArgsConstructor;
@@ -48,6 +49,12 @@ public class ProductMerchantDescription extends BaseModel {
         this.setProductMerchantDetail(productMerchantDetail);
     }
 
+    public ProductMerchantDescription(ProductMerchantDetail productMerchantDetail, ProductPosRequest productRequest) {
+        this.setShortDescription(productRequest.getProductDescriptionRequest().getShortDescription());
+        this.setLongDescription(productRequest.getProductDescriptionRequest().getLongDescription());
+        this.setProductMerchantDetail(productMerchantDetail);
+    }
+
     public void setProductMerchantDescription(ProductMerchantDescription productMerchantDescription, ProductMerchantDetail productMerchantDetail, ProductRequest productRequest) {
         productMerchantDescription.setShortDescription(productRequest.getProductDescriptionRequest().getShortDescription());
         productMerchantDescription.setLongDescription(productRequest.getProductDescriptionRequest().getLongDescription());
@@ -55,6 +62,12 @@ public class ProductMerchantDescription extends BaseModel {
     }
 
     public void setProductMerchantDescription(ProductMerchantDescription productMerchantDescription, ProductMerchantDetail productMerchantDetail, ProductWithProductStoreRequest productRequest) {
+        productMerchantDescription.setShortDescription(productRequest.getProductDescriptionRequest().getShortDescription());
+        productMerchantDescription.setLongDescription(productRequest.getProductDescriptionRequest().getLongDescription());
+        productMerchantDescription.setProductMerchantDetail(productMerchantDetail);
+    }
+
+    public void setProductMerchantDescription(ProductMerchantDescription productMerchantDescription, ProductMerchantDetail productMerchantDetail, ProductPosRequest productRequest) {
         productMerchantDescription.setShortDescription(productRequest.getProductDescriptionRequest().getShortDescription());
         productMerchantDescription.setLongDescription(productRequest.getProductDescriptionRequest().getLongDescription());
         productMerchantDescription.setProductMerchantDetail(productMerchantDetail);

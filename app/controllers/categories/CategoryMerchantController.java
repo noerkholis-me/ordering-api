@@ -131,6 +131,28 @@ public class CategoryMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
+    public static Result listCategoryPOS(String filter, String sort, int offset, int limit) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            try {
+                int totalData = CategoryMerchantRepository.findAllByMerchant(ownMerchant.id, sort, filter, 0, 0).size();
+                List<CategoryMerchant> categoryMerchants = CategoryMerchantRepository.findAllByMerchant(ownMerchant.id, sort, filter, offset, limit);
+
+                List<CategoryMerchantResponse> responses = listResponse(categoryMerchants, ownMerchant.id);
+
+                response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data", responses);
+                return ok(Json.toJson(response));
+            } catch (Exception e) {
+                Logger.error("allDetail", e);
+            }
+        } else {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
     // @ApiOperation(value = "Edit Category", notes = "Edit Category.\n" + swaggerInfo
     //         + "", response = BaseResponse.class, httpMethod = "PUT")
     // @ApiImplicitParams({
