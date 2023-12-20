@@ -1,5 +1,7 @@
 package controllers.order;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.avaje.ebean.Expr;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
@@ -57,7 +59,7 @@ public class OrderMerchantController extends BaseController {
     private static final String SERVING = "SERVING";
     private static final String ON_PROCESS = "ON PROCESS";
     private static final String READY_TO_PICKUP = "READY";
-
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     private static BaseResponse response = new BaseResponse();
 
     public static Result getOrderList(Long storeId, int offset, int limit, String statusOrder, String filter, String productType) throws Exception {
@@ -721,7 +723,7 @@ public class OrderMerchantController extends BaseController {
                     orderDetailResponse.setOrderDetailAddOns(orderDetailAddOns);
                     orderDetailResponses.add(orderDetailResponse);
                 }
-                TableMerchant tmerch = TableMerchantRepository.find.where().eq("t0.id", getOrder.getTableMerchant().id).findUnique();
+                TableMerchant tmerch = TableMerchantRepository.find.where().eq("t0.id", getOrder.table_id).findUnique();
                 if(tmerch != null){
                     invoicePrintResponse.setTableMerchant(tmerch);
                 } else {
@@ -778,6 +780,7 @@ public class OrderMerchantController extends BaseController {
 
                 response.setBaseResponse(1, offset, limit, success + " success showing data invoice.",
                         invoicePrintResponse);
+
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
                 ex.printStackTrace();
