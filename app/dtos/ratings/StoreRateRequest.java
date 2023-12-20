@@ -28,5 +28,7 @@ public class StoreRateRequest {
 
     private String feedback;
 
+    private List<ProductStoreRateRequest> products;
+
     private List<Long> tags;
 }
