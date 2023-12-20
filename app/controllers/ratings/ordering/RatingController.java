@@ -172,18 +172,17 @@ public class RatingController extends BaseController {
                         ProductRatings newProductRatings = new ProductRatings();
                         newProductRatings.setStore(store);
                         newProductRatings.setProductMerchant(productMerchant);
-                        newProductRatings.setRate(productRatings.getRate());
+                        newProductRatings.setRate(data.getRate());
                         newProductRatings.setMember(member);
-                        newProductRatings.setFeedback(productRatings.getFeedback());
-                        // newProductRatings.setRate(productRatings.getRate());
+                        newProductRatings.setFeedback(data.getFeedback());
 
                         newProductRatings.save();
                     } else {
                         productRatings.setStore(store);
-                        productRatings.setRate(productRatings.getRate());
+                        productRatings.setRate(data.getRate());
                         productRatings.setMember(member);
                         productRatings.setFeedback(productRatings.getFeedback());
-                        productRatings.setRate(productRatings.getRate());
+                        productRatings.setRate(data.getRate());
 
                         productRatings.update();
                     }
