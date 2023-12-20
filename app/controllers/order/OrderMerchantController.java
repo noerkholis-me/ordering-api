@@ -721,7 +721,7 @@ public class OrderMerchantController extends BaseController {
                     orderDetailResponse.setOrderDetailAddOns(orderDetailAddOns);
                     orderDetailResponses.add(orderDetailResponse);
                 }
-                TableMerchant tmerch = TableMerchantRepository.find.where().eq("t0.id", getOrder.table_id).findUnique();
+                TableMerchant tmerch = TableMerchantRepository.find.where().eq("t0.id", getOrder.getTableMerchant().id).findUnique();
                 if(tmerch != null){
                     invoicePrintResponse.setTableMerchant(tmerch);
                 } else {
