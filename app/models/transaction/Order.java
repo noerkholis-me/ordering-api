@@ -108,9 +108,6 @@ public class Order extends BaseModel {
 
     @Column(name = "table_name")
     private String tableName;
-
-    @Column(name = "table_id")
-    private Long tableId;
     
     @Column(name = "total_loyalty_usage")
     private BigDecimal totalLoyaltyUsage;
