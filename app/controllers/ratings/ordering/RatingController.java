@@ -172,17 +172,17 @@ public class RatingController extends BaseController {
                         ProductRatings newProductRatings = new ProductRatings();
                         newProductRatings.setStore(store);
                         newProductRatings.setProductMerchant(productMerchant);
-                        newProductRatings.setRate(storeRateRequest.getRate());
+                        newProductRatings.setRate(productRatings.getRate());
                         newProductRatings.setMember(member);
-                        newProductRatings.setFeedback(storeRateRequest.getFeedback());
-                        newProductRatings.setRate(storeRateRequest.getRate());
+                        newProductRatings.setFeedback(productRatings.getFeedback());
+                        // newProductRatings.setRate(productRatings.getRate());
 
                         newProductRatings.save();
                     } else {
                         productRatings.setStore(store);
-                        productRatings.setRate(storeRateRequest.getRate());
+                        productRatings.setRate(productRatings.getRate());
                         productRatings.setMember(member);
-                        productRatings.setFeedback(storeRateRequest.getFeedback());
+                        productRatings.setFeedback(productRatings.getFeedback());
                         productRatings.setRate(productRatings.getRate());
 
                         productRatings.update();
@@ -205,6 +205,28 @@ public class RatingController extends BaseController {
                 storeRatings.setRate(storeRatings.getRate());
 
                 storeRatings.update();
+                for (ProductStoreRateRequest data : storeRateRequest.getProducts()) {
+                    ProductMerchant productMerchant = ProductMerchantRepository.findById(data.getProduct_id());
+                    ProductRatings productRatings = ProductRatingRepository.findByProductMerchantIdAndStoreAndMember(data.getProduct_id(), store, member);
+                    if(productRatings == null) {
+                        System.out.println("INSERT NEW DATA");
+                        ProductRatings newProductRatings = new ProductRatings();
+                        newProductRatings.setStore(store);
+                        newProductRatings.setProductMerchant(productMerchant);
+                        newProductRatings.setRate(data.getRate());
+                        newProductRatings.setMember(member);
+                        newProductRatings.setFeedback(data.getFeedback());
+
+                        newProductRatings.save();
+                    } else {
+                        productRatings.setStore(store);
+                        productRatings.setRate(data.getRate());
+                        productRatings.setMember(member);
+                        productRatings.setFeedback(data.getFeedback());
+
+                        productRatings.update();
+                    }
+                }
                 txn.commit();
 
                 StoreRateResponse storeRateResponse = StoreRateResponse.builder()
