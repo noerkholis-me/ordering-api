@@ -14,4 +14,13 @@ public class ProductRatingRepository {
                 .eq("t0.is_deleted", Boolean.FALSE)
                 .findUnique();
     }
+
+    public static models.ProductRatings findByProductMerchantIdAndStoreAndMember(Long productId, Store store, Member member) {
+        return find.where()
+                .eq("t0.product_merchant_id", productId)
+                .eq("store", store)
+                .eq("member", member)
+                .eq("t0.is_deleted", Boolean.FALSE)
+                .findUnique();
+    }
 }

@@ -23,6 +23,5 @@ public class StoreTaggings extends BaseModel {
 
     private String name;
 
-    private float rate;
 
 }

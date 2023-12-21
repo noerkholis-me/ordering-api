@@ -10,6 +10,7 @@ import controllers.BaseController;
 import controllers.merchants.StoreController;
 import dtos.order.OrderTransaction;
 import dtos.ratings.ProductRateRequest;
+import dtos.ratings.ProductStoreRateRequest;
 import dtos.ratings.StoreRateRequest;
 import dtos.ratings.StoreRateResponse;
 import models.Member;
@@ -18,12 +19,17 @@ import models.ProductRatings;
 import models.Store;
 import models.merchant.ProductMerchant;
 import models.store.StoreRatings;
+import models.voucher.VoucherMerchant;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.ProductMerchantRepository;
 import repository.ratings.ProductRatingRepository;
 import repository.ratings.StoreRatingRepository;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
 
 
 @Api(value = "/ratings", description = "Rating")
@@ -157,6 +163,30 @@ public class RatingController extends BaseController {
                 newStoreRatings.setRate(storeRateRequest.getRate());
 
                 newStoreRatings.save();
+
+                for (ProductStoreRateRequest data : storeRateRequest.getProducts()) {
+                    ProductMerchant productMerchant = ProductMerchantRepository.findById(data.getProduct_id());
+                    ProductRatings productRatings = ProductRatingRepository.findByProductMerchantIdAndStoreAndMember(data.getProduct_id(), store, member);
+                    if(productRatings == null) {
+                        System.out.println("INSERT NEW DATA");
+                        ProductRatings newProductRatings = new ProductRatings();
+                        newProductRatings.setStore(store);
+                        newProductRatings.setProductMerchant(productMerchant);
+                        newProductRatings.setRate(data.getRate());
+                        newProductRatings.setMember(member);
+                        newProductRatings.setFeedback(data.getFeedback());
+
+                        newProductRatings.save();
+                    } else {
+                        productRatings.setStore(store);
+                        productRatings.setRate(data.getRate());
+                        productRatings.setMember(member);
+                        productRatings.setFeedback(productRatings.getFeedback());
+                        productRatings.setRate(data.getRate());
+
+                        productRatings.update();
+                    }
+                }
                 txn.commit();
 
                 StoreRateResponse storeRateResponse = StoreRateResponse.builder()
@@ -174,6 +204,28 @@ public class RatingController extends BaseController {
                 storeRatings.setRate(storeRatings.getRate());
 
                 storeRatings.update();
+                for (ProductStoreRateRequest data : storeRateRequest.getProducts()) {
+                    ProductMerchant productMerchant = ProductMerchantRepository.findById(data.getProduct_id());
+                    ProductRatings productRatings = ProductRatingRepository.findByProductMerchantIdAndStoreAndMember(data.getProduct_id(), store, member);
+                    if(productRatings == null) {
+                        System.out.println("INSERT NEW DATA");
+                        ProductRatings newProductRatings = new ProductRatings();
+                        newProductRatings.setStore(store);
+                        newProductRatings.setProductMerchant(productMerchant);
+                        newProductRatings.setRate(data.getRate());
+                        newProductRatings.setMember(member);
+                        newProductRatings.setFeedback(data.getFeedback());
+
+                        newProductRatings.save();
+                    } else {
+                        productRatings.setStore(store);
+                        productRatings.setRate(data.getRate());
+                        productRatings.setMember(member);
+                        productRatings.setFeedback(data.getFeedback());
+
+                        productRatings.update();
+                    }
+                }
                 txn.commit();
 
                 StoreRateResponse storeRateResponse = StoreRateResponse.builder()
