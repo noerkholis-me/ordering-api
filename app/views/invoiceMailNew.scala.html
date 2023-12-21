@@ -418,7 +418,7 @@
          <div style="display: none; font-size: 1px;max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all; font-family: Poppins;">
             &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
          </div>
-         <div style="max-width: 600px; margin: 0 auto;" class="email-container">
+         <div style="margin: 0 335px;" class="email-container">
             <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
                <tr style="height: 200px;">
                   <td class="hero bg_secondary">
@@ -432,7 +432,6 @@
                      <p style="color: #464646; margin-top: -10px; font-size: 14px; font-weight: 400;">Pembayaran telah terverifikasi dan pesanan telah diteruskan ke <b>Penjual</b>.</p>
                      <table>
                         <tbody>
-                         <p style="color: #333; font-size: 20px; font-style: normal; font-weight: 700; line-height: normal;">Rincian Pembayaran</p>
                             <tr style="color: #464646; font-size: 14px; font-weight: 400;">
                               <td class="left">Nomor Pesanan</td>
                               <td class="right">Waktu Pemesanan</td>
@@ -499,36 +498,30 @@
                         </table>
                       </div>
 
-                 <p style="color: #464646; margin-top: 32px; font-size: 14px; font-weight: 400;">Kamu bisa lihat status pesanan dengan klik tombol berikut.</p>
-                 <center>
-                  <a href="@order.scalaFetchStoreQrUrl" class="btn-primary" style="margin-top: 16px;">Lihat Status Pesanan</a>
-                 </center>
+                     <p style="color: #464646; margin-top: 32px; font-size: 14px; font-weight: 400;">Kamu bisa lihat status pesanan dengan klik tombol berikut.</p>
+                     <center>
+                     <a href="@order.scalaFetchStoreQrUrl" class="btn-primary" style="margin-top: 16px;">Lihat Status Pesanan</a>
+                     </center>
 
-                 <div class="heading-section bg_light" style="padding: 24px; border-style: groove; border: 1px solid; margin-top: 32px;">
-                  <p style="color: #333; font-size: 20px; font-style: normal; font-weight: 700; line-height: normal;">Informasi Toko</p>
-                  <p style="color: #333; font-size: 16px; font-style: normal; font-weight: 700; line-height: normal;">@order.scalaFetchStoreName()</p>
-                  <p style="color: #333; font-size: 14px; font-style: normal; font-weight: 400; line-height: normal;"><img src="@path/assets/images/phone.png" style="margin-top: 0px; width: 16px; height: 16px;"> @order.scalaFetchStorePhone()</p>
-                  <p style="color: #333; font-size: 14px; font-style: normal; font-weight: 400; line-height: normal;"><img src="@path/assets/images/location.png" style="margin-top: 0px; width: 16px; height: 16px;"> @order.scalaFetchStoreAddress()</p>
-               </div>
-               <tr>
-                  <td class="bg_light email-section">
-                     <div style="display: flex; justify-content: space-between;">
-                        <div style="font-size: 12px;
-                        font-style: normal;
-                        font-weight: 400;
-                        line-height: normal;
-                        color: #464646;"> Copyright <img src="@path/assets/images/copyright.png" style="margin-top: 0px; width: 12px; height: 12px;"> 2023 Pagii. All Rights Reserved</div>
-                        <div style="display: flex;
-                        width: 66px;
-                        height: 20px;
-                        justify-content: center;
-                        align-items: center;"><img src='@path/assets/images/Logo-Pagii-Sandbox.png' alt="Sandbox" width="100%"></div>
+                     <div class="heading-section bg_light" style="padding: 24px; border-style: groove; border: 1px solid; margin-top: 32px;">
+                        <p style="color: #333; font-size: 20px; font-style: normal; font-weight: 700; line-height: normal;">Informasi Toko</p>
+                        <p style="color: #333; font-size: 16px; font-style: normal; font-weight: 700; line-height: normal;">@order.scalaFetchStoreName()</p>
+                        <p style="color: #333; font-size: 14px; font-style: normal; font-weight: 400; line-height: normal;"><img src="@path/assets/images/phone.png" style="margin-top: 0px; width: 16px; height: 16px;"> @order.scalaFetchStorePhone()</p>
+                        <p style="color: #333; font-size: 14px; font-style: normal; font-weight: 400; line-height: normal;"><img src="@path/assets/images/location.png" style="margin-top: 0px; width: 16px; height: 16px;"> @order.scalaFetchStoreAddress()</p>
                      </div>
+
                   </td>
-               </tr>
-               </tr>
-               
+               </tr>   
+               <table style="width: 100%;">
+                  <tbody>
+                     <tr style="color: #464646; font-size: 14px; font-weight: 400;">
+                        <td class="left">Copyright <img src="@path/assets/images/copyright.png" style="margin-top: 0px; width: 12px; height: 12px;"> 2023 Pagii. All Rights Reserved</td>
+                        <td class="right" colspan="1"><img src='@path/assets/images/Ordering-Logomark-Default.png' alt="Sandbox"></td>
+                     </tr>
+                  </tbody>
+               </table>
             </table>
+            
          </div>
       </center>
    </body>
