@@ -332,7 +332,6 @@ public class OrderMerchantController extends BaseController {
                     orderRes.setOrderQueue(order.getOrderQueue());
                     orderRes.setStatusOrder(order.getStatus());
                     orderRes.setStatus(order.getStatus());
-                    orderRes.setTableId(order.getTableMerchant().id);
                     orderRes.setTableName(order.getTableName());
                     orderRes.setPaymentType(getOrderPayment.getPaymentType());
                     orderRes.setPaymentChannel(getOrderPayment.getPaymentChannel());
