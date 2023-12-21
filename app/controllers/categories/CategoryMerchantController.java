@@ -375,6 +375,28 @@ public class CategoryMerchantController extends BaseController {
         return badRequest(Json.toJson(response));
     }
 
+    public static Result listCategoryFE(Long merchantId, Long storeId) {
+        Store store = Store.find.byId(storeId);
+        if (store == null) {
+            response.setBaseResponse(0, 0, 0, "Store tidak ditemukan", null);
+            return badRequest(Json.toJson(response));
+        }
+        try {
+            int totalData = CategoryMerchantRepository.findAllByMerchant(merchantId).size();
+            List<CategoryMerchant> categoryMerchants = CategoryMerchantRepository.findAllByMerchant(merchantId);
+
+            List<CategoryMerchantResponse> responses = listResponse(categoryMerchants, merchantId);
+
+            response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data", responses);
+            return ok(Json.toJson(response));
+        } catch (Exception e) {
+            Logger.error("allDetail", e);
+        }
+        response.setBaseResponse(0, 0, 0, "Merchant tidak ditemukan", null);
+        return badRequest(Json.toJson(response));
+    }
+
+
     public static List<CategoryMerchantResponse> listResponse(List<CategoryMerchant> categoryMerchants, Long merchantId) {
         List<CategoryMerchantResponse> responses = new ArrayList<>();
         for (CategoryMerchant category : categoryMerchants) {
