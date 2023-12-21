@@ -430,21 +430,31 @@
                      <p style="margin-bottom: 0;  color: #464646;">Hello @order.scalaFetchMemberFullname(),</p>
                      <p style="margin-bottom: 0; margin-top: -10px;  color: #333; font-size: 24px; font-style: normal; font-weight: 700;">Terima kasih telah melakukan pembayaran</p>
                      <p style="color: #464646; margin-top: -10px; font-size: 14px; font-weight: 400;">Pembayaran telah terverifikasi dan pesanan telah diteruskan ke <b>Penjual</b>.</p>
+                     <table>
+                        <tbody>
+                         <p style="color: #333; font-size: 20px; font-style: normal; font-weight: 700; line-height: normal;">Rincian Pembayaran</p>
+                            <tr style="color: #464646; font-size: 14px; font-weight: 400;">
+                              <td class="left">Nomor Pesanan</td>
+                              <td class="right">Waktu Pemesanan</td>
+                            </tr>
+                            <tr style="color: #464646; font-size: 14px; font-weight: 600;">
+                              <td class="left">@order.scalaFetchOrderNumber()</td>
+                              <td class="right">@order.scalaFetchOrderDate()</td>
+                            </tr>
+                        </tbody>
+                      </table>
                      <div class="bg_light" style="padding: 24px; border-style: groove; border: 1px solid; margin-top: 28px;">
                         <table>
                           <tbody>
                            <p style="color: #333; font-size: 20px; font-style: normal; font-weight: 700; line-height: normal;">Rincian Pembayaran</p>
                               <tr style="color: #464646; font-size: 14px; font-weight: 400;">
-                                <td class="left">Nomor Pesanan</td>
+                                <td class="left">Tipe Pesanan</td>
                                 <td></td>
-                                <td class="right">Waktu Pemesanan</td>
+                                <td class="right">@order.scalaFetchOrderType()</td>
                               </tr>
-                              <tr style="color: #464646; font-size: 14px; font-weight: 600;">
-                                <td class="left">@order.scalaFetchOrderNumber()</td>
-                                <td></td>
-                                <td class="right">@order.scalaFetchOrderDate()</td>
-                              </tr>
+                              
                               <tr><td colspan ="3"><hr style="border: 1px #DEE3ED; border-style: dashed"></td></tr>
+
                               @for(o <- order.getProductDetail()){
                               <tr style="color: #464646; font-size: 14px; font-weight: 600;">
                                  <td style="width:25%">@o.fetchQuantity()</td>
