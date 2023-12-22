@@ -417,6 +417,9 @@ GET    /merchant/store/:storeCode/detail            controllers.merchants.StoreC
 GET    /merchant/store/v2/:storeAlias/detail        controllers.merchants.StoreController.getStoreByAlias(storeAlias: String)
 GET    /merchant/allstore                           controllers.merchants.StoreController.getAllStoreMerchant()
 
+POST    /merchant/store/qrcode/static              controllers.merchants.StoreController.createQrCodeStatic()
+GET     /merchant/store/qrcode/static               controllers.merchants.StoreController.getQrCodeStatic(store_id:Long ?= 0)
+
 GET    /merchant/detail/:merchantCode				controllers.merchants.MerchantController.getMerchantDetail(merchantCode: String)
 
 #QR GROUP
