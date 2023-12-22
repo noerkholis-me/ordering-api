@@ -80,6 +80,9 @@ public class OrderList {
     @JsonProperty("payment_type")
     private String paymentType;
 
+    @JsonProperty("payment_status")
+    private String paymentStatus;
+
     @JsonProperty("payment_channel")
     private String paymentChannel;
 
