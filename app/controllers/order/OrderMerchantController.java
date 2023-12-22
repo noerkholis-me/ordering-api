@@ -231,10 +231,10 @@ public class OrderMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result getOrderListUserByPhone(Long storeId, int offset, int limit, String statusOrder, String name, String phoneNumber) throws Exception {
+    public static Result getOrderListUserByPhone(Long storeId, int offset, int limit, String statusOrder, String email, String phoneNumber) throws Exception {
         try {
-            if (name != null && name != "" || phoneNumber != null && phoneNumber != "") {
-            Member memberUser = Member.findDataCustomerByName(name, phoneNumber);
+            if (email != null && email != "" || phoneNumber != null && phoneNumber != "") {
+            Member memberUser = Member.findDataCustomer(email, phoneNumber);
             if (memberUser != null) {
                 Query<Order> query = null;
                 // check store id --> mandatory
@@ -267,8 +267,8 @@ public class OrderMerchantController extends BaseController {
                 }
                 
                 ExpressionList<Order> exp = query.where();
-                exp.ieq("t0.member_name", name);
-                exp.ieq("t0.phone_number", phoneNumber);
+                exp.ieq("t0.member_name", memberUser.fullName);
+               //  exp.ieq("t0.phone_number", phoneNumber);
                 // exp = exp.disjunction();
                 // exp = exp.ilike("t0.order_number", "%" + filter + "%");
                 // exp = exp.ilike("t0.member_name", "%" + filter + "%");

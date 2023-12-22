@@ -1777,10 +1777,10 @@ public class SessionsController extends BaseController {
 		if (authority == 200 || authority == 203) {
 			JsonNode json = request().body().asJson();
 			String phone = json.get("phone").asText().toLowerCase();
-			String name = json.get("name").asText();
+			String email = json.get("email").asText();
 			Long merchantId = json.get("merchant_id").asLong();
 
-			if (name == null && name == "" || phone == null && phone == "") {
+			if (email == null && email == "" || phone == null && phone == "") {
 				response.setBaseResponse(0, 0, 0, "Email atau Nomor Telepon dibutuhkan", null);
         return badRequest(Json.toJson(response));
 			}
@@ -1800,7 +1800,7 @@ public class SessionsController extends BaseController {
 			// 	return badRequest(Json.toJson(response));
 			// }
 
-			Member member = Member.findByPhoneNameAndMerchantId(name, phone, merchantId);
+			Member member = Member.findByEmailAndMerchantId(email, merchantId);
 			if (member == null) {
 				response.setBaseResponse(0, 0, 0, "customer tidak terdaftar", Boolean.FALSE);
 				return badRequest(Json.toJson(response));

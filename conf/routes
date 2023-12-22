@@ -507,7 +507,7 @@ GET    /merchant/productstore/mobile-qr/list-by-category controllers.product.Pro
 POST /users/order/checkout                               controllers.users.CheckoutOrderController.checkoutOrder()
 POST /users/order/payment                                controllers.users.CheckoutOrderController.payment()
 GET  /users/order/history                                controllers.order.OrderMerchantController.getOrderListUser(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="", filter:String?="")
-GET  /users/order/checkhistory                                controllers.order.OrderMerchantController.getOrderListUserByPhone(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="", name:String?="" , phone_number:String?="")
+GET  /users/order/checkhistory                                controllers.order.OrderMerchantController.getOrderListUserByPhone(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="", email:String?="" , phone_number:String?="")
 GET  /users/order/checkstatus                            controllers.order.OrderMerchantController.checkStatusOrderNumber(offset:Int ?= 0, limit:Int ?= 10, statusOrder:String ?= "", email:String ?= "", phone_number:String ?= "", store_code: String)
 PUT  /merchant/order/changestatus                        controllers.users.CheckoutOrderController.changeStatusFromMerchant()
 PUT  /users/order/cancel                              controllers.users.CheckoutOrderController.cancelOrder()
