@@ -24,6 +24,28 @@ public class StoreRepository {
         return query.findUnique();
     }
 
+    public static Store findByStoreCode(String storeCode) {
+        String querySql = "SELECT s.id FROM store s "
+                + "WHERE s.store_code = '" + storeCode + "' "
+                + "AND s.is_deleted = false ";
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<Store> query = Ebean.find(Store.class).setRawSql(rawSql);
+
+        return query.findUnique();
+    }
+
+    public static Store findByStoreId(Long storeId) {
+        String querySql = "SELECT s.id FROM store s "
+                + "WHERE s.id = '" + storeId + "' "
+                + "AND s.is_deleted = false ";
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<Store> query = Ebean.find(Store.class).setRawSql(rawSql);
+
+        return query.findUnique();
+    }
+
     public static List<Store> findAllStore(String filter, String sort, int offset, int limit) {
         String sorting;
         if (!"".equals(sort)) {

@@ -88,6 +88,9 @@ public class Store extends BaseModel {
     @Column(name = "store_qr_code")
     public String storeQrCode;
 
+    @Column(name = "store_qr_code_static")
+    public String storeQrCodeStatic;
+
     @Column(name = "is_active")
     public Boolean isActive;
 
