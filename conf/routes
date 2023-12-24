@@ -689,7 +689,8 @@ PUT         /merchant/:tableId/change-availability-table        controllers.merc
 
 POST        /ratings/store                                  controllers.ratings.ordering.RatingController.rateStore()
 POST        /ratings/product                                controllers.ratings.ordering.RatingController.rateProduct()
-POST        /ratings/store/myrate                           controllers.ratings.ordering.RatingController.getMyRateStore
+POST        /ratings/store/myrate                           controllers.ratings.ordering.RatingController.getMyRateStore()
+GET         /ratings/product/list                  controllers.ratings.ordering.RatingController.getRateProduct(order_number:String, offset:Int ?= 0, limit:Int ?= 10)
 
 # Webhook
 GET         /external/:orderNumber/get-order-detail         controllers.webhook.OrderWebHookController.getOrderDetailWebhook(orderNumber: String)

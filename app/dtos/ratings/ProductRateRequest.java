@@ -31,5 +31,8 @@ public class ProductRateRequest {
 
     private String feedback;
 
+    @JsonProperty("order_number")
+    private String orderNumber;
+
     private List<Long> tags;
 }

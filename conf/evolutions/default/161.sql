@@ -21,6 +21,7 @@ CREATE TABLE product_ratings(
                               id						bigint not null,
                               store_id					bigint not null,
                               member_id			        bigint not null,
+                              order_number              varchar(255),
                               product_merchant_id       bigint not null,
                               feedback                  text,
                               rate                      float,

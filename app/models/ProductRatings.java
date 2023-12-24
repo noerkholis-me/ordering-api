@@ -30,7 +30,9 @@ public class ProductRatings extends BaseModel {
     @Column(columnDefinition = "text")
     private String feedback;
 
-    private float rate;
+    @Column(name = "order_number")
+    private String orderNumber;
 
+    private float rate;
 
 }

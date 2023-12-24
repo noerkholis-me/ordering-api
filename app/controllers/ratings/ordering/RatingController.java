@@ -1,34 +1,48 @@
 package controllers.ratings.ordering;
 
 import com.avaje.ebean.Ebean;
+import com.avaje.ebean.ExpressionList;
+import com.avaje.ebean.Query;
+import com.avaje.ebean.RawSql;
+import com.avaje.ebean.RawSqlBuilder;
 import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
+import com.hokeba.mapping.request.MapProductMerchant;
 import com.wordnik.swagger.annotations.Api;
 import controllers.BaseController;
 import controllers.merchants.StoreController;
+import controllers.product.ProductMerchantController;
+import dtos.order.OrderCustomerResponse;
 import dtos.order.OrderTransaction;
+import dtos.product.ProductAppResponse;
 import dtos.ratings.ProductRateRequest;
+import dtos.ratings.ProductRateResponse;
 import dtos.ratings.ProductStoreRateRequest;
 import dtos.ratings.StoreRateRequest;
 import dtos.ratings.StoreRateResponse;
+import dtos.table.DisplayTableResponse;
 import models.Member;
 import models.Merchant;
 import models.ProductRatings;
 import models.Store;
 import models.merchant.ProductMerchant;
+import models.merchant.TableMerchant;
 import models.store.StoreRatings;
+import models.transaction.Order;
 import models.voucher.VoucherMerchant;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import repository.OrderRepository;
 import repository.ProductMerchantRepository;
 import repository.ratings.ProductRatingRepository;
 import repository.ratings.StoreRatingRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -165,6 +179,7 @@ public class RatingController extends BaseController {
                 newStoreRatings.save();
 
                 for (ProductStoreRateRequest data : storeRateRequest.getProducts()) {
+                    System.out.println(data);
                     ProductMerchant productMerchant = ProductMerchantRepository.findById(data.getProduct_id());
                     ProductRatings productRatings = ProductRatingRepository.findByProductMerchantIdAndStoreAndMember(data.getProduct_id(), store, member);
                     if(productRatings == null) {
@@ -173,12 +188,14 @@ public class RatingController extends BaseController {
                         newProductRatings.setStore(store);
                         newProductRatings.setProductMerchant(productMerchant);
                         newProductRatings.setRate(data.getRate());
+                        newProductRatings.setOrderNumber(data.getOrderNumber());
                         newProductRatings.setMember(member);
                         newProductRatings.setFeedback(data.getFeedback());
 
                         newProductRatings.save();
                     } else {
                         productRatings.setStore(store);
+                        productRatings.setOrderNumber(data.getOrderNumber());
                         productRatings.setRate(data.getRate());
                         productRatings.setMember(member);
                         productRatings.setFeedback(productRatings.getFeedback());
@@ -212,9 +229,10 @@ public class RatingController extends BaseController {
                         ProductRatings newProductRatings = new ProductRatings();
                         newProductRatings.setStore(store);
                         newProductRatings.setProductMerchant(productMerchant);
-                        newProductRatings.setRate(data.getRate());
                         newProductRatings.setMember(member);
                         newProductRatings.setFeedback(data.getFeedback());
+                        newProductRatings.setRate(data.getRate());
+                        newProductRatings.setOrderNumber(data.getOrderNumber());
 
                         newProductRatings.save();
                     } else {
@@ -222,6 +240,7 @@ public class RatingController extends BaseController {
                         productRatings.setRate(data.getRate());
                         productRatings.setMember(member);
                         productRatings.setFeedback(data.getFeedback());
+                        productRatings.setOrderNumber(data.getOrderNumber());
 
                         productRatings.update();
                     }
@@ -274,15 +293,15 @@ public class RatingController extends BaseController {
             Store store = Store.findById(productRateRequest.getStore_id());
             Member member = getMember(storeRateRequest, productMerchant.merchant);
 
-            ProductRatings productRatings = ProductRatingRepository.findByStoreAndMember(store, member);
+            ProductRatings productRatings = ProductRatingRepository.findByProductMerchantIdAndStoreAndMember(productRateRequest.getProduct_id() ,store, member);
             if(productRatings == null) {
                 System.out.println("INSERT NEW DATA");
                 ProductRatings newProductRatings = new ProductRatings();
                 newProductRatings.setStore(store);
-                newProductRatings.setRate(storeRateRequest.getRate());
                 newProductRatings.setMember(member);
-                newProductRatings.setFeedback(storeRateRequest.getFeedback());
-                newProductRatings.setRate(storeRateRequest.getRate());
+                newProductRatings.setFeedback(productRateRequest.getFeedback());
+                newProductRatings.setRate(productRateRequest.getRate());
+                newProductRatings.setOrderNumber(productRateRequest.getOrderNumber());
 
                 newProductRatings.save();
                 txn.commit();
@@ -296,10 +315,9 @@ public class RatingController extends BaseController {
                 return ok(Json.toJson(response));
             } else {
                 productRatings.setStore(store);
-                productRatings.setRate(storeRateRequest.getRate());
                 productRatings.setMember(member);
-                productRatings.setFeedback(storeRateRequest.getFeedback());
-                productRatings.setRate(productRatings.getRate());
+                productRatings.setFeedback(productRateRequest.getFeedback());
+                productRatings.setRate(productRateRequest.getRate());
 
                 productRatings.update();
                 txn.commit();
@@ -339,7 +357,30 @@ public class RatingController extends BaseController {
         return null;
     }
 
-    public static Result getRateProduct(Long storeId, Long productId) {
-        return null;
+    public static Result getRateProduct(String order_number,  int offset, int limit) {
+        try {
+             List<ProductRatings> productRatings = ProductRatingRepository.findByProductRating(order_number);
+
+             List<ProductRateResponse> productRateResponses = new ArrayList<>();
+             
+             for (ProductRatings productRating : productRatings) {
+                ProductRateResponse productRateResponse = new ProductRateResponse();
+                productRateResponse.setId(productRating.id);
+                productRateResponse.setFeedback(productRating.getFeedback());
+                productRateResponse.setOrderNumber(productRating.getOrderNumber());
+                productRateResponse.setProductName(productRating.getProductMerchant().getProductName());
+                // productRateResponse.setProductImage(productRating.getProductMerchant().getProductMerchantDetail().getProductImageMain());
+                productRateResponse.setRate(productRating.getRate());
+                productRateResponses.add(productRateResponse);
+             }
+
+             response.setBaseResponse(productRateResponses.size(), 0, 0, success, productRateResponses);
+             return ok(Json.toJson(response));
+        } catch (Exception e) {
+            e.printStackTrace();
+            Logger.error("allDetail", e);
+
+            return internalServerError(Json.toJson(response));
+        }
     }
 }

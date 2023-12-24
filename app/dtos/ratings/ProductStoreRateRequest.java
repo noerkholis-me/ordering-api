@@ -12,4 +12,7 @@ public class ProductStoreRateRequest {
 
     private String feedback;
 
+    @JsonProperty("order_number")
+    private String orderNumber;
+
 }
