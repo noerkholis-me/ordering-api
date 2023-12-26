@@ -19,6 +19,7 @@ import models.Address;
 import models.BrandMerchant;
 import models.Member;
 import models.Merchant;
+import models.ProductRatings;
 import models.Store;
 import models.appsettings.AppSettings;
 import models.merchant.ProductMerchantDetail;
@@ -39,6 +40,7 @@ import repository.OrderRepository;
 import repository.ProductMerchantDetailRepository;
 import repository.TableMerchantRepository;
 import repository.pickuppoint.PickUpPointRepository;
+import repository.ratings.ProductRatingRepository;
 import service.DownloadOrderReport;
 
 import java.io.File;
@@ -322,6 +324,15 @@ public class OrderMerchantController extends BaseController {
                         orderRes.setCustomerName(customerName);
                     }
                     orderRes.setCustomerPhone(order.getPhoneNumber());
+
+                    // get rating
+                    List<ProductRatings> productRatings = ProductRatingRepository.findByProductRating(order.getOrderNumber());
+                    if (productRatings.isEmpty() || productRatings.size() == 0) {
+                        orderRes.setIsRated(false);
+                    }else{
+                        orderRes.setIsRated(true);
+                    }
+
 
                     // get store
                     orderRes.setMerchantName(order.getStore().getMerchant().name != null || order.getStore().getMerchant().name != "" ? order.getStore().getMerchant().name : null);

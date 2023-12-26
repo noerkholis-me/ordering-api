@@ -74,6 +74,9 @@ public class OrderList {
     @JsonProperty("order_detail")
     private List<ProductOrderDetail> productOrderDetail;
 
+    @JsonProperty("is_rated")
+    private Boolean isRated;
+
     @JsonProperty("status")
     private String status;
 
