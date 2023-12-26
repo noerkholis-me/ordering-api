@@ -21,6 +21,7 @@ import lombok.Setter;
 public class ProductRateResponse {
     //@JsonProperty("product_name")
     private Long id;
+    private Long productId;
     private String productName; 
 
     private String productImage; 

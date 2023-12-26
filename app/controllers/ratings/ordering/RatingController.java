@@ -375,6 +375,7 @@ public class RatingController extends BaseController {
                     productRateResponse.setProductImage(productMerchantDetail.getProductImageMain());
                 }
                 productRateResponse.setId(productRating.id);
+                productRateResponse.setProductId(productRating.getProductMerchant().id);
                 productRateResponse.setFeedback(productRating.getFeedback());
                 productRateResponse.setOrderNumber(productRating.getOrderNumber());
                 productRateResponse.setProductName(productRating.getProductMerchant().getProductName());
