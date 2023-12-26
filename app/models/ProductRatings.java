@@ -1,9 +1,12 @@
 package models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import models.merchant.ProductMerchant;
+
+import java.util.Date;
 
 import javax.persistence.*;
 
@@ -32,6 +35,10 @@ public class ProductRatings extends BaseModel {
 
     @Column(name = "order_number")
     private String orderNumber;
+
+    @Column(name = "updated_at")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "Asia/Jakarta")
+    public Date updatedAt;
 
     private float rate;
 

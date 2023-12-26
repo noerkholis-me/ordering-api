@@ -1,6 +1,9 @@
 package dtos.ratings;
 
+import java.util.Date;
+
 import dtos.product.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 // import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,4 +30,9 @@ public class ProductRateResponse {
     private String orderNumber;
     //@JsonProperty("rate")
     private float rate;
+
+    private String customerName;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Jakarta")
+    private Date date;
 }
