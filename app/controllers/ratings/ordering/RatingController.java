@@ -370,7 +370,13 @@ public class RatingController extends BaseController {
              
              for (ProductRatings productRating : productRatings) {
                 ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productRating.getProductMerchant());
+                
                 ProductRateResponse productRateResponse = new ProductRateResponse();
+                Member member = null;
+                if (productRating.getMember() != null) {
+                    member = Member.findByIdMember(productRating.getMember().id);
+                    productRateResponse.setCustomerName(member.fullName);
+                }
                 if (productMerchantDetail != null) {
                     productRateResponse.setProductImage(productMerchantDetail.getProductImageMain());
                 }
