@@ -13,7 +13,7 @@ public class ProductMerchantDetailRepository extends Model {
     public static Finder<Long, ProductMerchantDetail> find = new Finder<>(Long.class, ProductMerchantDetail.class);
 
     public static ProductMerchantDetail findByProduct(ProductMerchant productMerchant) {
-        return find.where().eq("productMerchant", productMerchant).findUnique();
+        return find.where().eq("productMerchant", productMerchant).eq("t0.is_deleted", false).findUnique();
     }
     
     public static ProductMerchantDetail findMainProduct(ProductMerchant productMerchant) {

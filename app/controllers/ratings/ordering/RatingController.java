@@ -28,6 +28,7 @@ import models.Merchant;
 import models.ProductRatings;
 import models.Store;
 import models.merchant.ProductMerchant;
+import models.merchant.ProductMerchantDetail;
 import models.merchant.TableMerchant;
 import models.store.StoreRatings;
 import models.transaction.Order;
@@ -36,6 +37,7 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.OrderRepository;
+import repository.ProductMerchantDetailRepository;
 import repository.ProductMerchantRepository;
 import repository.ratings.ProductRatingRepository;
 import repository.ratings.StoreRatingRepository;
@@ -360,16 +362,22 @@ public class RatingController extends BaseController {
     public static Result getRateProduct(String order_number,  int offset, int limit) {
         try {
              List<ProductRatings> productRatings = ProductRatingRepository.findByProductRating(order_number);
+            //  ProductRatings rating = objectMapper.readValue(json.toString(), ProductRatings.class);
+            //  System.out.println(rating);
+            System.out.println(Json.toJson(productRatings));
 
              List<ProductRateResponse> productRateResponses = new ArrayList<>();
              
              for (ProductRatings productRating : productRatings) {
+                ProductMerchantDetail productMerchantDetail = ProductMerchantDetailRepository.findByProduct(productRating.getProductMerchant());
                 ProductRateResponse productRateResponse = new ProductRateResponse();
+                if (productMerchantDetail != null) {
+                    productRateResponse.setProductImage(productMerchantDetail.getProductImageMain());
+                }
                 productRateResponse.setId(productRating.id);
                 productRateResponse.setFeedback(productRating.getFeedback());
                 productRateResponse.setOrderNumber(productRating.getOrderNumber());
                 productRateResponse.setProductName(productRating.getProductMerchant().getProductName());
-                // productRateResponse.setProductImage(productRating.getProductMerchant().getProductMerchantDetail().getProductImageMain());
                 productRateResponse.setRate(productRating.getRate());
                 productRateResponse.setCustomerName(productRating.getMember().fullName);
                 productRateResponse.setDate(productRating.getUpdatedAt());
