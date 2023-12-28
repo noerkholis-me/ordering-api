@@ -1,7 +1,7 @@
 package controllers.finance;
 
 import com.avaje.ebean.Ebean;
-import com.avaje.ebean.Query;
+import com.avaje.ebean.SqlRow;
 import com.avaje.ebean.Transaction;
 import com.hokeba.api.BaseResponse;
 import controllers.BaseController;
@@ -21,9 +21,7 @@ import service.DownloadTransactionService;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class FinanceTransactionController extends BaseController {
 
@@ -48,13 +46,13 @@ public class FinanceTransactionController extends BaseController {
                     }
                 }
 
-                List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.getAllTransactions(ownMerchant.id, storeId, startDate, endDate, status, statusOrder, sort, offset, limit);
-                Integer totalData = FinanceTransactionRepository.getAllTransactions(ownMerchant.id, storeId, startDate, endDate, status, statusOrder, sort, 0, 0).size();
+                List<SqlRow> financeTransactions = FinanceTransactionRepository.getAllTransactionsV2(ownMerchant.id, storeId, startDate, endDate, status, statusOrder, sort, offset, limit);
+                int totalData = FinanceTransactionRepository.getAllTransactionsV2(ownMerchant.id, storeId, startDate, endDate, status, statusOrder, sort, 0, 0).size();
                 List<FinanceTransactionResponse> financeTransactionResponses = new ArrayList<>();
-                for (FinanceTransaction transaction : financeTransactions) {
+                for (SqlRow transaction : financeTransactions) {
                     FinanceTransactionResponse trxRes = new FinanceTransactionResponse();
-                    Order order = OrderRepository.find.where().eq("id", transaction.id).eq("isDeleted", false).findUnique();
-                    FinanceTransaction trx = FinanceTransactionRepository.find.where().raw("reference_number = '" + order.getOrderNumber() + "' AND is_deleted = false ORDER BY date LIMIT 1").findUnique();
+                    String trxNumber = transaction.getString("reference_number");
+                    FinanceTransaction trx = FinanceTransactionRepository.find.where().raw("reference_number = '" + trxNumber + "' AND is_deleted = false LIMIT 1").findUnique();
                     trxRes.setReferenceNumber(trx.getReferenceNumber());
                     trxRes.setDate(trx.getDate());
                     trxRes.setTransactionType(trx.getTransactionType());
@@ -62,6 +60,7 @@ public class FinanceTransactionController extends BaseController {
                     trxRes.setAmount(trx.getAmount());
                     financeTransactionResponses.add(trxRes);
                 }
+
 
                 response.setBaseResponse(totalData, offset, limit, success + " Showing data transaction", financeTransactionResponses);
                 return ok(Json.toJson(response));
@@ -95,12 +94,12 @@ public class FinanceTransactionController extends BaseController {
                     }
                 }
 
-                List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.getAllTransactions(ownMerchant.id, storeId, startDate, endDate, status, statusOrder, sort, 0, 0);
+                List<SqlRow> financeTransactions = FinanceTransactionRepository.getAllTransactionsV2(ownMerchant.id, storeId, startDate, endDate, status, statusOrder, sort, 0, 0);
                 List<FinanceTransaction> financeTransactionResponses = new ArrayList<>();
-                for (FinanceTransaction transaction : financeTransactions) {
+                for (SqlRow transaction : financeTransactions) {
                     FinanceTransaction trxRes = new FinanceTransaction();
-                    Order order = OrderRepository.find.where().eq("id", transaction.id).eq("isDeleted", false).findUnique();
-                    FinanceTransaction trx = FinanceTransactionRepository.find.where().raw("reference_number = '" + order.getOrderNumber() + "' AND is_deleted = false ORDER BY date LIMIT 1").findUnique();
+                    String trxNumber = transaction.getString("reference_number");
+                    FinanceTransaction trx = FinanceTransactionRepository.find.where().raw("reference_number = '" + trxNumber + "' AND is_deleted = false LIMIT 1").findUnique();
                     trxRes.setEventId(trx.getEventId());
                     trxRes.setReferenceNumber(trx.getReferenceNumber());
                     trxRes.setDate(trx.getDate());
@@ -172,24 +171,20 @@ public class FinanceTransactionController extends BaseController {
                         if (!transaction.getReferenceNumber().equals(refNumberFilter)) {
                             refNumberFilter = transaction.getReferenceNumber();
                             if (status.equalsIgnoreCase("IN")) {
-                                if (transaction.getStatus().equals("IN")){
+                                if (transaction.getStatus().equals("IN")) {
                                     filteredActiveBalance = filteredActiveBalance.add(transaction.getAmount());
-                                    System.out.println("STATUS : " + transaction.getStatus() + " + Rp " + transaction.getAmount() + " , total = Rp " + filteredActiveBalance);
+                                    System.out.println(transaction.getReferenceNumber() + " : " + transaction.getStatus() + " + Rp " + transaction.getAmount() + " , total = Rp " + filteredActiveBalance);
                                 }
-                            } else if (status.equalsIgnoreCase("OUT")){
-                                if (transaction.getStatus().equals("OUT")) {
-                                    filteredActiveBalance = filteredActiveBalance.add(transaction.getAmount());
+                            } else if (status.equalsIgnoreCase("OUT")) {
+                                if (transaction.getStatus().equals("OUT") || transaction.getStatus().equals("WITHDRAW")) {
+                                    filteredActiveBalance = filteredActiveBalance.subtract(transaction.getAmount());
                                     System.out.println("STATUS : " + transaction.getStatus() + " - Rp " + transaction.getAmount() + " , total = Rp " + filteredActiveBalance);
                                 }
-                            } else {
-                                System.out.print("STATUS : " + transaction.getStatus());
+                            } else  {
                                 if (transaction.getStatus().equals("IN")){
                                     filteredActiveBalance = filteredActiveBalance.add(transaction.getAmount());
                                     System.out.println(" + Rp " + transaction.getAmount() + " , total = Rp " + filteredActiveBalance);
-                                } else if (transaction.getStatus().equals("OUT")) {
-                                    filteredActiveBalance = filteredActiveBalance.subtract(transaction.getAmount());
-                                    System.out.println(" - Rp " + transaction.getAmount() + " , total = Rp " + filteredActiveBalance);
-                                } else if (transaction.getStatus().equals("WITHDRAW")) {
+                                } else {
                                     filteredActiveBalance = filteredActiveBalance.subtract(transaction.getAmount());
                                     System.out.println(" - Rp " + transaction.getAmount() + " , total = Rp " + filteredActiveBalance);
                                 }
