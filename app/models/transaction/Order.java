@@ -246,7 +246,7 @@ public class Order extends BaseModel {
     
     public String scalaFetchStoreQrUrl() {
     	String feUrl = Constant.getInstance().getFrontEndUrl();
-    	String url = feUrl.concat(this.store.storeCode);
+    	String url = feUrl.concat(this.store.storeAlias);
     	System.out.println("URL Link Cek Order >>> "+url);
     	return url;
     }
