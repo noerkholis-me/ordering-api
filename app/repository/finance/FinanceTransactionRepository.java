@@ -5,6 +5,7 @@ import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
+import com.avaje.ebean.SqlRow;
 import models.BaseModel;
 import models.finance.FinanceTransaction;
 import play.Logger;
@@ -39,9 +40,9 @@ public class FinanceTransactionRepository extends BaseModel {
 
         String sorting;
         if (sort.equalsIgnoreCase("ASC")) {
-            sorting = "ORDER BY ft.date ASC";
+            sorting = "ORDER BY ft.date ASC ";
         } else {
-            sorting = "ORDER BY ft.date DESC";
+            sorting = "ORDER BY ft.date DESC ";
         }
 
         String transactionDate = "";
@@ -58,18 +59,24 @@ public class FinanceTransactionRepository extends BaseModel {
 
         String transactionStatus = "";
         if (!status.equalsIgnoreCase("")) {
-            transactionStatus = "AND ft.status = '" + status + "' ";
+            if (status.equalsIgnoreCase("OUT")) {
+                transactionStatus = "AND ft.status != 'IN' ";
+            } else {
+                transactionStatus = "AND ft.status = '" + status + "' ";
+            }
         }
 
         String orderStatus = "";
         if (!statusOrder.equalsIgnoreCase("")) {
-            orderStatus = "AND ord.status = '" + statusOrder + "' ";
+            if (!status.equalsIgnoreCase("OUT")) {
+                orderStatus = "AND ord.status = '" + statusOrder + "' ";
+            }
         }
 
         String querySql = "SELECT ord.id FROM finance_transaction ft "
                 + "JOIN store st ON ft.store_id = st.id "
                 + "JOIN merchant mc ON st.merchant_id = mc.id "
-                + "JOIN orders ord ON ft.reference_number = ord.order_number "
+                + "LEFT JOIN orders ord ON ft.reference_number = ord.order_number "
                 + condition
                 + orderStatus
                 + transactionDate
@@ -81,6 +88,81 @@ public class FinanceTransactionRepository extends BaseModel {
         Query<FinanceTransaction> query = Ebean.find(FinanceTransaction.class).setRawSql(rawSql);
 
         return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static List<SqlRow> getAllTransactionsV2(Long merchantId, Long storeId, String startDate, String endDate, String status, String statusOrder, String sort, int offset, int limit) throws Exception {
+        String condition;
+        if (storeId != null && storeId != 0L) {
+            condition = "WHERE st.id = " + storeId + " ";
+        } else {
+            condition = "WHERE mc.id = " + merchantId + " ";
+        }
+
+        String sorting;
+        if (sort.equalsIgnoreCase("ASC")) {
+            sorting = "ORDER BY ft.date ASC ";
+        } else {
+            sorting = "ORDER BY ft.date DESC ";
+        }
+
+        String transactionDate = "";
+        if (!startDate.equalsIgnoreCase("") && !endDate.equalsIgnoreCase("")) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            Date start = simpleDateFormat.parse(startDate.concat(" 00:00:00.0"));
+            Date end = simpleDateFormat.parse(endDate.concat(" 23:59:00.0"));
+
+            Timestamp startTimestamp = new Timestamp(start.getTime());
+            Timestamp endTimestamp = new Timestamp(end.getTime());
+
+            transactionDate = "AND ft.date BETWEEN '" + startTimestamp + "' AND '" + endTimestamp + "' ";
+        }
+
+        String transactionStatus = "";
+        if (!status.equalsIgnoreCase("")) {
+            if (status.equalsIgnoreCase("OUT")) {
+                transactionStatus = "AND ft.status != 'IN' ";
+            } else if (status.equalsIgnoreCase("IN")) {
+                transactionStatus = "AND ft.status = 'IN' ";
+            }
+        }
+
+        String orderStatus = "";
+        if (!statusOrder.equalsIgnoreCase("")) {
+            if (status.equalsIgnoreCase("IN")) {
+                orderStatus = "AND ord.status = '" + statusOrder + "' ";
+            }
+        } else {
+            if (status.equalsIgnoreCase("IN")) {
+                orderStatus = "AND ord.status = 'CLOSED' ";
+            }
+        }
+
+        String financeAndOrderStatus = "";
+        if (status.equalsIgnoreCase("") && statusOrder.equalsIgnoreCase("") || status.equalsIgnoreCase("") && statusOrder.equalsIgnoreCase("CLOSED")) {
+            financeAndOrderStatus = "AND (ord.status = 'CLOSED' AND ft.status = 'IN' OR ft.status != 'IN') ";
+        }
+
+
+        String limitOffset = "";
+        if (limit != 0) {
+            int offsetIndex = (limit * (offset + 1)) - limit;
+            limitOffset = "LIMIT " + limit + " OFFSET " + offsetIndex + " ";
+        }
+
+        String querySql = "SELECT ft.reference_number FROM finance_transaction ft "
+                + "JOIN store st ON ft.store_id = st.id "
+                + "JOIN merchant mc ON st.merchant_id = mc.id "
+                + "LEFT JOIN orders ord ON ft.reference_number = ord.order_number "
+                + condition
+                + orderStatus
+                + transactionDate
+                + transactionStatus
+                + financeAndOrderStatus
+                + "GROUP BY ft.reference_number, ft.date, ord.id "
+                + sorting
+                + limitOffset;
+
+        return Ebean.createSqlQuery(querySql).findList();
     }
 
     public static Query<FinanceTransaction> findAllTransactionByMerchantId(Long merchantId) {
@@ -239,22 +321,38 @@ public class FinanceTransactionRepository extends BaseModel {
 
         String transactionStatus = "";
         if (!status.equalsIgnoreCase("")) {
-            transactionStatus = "AND ft.status = '" + status + "' ";
+            if (status.equalsIgnoreCase("OUT")) {
+                transactionStatus = "AND ft.status != 'IN' ";
+            } else if (status.equalsIgnoreCase("IN")) {
+                transactionStatus = "AND ft.status = 'IN' ";
+            }
         }
 
         String orderStatus = "";
         if (!statusOrder.equalsIgnoreCase("")) {
-            orderStatus = "AND ord.status = '" + statusOrder + "' ";
+            if (status.equalsIgnoreCase("IN")) {
+                orderStatus = "AND ord.status = '" + statusOrder + "' ";
+            }
+        } else {
+            if (status.equalsIgnoreCase("IN")) {
+                orderStatus = "AND ord.status = 'CLOSED' ";
+            }
+        }
+
+        String financeAndOrderStatus = "";
+        if (status.equalsIgnoreCase("") && statusOrder.equalsIgnoreCase("") || status.equalsIgnoreCase("") && statusOrder.equalsIgnoreCase("CLOSED")) {
+            financeAndOrderStatus = "AND (ord.status = 'CLOSED' AND ft.status = 'IN' OR ft.status != 'IN') ";
         }
 
         String querySql = "SELECT ft.id FROM finance_transaction ft "
                 + "JOIN store st ON ft.store_id = st.id "
                 + "JOIN merchant mc ON st.merchant_id = mc.id "
-                + "JOIN orders ord ON ft.reference_number = ord.order_number "
+                + "LEFT JOIN orders ord ON ft.reference_number = ord.order_number "
                 + condition
                 + orderStatus
                 + transactionDate
                 + transactionStatus
+                + financeAndOrderStatus
                 + "ORDER BY ft.date DESC";
 
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
