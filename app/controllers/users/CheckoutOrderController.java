@@ -747,8 +747,10 @@ public class CheckoutOrderController extends BaseController {
 
                     OrderTransactionResponse orderTransactionResponse = new OrderTransactionResponse();
                     orderTransactionResponse.setOrderNumber(order.getOrderNumber());
-                    orderTransactionResponse.setTableId(order.getTableMerchant().id);
-                    orderTransactionResponse.setTableName(order.getTableName());
+                    if (orderRequest.getOrderType().equalsIgnoreCase("DINE IN")) {
+                        orderTransactionResponse.setTableId(order.getTableMerchant().id);
+                        orderTransactionResponse.setTableName(order.getTableName());
+                    }
                     orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
                     orderTransactionResponse.setTotalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount());
                     orderTransactionResponse.setQueueNumber(order.getOrderQueue());
