@@ -6,6 +6,7 @@ import com.hokeba.api.BaseResponse;
 import controllers.BaseController;
 import dtos.product.ProductAppResponse;
 import models.ProductDetail;
+import models.ProductRatings;
 import models.Store;
 import models.merchant.ProductMerchant;
 import models.merchant.ProductMerchantDescription;
@@ -15,6 +16,7 @@ import play.libs.Json;
 import play.mvc.Result;
 import repository.ProductMerchantDetailRepository;
 import repository.ProductMerchantRepository;
+import repository.ratings.ProductRatingRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,8 +47,12 @@ public class ProductAppController extends BaseController {
             for(ProductMerchantDetail product : products) {
 
                 ProductMerchantDescription description = ProductMerchantDescription.find.where().eq("product_merchant_detail_id", product.id).findUnique();
-
+                List<ProductRatings> productRatings = ProductRatingRepository.findByProductRatingByProductId(storeId, product.getProductMerchant().id);
                 ProductAppResponse response = new ProductAppResponse();
+                if (productRatings.size() > 0) {
+                    int countProductRatings = ProductRatingRepository.getTotalRating(storeId, product.getProductMerchant().id);
+                    response.setRating(countProductRatings/productRatings.size());
+                }
                 response.setId(product.getProductMerchant().id);
                 response.setProductName(product.getProductMerchant().getProductName());
                 response.setDiscount(product.getDiscount());

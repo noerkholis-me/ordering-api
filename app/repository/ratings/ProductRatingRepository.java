@@ -41,4 +41,20 @@ public class ProductRatingRepository {
                 .eq("order_number", order_number)
                 .query().findList();
     }
+
+    public static List<ProductRatings> findByProductRatingByProductId(Long storeId, Long productId) {
+        return Ebean.find(ProductRatings.class)
+                .where()
+                .eq("store.id", storeId)
+                .eq("product_merchant_id", productId)
+                .query().findList();
+    }
+
+    public static int getTotalRating(Long storeId, Long productId){
+        String sql = "SELECT SUM(rate) AS TOTAL FROM product_ratings" +
+                " WHERE store_id = "+storeId+" AND product_merchant_id = "+productId+"";
+
+        com.avaje.ebean.SqlQuery query = Ebean.createSqlQuery(sql);
+        return query.findUnique().getInteger("TOTAL");
+    }
 }
