@@ -269,7 +269,7 @@ public class OrderMerchantController extends BaseController {
                 }
                 
                 ExpressionList<Order> exp = query.where();
-                exp.ieq("t0.member_name", memberUser.fullName);
+                exp.eq("t0.user_id", memberUser.id);
                //  exp.ieq("t0.phone_number", phoneNumber);
                 // exp = exp.disjunction();
                 // exp = exp.ilike("t0.order_number", "%" + filter + "%");
@@ -316,6 +316,7 @@ public class OrderMerchantController extends BaseController {
                     // get member
                     Member member = null;
                     if (order.getMember() != null) {
+                        
                         member = Member.findByIdMember(order.getMember().id);
                         orderRes.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL CUSTOMER (" + order.getStore().storeName + ")");
                         orderRes.setCustomerEmail(member.email);
