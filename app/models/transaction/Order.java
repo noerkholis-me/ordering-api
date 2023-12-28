@@ -239,6 +239,10 @@ public class Order extends BaseModel {
     public String scalaFetchStoreBanner() {
     	return this.store.getStoreBanner();
     }
+
+    public String scalaFetchStoreLogo() {
+    	return this.store.getStoreLogo();
+    }
     
     public String scalaFetchStoreQrUrl() {
     	String feUrl = Constant.getInstance().getFrontEndUrl();
