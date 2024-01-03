@@ -594,7 +594,7 @@ public class CheckoutOrderController extends BaseController {
                     } else {
                         // update payment status
                         order.setStatus(OrderStatus.NEW_ORDER.getStatus());
-                        order.setOrderQueue(createQueue(store.id));
+                        // order.setOrderQueue(createQueue(store.id));
                         order.update();
 
                         orderPayment.setStatus(PaymentStatus.PENDING.getStatus());
@@ -626,7 +626,7 @@ public class CheckoutOrderController extends BaseController {
                         orderTransactionResponse.setOrderNumber(order.getOrderNumber());
                         orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
                         orderTransactionResponse.setTotalAmount(initiatePaymentResponse.getTotalAmount());
-                        orderTransactionResponse.setQueueNumber(order.getOrderQueue());
+                        // orderTransactionResponse.setQueueNumber(order.getOrderQueue());
                         orderTransactionResponse.setStatus(order.getStatus());
                         orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
                         orderTransactionResponse.setMetadata(initiatePaymentResponse.getMetadata());
@@ -717,7 +717,7 @@ public class CheckoutOrderController extends BaseController {
 
                     // update payment status
                     order.setStatus(mPayment.typePayment.equalsIgnoreCase("DIRECT_PAYMENT") ? OrderStatus.NEW_ORDER.getStatus() : OrderStatus.PENDING.getStatus());
-                    order.setOrderQueue(createQueue(store.id));
+                    // order.setOrderQueue(createQueue(store.id));
                     order.update();
 
                     if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
@@ -753,7 +753,7 @@ public class CheckoutOrderController extends BaseController {
                     }
                     orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
                     orderTransactionResponse.setTotalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount());
-                    orderTransactionResponse.setQueueNumber(order.getOrderQueue());
+                    // orderTransactionResponse.setQueueNumber(order.getOrderQueue());
                     orderTransactionResponse.setStatus(order.getStatus());
                     orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
                     orderTransactionResponse.setMetadata(null);
@@ -827,7 +827,7 @@ public class CheckoutOrderController extends BaseController {
                 .order("order_queue desc, id desc").setMaxRows(1).findUnique();
                 
                 return order == null ? 1 : order.getOrderQueue() + 1;
-            }
+    }
             
     public static Result changeStatusFromMerchant() {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
