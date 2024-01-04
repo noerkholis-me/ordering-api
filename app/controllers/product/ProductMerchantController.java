@@ -24,6 +24,7 @@ import models.BrandMerchant;
 import models.CategoryMerchant;
 import models.Merchant;
 import models.ProductStore;
+import models.StockHistory;
 import models.Store;
 import models.SubCategoryMerchant;
 import models.SubsCategoryMerchant;
@@ -144,6 +145,8 @@ public class ProductMerchantController extends BaseController {
                     
                     ProductStore newProductStore = new ProductStore(ownMerchant, store, newProductMerchant, productStoreRequest, true);
                     newProductStore.save();
+                    StockHistory newStockHistory = new StockHistory(ownMerchant, store, newProductMerchant, newProductStore, true);
+                    newStockHistory.save();
 				}
                 
                 trx.commit();
