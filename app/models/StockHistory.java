@@ -1,13 +1,22 @@
 package models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.hokeba.util.Constant;
+
+import dtos.product.ProductStoreResponse;
+import models.merchant.ProductMerchant;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 public class StockHistory extends BaseModel {
 
 
@@ -25,9 +34,17 @@ public class StockHistory extends BaseModel {
     public String notes;
 
     @Column(name = "stock")
-    public int stock;
+    public Integer stock;
 
     @Column(name = "stock_changes")
-    public int stockChanges;
+    public Integer stockChanges;
+
+    public StockHistory(Merchant merchant, Store store, ProductMerchant productMerchant, ProductStore productStore, Boolean isActive) {
+        this.setProductStore(productStore);
+        this.setMerchant(merchant);
+        this.setNotes("Admin");
+        this.setStock(productStore.getStock().intValue());
+        this.setStockChanges(0);
+    }
 
 }
