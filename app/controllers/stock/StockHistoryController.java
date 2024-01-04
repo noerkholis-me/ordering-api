@@ -40,7 +40,7 @@ public class StockHistoryController extends BaseController {
 
             StockHistoryResponse response = new StockHistoryResponse();
 
-            String stock = stockHistory.stockChanges > 0 ? "+" + stockHistory.stockChanges : Integer.toString(stockHistory.stock);
+            String stock = stockHistory.stockChanges > 0 ? "+" + stockHistory.stockChanges : Integer.toString(stockHistory.stockChanges);
 
             SimpleDateFormat date = new SimpleDateFormat("yyyy-MM-dd");
 
