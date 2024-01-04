@@ -53,6 +53,7 @@ public class ProductDetailResponse implements Serializable {
     @JsonProperty("product_image_4")
     private String productImage4;
 
+    @JsonProperty("stock")
     private Long stock;
 
     public ProductDetailResponse(ProductMerchantDetail productMerchantDetail, models.ProductStore productStore) {
@@ -60,6 +61,7 @@ public class ProductDetailResponse implements Serializable {
         this.setIsCustomizable(productMerchantDetail.getIsCustomizable());
         this.setProductPrice(productStore != null ? productStore.getStorePrice() : productMerchantDetail.getProductPrice());
         this.setDiscountType(productStore != null ? productStore.getDiscountType() : productMerchantDetail.getDiscountType());
+        this.setStock(productStore.getStock());
         this.setDiscount(productStore != null ? productStore.getDiscount() : productMerchantDetail.getDiscount());
         this.setProductPriceAfterDiscount(productStore != null ? productStore.getFinalPrice() : productMerchantDetail.getProductPriceAfterDiscount());
         this.setProductImageMain(productMerchantDetail.getProductImageMain());
