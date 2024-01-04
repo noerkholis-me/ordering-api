@@ -61,7 +61,7 @@ public class ProductDetailResponse implements Serializable {
         this.setIsCustomizable(productMerchantDetail.getIsCustomizable());
         this.setProductPrice(productStore != null ? productStore.getStorePrice() : productMerchantDetail.getProductPrice());
         this.setDiscountType(productStore != null ? productStore.getDiscountType() : productMerchantDetail.getDiscountType());
-        this.setStock(productStore.getStock());
+        this.setStock(productStore != null ? productStore.getStock() : 0);
         this.setDiscount(productStore != null ? productStore.getDiscount() : productMerchantDetail.getDiscount());
         this.setProductPriceAfterDiscount(productStore != null ? productStore.getFinalPrice() : productMerchantDetail.getProductPriceAfterDiscount());
         this.setProductImageMain(productMerchantDetail.getProductImageMain());
