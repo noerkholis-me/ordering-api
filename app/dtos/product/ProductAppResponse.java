@@ -27,11 +27,17 @@ public class ProductAppResponse {
     @com.fasterxml.jackson.annotation.JsonProperty("price")
     public int price;
 
+    @com.fasterxml.jackson.annotation.JsonProperty("stock")
+    public long stock;
+
     @com.fasterxml.jackson.annotation.JsonProperty("rating")
     public double rating;
 
     @com.fasterxml.jackson.annotation.JsonProperty("discount")
     public double discount;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("discount_type")
+    public String discountType;
 
     @com.fasterxml.jackson.annotation.JsonProperty("category_merchant_id")
     public Long categoryId;

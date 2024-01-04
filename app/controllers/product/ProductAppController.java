@@ -7,6 +7,7 @@ import controllers.BaseController;
 import dtos.product.ProductAppResponse;
 import models.ProductDetail;
 import models.ProductRatings;
+import models.ProductStore;
 import models.Store;
 import models.merchant.ProductMerchant;
 import models.merchant.ProductMerchantDescription;
@@ -16,6 +17,7 @@ import play.libs.Json;
 import play.mvc.Result;
 import repository.ProductMerchantDetailRepository;
 import repository.ProductMerchantRepository;
+import repository.ProductStoreRepository;
 import repository.ratings.ProductRatingRepository;
 
 import java.util.ArrayList;
@@ -53,6 +55,9 @@ public class ProductAppController extends BaseController {
                     int countProductRatings = ProductRatingRepository.getTotalRating(storeId, product.getProductMerchant().id);
                     response.setRating(countProductRatings/productRatings.size());
                 }
+
+                ProductStore productStore = ProductStoreRepository.findByStoreAndProductMerchant(storeId, product.getProductMerchant().id);
+
                 response.setId(product.getProductMerchant().id);
                 response.setProductName(product.getProductMerchant().getProductName());
                 response.setDiscount(product.getDiscount());
@@ -65,6 +70,8 @@ public class ProductAppController extends BaseController {
                 response.setLongDescription(description.getLongDescription());
                 response.setBasePrice(product.getProductPrice().intValue());
                 response.setPrice(product.getProductPriceAfterDiscount().intValue());
+                response.setDiscountType(product.getDiscountType());
+                response.setStock(productStore.stock);
                 responses.add(response);
 
             }
