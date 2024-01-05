@@ -24,6 +24,8 @@ public class OrderPaymentResponse {
     private Long tableId;
     @JsonProperty("table_name")
     private String tableName;
+    @JsonProperty("queue_number")
+    private Integer queueNumber;
     private String status;
     @JsonProperty("invoice_no")
     private String invoiceNo;

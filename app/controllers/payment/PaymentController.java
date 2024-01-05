@@ -52,6 +52,7 @@ public class PaymentController extends BaseController {
                     .paymentChannel(getOrderPayment.getPaymentChannel())
                     .totalAmount(getOrderPayment.getTotalAmount())
                     .paymentDate(getOrderPayment.getPaymentDate())
+                    .queueNumber(getOrderPayment.getOrder().getOrderQueue())
                     .build();
             response.setBaseResponse(1, offset, 1, success, orderPaymentResponse);
             return ok(Json.toJson(response));
