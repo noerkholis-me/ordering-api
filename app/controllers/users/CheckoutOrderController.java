@@ -384,6 +384,13 @@ public class CheckoutOrderController extends BaseController {
                         }
                         psStore.setStock(psStore.getStock() - productOrderDetail.getProductQty().longValue());
                         psStore.update();
+
+                        Long stock = productOrderDetail.getProductQty().longValue();
+                        Long stockChanges = psStore.getStock();
+                        String notes = order.getOrderNumber();
+                        StockHistory newStockHistory = new StockHistory(merchant, store, productMerchant, psStore, stockChanges, stock, notes);
+                        newStockHistory.save();
+
                         OrderDetail orderDetail = new OrderDetail();
                         orderDetail.setProductMerchant(productMerchant);
                         orderDetail.setProductName(productMerchant.getProductName());

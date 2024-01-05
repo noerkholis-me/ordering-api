@@ -39,12 +39,11 @@ public class StockHistory extends BaseModel {
     @Column(name = "stock_changes")
     public Integer stockChanges;
 
-    public StockHistory(Merchant merchant, Store store, ProductMerchant productMerchant, ProductStore productStore, Boolean isActive) {
+    public StockHistory(Merchant merchant, Store store, ProductMerchant productMerchant, ProductStore productStore, Long stockChanges, Long stock, String notes) {
         this.setProductStore(productStore);
         this.setMerchant(merchant);
-        this.setNotes("Admin");
-        this.setStock(productStore.getStock().intValue());
-        this.setStockChanges(0);
+        this.setNotes(notes);
+        this.setStock(stock.intValue());
+        this.setStockChanges(stockChanges.intValue());
     }
-
 }
