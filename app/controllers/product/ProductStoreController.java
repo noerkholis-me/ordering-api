@@ -19,6 +19,7 @@ import dtos.product.ProductStoreResponse;
 import models.Merchant;
 import models.Product;
 import models.ProductStore;
+import models.StockHistory;
 import models.Store;
 import models.merchant.ProductMerchant;
 import models.merchant.ProductMerchantDetail;
@@ -75,9 +76,16 @@ public class ProductStoreController extends BaseController {
                 if (validate == null) {
                     Transaction trx = Ebean.beginTransaction();
                     try {
+
+                        Long stock = request.getStock();
+                        Long stockChanges = 0L;
+
                         ProductStore newProductStore = new ProductStore(ownMerchant, store, productMerchant, request, null);
                         newProductStore.setStock(request.getStock());
                         newProductStore.save();
+
+                        StockHistory newStockHistory = new StockHistory(ownMerchant, store, productMerchant, newProductStore, stockChanges, stock, "Admin");
+                        newStockHistory.save();
 
                         trx.commit();
                         response.setBaseResponse(1, offset, 1, success + " membuat produk toko", newProductStore);
@@ -907,9 +915,16 @@ public class ProductStoreController extends BaseController {
                             return badRequest(Json.toJson(response));
                         }
 
+                        Long stock = request.getStock();
+                        Long stockChanges = productStore.getStock();
+                        Long totalStock = productStore.getStock() + request.getStock();
+
                         productStore.setProductStore(productStore, ownMerchant, store, productMerchant, request);
-                        productStore.setStock(request.getStock());
+                        productStore.setStock(totalStock);
                         productStore.update();
+
+                        StockHistory newStockHistory = new StockHistory(ownMerchant, store, productMerchant, productStore, stockChanges, stock, "Admin");
+                        newStockHistory.save();
 
                         trx.commit();
                         response.setBaseResponse(1, offset, 1, success + " mengubah produk store", productStore);

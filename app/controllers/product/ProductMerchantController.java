@@ -145,8 +145,8 @@ public class ProductMerchantController extends BaseController {
                     
                     ProductStore newProductStore = new ProductStore(ownMerchant, store, newProductMerchant, productStoreRequest, true);
                     newProductStore.save();
-                    StockHistory newStockHistory = new StockHistory(ownMerchant, store, newProductMerchant, newProductStore, true);
-                    newStockHistory.save();
+                    // StockHistory newStockHistory = new StockHistory(ownMerchant, store, newProductMerchant, newProductStore, true);
+                    // newStockHistory.save();
 				}
                 
                 trx.commit();
