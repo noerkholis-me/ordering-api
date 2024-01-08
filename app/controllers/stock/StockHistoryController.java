@@ -23,7 +23,7 @@ public class StockHistoryController extends BaseController {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static Result listHistory(String sort, int offset, int limit) {
+    public static Result listHistory(String sort, int offset, int limit, Long product_store_id) {
 
         Merchant ownMerchant = checkMerchantAccessAuthorization();
         if (ownMerchant == null) {
@@ -31,8 +31,8 @@ public class StockHistoryController extends BaseController {
             return unauthorized(Json.toJson(response));
         }
 
-        int totalData = StockHistoryRepository.countAll(ownMerchant.id);
-        List<StockHistory> list = StockHistoryRepository.findAll(ownMerchant.id, sort, offset, limit);
+        int totalData = StockHistoryRepository.countAll(ownMerchant.id, product_store_id);
+        List<StockHistory> list = StockHistoryRepository.findAll(ownMerchant.id, sort, offset, limit, product_store_id);
 
         List<StockHistoryResponse> responses = new ArrayList<>();
 

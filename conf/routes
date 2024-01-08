@@ -713,4 +713,4 @@ GET     /data/subscategory/list                        controllers.categories.Su
 GET     /data/product/list                             controllers.product.ProductAppController.listProduct(merchant_id:Long ?= 0, store_id:Long ?= 0, search:String ?= null, key:String ?= null, value:String ?= null, filter:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 
 # Stock History
-GET         /merchant/stock-history                    controllers.stock.StockHistoryController.listHistory(sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET         /merchant/stock-history                    controllers.stock.StockHistoryController.listHistory(sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, product_store_id:Long)
