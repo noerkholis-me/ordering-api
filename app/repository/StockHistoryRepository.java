@@ -14,11 +14,12 @@ public class StockHistoryRepository extends Model {
 
     public static Finder<Long, StockHistory> find = new Finder<>(Long.class, StockHistory.class);
 
-    public static List<StockHistory> findAll(Long merchantId, String sort, int offset, int limit) {
+    public static List<StockHistory> findAll(Long merchantId, String sort, int offset, int limit, Long product_store_id) {
 
         Query<StockHistory> query = find.query();
 
         query.where().eq("merchant_id", merchantId);
+        query.where().eq("product_store_id", product_store_id);
 
         if (!"".equals(sort)) {
             query = query.orderBy(sort);
@@ -41,9 +42,9 @@ public class StockHistoryRepository extends Model {
         return resData;
     }
 
-    public  static int countAll(Long merchantId)  {
+    public  static int countAll(Long merchantId, Long product_store_id)  {
 
-        int count = find.where().eq("product_store_id", merchantId).findRowCount();
+        int count = find.where().eq("merchant_id", merchantId).eq("product_store_id", product_store_id).findRowCount();
 
         return count;
 

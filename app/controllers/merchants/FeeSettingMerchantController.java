@@ -179,7 +179,7 @@ public class FeeSettingMerchantController extends BaseController {
             try {
                 int platformFee = 0;
                 if (total <= 10000) {
-                    int count = (int)(total * 0.05);;
+                    int count = (int)(total * 0.05);
                     platformFee = count;
                 } else if (total >= 10001 && total <= 25000) {
                     platformFee = 500;
