@@ -31,15 +31,49 @@ public class DeliverySettingController extends BaseController {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static Result listDelivery(String sort, int offset, int limit, Long product_store_id) {
+    public static Result listDelivery(String sort, int offset, int limit) {
 
-        Merchant ownMerchant = checkMerchantAccessAuthorization();
-        if (ownMerchant == null) {
-            response.setBaseResponse(0, 0, 0, unauthorized, null);
-            return unauthorized(Json.toJson(response));
+        try {
+
+            Merchant ownMerchant = checkMerchantAccessAuthorization();
+            if (ownMerchant == null) {
+                response.setBaseResponse(0, 0, 0, unauthorized, null);
+                return unauthorized(Json.toJson(response));
+            }
+
+            int total = DeliverySettingRepository.countAll(ownMerchant.id);
+            List<DeliverySettings> deliverySettings = DeliverySettingRepository.findAll(ownMerchant.id, sort, offset, limit);
+
+            response.setBaseResponse(total, 0, 0, "", deliverySettings);
+            return ok(Json.toJson(response));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat list setting delivery", null);
+            return badRequest(Json.toJson(response));
         }
+    }
 
-        return null;
+    public static Result getDelivery(Long store_id) {
+
+        try {
+
+            Merchant ownMerchant = checkMerchantAccessAuthorization();
+            if (ownMerchant == null) {
+                response.setBaseResponse(0, 0, 0, unauthorized, null);
+                return unauthorized(Json.toJson(response));
+            }
+
+            DeliverySettings deliverySettings = DeliverySettingRepository.findBystoreId(store_id);
+
+            response.setBaseResponse(0, 0, 0, "", deliverySettings);
+            return ok(Json.toJson(response));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat get setting delivery", null);
+            return badRequest(Json.toJson(response));
+        }
     }
 
     public static Result addDelivery() {
@@ -66,6 +100,7 @@ public class DeliverySettingController extends BaseController {
             return ok(Json.toJson(response));
 
         } catch (Exception e){
+            e.printStackTrace();
             response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat melakukan setting delivery", null);
             return badRequest(Json.toJson(response));
         }
