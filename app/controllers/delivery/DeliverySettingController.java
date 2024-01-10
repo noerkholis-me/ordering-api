@@ -10,6 +10,8 @@ import com.hokeba.http.response.global.ServiceResponse;
 import controllers.BaseController;
 import dtos.delivery.DeliveryDirectionRequest;
 import dtos.delivery.DeliveryDirectionResponse;
+import dtos.delivery.DeliveryFeeRequest;
+import dtos.delivery.DeliveryFeeResponse;
 import dtos.delivery.DeliverySettingRequest;
 import dtos.payment.InitiatePaymentResponse;
 import dtos.stock.StockHistoryResponse;
@@ -113,28 +115,73 @@ public class DeliverySettingController extends BaseController {
         }
     }
 
-    public static Result checkDistance() {
+    public static Result checkFeeDelivery() {
+
+        JsonNode rawRequest = request().body().asJson();
 
         try {
+            DeliveryFeeRequest deliveryFeeRequest = objectMapper.readValue(rawRequest.toString(), DeliveryFeeRequest.class);
+            Store store = Store.findById(deliveryFeeRequest.getStore_id());
 
+            // store
             DeliveryDirectionRequest base = new DeliveryDirectionRequest();
-            base.setLat(107.5689333);
-            base.setLong(-6.9377524);
+            base.setLat(store.getStoreLatitude());
+            base.setLong(store.getStoreLongitude());
+            // base.setLat(107.5689333);
+            // base.setLong(-6.9377524);
 
+            //customer
             DeliveryDirectionRequest target = new DeliveryDirectionRequest();
-            target.setLat(107.5735131);
-            target.setLong(-6.9323057);
+            target.setLat(deliveryFeeRequest.getLatitude());
+            target.setLong(deliveryFeeRequest.getLongitude());
+            
 
             ServiceResponse serviceResponse = DeliveryService.getInstance().checkDistance(base, target);
 
             String object = objectMapper.writeValueAsString(serviceResponse.getData());
             JSONObject jsonObject = new JSONObject(object);
             String initiate = jsonObject.getJSONArray("routes").getJSONObject(0).getJSONObject("summary").toString();
-            DeliveryDirectionResponse initiatePaymentResponse = objectMapper.readValue(initiate, DeliveryDirectionResponse.class);
+            DeliveryDirectionResponse distance = objectMapper.readValue(initiate, DeliveryDirectionResponse.class);
 
+            double changeKM = (double) distance.getDistance() / 1000.0;
 
-            response.setBaseResponse(1, offset, 1, success, initiatePaymentResponse);
-            return ok(Json.toJson(response));
+            DeliverySettings deliverySettings = DeliverySettingRepository.findBystoreId(deliveryFeeRequest.getStore_id());
+            DeliverySettings responses = new DeliverySettings();
+            if (deliverySettings != null) {
+                if (changeKM > deliverySettings.getMaxRangeDelivery()) {
+                    response.setBaseResponse(0, 0, 0, "jarak melebihi batas maksimal", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                int feeTotal = 0;
+                if (deliverySettings.getCalculateMethod().equals("tarif_km")) {
+                    if (deliverySettings.getEnableFlatPrice() == true) {
+                        int sisa = (int) changeKM - deliverySettings.getMaxRangeFlatPrice();
+
+                        feeTotal = (int) (sisa * deliverySettings.getKmPriceValue()) + deliverySettings.getFlatPriceValue();
+                    } else {
+                        feeTotal = (int) changeKM * deliverySettings.getKmPriceValue();
+                    }
+                    
+                } else if (deliverySettings.getCalculateMethod().equals("tarif_flat")) {
+                    if (changeKM > deliverySettings.getMaxRangeFlatPrice()) {
+                        feeTotal = (int) deliverySettings.getDeliverFee();
+                    } else {
+                        feeTotal = (int) deliverySettings.getFlatPriceValue();
+                    } 
+                }
+
+                DeliveryFeeResponse responsesFee = new DeliveryFeeResponse();
+                responsesFee.setDistance(changeKM);
+                responsesFee.setDuration((int) distance.getDuration());
+                responsesFee.setFeeDelivery(feeTotal);
+                response.setBaseResponse(1, offset, 1, success, responsesFee);
+                return ok(Json.toJson(response));
+
+            } else {
+               response.setBaseResponse(0, 0, 0, "store tidak di temukan", null);
+               return badRequest(Json.toJson(response));
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -142,5 +189,31 @@ public class DeliverySettingController extends BaseController {
             return badRequest(Json.toJson(response));
         }
     }
+
+    // public static Result checkFeeDelivery() {
+
+    //     JsonNode rawRequest = request().body().asJson();
+    //     try {
+    //         DeliverySettingRequest deliverySettingRequest = objectMapper.readValue(rawRequest.toString(), DeliverySettingRequest.class);
+    //         Store store = Store.findById(deliverySettingRequest.getStore_id());
+
+    //         DeliverySettings deliverySettings = DeliverySettingRepository.findBystoreId(deliverySettingRequest.getStore_id());
+    //         DeliverySettings responses = new DeliverySettings();
+    //         if (deliverySettings != null) {
+                
+    //         } else {
+    //            response.setBaseResponse(0, 0, 0, "store tidak di temukan", null);
+    //            return badRequest(Json.toJson(response));
+    //         }
+    //         response.setBaseResponse(1, offset, 1, success, responses);
+    //         return ok(Json.toJson(response));
+
+    //     } catch (Exception e){
+    //         e.printStackTrace();
+    //         response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat melakukan setting delivery", null);
+    //         return badRequest(Json.toJson(response));
+    //     }
+    // }
+
 
 }

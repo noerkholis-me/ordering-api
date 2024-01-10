@@ -32,7 +32,7 @@ public class DeliveryService {
             String url = openRouteURL + directionPath;
             logger.info("Check Distance URL: " + url);
 
-            String bodya = "{\"coordinates\":[["+baseCoordinate.getLat()+","+baseCoordinate.getLong()+"],["+targetCoordinate.getLat()+","+targetCoordinate.getLong()+"]]}";
+            String bodya = "{\"coordinates\":[["+baseCoordinate.getLong()+","+baseCoordinate.getLat()+"],["+targetCoordinate.getLong()+","+targetCoordinate.getLat()+"]]}";
 
             String requestBody = objectMapper.writeValueAsString(bodya);
 
