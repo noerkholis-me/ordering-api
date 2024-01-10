@@ -6,18 +6,25 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.hokeba.api.BaseResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
+import com.hokeba.http.response.global.ServiceResponse;
 import controllers.BaseController;
+import dtos.delivery.DeliveryDirectionRequest;
+import dtos.delivery.DeliveryDirectionResponse;
 import dtos.delivery.DeliverySettingRequest;
+import dtos.payment.InitiatePaymentResponse;
 import dtos.stock.StockHistoryResponse;
 import models.Merchant;
 import models.StockHistory;
 import models.DeliverySettings;
 
 import models.Store;
+import org.json.JSONObject;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.DeliverySettingRepository;
+import service.DeliveryService;
+import service.PaymentService;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -100,6 +107,36 @@ public class DeliverySettingController extends BaseController {
             return ok(Json.toJson(response));
 
         } catch (Exception e){
+            e.printStackTrace();
+            response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat melakukan setting delivery", null);
+            return badRequest(Json.toJson(response));
+        }
+    }
+
+    public static Result checkDistance() {
+
+        try {
+
+            DeliveryDirectionRequest base = new DeliveryDirectionRequest();
+            base.setLat(107.5689333);
+            base.setLong(-6.9377524);
+
+            DeliveryDirectionRequest target = new DeliveryDirectionRequest();
+            target.setLat(107.5735131);
+            target.setLong(-6.9323057);
+
+            ServiceResponse serviceResponse = DeliveryService.getInstance().checkDistance(base, target);
+
+            String object = objectMapper.writeValueAsString(serviceResponse.getData());
+            JSONObject jsonObject = new JSONObject(object);
+            String initiate = jsonObject.getJSONArray("routes").getJSONObject(0).getJSONObject("summary").toString();
+            DeliveryDirectionResponse initiatePaymentResponse = objectMapper.readValue(initiate, DeliveryDirectionResponse.class);
+
+
+            response.setBaseResponse(1, offset, 1, success, initiatePaymentResponse);
+            return ok(Json.toJson(response));
+
+        } catch (Exception e) {
             e.printStackTrace();
             response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat melakukan setting delivery", null);
             return badRequest(Json.toJson(response));
