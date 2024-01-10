@@ -68,6 +68,7 @@ public class DeliverySettingRepository extends Model {
                 newDeliverySettings.setKmPriceValue(deliverySettingRequest.getKmPriceValue());
                 newDeliverySettings.setMaxRangeDelivery(deliverySettingRequest.getMaxRangeDelivery());
                 newDeliverySettings.setFlatPriceValue(deliverySettingRequest.getFlatPriceValue());
+                newDeliverySettings.setDeliverFee(deliverySettingRequest.getDeliverFee());
                 newDeliverySettings.setCalculateMethod(deliverySettingRequest.getCalculateMethod());
 
                 newDeliverySettings.save();
@@ -82,6 +83,7 @@ public class DeliverySettingRepository extends Model {
                 deliverySettings.setKmPriceValue(deliverySettingRequest.getKmPriceValue());
                 deliverySettings.setMaxRangeDelivery(deliverySettingRequest.getMaxRangeDelivery());
                 deliverySettings.setCalculateMethod(deliverySettingRequest.getCalculateMethod());
+                deliverySettings.setDeliverFee(deliverySettingRequest.getDeliverFee());
                 deliverySettings.setFlatPriceValue(deliverySettingRequest.getFlatPriceValue());
 
                 deliverySettings.update();

@@ -42,6 +42,9 @@ public class DeliverySettings extends BaseModel {
     @Column(name = "flat_price_value")
     public Integer flatPriceValue;
 
+    @Column(name = "deliver_fee")
+    public Integer deliverFee;
+
     @Column(name = "calculate_method")
     public String calculateMethod;
 }

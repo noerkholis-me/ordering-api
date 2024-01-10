@@ -32,6 +32,9 @@ public class DeliverySettingRequest {
     @JsonProperty("flat_price_value")
     public Integer flatPriceValue;
 
+    @JsonProperty("deliver_fee")
+    public Integer deliverFee;
+
     @JsonProperty("calculate_method")
     public String calculateMethod;
 }

@@ -8,6 +8,7 @@ create table delivery_settings(
     max_range_delivery        int,
     km_price_value            int,
     flat_price_value          int,
+    deliver_fee               int,
     enable_flat_price         boolean,
     max_range_flat_price      int,
     calculate_method          varchar(255),
