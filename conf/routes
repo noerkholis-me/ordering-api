@@ -714,3 +714,9 @@ GET     /data/product/list                             controllers.product.Produ
 
 # Stock History
 GET         /merchant/stock-history                    controllers.stock.StockHistoryController.listHistory(sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, product_store_id:Long)
+
+# Stock History
+POST         /delivery-setting                    controllers.delivery.DeliverySettingController.addDelivery()
+GET          /delivery-setting                    controllers.delivery.DeliverySettingController.listDelivery(sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET          /delivery-setting/:store_id          controllers.delivery.DeliverySettingController.getDelivery(store_id: Long)
+POST          /fee-delivery                   controllers.delivery.DeliverySettingController.checkFeeDelivery()
