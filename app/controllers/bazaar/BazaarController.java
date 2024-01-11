@@ -1,0 +1,93 @@
+package controllers.bazaar;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hokeba.api.BaseResponse;
+import com.hokeba.http.response.global.ServiceResponse;
+import controllers.BaseController;
+import controllers.stock.StockHistoryController;
+import dtos.bazaar.BazaarStoreResponse;
+import dtos.delivery.DeliveryDirectionRequest;
+import dtos.delivery.DeliveryDirectionResponse;
+import dtos.stock.StockHistoryResponse;
+import models.StockHistory;
+import models.Store;
+import models.store.StoreRatings;
+import org.json.JSONObject;
+import play.Logger;
+import play.libs.Json;
+import play.mvc.Result;
+import repository.StoreRepository;
+import repository.ratings.StoreRatingRepository;
+import service.DeliveryService;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+public class BazaarController extends BaseController {
+    private final static Logger.ALogger logger = Logger.of(StockHistoryController.class);
+    private static BaseResponse response = new BaseResponse();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    public static Result listStore(double longitude, double latitude, String sort, int offset, int limit) {
+
+        try {
+
+            int totalData = StoreRepository.find.findRowCount();
+            List<Store> list = StoreRepository.findAll(sort, offset, limit);
+
+            List<BazaarStoreResponse> responses = new ArrayList<>();
+
+            for (Store store : list) {
+
+                double distance = 0;
+
+                if (longitude != 0 && latitude != 0) {
+                    DeliveryDirectionRequest base = new DeliveryDirectionRequest();
+                    base.setLat(store.getStoreLatitude());
+                    base.setLong(store.getStoreLongitude());
+
+                    DeliveryDirectionRequest target = new DeliveryDirectionRequest();
+                    target.setLat(latitude);
+                    target.setLong(longitude);
+
+                    ServiceResponse serviceResponse = DeliveryService.getInstance().checkDistance(base, target);
+
+                    String object = objectMapper.writeValueAsString(serviceResponse.getData());
+                    JSONObject jsonObject = new JSONObject(object);
+                    String initiate = jsonObject.getJSONArray("routes").getJSONObject(0).getJSONObject("summary").toString();
+                    DeliveryDirectionResponse directionResponse = objectMapper.readValue(initiate, DeliveryDirectionResponse.class);
+
+                    distance = (double) directionResponse.getDistance() / 1000.0;
+                } else {
+                    distance = 0;
+                }
+
+                BazaarStoreResponse response = new BazaarStoreResponse();
+
+
+                float storeRating = StoreRatingRepository.getRatings(store);
+
+                response.setId(store.id);
+                response.setStoreAddress(store.getStoreAddress());
+                response.setStoreName(store.getStoreName());
+                response.setStoreImage(store.getStoreBanner());
+                response.setStoreDistance(distance);
+                response.setMerchantId(store.getMerchant().id);
+                response.setStoreRating(storeRating);
+
+                responses.add(response);
+
+            }
+
+            response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data", responses);
+            return ok(Json.toJson(response));
+
+        } catch (Exception e){
+            e.printStackTrace();
+            response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat menampilkan data", null);
+            return badRequest(Json.toJson(response));
+        }
+
+    }
+}
