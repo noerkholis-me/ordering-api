@@ -916,8 +916,8 @@ public class ProductStoreController extends BaseController {
                         }
 
                         Long stock = request.getStock();
-                        Long stockChanges = productStore.getStock();
-                        Long totalStock = productStore.getStock() + request.getStock();
+                        Long stockChanges = ((productStore.getStock() != null) ? productStore.getStock() :  0);
+                        Long totalStock = ((productStore.getStock() != null) ? productStore.getStock() : 0)  + request.getStock();
 
                         productStore.setProductStore(productStore, ownMerchant, store, productMerchant, request);
                         productStore.setStock(totalStock);

@@ -20,6 +20,8 @@ import models.StockHistory;
 import models.DeliverySettings;
 
 import models.Store;
+import models.transaction.Order;
+
 import org.json.JSONObject;
 import play.Logger;
 import play.libs.Json;
@@ -28,8 +30,10 @@ import repository.DeliverySettingRepository;
 import service.DeliveryService;
 import service.PaymentService;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class DeliverySettingController extends BaseController {
@@ -156,9 +160,9 @@ public class DeliverySettingController extends BaseController {
                 int feeTotal = 0;
                 if (deliverySettings.getCalculateMethod().equals("tarif_km")) {
                     if (deliverySettings.getEnableFlatPrice() == true) {
-                        int sisa = (int) changeKM - deliverySettings.getMaxRangeFlatPrice();
+                        int remainder = (int) changeKM - deliverySettings.getMaxRangeFlatPrice();
 
-                        feeTotal = (int) (sisa * deliverySettings.getKmPriceValue()) + deliverySettings.getFlatPriceValue();
+                        feeTotal = (int) (remainder * deliverySettings.getKmPriceValue()) + deliverySettings.getFlatPriceValue();
                     } else {
                         feeTotal = (int) changeKM * deliverySettings.getKmPriceValue();
                     }
@@ -172,7 +176,7 @@ public class DeliverySettingController extends BaseController {
                 }
 
                 DeliveryFeeResponse responsesFee = new DeliveryFeeResponse();
-                responsesFee.setDistance(changeKM);
+                responsesFee.setDistance(changeDistance(changeKM));
                 responsesFee.setDuration((int) distance.getDuration());
                 responsesFee.setFeeDelivery(feeTotal);
                 response.setBaseResponse(1, offset, 1, success, responsesFee);
@@ -190,30 +194,13 @@ public class DeliverySettingController extends BaseController {
         }
     }
 
-    // public static Result checkFeeDelivery() {
-
-    //     JsonNode rawRequest = request().body().asJson();
-    //     try {
-    //         DeliverySettingRequest deliverySettingRequest = objectMapper.readValue(rawRequest.toString(), DeliverySettingRequest.class);
-    //         Store store = Store.findById(deliverySettingRequest.getStore_id());
-
-    //         DeliverySettings deliverySettings = DeliverySettingRepository.findBystoreId(deliverySettingRequest.getStore_id());
-    //         DeliverySettings responses = new DeliverySettings();
-    //         if (deliverySettings != null) {
-                
-    //         } else {
-    //            response.setBaseResponse(0, 0, 0, "store tidak di temukan", null);
-    //            return badRequest(Json.toJson(response));
-    //         }
-    //         response.setBaseResponse(1, offset, 1, success, responses);
-    //         return ok(Json.toJson(response));
-
-    //     } catch (Exception e){
-    //         e.printStackTrace();
-    //         response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat melakukan setting delivery", null);
-    //         return badRequest(Json.toJson(response));
-    //     }
-    // }
+    public static Double changeDistance(Double changeKM) {
+        double x = changeKM;
+        int angkaSignifikan = 2;
+        double temp = Math.pow(10, angkaSignifikan);
+        double y = (double) Math.round(x*temp)/temp;
+        return y;
+    }
 
 
 }
