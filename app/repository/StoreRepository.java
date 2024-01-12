@@ -28,6 +28,11 @@ public class StoreRepository {
     public static List<Store> findAll(String sort, int offset, int limit) {
         Query<Store> query = find.query();
 
+        query = query.where()
+                .eq("t0.is_active", true)
+                .eq("t0.is_deleted", false)
+                .query();
+
         if (!"".equals(sort)) {
             query = query.orderBy(sort);
         } else {

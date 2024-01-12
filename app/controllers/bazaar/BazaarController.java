@@ -33,7 +33,7 @@ public class BazaarController extends BaseController {
 
         try {
 
-            int totalData = StoreRepository.find.findRowCount();
+            int totalData = StoreRepository.find.where().eq("t0.is_active", true).eq("t0.is_deleted", false).findRowCount();
             List<Store> list = StoreRepository.findAll(sort, offset, limit);
 
             List<BazaarStoreResponse> responses = new ArrayList<>();
