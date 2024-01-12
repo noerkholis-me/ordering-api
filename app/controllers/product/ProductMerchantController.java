@@ -353,8 +353,6 @@ public class ProductMerchantController extends BaseController {
                         if (getProductStore == null) {
                             response.setBaseResponse(0, 0, 0, error + " product store tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
-                        } else {
-                            getProductStore.delete();
                         }
                     }
 
@@ -377,9 +375,15 @@ public class ProductMerchantController extends BaseController {
                             return badRequest(Json.toJson(response));
                         }
 
-                        // insert new product store
-                        ProductStore productStore = new ProductStore(ownMerchant, store, productMerchant, productStoreRequest, null);
-                        productStore.save();
+                        ProductStore productStore = ProductStoreRepository.findByProductIdAndStoreId(id, store);
+                        if (productStore != null) {
+                            productStore.setProductStore(productStore, ownMerchant, store, productMerchant, productStoreRequest);
+                            productStore.update();
+                        } else {
+                            // insert new product store
+                            ProductStore productStoreInsert = new ProductStore(ownMerchant, store, productMerchant, productStoreRequest, null);
+                            productStoreInsert.save();
+                        }
                     }
 
                     trx.commit();
