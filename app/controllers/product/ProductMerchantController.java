@@ -365,15 +365,15 @@ public class ProductMerchantController extends BaseController {
                             return badRequest(Json.toJson(response));
                         }
 
-                        ProductStore psQuery = ProductStoreRepository.find.where().eq("productMerchant", productMerchant)
-                            .eq("store", store).eq("t0.is_deleted", false).findUnique();
-                        if (psQuery != null) {
-                            trx.rollback();
-                            response.setBaseResponse(0, 0, 0,
-                                "Tidak dapat menambahkan " + productMerchant.getProductName() + " ke toko yang sama.",
-                                null);
-                            return badRequest(Json.toJson(response));
-                        }
+                        // ProductStore psQuery = ProductStoreRepository.find.where().eq("productMerchant", productMerchant)
+                        //     .eq("store", store).eq("t0.is_deleted", false).findUnique();
+                        // if (psQuery != null) {
+                        //     trx.rollback();
+                        //     response.setBaseResponse(0, 0, 0,
+                        //         "Tidak dapat menambahkan " + productMerchant.getProductName() + " ke toko yang sama.",
+                        //         null);
+                        //     return badRequest(Json.toJson(response));
+                        // }
 
                         ProductStore productStore = ProductStoreRepository.findByProductIdAndStoreId(id, store);
                         if (productStore != null) {
