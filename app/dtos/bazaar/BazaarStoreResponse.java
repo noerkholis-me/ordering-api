@@ -30,4 +30,7 @@ public class BazaarStoreResponse {
     @com.fasterxml.jackson.annotation.JsonProperty("merchant_id")
     public Long merchantId;
 
+    @com.fasterxml.jackson.annotation.JsonProperty("slug")
+    public String slug;
+
 }
