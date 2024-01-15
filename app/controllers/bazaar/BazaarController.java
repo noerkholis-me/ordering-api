@@ -29,12 +29,12 @@ public class BazaarController extends BaseController {
     private static BaseResponse response = new BaseResponse();
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static Result listStore(double longitude, double latitude, String sort, int offset, int limit) {
+    public static Result listStore(String search, int rating, double longitude, double latitude, String sort, int offset, int limit) {
 
         try {
 
-            int totalData = StoreRepository.find.where().eq("t0.is_active", true).eq("t0.is_deleted", false).findRowCount();
-            List<Store> list = StoreRepository.findAll(sort, offset, limit);
+            int totalData = StoreRepository.countAll(search, rating, sort, offset, limit);
+            List<Store> list = StoreRepository.findAll(search, rating, sort, offset, limit);
 
             List<BazaarStoreResponse> responses = new ArrayList<>();
 
