@@ -25,18 +25,32 @@ public class StoreRepository {
         return query.findUnique();
     }
 
-    public static List<Store> findAll(String sort, int offset, int limit) {
+    public static Query<Store> query(String search, int rating, String sort, int offset, int limit) {
         Query<Store> query = find.query();
 
+        if (rating > 0) {
+            String querySql = "select s.id from store s \n" +
+                    "where (SELECT AVG(rate) AS RATING FROM store_ratings sr WHERE sr.store_id = s.id) >= " + rating +
+                    " AND (SELECT AVG(rate) AS RATING FROM store_ratings sr WHERE sr.store_id = s.id) < " + (rating + 1);
+
+            RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+            query = Ebean.find(Store.class).setRawSql(rawSql);
+
+        }
+
         query = query.where()
-                .eq("t0.is_active", true)
-                .eq("t0.is_deleted", false)
+                .eq("is_active", true)
+                .eq("is_deleted", false)
                 .query();
+
+        if (search != null) {
+            query = query.where().like("store_name", "%"+search+"%").query();
+        }
 
         if (!"".equals(sort)) {
             query = query.orderBy(sort);
         } else {
-            query = query.orderBy("t0.updated_at desc");
+            query = query.orderBy("updated_at desc");
         }
 
         ExpressionList<Store> exp = query.where();
@@ -49,9 +63,21 @@ public class StoreRepository {
             query = query.setMaxRows(limit);
         }
 
-        List<Store> resData = query.findPagingList(limit).getPage(offset).getList();
+        return query;
+    }
 
-        return resData;
+    public static List<Store> findAll(String search, int rating, String sort, int offset, int limit) {
+
+        return query(search, rating, sort, offset, limit).findList();
+    }
+
+    public  static int countAll(String search, int rating, String sort, int offset, int limit) {
+
+        try {
+            return query(search, rating, sort, offset, limit).findRowCount();
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     public static List<Store> findAllStore(String filter, String sort, int offset, int limit) {
