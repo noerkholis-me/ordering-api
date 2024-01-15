@@ -194,6 +194,36 @@ public class DeliverySettingController extends BaseController {
         }
     }
 
+    public static Result deleteDelivery(Long id) {
+
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        System.out.println(ownMerchant);
+        if (ownMerchant == null) {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+        Transaction trx = Ebean.beginTransaction();
+        try {
+            DeliverySettings deliverySettings = DeliverySettingRepository.findById(id);
+
+            if (deliverySettings == null) {
+                response.setBaseResponse(0, 0, 0, error + " delivery settings tidak tersedia.", null);
+                return badRequest(Json.toJson(response));
+            }
+            deliverySettings.isDeleted = true;
+            deliverySettings.update();
+            trx.commit();
+
+            response.setBaseResponse(1, offset, 1, success + " menghapus delivery settings", deliverySettings);
+            return ok(Json.toJson(response));
+
+        } catch (Exception e){
+            e.printStackTrace();
+            response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat melakukan setting delivery", null);
+            return badRequest(Json.toJson(response));
+        }
+    }
+
     public static Double changeDistance(Double changeKM) {
         double x = changeKM;
         int angkaSignifikan = 2;

@@ -23,7 +23,7 @@ public class DeliverySettingRepository extends Model {
 
         Query<DeliverySettings> query = find.query();
 
-        query.where().eq("merchant_id", merchantId);
+        query.where().eq("merchant_id", merchantId).eq("isDeleted", false);
 
         if (!"".equals(sort)) {
             query = query.orderBy(sort);
@@ -48,13 +48,23 @@ public class DeliverySettingRepository extends Model {
 
     public  static int countAll(Long merchantId)  {
 
-        int count = find.where().eq("merchant_id", merchantId).findRowCount();
+        int count = find.where().eq("merchant_id", merchantId).eq("isDeleted", false).findRowCount();
 
         return count;
 
     }
     public static DeliverySettings findBystoreId(Long storeId) {
-      DeliverySettings deliverySettings = find.where().eq("store_id", storeId).findUnique();
+      DeliverySettings deliverySettings = find.where()
+              .eq("store_id", storeId)
+              .eq("isDeleted", false)
+              .findUnique();
+      return deliverySettings;
+    }
+    public static DeliverySettings findById(Long id) {
+      DeliverySettings deliverySettings = find.where()
+              .eq("id", id)
+              .eq("isDeleted", false)
+              .findUnique();
       return deliverySettings;
     }
 

@@ -717,6 +717,7 @@ GET         /merchant/stock-history                    controllers.stock.StockHi
 
 # Stock History
 POST         /delivery-setting                    controllers.delivery.DeliverySettingController.addDelivery()
+DELETE         /delivery-setting/:id                    controllers.delivery.DeliverySettingController.deleteDelivery(id: Long)
 GET          /delivery-setting                    controllers.delivery.DeliverySettingController.listDelivery(sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET          /delivery-setting/:store_id          controllers.delivery.DeliverySettingController.getDelivery(store_id: Long)
 POST          /fee-delivery                   controllers.delivery.DeliverySettingController.checkFeeDelivery()
