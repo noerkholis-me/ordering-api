@@ -5,6 +5,7 @@ import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
+import models.StockHistory;
 import models.Store;
 import play.db.ebean.Model;
 
@@ -22,6 +23,35 @@ public class StoreRepository {
         Query<Store> query = Ebean.find(Store.class).setRawSql(rawSql);
 
         return query.findUnique();
+    }
+
+    public static List<Store> findAll(String sort, int offset, int limit) {
+        Query<Store> query = find.query();
+
+        query = query.where()
+                .eq("t0.is_active", true)
+                .eq("t0.is_deleted", false)
+                .query();
+
+        if (!"".equals(sort)) {
+            query = query.orderBy(sort);
+        } else {
+            query = query.orderBy("t0.updated_at desc");
+        }
+
+        ExpressionList<Store> exp = query.where();
+
+        query = exp.query();
+
+        int total = query.findList().size();
+
+        if (limit != 0) {
+            query = query.setMaxRows(limit);
+        }
+
+        List<Store> resData = query.findPagingList(limit).getPage(offset).getList();
+
+        return resData;
     }
 
     public static List<Store> findAllStore(String filter, String sort, int offset, int limit) {

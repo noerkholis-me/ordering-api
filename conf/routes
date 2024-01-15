@@ -720,3 +720,6 @@ POST         /delivery-setting                    controllers.delivery.DeliveryS
 GET          /delivery-setting                    controllers.delivery.DeliverySettingController.listDelivery(sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET          /delivery-setting/:store_id          controllers.delivery.DeliverySettingController.getDelivery(store_id: Long)
 POST          /fee-delivery                   controllers.delivery.DeliverySettingController.checkFeeDelivery()
+
+# Bazaar
+GET           /bazaar                                  controllers.bazaar.BazaarController.listStore(longitude:Double ?= 0, latitude:Double ?= 0, sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
