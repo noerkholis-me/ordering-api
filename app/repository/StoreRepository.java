@@ -25,18 +25,35 @@ public class StoreRepository {
         return query.findUnique();
     }
 
-    public static Query<Store> query(String search, int rating, String sort, int offset, int limit) {
+    public static Query<Store> query(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
         Query<Store> query = find.query();
 
-        if (rating > 0) {
-            String querySql = "select s.id from store s \n" +
-                    "where (SELECT AVG(rate) AS RATING FROM store_ratings sr WHERE sr.store_id = s.id) >= " + rating +
-                    " AND (SELECT AVG(rate) AS RATING FROM store_ratings sr WHERE sr.store_id = s.id) < " + (rating + 1);
+        // SQL for get range distance
+        String sqlDistance = "(SELECT SQRT(\n" +
+                "    POW(69.1 * (sd.store_lat - "+latitude+"), 2) +\n" +
+                "    POW(69.1 * ("+longitude+" - sd.store_long) * COS(sd.store_lat / 57.3), 2)) \n" +
+                "FROM store sd WHERE sd.id = s.id)";
+
+        // SQL for get rating
+        String sqlRating = "(SELECT AVG(rate) AS RATING FROM store_ratings sr WHERE sr.store_id = s.id)";
+
+        if (rating > 0 || endRange > 0) {
+            String querySql = "select s.id from store s where ";
+
+            if (rating > 0) {
+                querySql = querySql + sqlRating + " >= " + rating + " AND " + sqlRating + " < " + (rating + 1) + " ";
+            }
+
+            if (endRange > 0) {
+                // mil = km * 0.62137
+                querySql = querySql + sqlDistance + " >= " + (startRange * 0.62137) + " AND " + sqlDistance + " < " + (endRange * 0.62137);
+            }
 
             RawSql rawSql = RawSqlBuilder.parse(querySql).create();
             query = Ebean.find(Store.class).setRawSql(rawSql);
 
         }
+
 
         query = query.where()
                 .eq("is_active", true)
@@ -44,7 +61,7 @@ public class StoreRepository {
                 .query();
 
         if (search != null) {
-            query = query.where().like("store_name", "%"+search+"%").query();
+            query = query.where().ilike("store_name", "%"+search+"%").query();
         }
 
         if (!"".equals(sort)) {
@@ -66,15 +83,15 @@ public class StoreRepository {
         return query;
     }
 
-    public static List<Store> findAll(String search, int rating, String sort, int offset, int limit) {
+    public static List<Store> findAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
 
-        return query(search, rating, sort, offset, limit).findList();
+        return query(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit).findList();
     }
 
-    public  static int countAll(String search, int rating, String sort, int offset, int limit) {
+    public  static int countAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
 
         try {
-            return query(search, rating, sort, offset, limit).findRowCount();
+            return query(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit).findRowCount();
         } catch (Exception e) {
             return 0;
         }
