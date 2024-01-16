@@ -37,14 +37,19 @@ public class StoreRepository {
         // SQL for get rating
         String sqlRating = "(SELECT AVG(rate) AS RATING FROM store_ratings sr WHERE sr.store_id = s.id)";
 
-        if (rating > 0 || endRange > 0) {
+        if (rating > 0 || (endRange > 0 && longitude != 0 && latitude != 0)) {
             String querySql = "select s.id from store s where ";
 
             if (rating > 0) {
                 querySql = querySql + sqlRating + " >= " + rating + " AND " + sqlRating + " < " + (rating + 1) + " ";
             }
 
-            if (endRange > 0 && longitude > 0 && latitude > 0) {
+            if ((endRange > 0 && longitude != 0 && latitude != 0)) {
+
+                if (rating > 0) {
+                    querySql = querySql + " AND ";
+                }
+
                 // mil = km * 0.62137
                 querySql = querySql + sqlDistance + " >= " + (startRange * 0.62137) + " AND " + sqlDistance + " < " + (endRange * 0.62137);
             }
