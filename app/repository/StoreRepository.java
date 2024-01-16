@@ -44,7 +44,7 @@ public class StoreRepository {
                 querySql = querySql + sqlRating + " >= " + rating + " AND " + sqlRating + " < " + (rating + 1) + " ";
             }
 
-            if (endRange > 0) {
+            if (endRange > 0 && longitude > 0 && latitude > 0) {
                 // mil = km * 0.62137
                 querySql = querySql + sqlDistance + " >= " + (startRange * 0.62137) + " AND " + sqlDistance + " < " + (endRange * 0.62137);
             }
