@@ -14,6 +14,7 @@ public class DeliveryService {
     private ObjectMapper objectMapper = new ObjectMapper();
     private static final String openRouteURL = Play.application().configuration().getString("openroute.url");
     private static final String apiKey = Play.application().configuration().getString("openroute.key");;
+    private static final String apiKeyDelivery = Play.application().configuration().getString("openroute.key.delivery");;
     private static final String directionPath = Play.application().configuration().getString("openroute.path.direction");;
 
     private static DeliveryService instance;
@@ -25,24 +26,24 @@ public class DeliveryService {
         return instance;
     }
 
-    public ServiceResponse checkDistance(DeliveryDirectionRequest baseCoordinate, DeliveryDirectionRequest targetCoordinate) {
+    public ServiceResponse checkDistance(DeliveryDirectionRequest baseCoordinate, DeliveryDirectionRequest targetCoordinate, boolean isDelivery) {
         ServiceResponse serviceResponse = new ServiceResponse();
         try {
             OkHttpClient httpClient = new OkHttpClient();
             String url = openRouteURL + directionPath;
             logger.info("Check Distance URL: " + url);
 
-            String bodya = "{\"coordinates\":[["+baseCoordinate.getLong()+","+baseCoordinate.getLat()+"],["+targetCoordinate.getLong()+","+targetCoordinate.getLat()+"]]}";
+            String req = "{\"coordinates\":[["+baseCoordinate.getLong()+","+baseCoordinate.getLat()+"],["+targetCoordinate.getLong()+","+targetCoordinate.getLat()+"]]}";
 
-            String requestBody = objectMapper.writeValueAsString(bodya);
+            String requestBody = objectMapper.writeValueAsString(req);
 
             logger.info("Check Distance Request: " + requestBody);
-            RequestBody body = RequestBody.create(bodya, MediaType.get("application/json; charset=utf-8"));
+            RequestBody body = RequestBody.create(req, MediaType.get("application/json; charset=utf-8"));
             Request request = new Request.Builder()
                     .url(url)
                     .addHeader("Accept", "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8")
                     .addHeader("Content-Type", "application/json; charset=utf-8")
-                    .addHeader("Authorization", apiKey)
+                    .addHeader("Authorization", isDelivery ? apiKeyDelivery : apiKey)
                     .post(body)
                     .build();
             Response wsResponse = httpClient.newCall(request).execute();

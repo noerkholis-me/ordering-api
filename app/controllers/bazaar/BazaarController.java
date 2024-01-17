@@ -51,7 +51,7 @@ public class BazaarController extends BaseController {
                     target.setLat(latitude);
                     target.setLong(longitude);
 
-                    ServiceResponse serviceResponse = DeliveryService.getInstance().checkDistance(base, target);
+                    ServiceResponse serviceResponse = DeliveryService.getInstance().checkDistance(base, target, false);
 
                     String object = objectMapper.writeValueAsString(serviceResponse.getData());
                     JSONObject jsonObject = new JSONObject(object);

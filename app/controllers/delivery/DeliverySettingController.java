@@ -140,7 +140,7 @@ public class DeliverySettingController extends BaseController {
             target.setLong(deliveryFeeRequest.getLongitude());
             
 
-            ServiceResponse serviceResponse = DeliveryService.getInstance().checkDistance(base, target);
+            ServiceResponse serviceResponse = DeliveryService.getInstance().checkDistance(base, target, true);
 
             String object = objectMapper.writeValueAsString(serviceResponse.getData());
             JSONObject jsonObject = new JSONObject(object);
