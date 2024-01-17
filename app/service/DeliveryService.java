@@ -13,7 +13,7 @@ public class DeliveryService {
     private final static Logger.ALogger logger = Logger.of(DeliveryService.class);
     private ObjectMapper objectMapper = new ObjectMapper();
     private static final String openRouteURL = Play.application().configuration().getString("openroute.url");
-    private static final String apiKey = Play.application().configuration().getString("openroute.key");;
+    private static final String apiKey = Play.application().configuration().getString("openroute.key.general");;
     private static final String apiKeyDelivery = Play.application().configuration().getString("openroute.key.delivery");;
     private static final String directionPath = Play.application().configuration().getString("openroute.path.direction");;
 
