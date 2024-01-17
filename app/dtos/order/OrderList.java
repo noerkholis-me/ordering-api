@@ -31,6 +31,15 @@ public class OrderList {
     @JsonProperty("invoice_number")
     private String invoiceNumber;
 
+    @JsonProperty("delivery_fee")
+    private BigDecimal deliveryFee;
+
+    @JsonProperty("service_price")
+    private BigDecimal servicePrice;
+
+    @JsonProperty("destination_address")
+    private String destinationAddress;
+
     @JsonProperty("order_number")
     private String orderNumber;
 

@@ -553,6 +553,7 @@ public class CheckoutOrderController extends BaseController {
                 orderPayment.setTaxPercentage(orderRequest.getPaymentDetailResponse().getTaxPercentage());
                 orderPayment.setServicePercentage(orderRequest.getPaymentDetailResponse().getServicePercentage());
                 orderPayment.setTaxPrice(orderRequest.getPaymentDetailResponse().getTaxPrice());
+                orderPayment.setDeliveryFee(orderRequest.getPaymentDetailResponse().getDeliveryFee());
                 orderPayment.setServicePrice(orderRequest.getPaymentDetailResponse().getServicePrice());
                 orderPayment.setPaymentFeeType(orderRequest.getPaymentDetailResponse().getPaymentFeeType());
                 orderPayment.setPaymentFeeCustomer(orderRequest.getPaymentDetailResponse().getPaymentFeeCustomer());
