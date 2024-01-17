@@ -57,6 +57,9 @@ public class OrderPayment extends BaseModel {
     @Column(name = "tax_price")
     private BigDecimal taxPrice;
 
+    @Column(name = "delivery_fee")
+    private BigDecimal deliveryFee;
+
     @Column(name = "service_price")
     private BigDecimal servicePrice;
 

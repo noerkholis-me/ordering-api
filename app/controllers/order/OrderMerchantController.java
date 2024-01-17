@@ -311,7 +311,10 @@ public class OrderMerchantController extends BaseController {
                     OrderPayment getOrderPayment = orderPayment.get();
                     // System.out.println(">>>>> Order payment when paid <<<<<");
                     orderRes.setInvoiceNumber(getOrderPayment.getInvoiceNo());
+                    orderRes.setDeliveryFee(getOrderPayment.getDeliveryFee());
+                    orderRes.setServicePrice(getOrderPayment.getServicePrice());
                     orderRes.setOrderNumber(order.getOrderNumber());
+                    orderRes.setDestinationAddress(order.getDestinationAddress());
 
                     // get member
                     Member member = null;
