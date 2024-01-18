@@ -147,12 +147,12 @@ public class DeliverySettingController extends BaseController {
             String initiate = jsonObject.getJSONArray("routes").getJSONObject(0).getJSONObject("summary").toString();
             DeliveryDirectionResponse distance = objectMapper.readValue(initiate, DeliveryDirectionResponse.class);
 
-            double changeKM = (double) distance.getDistance() / 1000.0;
+            double parseKM = (double) distance.getDistance() / 1000.0;
 
             DeliverySettings deliverySettings = DeliverySettingRepository.findBystoreId(deliveryFeeRequest.getStore_id());
             DeliverySettings responses = new DeliverySettings();
             if (deliverySettings != null) {
-                if (changeKM > deliverySettings.getMaxRangeDelivery()) {
+                if (parseKM > deliverySettings.getMaxRangeDelivery()) {
                     response.setBaseResponse(0, 0, 0, "jarak melebihi batas maksimal", null);
                     return badRequest(Json.toJson(response));
                 }
@@ -160,15 +160,18 @@ public class DeliverySettingController extends BaseController {
                 int feeTotal = 0;
                 if (deliverySettings.getCalculateMethod().equals("tarif_km")) {
                     if (deliverySettings.getEnableFlatPrice() == true) {
-                        int remainder = (int) changeKM - deliverySettings.getMaxRangeFlatPrice();
-
-                        feeTotal = (int) (remainder * deliverySettings.getKmPriceValue()) + deliverySettings.getFlatPriceValue();
+                        if (Math.round(parseKM) > deliverySettings.getMaxRangeFlatPrice()) {
+                            int remainder = (int) Math.round(parseKM) - deliverySettings.getMaxRangeFlatPrice();
+                            feeTotal = (int) (remainder * deliverySettings.getKmPriceValue()) + deliverySettings.getFlatPriceValue();
+                        } else {
+                            feeTotal = (int) deliverySettings.getFlatPriceValue();
+                        }
                     } else {
-                        feeTotal = (int) changeKM * deliverySettings.getKmPriceValue();
+                        feeTotal = (int) parseKM * deliverySettings.getKmPriceValue();
                     }
                     
                 } else if (deliverySettings.getCalculateMethod().equals("tarif_flat")) {
-                    if (changeKM > deliverySettings.getMaxRangeFlatPrice()) {
+                    if (Math.round(parseKM) > deliverySettings.getMaxRangeFlatPrice()) {
                         feeTotal = (int) deliverySettings.getDeliverFee();
                     } else {
                         feeTotal = (int) deliverySettings.getFlatPriceValue();
@@ -176,7 +179,7 @@ public class DeliverySettingController extends BaseController {
                 }
 
                 DeliveryFeeResponse responsesFee = new DeliveryFeeResponse();
-                responsesFee.setDistance(changeDistance(changeKM));
+                responsesFee.setDistance(changeDistance(parseKM));
                 responsesFee.setDuration((int) distance.getDuration());
                 responsesFee.setFeeDelivery(feeTotal);
                 response.setBaseResponse(1, offset, 1, success, responsesFee);
