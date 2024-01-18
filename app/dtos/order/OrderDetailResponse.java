@@ -17,6 +17,9 @@ public class OrderDetailResponse {
 
     @JsonProperty("product_name")
     private String productName;
+    @JsonProperty("product_price")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal productPrice;
     @JsonProperty("qty")
     private Integer qty;
     @JsonProperty("total")
