@@ -37,7 +37,7 @@ public class StoreRepository {
         // SQL for get rating
         String sqlRating = "(SELECT AVG(rate) AS RATING FROM store_ratings sr WHERE sr.store_id = s.id)";
 
-        if (rating > 0 || (endRange > 0 || startRange > 0 && longitude != 0 && latitude != 0)) {
+        if (rating > 0 || ((endRange > 0 || startRange > 0) && longitude != 0 && latitude != 0)) {
 
             String queryDistance = "select x.*, ((SELECT SQRT(\n" +
                     " POW(69.1 * (sd.store_lat - x.store_lat), 2) +\n" +
