@@ -132,7 +132,12 @@ public class OrderPayment extends BaseModel {
     }
 
     public String scalaFetchDeliveryFee () {
-    	return Helper.getRupiahFormat(this.deliveryFee.doubleValue());
+        if (this.deliveryFee != null) {
+            return Helper.getRupiahFormat(this.deliveryFee.doubleValue());
+        } else {
+            double num = 0;
+            return Helper.getRupiahFormat(num);
+        }
     }
     
     public String scalaFetchFeeCustomer () {
