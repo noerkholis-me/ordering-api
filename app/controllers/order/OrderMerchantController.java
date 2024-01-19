@@ -44,6 +44,7 @@ import repository.ratings.ProductRatingRepository;
 import service.DownloadOrderReport;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -722,6 +723,8 @@ public class OrderMerchantController extends BaseController {
                     orderDetailResponse.setTotal(orderDetail.getSubTotal());
                     orderDetailResponse.setNotes(orderDetail.getNotes());
                     orderDetailResponse.setNoSku(orderDetail.getProductMerchant().getNoSKU());
+                    orderDetailResponse.setProductPrice(orderDetail.getProductPrice());
+
                     List<OrderDetailAddOnResponse> orderDetailAddOns = new ArrayList<>();
                     List<OrderDetailAddOn> orderDetailAddOnList = orderDetail.getOrderDetailAddOns();
                     for (OrderDetailAddOn orderDetailAddOn : orderDetailAddOnList) {
@@ -753,6 +756,7 @@ public class OrderMerchantController extends BaseController {
                 invoicePrintResponse.setServicePercentage(orderPayment.getServicePercentage());
                 invoicePrintResponse.setServiceFee(orderPayment.getServicePrice());
 
+                invoicePrintResponse.setDeliveryFee(orderPayment.getDeliveryFee() != null ? orderPayment.getDeliveryFee() : BigDecimal.ZERO );
                 invoicePrintResponse.setPaymentFeeType(orderPayment.getPaymentFeeType());
                 invoicePrintResponse.setPaymentFeeOwner(orderPayment.getPaymentFeeOwner());
                 invoicePrintResponse.setPaymentFeeCustomer(orderPayment.getPaymentFeeCustomer());

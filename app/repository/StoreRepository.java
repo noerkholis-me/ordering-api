@@ -37,21 +37,36 @@ public class StoreRepository {
         // SQL for get rating
         String sqlRating = "(SELECT AVG(rate) AS RATING FROM store_ratings sr WHERE sr.store_id = s.id)";
 
-        if (rating > 0 || (endRange > 0 && longitude != 0 && latitude != 0)) {
-            String querySql = "select s.id from store s where ";
+        if (rating > 0 || ((endRange > 0 || startRange > 0) && longitude != 0 && latitude != 0)) {
+
+            String queryDistance = "select x.*, ((SELECT SQRT(\n" +
+                    " POW(69.1 * (sd.store_lat - x.store_lat), 2) +\n" +
+                    " POW(69.1 * (x.store_long - sd.store_long) * COS(sd.store_lat / 57.3), 2)) \n" +
+                    " FROM store sd WHERE sd.id = x.id)) as distance from store x";
+
+            String querySql = "select s.id from ("+queryDistance+") s where ";
 
             if (rating > 0) {
                 querySql = querySql + sqlRating + " >= " + rating + " AND " + sqlRating + " < " + (rating + 1) + " ";
             }
 
-            if ((endRange > 0 && longitude != 0 && latitude != 0)) {
+            if (((endRange > 0 || startRange > 0) && longitude != 0 && latitude != 0)) {
 
                 if (rating > 0) {
                     querySql = querySql + " AND ";
                 }
 
                 // mil = km * 0.62137
-                querySql = querySql + sqlDistance + " >= " + (startRange * 0.62137) + " AND " + sqlDistance + " < " + (endRange * 0.62137);
+                double startMil = (startRange * 0.62137);
+                double endMil = (endRange * 0.62137);
+
+                // X KM - unlimited
+                if (endRange <= 0) {
+                    querySql = querySql + sqlDistance + " >= " + startMil + "  ORDER BY distance ASC";
+                } else {
+                    // Y KM - X KM
+                    querySql = querySql + sqlDistance + " >= " + startMil + " AND " + sqlDistance + " < " + endMil + "  ORDER BY distance ASC";
+                }
             }
 
             RawSql rawSql = RawSqlBuilder.parse(querySql).create();
