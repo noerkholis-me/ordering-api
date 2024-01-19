@@ -7,6 +7,7 @@ import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
 import models.BaseModel;
 import models.Merchant;
+import models.ProductStore;
 import models.merchant.BankAccountMerchant;
 import models.transaction.Order;
 
@@ -23,6 +24,18 @@ public class BankAccountMerchantRepository extends BaseModel {
 
     public static Optional<BankAccountMerchant> findByAccountNumber(String accountNumber) {
         return Optional.ofNullable(find.where().eq("accountNumber", accountNumber).eq("isPrimary", true).findUnique());
+    }
+
+    public static Optional<BankAccountMerchant> findByAccountNumberV2(String accountNumber) {
+        String querySql = "SELECT bam.id FROM bank_account_merchant bam "
+                + "WHERE bam.account_number = '" + accountNumber + "' AND bam.is_primary = true AND bam.is_deleted = false "
+                + "ORDER BY bam.id DESC "
+                + "LIMIT 1";
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<BankAccountMerchant> query = Ebean.find(BankAccountMerchant.class).setRawSql(rawSql);
+
+        return Optional.ofNullable(query.findUnique());
     }
 
     public static Optional<BankAccountMerchant> findByAccountNumberNotPrimary(String accountNumber) {

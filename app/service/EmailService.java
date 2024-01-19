@@ -58,15 +58,12 @@ public class EmailService {
 	public static void handleCallbackAndSendEmail(Order order, Boolean toAdmin) {
 	
 	        logger.info(">>> incoming requet...  ");
-	        System.out.println("order >>> " + order.id);
+//	        System.out.println("order >>> " + order.id);
+//	        System.out.println("order member " + order.getMember().id);
+//	        System.out.println("email >>> " + order.getMember().email);
 	
-	        System.out.println("order member " + order.getMember().id);
-	        
-	        
-	        System.out.println("email >>> " + order.getMember().email);
-	
-	//        String urlLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/hellobisnisnewlogo.png";
-	//        String urlEmailLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/email.png";
+//	        String urlLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/hellobisnisnewlogo.png";
+//	        String urlEmailLogo = Constant.getInstance().getImageUrl() + "/" + "assets/images/email.png";
 	        SimpleDateFormat formatter = new SimpleDateFormat("EEEE, dd MMMM yyyy - HH : mm : ss", new Locale("id", "ID"));
 	        List<String> emails = new ArrayList<>();
 	        String orderDate = formatter.format(order.getOrderDate());
@@ -85,8 +82,7 @@ public class EmailService {
 //	        	metodePembayaran = "Gopay";
 //	        	logoPembayaran = "Gopay.png";
 //	        }
-	        
-	        
+
 	        if(toAdmin) {
 	        	Query<StoreAccessDetail> queryDetail = StoreAccessRepository.findDetail.where().
 	                    eq("t0.store_id", order.getStore().id).eq("t0.is_deleted", false).order("t0.id");
