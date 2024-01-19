@@ -130,6 +130,10 @@ public class OrderPayment extends BaseModel {
     public String scalaFetchServicePrice () {
     	return Helper.getRupiahFormat(this.servicePrice.doubleValue());
     }
+
+    public String scalaFetchDeliveryFee () {
+    	return Helper.getRupiahFormat(this.deliveryFee.doubleValue());
+    }
     
     public String scalaFetchFeeCustomer () {
     	return Helper.getRupiahFormat(this.paymentFeeCustomer.doubleValue());
