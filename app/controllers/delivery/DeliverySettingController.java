@@ -34,7 +34,7 @@ public class DeliverySettingController extends BaseController {
                 int totalData = DeliverySettingRepository.findAll(merchant.id, 0, 0).size();
                 List<DeliverySetting> data = DeliverySettingRepository.findAll(merchant.id, offset, limit);
 
-                response.setBaseResponse(0, 0, 0, "Menampilkan list data pengaturan pengiriman.", listResponse(data));
+                response.setBaseResponse(totalData, offset, limit, "Menampilkan list data pengaturan pengiriman.", listResponse(data));
                 return ok(Json.toJson(response));
             } else {
                 response.setBaseResponse(0, 0, 0, unauthorized, null);
