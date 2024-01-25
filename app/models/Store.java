@@ -192,6 +192,7 @@ public class Store extends BaseModel {
         String slug = Normalizer.normalize(input.toLowerCase(), Normalizer.Form.NFD)
                 .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
                 .replaceAll("[^\\p{Alnum}]+", "");
+        System.out.println("SLUG"+slug);
         if (slug.length() != 0 && slug.charAt(slug.length() - 1) == '-') {
             return slug.substring(0, slug.length() - 1);
         } else {
@@ -204,10 +205,10 @@ public class Store extends BaseModel {
                 .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
                 .replaceAll("[^\\p{Alnum}]+", "");
         slug = slug+"-1";
+        System.out.println("SLUG"+slug);
 
         return slug;
     }
-
 
     public static Store findById(Long id) {
         return find.where().eq("id", id).eq("is_deleted", false).eq("isActive", true).findUnique();
