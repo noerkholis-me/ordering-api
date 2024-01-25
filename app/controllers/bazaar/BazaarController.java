@@ -66,15 +66,15 @@ public class BazaarController extends BaseController {
                 BazaarStoreResponse response = new BazaarStoreResponse();
 
 
-                float storeRating = StoreRatingRepository.getRatings(store);
-
+                double storeRating = StoreRatingRepository.getRatings(store);
+                
                 response.setId(store.id);
                 response.setStoreAddress(store.getStoreAddress());
                 response.setStoreName(store.getStoreName());
                 response.setStoreImage(store.getStoreBanner());
                 response.setStoreDistance(distance);
                 response.setMerchantId(store.getMerchant().id);
-                response.setStoreRating(storeRating);
+                response.setStoreRating(change(storeRating));
                 response.setSlug(store.getStoreAlias());
 
                 responses.add(response);
@@ -89,6 +89,13 @@ public class BazaarController extends BaseController {
             response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat menampilkan data", null);
             return badRequest(Json.toJson(response));
         }
+    }
 
+    public static Double change(Double storeRating) {
+        double x = storeRating;
+        int angkaSignifikan = 1;
+        double temp = Math.pow(10, angkaSignifikan);
+        double y = (double) Math.round(x*temp)/temp;
+        return y;
     }
 }

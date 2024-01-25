@@ -25,7 +25,7 @@ public class BazaarStoreResponse {
     public double storeDistance;
 
     @com.fasterxml.jackson.annotation.JsonProperty("store_rating")
-    public float storeRating;
+    public Double storeRating;
 
     @com.fasterxml.jackson.annotation.JsonProperty("merchant_id")
     public Long merchantId;
