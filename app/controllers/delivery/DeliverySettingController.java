@@ -93,6 +93,29 @@ public class DeliverySettingController extends BaseController {
         }
     }
 
+    public static Result getByStoreIdNoAuth(Long id) {
+        try {
+            int authority = checkAccessAuthorization("all");
+            if (authority == 200 || authority == 203) {
+                DeliverySetting deliverySetting = DeliverySettingRepository.findByStoreId(id);
+                if (deliverySetting == null) {
+                    response.setBaseResponse(0, 0, 0, "Pengaturan pengiriman tidak ditemukan atau belum dibuat.", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                response.setBaseResponse(1, 0, 0, "Menampilkan data pengaturan pengiriman.", detailResponse(deliverySetting));
+                return ok(Json.toJson(response));
+            } else {
+                response.setBaseResponse(0, 0, 0, forbidden, null);
+                return unauthorized(Json.toJson(response));
+            }
+        } catch (Exception e) {
+            logger.error("Error when get by store id : " + e.getMessage());
+            response.setBaseResponse(0, 0, 0, e.getMessage(), null);
+            return badRequest(Json.toJson(response));
+        }
+    }
+
     public static Result createDeliverySetting() {
         try {
             Merchant merchant = checkMerchantAccessAuthorization();
