@@ -194,6 +194,9 @@ public class SeedDefaultConfiguration {
 		features.add(
 				new Feature("Pick Up Point", "pickuppoint", "Merchant",
 						"Can view, create, and edit pick up point data.", true, false));
+		features.add(
+				new Feature("banner Bazaar Settings", "bannerbazaar", "Master Products", "Can view, create, and edit banner bazzar data.", true,
+					false));
 
 		// ============================ FEATURE FOR
 		// MERCHANT================================================ //
@@ -262,6 +265,9 @@ public class SeedDefaultConfiguration {
 						true, true));
 		features.add(
 				new Feature("Table Merchant", "tablemerchant", "Stores", "Can view, create and edit table type data.", true,
+						true));
+		features.add(
+				new Feature("Delivery Setting", "deliverysettingmerchant", "Settings", "Can view, create and edit delivery setting data.", true,
 						true));
 		// ============================ ROLE FEATURE
 		// ================================================ //
