@@ -164,6 +164,11 @@ public class RatingController extends BaseController {
         Transaction txn = Ebean.beginTransaction();
         try {
             StoreRateRequest storeRateRequest = objectMapper.readValue(rawRequest.toString(), StoreRateRequest.class);
+            if(storeRateRequest.getFeedback().length() > 100) {
+                response.setBaseResponse(0, 0, 0, "Jumlah karakter tidak boleh melebihi 100 karakter", null);
+                return badRequest(Json.toJson(response));
+            }
+
             Store store = Store.findById(storeRateRequest.getStoreId());
 
             Member member = getMember(storeRateRequest, store.merchant);

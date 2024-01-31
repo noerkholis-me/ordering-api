@@ -72,7 +72,7 @@ public class BazaarController extends BaseController {
                 response.setStoreAddress(store.getStoreAddress());
                 response.setStoreName(store.getStoreName());
                 response.setStoreImage(store.getStoreBanner());
-                response.setStoreDistance(distance);
+                response.setStoreDistance(change(distance));
                 response.setMerchantId(store.getMerchant().id);
                 response.setStoreRating(change(storeRating));
                 response.setSlug(store.getStoreAlias());
