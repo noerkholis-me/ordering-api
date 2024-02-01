@@ -1,6 +1,6 @@
 # --- !Ups
 
-create table banner_bazaar(
+create table banner_bazar(
     id                        bigint not null,
     is_deleted                boolean,
     title                     varchar(255),
@@ -8,11 +8,11 @@ create table banner_bazaar(
     url                       varchar(255),
     created_at                timestamp not null,
     updated_at                timestamp not null,
-    constraint pk_banner_bazaar primary key (id)
+    constraint pk_banner_bazar primary key (id)
 );
 
-create sequence banner_bazaar_seq;
+create sequence banner_bazar_seq;
 
 
 # --- !Downs
-drop sequence if exists banner_bazaar_seq;
+drop sequence if exists banner_bazar_seq;
