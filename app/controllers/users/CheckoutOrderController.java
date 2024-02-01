@@ -55,6 +55,7 @@ import repository.TableMerchantRepository;
 import repository.loyalty.LoyaltyPointHistoryRepository;
 import repository.loyalty.LoyaltyPointMerchantRepository;
 import repository.pickuppoint.PickUpPointRepository;
+import service.EmailService;
 import service.PaymentService;
 import service.firebase.FirebaseService;
 
@@ -749,6 +750,12 @@ public class CheckoutOrderController extends BaseController {
                     
                     if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
                     	FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order);
+                    }
+
+                    if (order.getDeviceType().equalsIgnoreCase("MINIPOS")) {
+                        if (!orderPayment.getPaymentType().equalsIgnoreCase("virtual_account") || !orderPayment.getPaymentType().equalsIgnoreCase("qr_code")) {
+                            if (member != null && (member.email != null && member.fullName != null)) EmailService.handleCallbackAndSendEmail(order, false);
+                        }
                     }
 
                     response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
