@@ -40,6 +40,7 @@ import repository.pickuppoint.PickUpPointRepository;
 import service.DownloadOrderReport;
 
 import java.io.File;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -568,6 +569,7 @@ public class OrderMerchantController extends BaseController {
                 invoicePrintResponse.setTaxPercentage(orderPayment.getTaxPercentage());
                 invoicePrintResponse.setServicePercentage(orderPayment.getServicePercentage());
                 invoicePrintResponse.setServiceFee(orderPayment.getServicePrice());
+                invoicePrintResponse.setLoyaltyUsage(getOrder.getTotalLoyaltyUsage() == null ? BigDecimal.ZERO : getOrder.getTotalLoyaltyUsage());
 
                 invoicePrintResponse.setPaymentFeeType(orderPayment.getPaymentFeeType());
                 invoicePrintResponse.setPaymentFeeOwner(orderPayment.getPaymentFeeOwner());
