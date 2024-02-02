@@ -724,3 +724,4 @@ POST          /fee-delivery                   controllers.delivery.DeliverySetti
 
 # Bazaar
 GET           /bazaar                                  controllers.bazaar.BazaarController.listStore(search:String ?= null, rating:Int ?= 0, start_range:Int ?= 0, end_range:Int ?= 0, longitude:Double ?= 0, latitude:Double ?= 0, sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET           /banner-bazaar                            controllers.bazaar.BannerBazaarController.listBannerBazaar()
