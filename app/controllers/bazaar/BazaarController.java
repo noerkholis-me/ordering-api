@@ -8,10 +8,8 @@ import controllers.stock.StockHistoryController;
 import dtos.bazaar.BazaarStoreResponse;
 import dtos.delivery.DeliveryDirectionRequest;
 import dtos.delivery.DeliveryDirectionResponse;
-import dtos.stock.StockHistoryResponse;
-import models.StockHistory;
+
 import models.Store;
-import models.store.StoreRatings;
 import org.json.JSONObject;
 import play.Logger;
 import play.libs.Json;

@@ -95,29 +95,97 @@ public class StoreRepository {
         query = exp.query();
 
         return query.findPagingList(limit).getPage(offset).getList();
+    }public static Query<Store> query(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
+        Query<Store> query = find.query();
+
+        // SQL for get range distance
+        String sqlDistance = "(SELECT SQRT(\n" +
+                "    POW(69.1 * (sd.store_lat - "+latitude+"), 2) +\n" +
+                "    POW(69.1 * ("+longitude+" - sd.store_long) * COS(sd.store_lat / 57.3), 2)) \n" +
+                "FROM store sd WHERE sd.id = s.id)";
+
+        // SQL for get rating
+        String sqlRating = "(SELECT AVG(rate) AS RATING FROM store_ratings sr WHERE sr.store_id = s.id)";
+
+        if (rating > 0 || ((endRange > 0 || startRange > 0) && longitude != 0 && latitude != 0)) {
+
+            String queryDistance = "select x.*, ((SELECT SQRT(\n" +
+                    " POW(69.1 * (sd.store_lat - x.store_lat), 2) +\n" +
+                    " POW(69.1 * (x.store_long - sd.store_long) * COS(sd.store_lat / 57.3), 2)) \n" +
+                    " FROM store sd WHERE sd.id = x.id)) as distance from store x";
+
+            String querySql = "select s.id from ("+queryDistance+") s where ";
+
+            if (rating > 0) {
+                querySql = querySql + sqlRating + " >= " + rating + " AND " + sqlRating + " < " + (rating + 1) + " ";
+            }
+
+            if (((endRange > 0 || startRange > 0) && longitude != 0 && latitude != 0)) {
+
+                if (rating > 0) {
+                    querySql = querySql + " AND ";
+                }
+
+                // mil = km * 0.62137
+                double startMil = (startRange * 0.62137);
+                double endMil = (endRange * 0.62137);
+
+                // X KM - unlimited
+                if (endRange <= 0) {
+                    querySql = querySql + sqlDistance + " >= " + startMil + "  ORDER BY distance ASC";
+                } else {
+                    // Y KM - X KM
+                    querySql = querySql + sqlDistance + " >= " + startMil + " AND " + sqlDistance + " < " + endMil + "  ORDER BY distance ASC";
+                }
+            }
+
+            RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+            query = Ebean.find(Store.class).setRawSql(rawSql);
+
+        }
+
+
+        query = query.where()
+                .eq("is_active", true)
+                .eq("is_deleted", false)
+                .query();
+
+        if (search != null) {
+            query = query.where().ilike("store_name", "%"+search+"%").query();
+        }
+
+        if (!"".equals(sort)) {
+            query = query.orderBy(sort);
+        } else {
+            query = query.orderBy("updated_at desc");
+        }
+
+        ExpressionList<Store> exp = query.where();
+
+        query = exp.query();
+
+        int total = query.findList().size();
+
+        if (limit != 0) {
+            query = query.setMaxRows(limit);
+        }
+
+        return query;
     }
 
-    public static Store findByStoreCode(String storeCode) {
-        String querySql = "SELECT s.id FROM store s "
-                + "WHERE s.store_code = '" + storeCode + "' "
-                + "AND s.is_deleted = false ";
 
-        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
-        Query<Store> query = Ebean.find(Store.class).setRawSql(rawSql);
 
-        return query.findUnique();
+    public static List<Store> findAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
+
+        return query(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit).findList();
     }
 
-    public static Store findByStoreId(Long storeId) {
-        String querySql = "SELECT s.id FROM store s "
-                + "WHERE s.id = '" + storeId + "' "
-                + "AND s.is_deleted = false ";
+    public  static int countAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
 
-        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
-        Query<Store> query = Ebean.find(Store.class).setRawSql(rawSql);
-
-        return query.findUnique();
-
+        try {
+            return query(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit).findRowCount();
+        } catch (Exception e) {
+            return 0;
+        }
     }
-
 }

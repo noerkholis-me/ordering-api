@@ -562,13 +562,13 @@ GET     /users/feesetting/:id                           controllers.merchants.Fe
 GET     /users/feesettingV2/:total                           controllers.merchants.FeeSettingMerchantController.platformFee(total: Int)
 
 #DELIVERY SETTING
-GET     /merchant/delivery-setting                       controllers.delivery.DeliverySettingController.getAllDeliverySetting(offset:Int ?= 0, limit:Int ?= 10)
-GET     /merchant/delivery-setting/:id                   controllers.delivery.DeliverySettingController.getById(id: Long)
-GET     /merchant/delivery-setting/store/:id             controllers.delivery.DeliverySettingController.getByStoreId(id: Long)
-GET     /merchant/delivery-setting/store/:id/detail      controllers.delivery.DeliverySettingController.getByStoreIdNoAuth(id: Long)
-POST    /merchant/delivery-setting                       controllers.delivery.DeliverySettingController.createDeliverySetting()
-PUT     /merchant/delivery-setting/:id                   controllers.delivery.DeliverySettingController.updateDeliverySetting(id: Long)
-DELETE  /merchant/delivery-setting/:id                   controllers.delivery.DeliverySettingController.deleteDeliverySetting(id: Long)
+#GET     /merchant/delivery-setting                       controllers.delivery.DeliverySettingController.getAllDeliverySetting(offset:Int ?= 0, limit:Int ?= 10)
+#GET     /merchant/delivery-setting/:id                   controllers.delivery.DeliverySettingController.getById(id: Long)
+#GET     /merchant/delivery-setting/store/:id             controllers.delivery.DeliverySettingController.getByStoreId(id: Long)
+#GET     /merchant/delivery-setting/store/:id/detail      controllers.delivery.DeliverySettingController.getByStoreIdNoAuth(id: Long)
+#POST    /merchant/delivery-setting                       controllers.delivery.DeliverySettingController.createDeliverySetting()
+#PUT     /merchant/delivery-setting/:id                   controllers.delivery.DeliverySettingController.updateDeliverySetting(id: Long)
+#DELETE  /merchant/delivery-setting/:id                   controllers.delivery.DeliverySettingController.deleteDeliverySetting(id: Long)
 
 #FEESETTINGCONFIG
 GET     /master/feesettingconfig                   controllers.masters.FeeSettingConfigController.getFeeSettingConfig()

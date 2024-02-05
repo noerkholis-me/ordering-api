@@ -1,6 +1,6 @@
 package models.delivery;
 
-import dtos.delivery.DeliverySettingRequest;
+//import dtos.delivery.DeliverySettingRequest;
 import lombok.Getter;
 import lombok.Setter;
 import models.BaseModel;
@@ -47,28 +47,28 @@ public class DeliverySetting extends BaseModel {
     @JoinColumn(name = "merchant_id")
     private Merchant merchant;
 
-    public DeliverySetting(DeliverySettingRequest req, Merchant merchant, Store store) {
-        this.setDeliveryMethod(req.getDeliveryMethod());
-        this.setNormalPrice(req.getNormalPrice());
-        this.setNormalPriceMaxRange(req.getNormalPriceMaxRange());
-        this.setBasicPrice(req.getBasicPrice());
-        this.setBasicPriceMaxRange(req.getBasicPriceMaxRange());
-        this.setIsActiveBasePrice(req.getIsActiveBasePrice());
-        this.setIsShipper(req.getIsShipper() != null ? req.getIsShipper() : false);
-        this.setStore(store);
-        this.setMerchant(merchant);
-    }
-
-    public void updateDeliverySetting(DeliverySettingRequest req, DeliverySetting deliverySetting, Merchant merchant, Store store) {
-        this.setDeliveryMethod(req.getDeliveryMethod() != null ? req.getDeliveryMethod() : deliverySetting.getDeliveryMethod());
-        this.setNormalPrice(req.getNormalPrice() != null ? req.getNormalPrice() : deliverySetting.getNormalPrice());
-        this.setNormalPriceMaxRange(req.getNormalPriceMaxRange() != null ? req.getNormalPriceMaxRange() : deliverySetting.normalPriceMaxRange);
-        this.setBasicPrice(req.getBasicPrice() != null ? req.getBasicPrice() : deliverySetting.getBasicPrice());
-        this.setBasicPriceMaxRange(req.getBasicPriceMaxRange() != null ? req.getBasicPriceMaxRange() : deliverySetting.getBasicPriceMaxRange());
-        this.setIsActiveBasePrice(req.getIsActiveBasePrice() != null ? req.getIsActiveBasePrice() : deliverySetting.getIsActiveBasePrice());
-        this.setIsShipper(req.getIsShipper() != null ? req.getIsShipper() : false);
-        this.setStore(store);
-        this.setMerchant(merchant);
-    }
+//    public DeliverySetting(DeliverySettingRequest req, Merchant merchant, Store store) {
+//        this.setDeliveryMethod(req.getDeliveryMethod());
+//        this.setNormalPrice(req.getNormalPrice());
+//        this.setNormalPriceMaxRange(req.getNormalPriceMaxRange());
+//        this.setBasicPrice(req.getBasicPrice());
+//        this.setBasicPriceMaxRange(req.getBasicPriceMaxRange());
+//        this.setIsActiveBasePrice(req.getIsActiveBasePrice());
+//        this.setIsShipper(req.getIsShipper() != null ? req.getIsShipper() : false);
+//        this.setStore(store);
+//        this.setMerchant(merchant);
+//    }
+//
+//    public void updateDeliverySetting(DeliverySettingRequest req, DeliverySetting deliverySetting, Merchant merchant, Store store) {
+//        this.setDeliveryMethod(req.getDeliveryMethod() != null ? req.getDeliveryMethod() : deliverySetting.getDeliveryMethod());
+//        this.setNormalPrice(req.getNormalPrice() != null ? req.getNormalPrice() : deliverySetting.getNormalPrice());
+//        this.setNormalPriceMaxRange(req.getNormalPriceMaxRange() != null ? req.getNormalPriceMaxRange() : deliverySetting.normalPriceMaxRange);
+//        this.setBasicPrice(req.getBasicPrice() != null ? req.getBasicPrice() : deliverySetting.getBasicPrice());
+//        this.setBasicPriceMaxRange(req.getBasicPriceMaxRange() != null ? req.getBasicPriceMaxRange() : deliverySetting.getBasicPriceMaxRange());
+//        this.setIsActiveBasePrice(req.getIsActiveBasePrice() != null ? req.getIsActiveBasePrice() : deliverySetting.getIsActiveBasePrice());
+//        this.setIsShipper(req.getIsShipper() != null ? req.getIsShipper() : false);
+//        this.setStore(store);
+//        this.setMerchant(merchant);
+//    }
 
 }
