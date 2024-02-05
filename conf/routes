@@ -416,6 +416,7 @@ GET    /merchant/store/:id                          controllers.merchants.StoreC
 DELETE    /merchant/store/:id                       controllers.merchants.StoreController.deleteStore(id:Long)
 GET    /merchant/store/:storeCode/detail            controllers.merchants.StoreController.getStoreByStoreCode(storeCode: String)
 GET    /merchant/store/v2/:storeAlias/detail        controllers.merchants.StoreController.getStoreByAlias(storeAlias: String)
+GET    /merchant/store/v2/taggings/:storeId          controllers.merchants.StoreController.getAllTagings(storeId: Long)
 GET    /merchant/allstore                           controllers.merchants.StoreController.getAllStoreMerchant()
 
 POST    /merchant/store/qrcode/static              controllers.merchants.StoreController.createQrCodeStatic()
@@ -510,6 +511,7 @@ GET    /merchant/productstore/mobile-qr/list-by-category controllers.product.Pro
 POST /users/order/checkout                               controllers.users.CheckoutOrderController.checkoutOrder()
 POST /users/order/payment                                controllers.users.CheckoutOrderController.payment()
 GET  /users/order/history                                controllers.order.OrderMerchantController.getOrderListUser(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="", filter:String?="")
+GET  /users/order/checkhistory                                controllers.order.OrderMerchantController.getOrderListUserByPhone(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="", email:String?="" , phone_number:String?="")
 GET  /users/order/checkstatus                            controllers.order.OrderMerchantController.checkStatusOrderNumber(offset:Int ?= 0, limit:Int ?= 10, statusOrder:String ?= "", email:String ?= "", phone_number:String ?= "", store_code: String)
 PUT  /merchant/order/changestatus                        controllers.users.CheckoutOrderController.changeStatusFromMerchant()
 PUT  /users/order/cancel                              controllers.users.CheckoutOrderController.cancelOrder()
@@ -557,6 +559,7 @@ GET     /merchant/setup/pickuppoint/listdata              controllers.pickuppoin
 POST    /merchant/feesetting                       controllers.merchants.FeeSettingMerchantController.addFeeSetting()
 GET    /merchant/feesetting                         controllers.merchants.FeeSettingMerchantController.getAllFeeSetting(store_id:Long ?= 0L, user_type:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET     /users/feesetting/:id                           controllers.merchants.FeeSettingMerchantController.getFeeSetting(id: Long, user_type:String ?= "")
+GET     /users/feesettingV2/:total                           controllers.merchants.FeeSettingMerchantController.platformFee(total: Int)
 
 #DELIVERY SETTING
 GET     /merchant/delivery-setting                       controllers.delivery.DeliverySettingController.getAllDeliverySetting(offset:Int ?= 0, limit:Int ?= 10)
@@ -690,12 +693,17 @@ GET         /pos/:orderNumber/print-invoice-paid            controllers.order.Or
 
 GET         /users/:storeId/order-queue                     controllers.order.OrderMerchantController.listQueueOrder(storeId : Long, offset:Int ?= 0, limit:Int ?= 5)
 GET         /users/:storeId/check-customer                    controllers.users.SessionsController.checkCustomer(email: String ?= "", storeId: Long)
+POST         /users/check-customer                    controllers.users.SessionsController.checkCustomerv2()
 GET         /users/:memberId/order-customer/:storeId/store        controllers.order.OrderMerchantController.orderListCustomer(memberId: Long, storeId: Long, offset: Int ?= 0, limit: Int ?= 10)
 
 POST        /users/send-invoice                                  controllers.payment.PaymentController.sendMailInvoice()
 GET         /users/:storeId/display-table                            controllers.merchants.TableMerchantController.getDisplayTable(storeId: Long)
 PUT         /merchant/:tableId/change-availability-table        controllers.merchants.TableMerchantController.changeAvailabilityTable(tableId: Long)
 
+POST        /ratings/store                                  controllers.ratings.ordering.RatingController.rateStore()
+POST        /ratings/product                                controllers.ratings.ordering.RatingController.rateProduct()
+POST        /ratings/store/myrate                           controllers.ratings.ordering.RatingController.getMyRateStore()
+GET         /ratings/product/list                  controllers.ratings.ordering.RatingController.getRateProduct(order_number:String, offset:Int ?= 0, limit:Int ?= 10)
 
 # Webhook
 GET         /external/:orderNumber/get-order-detail         controllers.webhook.OrderWebHookController.getOrderDetailWebhook(orderNumber: String)
@@ -708,3 +716,25 @@ POST 	/webhook/shipper-status 							controllers.users.WebhookShipperController.
 ####### for tracking shipper Sandbox ###########
 GET 	/shipper/tracking-shipper 				            controllers.users.CheckoutOrderController.getTrackingShipper(id:String)
 GET 	/shipper/tracking-shipment-status 				    controllers.users.CheckoutOrderController.getShipmentStatus(id:String)
+
+#CATEGORY KIOSK
+GET     /data/category/list                            controllers.categories.CategoryMerchantController.listCategoryApp(merchant_id:Long ?= 0, store_id:Long ?= 0, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET     /data/subcategory/list                         controllers.categories.SubCategoryMerchantController.listSubCategoryApp(category_id:Long ?= 0, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET     /data/subscategory/list                        controllers.categories.SubCategoryMerchantController.listSubsCategoryApp(subcategory_id:Long ?= 0, filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+
+# Product App
+GET     /data/product/list                             controllers.product.ProductAppController.listProduct(merchant_id:Long ?= 0, store_id:Long ?= 0, search:String ?= null, key:String ?= null, value:String ?= null, filter:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+
+# Stock History
+GET         /merchant/stock-history                    controllers.stock.StockHistoryController.listHistory(sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, product_store_id:Long)
+
+# Stock History
+POST         /delivery-setting                    controllers.delivery.DeliverySettingController.addDelivery()
+DELETE         /delivery-setting/:id                    controllers.delivery.DeliverySettingController.deleteDelivery(id: Long)
+GET          /delivery-setting                    controllers.delivery.DeliverySettingController.listDelivery(sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET          /delivery-setting/:store_id          controllers.delivery.DeliverySettingController.getDelivery(store_id: Long)
+POST          /fee-delivery                   controllers.delivery.DeliverySettingController.checkFeeDelivery()
+
+# Bazaar
+GET           /bazaar                                  controllers.bazaar.BazaarController.listStore(search:String ?= null, rating:Int ?= 0, start_range:Int ?= 0, end_range:Int ?= 0, longitude:Double ?= 0, latitude:Double ?= 0, sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
+GET           /banner-bazaar                            controllers.bazaar.BannerBazaarController.listBannerBazaar()

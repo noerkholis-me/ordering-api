@@ -5,6 +5,7 @@ import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
+import models.StockHistory;
 import models.Store;
 import play.db.ebean.Model;
 
@@ -94,6 +95,29 @@ public class StoreRepository {
         query = exp.query();
 
         return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+    public static Store findByStoreCode(String storeCode) {
+        String querySql = "SELECT s.id FROM store s "
+                + "WHERE s.store_code = '" + storeCode + "' "
+                + "AND s.is_deleted = false ";
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<Store> query = Ebean.find(Store.class).setRawSql(rawSql);
+
+        return query.findUnique();
+    }
+
+    public static Store findByStoreId(Long storeId) {
+        String querySql = "SELECT s.id FROM store s "
+                + "WHERE s.id = '" + storeId + "' "
+                + "AND s.is_deleted = false ";
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<Store> query = Ebean.find(Store.class).setRawSql(rawSql);
+
+        return query.findUnique();
+
     }
 
 }

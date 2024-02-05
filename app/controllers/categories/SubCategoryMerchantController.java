@@ -27,7 +27,7 @@ import repository.SubsCategoryMerchantRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import repository.ProductMerchantRepository;
 import models.merchant.ProductMerchant;
-
+import models.Store;
 import java.io.File;
 import java.util.*;
 import com.avaje.ebean.Query;
@@ -44,6 +44,39 @@ public class SubCategoryMerchantController extends BaseController {
     private static BaseResponse response = new BaseResponse();
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    public static Result listSubCategoryApp(Long categoryId, String filter, String sort, int offset, int limit) {
+
+        CategoryMerchant category = CategoryMerchantRepository.findById(categoryId);
+        if (category == null) {
+            response.setBaseResponse(0, 0, 0, "Category tidak ditemukan", null);
+            return badRequest(Json.toJson(response));
+        }
+
+        try {
+            Query<SubCategoryMerchant> query = SubCategoryMerchantRepository.find.where().eq("category_id", categoryId).eq("is_active", true).order("sequence");
+            int totalData = query.findList().size();
+            List<SubCategoryMerchant> responseIndex = SubCategoryMerchantRepository.getDataSubCategoryFE(query, sort, filter, offset, limit);
+            response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data", responseIndex);
+
+            List<SubCategoryAppResponse> responses = new ArrayList<>();
+            for (SubCategoryMerchant data : responseIndex) {
+                SubCategoryAppResponse response = new SubCategoryAppResponse();
+                response.setId(data.id);
+                response.setImageMobile(data.imageMobile);
+                response.setImageWeb(data.imageWeb);
+                response.setSubcategoryName(data.subcategoryName);
+                responses.add(response);
+            }
+
+            response.setBaseResponse(filter == null || filter.equals("") ? totalData : responseIndex.size() , offset, limit, success + " menampilkan data", responses);
+            return ok(Json.toJson(response));
+
+        } catch (IOException e) {
+            Logger.error("allDetail", e);
+            return internalServerError(Json.toJson(response));
+        }
+    }
 
     public static Result createSubCategory(Long id) {
         Merchant ownMerchant = checkMerchantAccessAuthorization();
@@ -134,7 +167,6 @@ public class SubCategoryMerchantController extends BaseController {
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
     }
-
 
     public static String validateCreateSubCategory(SubCategoryMerchantResponse request) {
         if (request == null)
@@ -786,5 +818,38 @@ public class SubCategoryMerchantController extends BaseController {
     
             return null;
         }
+
+        public static Result listSubsCategoryApp(Long subCategoryId, String filter, String sort, int offset, int limit) {
+
+        SubCategoryMerchant subCategory = SubCategoryMerchantRepository.findById(subCategoryId);
+        if (subCategory == null) {
+            response.setBaseResponse(0, 0, 0, "Sub Category tidak ditemukan", null);
+            return badRequest(Json.toJson(response));
+        }
+
+        try {
+            Query<SubsCategoryMerchant> query = SubsCategoryMerchantRepository.find.where().eq("subcategory_id", subCategoryId).eq("is_active", true).order("sequence");
+            int totalData = query.findList().size();
+            List<SubsCategoryMerchant> responseIndex = SubsCategoryMerchantRepository.getDataSubsCategory(query, sort, filter, offset, limit);
+            response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data", responseIndex);
+
+            List<SubsCategoryAppResponse> responses = new ArrayList<>();
+            for (SubsCategoryMerchant data : responseIndex) {
+                SubsCategoryAppResponse response = new SubsCategoryAppResponse();
+                response.setId(data.id);
+                response.setImageMobile(data.imageMobile);
+                response.setImageWeb(data.imageWeb);
+                response.setSubscategoryName(data.subscategoryName);
+                responses.add(response);
+            }
+
+            response.setBaseResponse(filter == null || filter.equals("") ? totalData : responseIndex.size() , offset, limit, success + " menampilkan data", responses);
+            return ok(Json.toJson(response));
+
+        } catch (IOException e) {
+            Logger.error("allDetail", e);
+            return internalServerError(Json.toJson(response));
+        }
+    }
 
 }

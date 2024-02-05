@@ -173,6 +173,33 @@ public class FeeSettingMerchantController extends BaseController {
         return ok(Json.toJson(response));
     }
 
+    public static Result platformFee(int total) {
+        int authority = checkAccessAuthorization("all");
+        if (authority == 200 || authority == 203) {
+            try {
+                int platformFee = 0;
+                if (total <= 10000) {
+                    int count = (int)(total * 0.05);
+                    platformFee = count;
+                } else if (total >= 10001 && total <= 25000) {
+                    platformFee = 500;
+                } else if (total >= 25001 && total <= 150000) {
+                    platformFee = 1000;
+                } else if (total >= 150001) {
+                    platformFee = 1500;
+                } 
+               
+                response.setBaseResponse(1, 0, 0, success + " Showing data fee setting", platformFee);
+                return ok(Json.toJson(response));
+            } catch (Exception ex) {
+                logger.error("Error while getting list fee setting", ex);
+                ex.printStackTrace();
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
 
 
 

@@ -57,6 +57,9 @@ public class OrderPayment extends BaseModel {
     @Column(name = "tax_price")
     private BigDecimal taxPrice;
 
+    @Column(name = "delivery_fee")
+    private BigDecimal deliveryFee;
+
     @Column(name = "service_price")
     private BigDecimal servicePrice;
 
@@ -126,6 +129,15 @@ public class OrderPayment extends BaseModel {
     
     public String scalaFetchServicePrice () {
     	return Helper.getRupiahFormat(this.servicePrice.doubleValue());
+    }
+
+    public String scalaFetchDeliveryFee () {
+        if (this.deliveryFee != null) {
+            return Helper.getRupiahFormat(this.deliveryFee.doubleValue());
+        } else {
+            double num = 0;
+            return Helper.getRupiahFormat(num);
+        }
     }
     
     public String scalaFetchFeeCustomer () {

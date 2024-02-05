@@ -86,6 +86,8 @@ public class ProductSpecificStoreResponse implements Serializable {
 
         @JsonProperty("is_deleted")
         private Boolean isDeleted;
+        private Long stock;
+
 
         public ProductStore(models.ProductStore productStore) {
             this.setId(productStore.id);
