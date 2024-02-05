@@ -112,6 +112,10 @@ public class InvoicePrintResponse {
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal serviceFee;
 
+    @JsonProperty("loyalty_usage")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal loyaltyUsage;
+
     @JsonProperty("sub_total")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal subTotal;

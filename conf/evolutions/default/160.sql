@@ -11,6 +11,10 @@ CREATE TABLE store_taggings(
 
 ALTER TABLE store_taggings add constraint fk_store_taggings_store_id foreign key (store_id) references store(id);
 
+alter table store add column store_qr_code_static text;
+
+
+
 CREATE SEQUENCE store_taggings_seq
     INCREMENT 1
 START 1;
@@ -19,3 +23,5 @@ START 1;
 
 DROP SEQUENCE IF EXISTS  store_taggings_seq;
 drop table if exists store_taggings;
+
+alter table store drop column if exists store_qr_code_static;

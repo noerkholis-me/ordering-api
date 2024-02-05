@@ -755,6 +755,7 @@ public class OrderMerchantController extends BaseController {
                 invoicePrintResponse.setTaxPercentage(orderPayment.getTaxPercentage());
                 invoicePrintResponse.setServicePercentage(orderPayment.getServicePercentage());
                 invoicePrintResponse.setServiceFee(orderPayment.getServicePrice());
+                invoicePrintResponse.setLoyaltyUsage(getOrder.getTotalLoyaltyUsage() == null ? BigDecimal.ZERO : getOrder.getTotalLoyaltyUsage());
 
                 invoicePrintResponse.setDeliveryFee(orderPayment.getDeliveryFee() != null ? orderPayment.getDeliveryFee() : BigDecimal.ZERO );
                 invoicePrintResponse.setPaymentFeeType(orderPayment.getPaymentFeeType());

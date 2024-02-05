@@ -350,6 +350,7 @@ GET     /merchant/role/:id/detailrole              controllers.merchants.RoleMer
 
 #FEATURE
 GET     /master/feature/list                       controllers.masters.FeatureController.getAllFeatureMerchant(isMerchant:Boolean ?= false)
+POST    /master/feature                            controllers.masters.FeatureController.createFeatureMerchant()
 
 #BRAND
 GET     /merchant/brand/list                        controllers.brand.BrandMerchantController.listBrand(filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10, isActive:String ?= "")
@@ -417,6 +418,9 @@ GET    /merchant/store/:storeCode/detail            controllers.merchants.StoreC
 GET    /merchant/store/v2/:storeAlias/detail        controllers.merchants.StoreController.getStoreByAlias(storeAlias: String)
 GET    /merchant/store/v2/taggings/:storeId          controllers.merchants.StoreController.getAllTagings(storeId: Long)
 GET    /merchant/allstore                           controllers.merchants.StoreController.getAllStoreMerchant()
+
+POST    /merchant/store/qrcode/static              controllers.merchants.StoreController.createQrCodeStatic()
+GET     /merchant/store/qrcode/static               controllers.merchants.StoreController.getQrCodeStatic(store_id:Long ?= 0)
 
 GET    /merchant/detail/:merchantCode				controllers.merchants.MerchantController.getMerchantDetail(merchantCode: String)
 
@@ -556,6 +560,15 @@ POST    /merchant/feesetting                       controllers.merchants.FeeSett
 GET    /merchant/feesetting                         controllers.merchants.FeeSettingMerchantController.getAllFeeSetting(store_id:Long ?= 0L, user_type:String ?= "", filter:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET     /users/feesetting/:id                           controllers.merchants.FeeSettingMerchantController.getFeeSetting(id: Long, user_type:String ?= "")
 GET     /users/feesettingV2/:total                           controllers.merchants.FeeSettingMerchantController.platformFee(total: Int)
+
+#DELIVERY SETTING
+GET     /merchant/delivery-setting                       controllers.delivery.DeliverySettingController.getAllDeliverySetting(offset:Int ?= 0, limit:Int ?= 10)
+GET     /merchant/delivery-setting/:id                   controllers.delivery.DeliverySettingController.getById(id: Long)
+GET     /merchant/delivery-setting/store/:id             controllers.delivery.DeliverySettingController.getByStoreId(id: Long)
+GET     /merchant/delivery-setting/store/:id/detail      controllers.delivery.DeliverySettingController.getByStoreIdNoAuth(id: Long)
+POST    /merchant/delivery-setting                       controllers.delivery.DeliverySettingController.createDeliverySetting()
+PUT     /merchant/delivery-setting/:id                   controllers.delivery.DeliverySettingController.updateDeliverySetting(id: Long)
+DELETE  /merchant/delivery-setting/:id                   controllers.delivery.DeliverySettingController.deleteDeliverySetting(id: Long)
 
 #FEESETTINGCONFIG
 GET     /master/feesettingconfig                   controllers.masters.FeeSettingConfigController.getFeeSettingConfig()

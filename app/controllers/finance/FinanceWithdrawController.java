@@ -109,7 +109,7 @@ public class FinanceWithdrawController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
 
-                Optional<BankAccountMerchant> bankAccountMerchant = BankAccountMerchantRepository.findByAccountNumber(request.getAccountNumber());
+                Optional<BankAccountMerchant> bankAccountMerchant = BankAccountMerchantRepository.findByAccountNumberV2(request.getAccountNumber());
                 if (!bankAccountMerchant.isPresent()) {
                     response.setBaseResponse(0, 0, 0, inputParameter + " account number not found", null);
                     return badRequest(Json.toJson(response));
