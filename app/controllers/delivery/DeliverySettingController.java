@@ -3,296 +3,238 @@ package controllers.delivery;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.hokeba.api.BaseResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
+import com.hokeba.http.response.global.ServiceResponse;
 import controllers.BaseController;
+import dtos.delivery.DeliveryDirectionRequest;
+import dtos.delivery.DeliveryDirectionResponse;
+import dtos.delivery.DeliveryFeeRequest;
+import dtos.delivery.DeliveryFeeResponse;
 import dtos.delivery.DeliverySettingRequest;
-import dtos.delivery.DeliverySettingResponse;
+import dtos.payment.InitiatePaymentResponse;
+import dtos.stock.StockHistoryResponse;
 import models.Merchant;
+import models.StockHistory;
+import models.DeliverySettings;
+
 import models.Store;
-import models.delivery.DeliverySetting;
+import models.transaction.Order;
+
+import org.json.JSONObject;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
-import repository.StoreRepository;
-import repository.delivery.DeliverySettingRepository;
+import repository.DeliverySettingRepository;
+import service.DeliveryService;
+import service.PaymentService;
 
-import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class DeliverySettingController extends BaseController {
 
-    private static final Logger.ALogger logger = Logger.of(DeliverySettingController.class);
+    private final static Logger.ALogger logger = Logger.of(DeliverySettingController.class);
+
     private static BaseResponse response = new BaseResponse();
+
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static Result getAllDeliverySetting(int offset, int limit) {
-        try {
-            Merchant merchant = checkMerchantAccessAuthorization();
-            if (merchant != null) {
-                int totalData = DeliverySettingRepository.findAll(merchant.id, 0, 0).size();
-                List<DeliverySetting> data = DeliverySettingRepository.findAll(merchant.id, offset, limit);
+    public static Result listDelivery(String sort, int offset, int limit) {
 
-                response.setBaseResponse(totalData, offset, limit, "Menampilkan list data pengaturan pengiriman.", listResponse(data));
-                return ok(Json.toJson(response));
-            } else {
+        try {
+
+            Merchant ownMerchant = checkMerchantAccessAuthorization();
+            if (ownMerchant == null) {
                 response.setBaseResponse(0, 0, 0, unauthorized, null);
                 return unauthorized(Json.toJson(response));
             }
+
+            int total = DeliverySettingRepository.countAll(ownMerchant.id);
+            List<DeliverySettings> deliverySettings = DeliverySettingRepository.findAll(ownMerchant.id, sort, offset, limit);
+
+            response.setBaseResponse(total, 0, 0, "", deliverySettings);
+            return ok(Json.toJson(response));
+
         } catch (Exception e) {
-            logger.error("Error when get all : " + e.getMessage());
-            response.setBaseResponse(0, 0, 0, e.getMessage(), null);
+            e.printStackTrace();
+            response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat list setting delivery", null);
             return badRequest(Json.toJson(response));
         }
     }
 
-    public static Result getById(Long id) {
-        try {
-            Merchant merchant = checkMerchantAccessAuthorization();
-            if (merchant != null) {
-                DeliverySetting deliverySetting = DeliverySettingRepository.findById(id);
-                if (deliverySetting == null) {
-                    response.setBaseResponse(0, 0, 0, "Pengaturan pengiriman tidak ditemukan atau belum dibuat.", null);
-                    return badRequest(Json.toJson(response));
-                }
+    public static Result getDelivery(Long store_id) {
 
-                response.setBaseResponse(1, 0, 0, "Menampilkan data pengaturan pengiriman.", detailResponse(deliverySetting));
-                return ok(Json.toJson(response));
-            } else {
+        try {
+
+            Merchant ownMerchant = checkMerchantAccessAuthorization();
+            if (ownMerchant == null) {
                 response.setBaseResponse(0, 0, 0, unauthorized, null);
                 return unauthorized(Json.toJson(response));
             }
+
+            DeliverySettings deliverySettings = DeliverySettingRepository.findBystoreId(store_id);
+
+            response.setBaseResponse(0, 0, 0, "", deliverySettings);
+            return ok(Json.toJson(response));
+
         } catch (Exception e) {
-            logger.error("Error when get by id: " + e.getMessage());
-            response.setBaseResponse(0, 0, 0, e.getMessage(), null);
+            e.printStackTrace();
+            response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat get setting delivery", null);
             return badRequest(Json.toJson(response));
         }
     }
 
-    public static Result getByStoreId(Long id) {
-        try {
-            Merchant merchant = checkMerchantAccessAuthorization();
-            if (merchant != null) {
-                DeliverySetting deliverySetting = DeliverySettingRepository.findByStoreId(id);
-                if (deliverySetting == null) {
-                    response.setBaseResponse(0, 0, 0, "Pengaturan pengiriman tidak ditemukan atau belum dibuat.", null);
-                    return badRequest(Json.toJson(response));
-                }
+    public static Result addDelivery() {
 
-                response.setBaseResponse(1, 0, 0, "Menampilkan data pengaturan pengiriman.", detailResponse(deliverySetting));
-                return ok(Json.toJson(response));
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant == null) {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        }
+
+        JsonNode rawRequest = request().body().asJson();
+        try {
+            DeliverySettingRequest deliverySettingRequest = objectMapper.readValue(rawRequest.toString(), DeliverySettingRequest.class);
+            Store store = Store.findById(deliverySettingRequest.getStore_id());
+
+            DeliverySettings deliverySettings = DeliverySettingRepository.findBystoreId(deliverySettingRequest.getStore_id());
+            DeliverySettings responses = new DeliverySettings();
+            if (deliverySettings == null) {
+                responses = DeliverySettingRepository.addDeliverySettings(store, ownMerchant, deliverySettingRequest);
             } else {
-                response.setBaseResponse(0, 0, 0, unauthorized, null);
-                return unauthorized(Json.toJson(response));
+                responses = DeliverySettingRepository.updateDeliverySettings(deliverySettings, store, ownMerchant, deliverySettingRequest);
             }
-        } catch (Exception e) {
-            logger.error("Error when get by store id : " + e.getMessage());
-            response.setBaseResponse(0, 0, 0, e.getMessage(), null);
+            response.setBaseResponse(1, offset, 1, success, responses);
+            return ok(Json.toJson(response));
+
+        } catch (Exception e){
+            e.printStackTrace();
+            response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat melakukan setting delivery", null);
             return badRequest(Json.toJson(response));
         }
     }
 
-    public static Result getByStoreIdNoAuth(Long id) {
+    public static Result checkFeeDelivery() {
+
+        JsonNode rawRequest = request().body().asJson();
+
         try {
-            int authority = checkAccessAuthorization("all");
-            if (authority == 200 || authority == 203) {
-                DeliverySetting deliverySetting = DeliverySettingRepository.findByStoreId(id);
-                if (deliverySetting == null) {
-                    response.setBaseResponse(0, 0, 0, "Pengaturan pengiriman tidak ditemukan atau belum dibuat.", null);
+            DeliveryFeeRequest deliveryFeeRequest = objectMapper.readValue(rawRequest.toString(), DeliveryFeeRequest.class);
+            Store store = Store.findById(deliveryFeeRequest.getStore_id());
+
+            // store
+            DeliveryDirectionRequest base = new DeliveryDirectionRequest();
+            base.setLat(store.getStoreLatitude());
+            base.setLong(store.getStoreLongitude());
+            // base.setLat(107.5689333);
+            // base.setLong(-6.9377524);
+
+            //customer
+            DeliveryDirectionRequest target = new DeliveryDirectionRequest();
+            target.setLat(deliveryFeeRequest.getLatitude());
+            target.setLong(deliveryFeeRequest.getLongitude());
+            
+
+            ServiceResponse serviceResponse = DeliveryService.getInstance().checkDistance(base, target, true);
+
+            String object = objectMapper.writeValueAsString(serviceResponse.getData());
+            JSONObject jsonObject = new JSONObject(object);
+            String initiate = jsonObject.getJSONArray("routes").getJSONObject(0).getJSONObject("summary").toString();
+            DeliveryDirectionResponse distance = objectMapper.readValue(initiate, DeliveryDirectionResponse.class);
+
+            double parseKM = (double) distance.getDistance() / 1000.0;
+            double changeDistance = (double) changeDistance(parseKM);
+
+            DeliverySettings deliverySettings = DeliverySettingRepository.findBystoreId(deliveryFeeRequest.getStore_id());
+            DeliverySettings responses = new DeliverySettings();
+            if (deliverySettings != null) {
+                if (parseKM > deliverySettings.getMaxRangeDelivery()) {
+                    response.setBaseResponse(0, 0, 0, "jarak melebihi batas maksimal", null);
                     return badRequest(Json.toJson(response));
                 }
 
-                response.setBaseResponse(1, 0, 0, "Menampilkan data pengaturan pengiriman.", detailResponse(deliverySetting));
-                return ok(Json.toJson(response));
-            } else {
-                response.setBaseResponse(0, 0, 0, forbidden, null);
-                return unauthorized(Json.toJson(response));
-            }
-        } catch (Exception e) {
-            logger.error("Error when get by store id : " + e.getMessage());
-            response.setBaseResponse(0, 0, 0, e.getMessage(), null);
-            return badRequest(Json.toJson(response));
-        }
-    }
-
-    public static Result createDeliverySetting() {
-        try {
-            Merchant merchant = checkMerchantAccessAuthorization();
-            if (merchant != null) {
-                JsonNode json = request().body().asJson();
-                DeliverySettingRequest request = objectMapper.readValue(json.toString(), DeliverySettingRequest.class);
-                if (request.getIsShipper() != null && !request.getIsShipper()) {
-                    String validate = validate(request);
-                    if (validate != null) {
-                        response.setBaseResponse(0, 0, 0, validate, null);
-                        return badRequest(Json.toJson(response));
-                    }
-                }
-                Store store = StoreRepository.findByStoreId(request.getStoreId());
-                if (store == null) {
-                    response.setBaseResponse(0, 0, 0, "Toko tidak ditemukan.", null);
-                    return badRequest(Json.toJson(response));
-                }
-                Transaction trx = Ebean.beginTransaction();
-                try {
-                    // TODO: update data when input store value is exist
-                    DeliverySetting deliverySetting = DeliverySettingRepository.findByStoreId(store.id);
-                    if (deliverySetting == null) {
-                        deliverySetting = new DeliverySetting(request, merchant, store);
-                        deliverySetting.save();
+                int feeTotal = 0;
+                if (deliverySettings.getCalculateMethod().equals("tarif_km")) {
+                    if (deliverySettings.getEnableFlatPrice() == true) {
+                        if (Math.round(changeDistance) > deliverySettings.getMaxRangeFlatPrice()) {
+                            int remainder = (int) Math.round(changeDistance) - deliverySettings.getMaxRangeFlatPrice();
+                            feeTotal = (int) (remainder * deliverySettings.getKmPriceValue()) + deliverySettings.getFlatPriceValue();
+                        } else {
+                            feeTotal = (int) deliverySettings.getFlatPriceValue();
+                        }
                     } else {
-                        deliverySetting.updateDeliverySetting(request, deliverySetting, merchant, store);
-                        deliverySetting.update();
+                        feeTotal = (int) changeDistance * deliverySettings.getKmPriceValue();
                     }
-                    trx.commit();
-
-                    response.setBaseResponse(1, 0, 0, "Berhasil menyimpan data pengaturan pengiriman", detailResponse(deliverySetting));
-                    return ok(Json.toJson(response));
-                } catch (Exception e) {
-                    trx.rollback();
-                    logger.error("Error when create :", e);
-                    response.setBaseResponse(0, 0, 0, e.getMessage(), null);
-                    return badRequest(Json.toJson(response));
-                } finally {
-                    trx.end();
+                    
+                } else if (deliverySettings.getCalculateMethod().equals("tarif_flat")) {
+                    if (Math.round(changeDistance) > deliverySettings.getMaxRangeFlatPrice()) {
+                        feeTotal = (int) deliverySettings.getDeliverFee();
+                    } else {
+                        feeTotal = (int) deliverySettings.getFlatPriceValue();
+                    } 
                 }
+
+                DeliveryFeeResponse responsesFee = new DeliveryFeeResponse();
+                responsesFee.setDistance(changeDistance);
+                responsesFee.setDuration((int) distance.getDuration());
+                responsesFee.setFeeDelivery(feeTotal);
+                response.setBaseResponse(1, offset, 1, success, responsesFee);
+                return ok(Json.toJson(response));
+
             } else {
-                response.setBaseResponse(0, 0, 0, unauthorized, null);
-                return unauthorized(Json.toJson(response));
+               response.setBaseResponse(0, 0, 0, "store tidak di temukan", null);
+               return badRequest(Json.toJson(response));
             }
+
         } catch (Exception e) {
-            logger.error("Error when create : " + e.getMessage());
-            response.setBaseResponse(0, 0, 0, e.getMessage(), null);
+            e.printStackTrace();
+            response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat melakukan setting delivery", null);
             return badRequest(Json.toJson(response));
         }
     }
 
-    public static Result updateDeliverySetting(Long id) {
-        try {
-            Merchant merchant = checkMerchantAccessAuthorization();
-            if (merchant != null) {
-                JsonNode json = request().body().asJson();
-                DeliverySettingRequest request = objectMapper.readValue(json.toString(), DeliverySettingRequest.class);
-                if (request.getIsShipper() != null && !request.getIsShipper()) {
-                    String validate = validate(request);
-                    if (validate != null) {
-                        response.setBaseResponse(0, 0, 0, validate, null);
-                        return badRequest(Json.toJson(response));
-                    }
-                }
-                DeliverySetting deliverySetting = DeliverySettingRepository.findById(id);
-                if (deliverySetting == null) {
-                    response.setBaseResponse(0, 0, 0, "Pengaturan pengiriman tidak ditemukan.", null);
-                    return badRequest(Json.toJson(response));
-                }
-                Store store = StoreRepository.findByStoreId(request.getStoreId());
-                if (store == null) {
-                    response.setBaseResponse(0, 0, 0, "Toko tidak ditemukan.", null);
-                    return badRequest(Json.toJson(response));
-                }
-                Transaction trx = Ebean.beginTransaction();
-                try {
-                    deliverySetting.updateDeliverySetting(request, deliverySetting, merchant, store);
-                    deliverySetting.update();
-                    trx.commit();
+    public static Result deleteDelivery(Long id) {
 
-                    response.setBaseResponse(1, 0, 0, "Berhasil menyimpan data pengaturan pengiriman", detailResponse(deliverySetting));
-                    return ok(Json.toJson(response));
-                } catch (Exception e) {
-                    trx.rollback();
-                    logger.error("Error when updating :", e);
-                    response.setBaseResponse(0, 0, 0, e.getMessage(), null);
-                    return badRequest(Json.toJson(response));
-                } finally {
-                    trx.end();
-                }
-            } else {
-                response.setBaseResponse(0, 0, 0, unauthorized, null);
-                return unauthorized(Json.toJson(response));
-            }
-        } catch (Exception e) {
-            logger.error("Error when create : " + e.getMessage());
-            response.setBaseResponse(0, 0, 0, e.getMessage(), null);
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        System.out.println(ownMerchant);
+        if (ownMerchant == null) {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         }
-    }
-
-    public static Result deleteDeliverySetting(Long id) {
+        Transaction trx = Ebean.beginTransaction();
         try {
-            Merchant merchant = checkMerchantAccessAuthorization();
-            if (merchant != null) {
-                DeliverySetting deliverySetting = DeliverySettingRepository.findById(id);
-                if (deliverySetting == null) {
-                    response.setBaseResponse(0, 0, 0, "Pengaturan pengiriman tidak ditemukan.", null);
-                    return badRequest(Json.toJson(response));
-                }
-                Transaction trx = Ebean.beginTransaction();
-                try {
-                    deliverySetting.isDeleted = true;
-                    deliverySetting.update();
-                    trx.commit();
+            DeliverySettings deliverySettings = DeliverySettingRepository.findById(id);
 
-                    response.setBaseResponse(0, 0, 0, "Berhasil menghapus data pengaturan pengiriman", null);
-                    return ok(Json.toJson(response));
-                } catch (Exception e) {
-                    trx.rollback();
-                    logger.error("Error while deleting :", e);
-                    response.setBaseResponse(0, 0, 0, e.getMessage(), null);
-                    return badRequest(Json.toJson(response));
-                } finally {
-                    trx.end();
-                }
-            } else {
-                response.setBaseResponse(0, 0, 0, unauthorized, null);
-                return unauthorized(Json.toJson(response));
+            if (deliverySettings == null) {
+                response.setBaseResponse(0, 0, 0, error + " delivery settings tidak tersedia.", null);
+                return badRequest(Json.toJson(response));
             }
-        } catch (Exception e) {
-            logger.error("Error : " + e.getMessage());
-            response.setBaseResponse(0, 0, 0, e.getMessage(), null);
-            return unauthorized(Json.toJson(response));
+            deliverySettings.isDeleted = true;
+            deliverySettings.update();
+            trx.commit();
+
+            response.setBaseResponse(1, offset, 1, success + " menghapus delivery settings", deliverySettings);
+            return ok(Json.toJson(response));
+
+        } catch (Exception e){
+            e.printStackTrace();
+            response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat melakukan setting delivery", null);
+            return badRequest(Json.toJson(response));
         }
     }
 
-
-    // ==========
-    public static DeliverySettingResponse detailResponse(DeliverySetting data) {
-        return new DeliverySettingResponse(data);
+    public static Double changeDistance(Double changeKM) {
+        double x = changeKM;
+        int angkaSignifikan = 2;
+        double temp = Math.pow(10, angkaSignifikan);
+        double y = (double) Math.round(x*temp)/temp;
+        return y;
     }
 
-    public static List<DeliverySettingResponse> listResponse(List<DeliverySetting> data) {
-        List<DeliverySettingResponse> responses = new ArrayList<>();
-        for (DeliverySetting deliverySetting : data) {
-            DeliverySettingResponse response = new DeliverySettingResponse(deliverySetting);
-            responses.add(response);
-        }
-
-        return responses;
-    }
-
-    public static String validate(DeliverySettingRequest request) {
-        String message = null;
-        if (request.getIsActiveBasePrice()) {
-            if (request.getDeliveryMethod() == null || request.getDeliveryMethod().isEmpty())
-                message = "Metode perhitungan tidak boleh atau kurang dari nol";
-            if (request.getNormalPrice().compareTo(BigDecimal.ZERO) == 0 || request.getNormalPrice().compareTo(BigDecimal.ZERO) < 0)
-                message = "Tarif normal tidak boleh atau kurang dari nol";
-            if (request.getNormalPriceMaxRange() == 0 || request.getNormalPriceMaxRange() < 0)
-                message = "Jangkauan maksimal tarif normal tidak boleh atau kurang dari nol";
-            if (request.getBasicPrice().compareTo(BigDecimal.ZERO) == 0 || request.getBasicPrice().compareTo(BigDecimal.ZERO) < 0)
-                message = "Tarif dasar tidak boleh atau kurang dari nol";
-            if (request.getBasicPriceMaxRange() == 0 || request.getBasicPriceMaxRange() < 0)
-                message = "Jangkauan maksimal tarif dasar tidak boleh atau kurang dari nol";
-        } else {
-            if (request.getDeliveryMethod() == null || request.getDeliveryMethod().isEmpty())
-                message = "Metode perhitungan tidak boleh atau kurang dari nol";
-            if (request.getNormalPrice().compareTo(BigDecimal.ZERO) == 0 || request.getNormalPrice().compareTo(BigDecimal.ZERO) < 0)
-                message = "Tarif normal tidak boleh atau kurang dari nol";
-            if (request.getNormalPriceMaxRange() == 0 || request.getNormalPriceMaxRange() < 0)
-                message = "Jangkauan maksimal tarif normal tidak boleh atau kurang dari nol";
-        }
-
-        return message;
-    }
 
 }

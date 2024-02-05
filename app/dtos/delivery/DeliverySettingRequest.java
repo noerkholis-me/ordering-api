@@ -1,35 +1,40 @@
 package dtos.delivery;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 import lombok.Data;
 
-import java.math.BigDecimal;
+
+import javax.persistence.Column;
+import java.util.List;
 
 @Data
+@Builder
+
+
 public class DeliverySettingRequest {
 
-    @JsonProperty("delivery_method")
-    private String deliveryMethod;
-
-    @JsonProperty("normal_price")
-    private BigDecimal normalPrice;
-
-    @JsonProperty("normal_price_max_range")
-    private Integer normalPriceMaxRange;
-
-    @JsonProperty("basic_price")
-    private BigDecimal basicPrice;
-
-    @JsonProperty("basic_price_max_range")
-    private Integer basicPriceMaxRange;
-
-    @JsonProperty("is_active_base_price")
-    private Boolean isActiveBasePrice;
-
-    @JsonProperty("is_shipper")
-    private Boolean isShipper;
-
     @JsonProperty("store_id")
-    private Long storeId;
+    private Long store_id;
 
+    @JsonProperty("max_range_delivery")
+    public Integer maxRangeDelivery;
+
+    @JsonProperty("km_price_value")
+    public Integer kmPriceValue;
+
+    @JsonProperty("enable_flat_price")
+    public Boolean enableFlatPrice;
+
+    @JsonProperty("max_range_flat_price")
+    public Integer maxRangeFlatPrice;
+
+    @JsonProperty("flat_price_value")
+    public Integer flatPriceValue;
+
+    @JsonProperty("deliver_fee")
+    public Integer deliverFee;
+
+    @JsonProperty("calculate_method")
+    public String calculateMethod;
 }

@@ -103,6 +103,9 @@ public class Store extends BaseModel {
     @Column(name = "store_logo")
     public String storeLogo;
 
+    @Column(name = "store_banner")
+    public String storeBanner;
+
     @Column(name = "store_alias")
     public String storeAlias;
 
@@ -139,6 +142,7 @@ public class Store extends BaseModel {
         this.setStorePhone(request.getStorePhone());
         this.setStoreAddress(request.getAddress());
         this.setStoreLogo(request.getStoreLogo());
+        this.setStoreBanner(request.getStoreBanner());
         this.setIsActive(true);
         this.setStatusOpenStore(true);
         this.setShipperProvince(ShipperProvince.findById(request.getProvinceId()));
@@ -156,11 +160,14 @@ public class Store extends BaseModel {
     }
 
     public void setStore(StoreRequest request, Store store) {
+        if(!store.getStoreName().equals(request.getStoreName())) {
+            store.setStoreAlias(slugGenerateForUpdate(request.getStoreName()));
+        }
         store.setStoreName(request.getStoreName());
-        store.setStoreAlias(slugGenerate(request.getStoreName()));
         store.setStorePhone(request.getStorePhone());
         store.setStoreAddress(request.getAddress());
         store.setStoreLogo(request.getStoreLogo());
+        store.setStoreBanner(request.getStoreBanner());
         store.setIsActive(true);
         store.setStatusOpenStore(request.getStatusOpenStore() != null && request.getStatusOpenStore());
         store.setOpenAt("".equals(request.getOpenAt()) ? null : request.getOpenAt());
@@ -188,11 +195,22 @@ public class Store extends BaseModel {
         String slug = Normalizer.normalize(input.toLowerCase(), Normalizer.Form.NFD)
                 .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
                 .replaceAll("[^\\p{Alnum}]+", "");
+        System.out.println("SLUG"+slug);
         if (slug.length() != 0 && slug.charAt(slug.length() - 1) == '-') {
             return slug.substring(0, slug.length() - 1);
         } else {
             return slug;
         }
+    }
+
+    public static String slugGenerateForUpdate(String input) {
+        String slug = Normalizer.normalize(input.toLowerCase(), Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .replaceAll("[^\\p{Alnum}]+", "");
+        slug = slug+"-1";
+        System.out.println("SLUG"+slug);
+
+        return slug;
     }
 
     public static Store findById(Long id) {

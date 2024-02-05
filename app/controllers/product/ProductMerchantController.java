@@ -24,6 +24,7 @@ import models.BrandMerchant;
 import models.CategoryMerchant;
 import models.Merchant;
 import models.ProductStore;
+import models.StockHistory;
 import models.Store;
 import models.SubCategoryMerchant;
 import models.SubsCategoryMerchant;
@@ -144,6 +145,8 @@ public class ProductMerchantController extends BaseController {
                     
                     ProductStore newProductStore = new ProductStore(ownMerchant, store, newProductMerchant, productStoreRequest, true);
                     newProductStore.save();
+                    // StockHistory newStockHistory = new StockHistory(ownMerchant, store, newProductMerchant, newProductStore, true);
+                    // newStockHistory.save();
 				}
                 
                 trx.commit();
@@ -350,8 +353,6 @@ public class ProductMerchantController extends BaseController {
                         if (getProductStore == null) {
                             response.setBaseResponse(0, 0, 0, error + " product store tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
-                        } else {
-                            getProductStore.delete();
                         }
                     }
 
@@ -364,19 +365,25 @@ public class ProductMerchantController extends BaseController {
                             return badRequest(Json.toJson(response));
                         }
 
-                        ProductStore psQuery = ProductStoreRepository.find.where().eq("productMerchant", productMerchant)
-                            .eq("store", store).eq("t0.is_deleted", false).findUnique();
-                        if (psQuery != null) {
-                            trx.rollback();
-                            response.setBaseResponse(0, 0, 0,
-                                "Tidak dapat menambahkan " + productMerchant.getProductName() + " ke toko yang sama.",
-                                null);
-                            return badRequest(Json.toJson(response));
-                        }
+                        // ProductStore psQuery = ProductStoreRepository.find.where().eq("productMerchant", productMerchant)
+                        //     .eq("store", store).eq("t0.is_deleted", false).findUnique();
+                        // if (psQuery != null) {
+                        //     trx.rollback();
+                        //     response.setBaseResponse(0, 0, 0,
+                        //         "Tidak dapat menambahkan " + productMerchant.getProductName() + " ke toko yang sama.",
+                        //         null);
+                        //     return badRequest(Json.toJson(response));
+                        // }
 
-                        // insert new product store
-                        ProductStore productStore = new ProductStore(ownMerchant, store, productMerchant, productStoreRequest, null);
-                        productStore.save();
+                        ProductStore productStore = ProductStoreRepository.findByProductIdAndStoreId(id, store);
+                        if (productStore != null) {
+                            productStore.setProductStore(productStore, ownMerchant, store, productMerchant, productStoreRequest);
+                            productStore.update();
+                        } else {
+                            // insert new product store
+                            ProductStore productStoreInsert = new ProductStore(ownMerchant, store, productMerchant, productStoreRequest, null);
+                            productStoreInsert.save();
+                        }
                     }
 
                     trx.commit();
@@ -835,6 +842,7 @@ public class ProductMerchantController extends BaseController {
                                 .productImage2(productMerchantDetail.getProductImage2())
                                 .productImage3(productMerchantDetail.getProductImage3())
                                 .productImage4(productMerchantDetail.getProductImage4())
+                                .stock(productStore != null ? productStore.getStock() : 0)
                                 .build();
                     productResponse.setProductDetail(productDetailResponse);
 
@@ -1108,6 +1116,7 @@ public class ProductMerchantController extends BaseController {
 
                 if (productStore != null) {
                     ProductSpecificStoreResponse.ProductStore pStore = new ProductSpecificStoreResponse.ProductStore(productStore);
+                    pStore.setStock(productStore.getStock());
                     response.setProductStore(pStore);
                 }
 

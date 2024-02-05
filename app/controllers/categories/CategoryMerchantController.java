@@ -1,6 +1,7 @@
 package controllers.categories;
 
 import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Query;
 import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,6 +11,7 @@ import com.wordnik.swagger.annotations.ApiImplicitParam;
 import com.wordnik.swagger.annotations.ApiImplicitParams;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
+import dtos.category.CategoryAppResponse;
 import dtos.category.CategoryMerchantResponse;
 import models.CategoryMerchant;
 import models.Merchant;
@@ -22,6 +24,7 @@ import play.libs.Json;
 import play.mvc.Result;
 import repository.CategoryMerchantRepository;
 import repository.ProductMerchantRepository;
+import repository.StoreRepository;
 import repository.SubCategoryMerchantRepository;
 import repository.SubsCategoryMerchantRepository;
 
@@ -342,6 +345,36 @@ public class CategoryMerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
+    public static Result listCategoryApp(Long merchantId, Long storeId, String filter, String sort, int offset, int limit) {
+        Store store = Store.find.byId(storeId);
+        if (store == null) {
+            response.setBaseResponse(0, 0, 0, "Store tidak ditemukan", null);
+            return badRequest(Json.toJson(response));
+        }
+        try {
+            int totalData = CategoryMerchantRepository.findMerchantIdWithStatus(merchantId).size();
+            List<CategoryMerchant> categoryMerchants = CategoryMerchantRepository.findMerchantIdWithStatus(merchantId);
+
+            List<CategoryAppResponse> responses = new ArrayList<>();
+
+            for (CategoryMerchant data : categoryMerchants) {
+                CategoryAppResponse response = new CategoryAppResponse();
+                response.setId(data.id);
+                response.setCategoryName(data.categoryName);
+                response.setImageMobile(data.imageMobile);
+                response.setImageWeb(data.imageWeb);
+                responses.add(response);
+            }
+
+            response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data", responses);
+            return ok(Json.toJson(response));
+        } catch (Exception e) {
+            Logger.error("allDetail", e);
+        }
+        response.setBaseResponse(0, 0, 0, "Merchant tidak ditemukan", null);
+        return badRequest(Json.toJson(response));
+    }
+
     public static Result listCategoryFE(Long merchantId, Long storeId) {
         Store store = Store.find.byId(storeId);
         if (store == null) {
@@ -362,6 +395,7 @@ public class CategoryMerchantController extends BaseController {
         response.setBaseResponse(0, 0, 0, "Merchant tidak ditemukan", null);
         return badRequest(Json.toJson(response));
     }
+
 
     public static List<CategoryMerchantResponse> listResponse(List<CategoryMerchant> categoryMerchants, Long merchantId) {
         List<CategoryMerchantResponse> responses = new ArrayList<>();

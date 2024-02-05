@@ -11,6 +11,7 @@ import com.hokeba.util.CommonFunction;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
+import dtos.store.*;
 import dtos.payment.QrCodeStaticPaymentRequest;
 import dtos.store.ProductStoreResponseForStore;
 import dtos.store.StoreRequest;
@@ -29,6 +30,7 @@ import models.merchant.ProductMerchantDetail;
 import models.merchant.TableMerchant;
 import models.pupoint.PickUpPointMerchant;
 import models.store.StoreAccessDetail;
+import models.store.StoreTaggings;
 import org.json.JSONObject;
 import play.Logger;
 import play.libs.Json;
@@ -40,10 +42,12 @@ import repository.StoreAccessRepository;
 import repository.StoreRepository;
 import repository.TableMerchantRepository;
 import repository.pickuppoint.PickUpPointRepository;
+import repository.store.StoreTaggingsRepository;
 import service.PaymentService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Api(value = "/merchants/store", description = "Store Management")
 public class StoreController extends BaseController {
@@ -336,98 +340,31 @@ public class StoreController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
 
-    public static Result createQrCodeStatic() {
-        Merchant ownMerchant = checkMerchantAccessAuthorization();
-        if (ownMerchant != null) {
-            JsonNode json = request().body().asJson();
+    @ApiOperation(value = "Get all tagging of store for rating.", notes = "Returns all list of tagging in store.\n" + swaggerInfo
+            + "", responseContainer = "List", httpMethod = "GET")
+    public static Result getAllTagings(Long storeId) {
+        int authority = checkAccessAuthorization("all");
+        Logger.info("AUTHORITY : "+authority);
+        if (authority == 200 || authority == 203) {
             try {
-                QrCodeStaticPaymentRequest request = objectMapper.readValue(json.toString(), QrCodeStaticPaymentRequest.class);
-
-                Store store = StoreRepository.findByStoreCode(request.getStoreCode());
+                Store store = Store.find.where().eq("id", storeId).eq("isDeleted", false).eq("isActive", true).findUnique();
                 if (store == null) {
-                    response.setBaseResponse(0, 0, 0, "Toko tidak ditemukan.", null);
+                    response.setBaseResponse(0, 0, 0, "Store is not found.", null);
                     return badRequest(Json.toJson(response));
                 }
-                if (store.getStoreQrCodeStatic() != null) {
-                    response.setBaseResponse(1, 0, 1, "QRIS sudah dibuat.", null);
-                    return badRequest(Json.toJson(response));
-                }
-                Transaction trx = Ebean.beginTransaction();
-                try {
-                    // external_id is - store_[unique code]-[storeCode]-[merchnatId]-[storeId] toLowerCase()
-                    String externalId = "store_" +
-                            CommonFunction.generateRandomString(4) + "-" +
-                            store.getStoreCode() + "-" +
-                            store.getMerchant().id + "-" +
-                            store.id;
-                    request.setExternalId(externalId.toLowerCase());
-
-                    ServiceResponse serviceResponse = PaymentService.getInstance().qrCodeStaticPayment(request);
-                    if (serviceResponse.getCode() == 408) {
-                        trx.rollback();
-                        ObjectNode result = Json.newObject();
-                        result.put("error_messages", Json.toJson(new String[]{"Request timeout, please try again later"}));
-                        response.setBaseResponse(1, offset, 1, timeOut, result);
-                        return badRequest(Json.toJson(response));
-                    } else if (serviceResponse.getCode() == 400) {
-                        trx.rollback();
-                        response.setBaseResponse(1, offset, 1, inputParameter, serviceResponse.getData());
-                        return badRequest(Json.toJson(response));
-                    } else {
-                        String object = objectMapper.writeValueAsString(serviceResponse.getData());
-                        JSONObject jsonObject = new JSONObject(object);
-                        String initiate = jsonObject.getJSONObject("data").toString();
-                        XenditCreateQrCodeResponse xenditCreateQrCodeResponse = objectMapper.readValue(initiate, XenditCreateQrCodeResponse.class);
-                        String qrCode = jsonObject.getJSONObject("data").getString("qr_string");
-
-                        System.out.println("Qr Code:");
-
-                        store.setStoreQrCodeStatic(qrCode);
-                        store.update();
-
-                        trx.commit();
-
-                        response.setBaseResponse(1, 0, 1, "Berhasil membuat QR Code", xenditCreateQrCodeResponse);
-                        return ok(Json.toJson(response));
-                    }
-                } catch (Exception e) {
-                    logger.error("Error while creating qr code", e);
-                    e.printStackTrace();
-                    trx.rollback();
-                } finally {
-                    trx.end();
-                }
+                List<StoreTaggings> data = StoreTaggingsRepository.findByStore(store);
+                int totalData = data.size();
+                logger.info("TEST");
+                List<StoreTaggingsResponse> results = data.stream().map(x -> StoreTaggingsResponse.builder().name(x.getName()).id(x.id).build() ).collect(Collectors.toList());
+                response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data toko", results);
+                return ok(Json.toJson(response));
             } catch (Exception e) {
                 Logger.info("Error: " + e.getMessage());
-                response.setBaseResponse(0, 0, 0, error, null);
-                return internalServerError(Json.toJson(response));
             }
-        }
-        response.setBaseResponse(0, 0, 0, unauthorized, null);
-        return unauthorized(Json.toJson(response));
-    }
 
-    public static Result getQrCodeStatic(Long storeId) {
-        Merchant ownMerchant = checkMerchantAccessAuthorization();
-        if (ownMerchant != null) {
-            try {
-                Store store = StoreRepository.findByStoreId(storeId);
-                if (store == null) {
-                    response.setBaseResponse(0, 0, 0, "Toko tidak ditemukan.", null);
-                    return badRequest(Json.toJson(response));
-                }
-                if (store.getStoreQrCodeStatic() == null || store.getStoreQrCodeStatic().isEmpty()) {
-                    response.setBaseResponse(0, 0, 0, "Code QRIS belum dibuat.", null);
-                    return badRequest(Json.toJson(response));
-                }
-
-                response.setBaseResponse(1, 0, 1, "Menampilkan kode QRIS.", store.getStoreQrCodeStatic());
-                return badRequest(Json.toJson(response));
-            } catch (Exception e) {
-                Logger.info("Error: " + e.getMessage());
-                response.setBaseResponse(0, 0, 0, error, null);
-                return internalServerError(Json.toJson(response));
-            }
+        } else if (authority == 403) {
+            response.setBaseResponse(0, 0, 0, forbidden, null);
+            return forbidden(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
@@ -538,6 +475,103 @@ public class StoreController extends BaseController {
         storeResponse.setProductStoreResponses(list);
 
         return storeResponse;
+    }
+
+    public static Result createQrCodeStatic() {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            JsonNode json = request().body().asJson();
+            try {
+                QrCodeStaticPaymentRequest request = objectMapper.readValue(json.toString(), QrCodeStaticPaymentRequest.class);
+
+                Store store = StoreRepository.findByStoreCode(request.getStoreCode());
+                if (store == null) {
+                    response.setBaseResponse(0, 0, 0, "Toko tidak ditemukan.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                if (store.getStoreQrCodeStatic() != null) {
+                    response.setBaseResponse(1, 0, 1, "QRIS sudah dibuat.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                Transaction trx = Ebean.beginTransaction();
+                try {
+                    // external_id is - store_[unique code]-[storeCode]-[merchnatId]-[storeId] toLowerCase()
+                    String externalId = "store_" +
+                            CommonFunction.generateRandomString(4) + "-" +
+                            store.getStoreCode() + "-" +
+                            store.getMerchant().id + "-" +
+                            store.id;
+                    request.setExternalId(externalId.toLowerCase());
+
+                    ServiceResponse serviceResponse = PaymentService.getInstance().qrCodeStaticPayment(request);
+                    if (serviceResponse.getCode() == 408) {
+                        trx.rollback();
+                        ObjectNode result = Json.newObject();
+                        result.put("error_messages", Json.toJson(new String[]{"Request timeout, please try again later"}));
+                        response.setBaseResponse(1, offset, 1, timeOut, result);
+                        return badRequest(Json.toJson(response));
+                    } else if (serviceResponse.getCode() == 400) {
+                        trx.rollback();
+                        response.setBaseResponse(1, offset, 1, inputParameter, serviceResponse.getData());
+                        return badRequest(Json.toJson(response));
+                    } else {
+                        String object = objectMapper.writeValueAsString(serviceResponse.getData());
+                        JSONObject jsonObject = new JSONObject(object);
+                        String initiate = jsonObject.getJSONObject("data").toString();
+                        XenditCreateQrCodeResponse xenditCreateQrCodeResponse = objectMapper.readValue(initiate, XenditCreateQrCodeResponse.class);
+                        String qrCode = jsonObject.getJSONObject("data").getString("qr_string");
+
+                        System.out.println("Qr Code:");
+
+                        store.setStoreQrCodeStatic(qrCode);
+                        store.update();
+
+                        trx.commit();
+
+                        response.setBaseResponse(1, 0, 1, "Berhasil membuat QR Code", xenditCreateQrCodeResponse);
+                        return ok(Json.toJson(response));
+                    }
+                } catch (Exception e) {
+                    logger.error("Error while creating qr code", e);
+                    e.printStackTrace();
+                    trx.rollback();
+                } finally {
+                    trx.end();
+                }
+            } catch (Exception e) {
+                Logger.info("Error: " + e.getMessage());
+                response.setBaseResponse(0, 0, 0, error, null);
+                return internalServerError(Json.toJson(response));
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    public static Result getQrCodeStatic(Long storeId) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            try {
+                Store store = StoreRepository.findByStoreId(storeId);
+                if (store == null) {
+                    response.setBaseResponse(0, 0, 0, "Toko tidak ditemukan.", null);
+                    return badRequest(Json.toJson(response));
+                }
+                if (store.getStoreQrCodeStatic() == null || store.getStoreQrCodeStatic().isEmpty()) {
+                    response.setBaseResponse(0, 0, 0, "Code QRIS belum dibuat.", null);
+                    return badRequest(Json.toJson(response));
+                }
+
+                response.setBaseResponse(1, 0, 1, "Menampilkan kode QRIS.", store.getStoreQrCodeStatic());
+                return badRequest(Json.toJson(response));
+            } catch (Exception e) {
+                Logger.info("Error: " + e.getMessage());
+                response.setBaseResponse(0, 0, 0, error, null);
+                return internalServerError(Json.toJson(response));
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
     }
 
 }
