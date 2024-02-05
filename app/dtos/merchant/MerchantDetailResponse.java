@@ -2,7 +2,6 @@ package dtos.merchant;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import dtos.merchant.MerchantResponse.MerchantResponseBuilder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
