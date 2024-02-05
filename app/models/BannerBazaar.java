@@ -6,7 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
-@Table(name = "banner_bazar")
+@Table(name = "banner_bazaar")
 @Getter
 @Setter
 @Entity
