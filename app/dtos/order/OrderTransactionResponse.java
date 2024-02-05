@@ -19,6 +19,10 @@ public class OrderTransactionResponse {
     private String invoiceNumber;
     @JsonProperty("order_number")
     private String orderNumber;
+    @JsonProperty("table_id")
+    private Long tableId;
+    @JsonProperty("table_name")
+    private String tableName;
     @JsonProperty("queue_number")
     private Integer queueNumber;
     @JsonProperty("total_amount")

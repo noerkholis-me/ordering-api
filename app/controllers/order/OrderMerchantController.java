@@ -1,5 +1,7 @@
 package controllers.order;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.avaje.ebean.Expr;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
@@ -17,6 +19,7 @@ import models.Address;
 import models.BrandMerchant;
 import models.Member;
 import models.Merchant;
+import models.ProductRatings;
 import models.Store;
 import models.appsettings.AppSettings;
 import models.merchant.ProductMerchantDetail;
@@ -37,6 +40,7 @@ import repository.OrderRepository;
 import repository.ProductMerchantDetailRepository;
 import repository.TableMerchantRepository;
 import repository.pickuppoint.PickUpPointRepository;
+import repository.ratings.ProductRatingRepository;
 import service.DownloadOrderReport;
 
 import java.io.File;
@@ -58,13 +62,14 @@ public class OrderMerchantController extends BaseController {
     private static final String SERVING = "SERVING";
     private static final String ON_PROCESS = "ON PROCESS";
     private static final String READY_TO_PICKUP = "READY";
-
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     private static BaseResponse response = new BaseResponse();
 
     public static Result getOrderList(Long storeId, int offset, int limit, String statusOrder, String filter, String productType) throws Exception {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
+                System.out.println("MERCHANT ID : "+merchant.id);
                 int totalData = OrderRepository.getTotalOrderListWithFilter(merchant.id, storeId, statusOrder, filter, productType);
                 List<Order> orders = OrderRepository.getOrderListWithFilter(merchant.id, storeId, offset, limit, statusOrder, filter, productType);
                 List<OrderList> orderLists = new ArrayList<>();
@@ -221,6 +226,185 @@ public class OrderMerchantController extends BaseController {
             response.setBaseResponse(totalData, offset, limit, success + " Berhasil menampilkan data order",
                     orderLists);
             return ok(Json.toJson(response));
+        } catch (Exception ex) {
+            LOGGER.error("Error when getting list data orders");
+            ex.printStackTrace();
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
+
+    public static Result getOrderListUserByPhone(Long storeId, int offset, int limit, String statusOrder, String email, String phoneNumber) throws Exception {
+        try {
+            if (email != null && email != "" || phoneNumber != null && phoneNumber != "") {
+            Member memberUser = Member.findDataCustomer(email, phoneNumber);
+            if (memberUser != null) {
+                Query<Order> query = null;
+                // check store id --> mandatory
+                Store store = null;
+                if (storeId != null && storeId != 0L) {
+                    store = Store.findById(storeId);    
+                }
+                if (store == null) {
+                    response.setBaseResponse(0, 0, 0, "Store id does not exists", null);
+                    return badRequest(Json.toJson(response));
+                }
+                
+                if (statusOrder.equalsIgnoreCase("ALL")) {
+                    query = OrderRepository.find.where().eq("store", store)
+                            .order("t0.id desc");
+                } else if (statusOrder.equalsIgnoreCase("CANCELED")) {
+                    query = OrderRepository.find.where().eq("t0.status", statusOrder).eq("store", store)
+                            .order("t0.id desc");
+                } else if (statusOrder.equalsIgnoreCase("PENDING")) {
+                    query = OrderRepository.find.where()
+                            .or(Expr.ne("t0.device_type", "MINIPOS"), Expr.isNull("t0.user_merchant_id"))
+                            .ne("t0.status", "CANCELLED").ne("t0.status", "CANCELED")
+                            .eq("orderPayment.status", statusOrder)
+                            .eq("store", store)
+                            .order("t0.id desc");
+                } else {
+                    query = OrderRepository.find.where().eq("t0.status", statusOrder).eq("store", store)
+                            .eq("orderPayment.status", "PAID")
+                            .order("t0.id desc");
+                }
+                
+                ExpressionList<Order> exp = query.where();
+                exp.eq("t0.user_id", memberUser.id);
+               //  exp.ieq("t0.phone_number", phoneNumber);
+                // exp = exp.disjunction();
+                // exp = exp.ilike("t0.order_number", "%" + filter + "%");
+                // exp = exp.ilike("t0.member_name", "%" + filter + "%");
+                // exp = exp.ilike("member.fullName", "%" + filter + "%");
+                // exp = exp.ilike("member.firstName", "%" + filter + "%");
+                // exp = exp.ilike("member.lastName", "%" + filter + "%");
+                // exp = exp.endJunction();
+                query = exp.query();
+
+                List<OrderList> orderLists = new ArrayList<>();
+                List<Order> orders = query.findPagingList(limit).getPage(offset).getList();
+                Integer totalData = query.findList().size();
+                System.out.println(orders.size());
+                if (orders.isEmpty() || orders.size() == 0) {
+                    response.setBaseResponse(totalData, offset, limit, success + " Showing data order",
+                            orderLists);
+                    return ok(Json.toJson(response));
+                }
+                
+                // if (store == null) {
+                //     response.setBaseResponse(0, 0, 0, "Store tidak ditemukan", null);
+                //     return notFound(Json.toJson(response));
+                // }
+                // if (orders.isEmpty() || orders.size() == 0) {
+                //     response.setBaseResponse(totalData, offset, limit, success + " Showing data order",
+                //             orderLists);
+                //     return ok(Json.toJson(response));
+                // }
+
+                for (Order order : orders) {
+                    OrderList orderRes = new OrderList();
+                    // looping order
+                    Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderId(order.id);
+                    if (!orderPayment.isPresent()) {
+                        System.out.println(">>>>> order payment does not exists <<<<< ");
+                        break;
+                    }
+                    OrderPayment getOrderPayment = orderPayment.get();
+                    // System.out.println(">>>>> Order payment when paid <<<<<");
+                    orderRes.setInvoiceNumber(getOrderPayment.getInvoiceNo());
+                    orderRes.setDeliveryFee(getOrderPayment.getDeliveryFee());
+                    orderRes.setServicePrice(getOrderPayment.getServicePrice());
+                    orderRes.setOrderNumber(order.getOrderNumber());
+                    orderRes.setDestinationAddress(order.getDestinationAddress());
+
+                    // get member
+                    Member member = null;
+                    if (order.getMember() != null) {
+                        
+                        member = Member.findByIdMember(order.getMember().id);
+                        orderRes.setCustomerName(member.fullName != null && member.fullName != "" ? member.fullName : "GENERAL CUSTOMER (" + order.getStore().storeName + ")");
+                        orderRes.setCustomerEmail(member.email);
+                    } else {
+                        String customerName = "GENERAL CUSTOMER (" + order.getStore().storeName + ")";
+                        orderRes.setCustomerName(customerName);
+                    }
+                    orderRes.setCustomerPhone(order.getPhoneNumber());
+
+                    // get rating
+                    List<ProductRatings> productRatings = ProductRatingRepository.findByProductRating(order.getOrderNumber());
+                    if (productRatings.isEmpty() || productRatings.size() == 0) {
+                        orderRes.setIsRated(false);
+                    }else{
+                        orderRes.setIsRated(true);
+                    }
+
+
+                    // get store
+                    orderRes.setMerchantName(order.getStore().getMerchant().name != null || order.getStore().getMerchant().name != "" ? order.getStore().getMerchant().name : null);
+                    orderRes.setMerchantAddress(order.getStore().getMerchant().address != null || order.getStore().getMerchant().address != "" ? order.getStore().getMerchant().address : null);
+
+                    orderRes.setTotalAmount(order.getTotalPrice());
+                    orderRes.setOrderType(order.getOrderType());
+                    orderRes.setOrderQueue(order.getOrderQueue());
+                    orderRes.setStatusOrder(order.getStatus());
+                    orderRes.setStatus(order.getStatus());
+                    orderRes.setTableName(order.getTableName());
+                    orderRes.setPaymentType(getOrderPayment.getPaymentType());
+                    orderRes.setPaymentStatus(getOrderPayment.getStatus());
+                    orderRes.setPaymentChannel(getOrderPayment.getPaymentChannel());
+                    orderRes.setTotalAmountPayment(getOrderPayment.getTotalAmount());
+                    orderRes.setPaymentDate(getOrderPayment.getPaymentDate());
+                    orderRes.setBankCode(getOrderPayment.getBankCode());
+
+                    List<OrderDetail> orderDetails = OrderRepository.findOrderDetailByOrderId(order.id);
+                    List<OrderList.ProductOrderDetail> productOrderDetails = new ArrayList<>();
+
+                    // System.out.println(">>>>> loop order detail <<<<<");
+                    for (OrderDetail orderDetail : orderDetails) {
+                        // System.out.println(">>>>> order detail in : " + orderDetail.id);
+                        OrderList.ProductOrderDetail productDetail = new OrderList.ProductOrderDetail();
+                        productDetail.setProductId(orderDetail.getProductMerchant().id);
+                        productDetail.setProductName(orderDetail.getProductName());
+                        ProductMerchantDetail pMD = ProductMerchantDetailRepository.findMainProduct(orderDetail.getProductMerchant());
+                        productDetail.setProductImage(pMD == null ? null : pMD.getProductImageMain());
+                        productDetail.setProductPrice(orderDetail.getProductPrice());
+                        productDetail.setProductQty(orderDetail.getQuantity());
+                        productDetail.setNotes(orderDetail.getNotes());
+
+                        // System.out.println(">>>>> loop order detail add on <<<<<<");
+                        List<OrderList.ProductOrderDetail.ProductOrderDetailAddOn> productDetailAddOns = new ArrayList<>();
+                        for (OrderDetailAddOn orderDetailAddOn : orderDetail.getOrderDetailAddOns()) {
+                            // System.out.println(">>>>> order detail add on in : " + orderDetailAddOn.id);
+                            OrderList.ProductOrderDetail.ProductOrderDetailAddOn productAddOn = new OrderList.ProductOrderDetail.ProductOrderDetailAddOn();
+                            productAddOn.setProductId(orderDetailAddOn.getProductAddOn().getProductAssignId());
+                            productAddOn.setProductName(orderDetailAddOn.getProductName());
+                            productAddOn.setProductPrice(orderDetailAddOn.getProductPrice());
+                            productAddOn.setProductQty(orderDetailAddOn.getQuantity());
+                            productAddOn.setNotes(orderDetailAddOn.getNotes());
+                            productDetailAddOns.add(productAddOn);
+                        }
+                        productDetail.setProductAddOn(productDetailAddOns);
+                        productOrderDetails.add(productDetail);
+                    }
+                    orderRes.setProductOrderDetail(productOrderDetails);
+                    orderLists.add(orderRes);
+                
+                }
+
+                // System.out.println(">>>>> Total Data : " + totalData);
+                // System.out.println(">>>>> Total Data Orders : " + orders.size());
+                // System.out.println(">>>>> order list : " + orderLists.size());
+
+                response.setBaseResponse(totalData, offset, limit, success + " Berhasil menampilkan data order",
+                        orderLists);
+                return ok(Json.toJson(response));
+            }
+            response.setBaseResponse(0, 0, 0, "Email atau Nomor Telepon tidak ditemukan", null);
+            return badRequest(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, "Email atau Nomor Telepon dibutuhkan", null);
+        return badRequest(Json.toJson(response));
+
         } catch (Exception ex) {
             LOGGER.error("Error when getting list data orders");
             ex.printStackTrace();
@@ -539,6 +723,8 @@ public class OrderMerchantController extends BaseController {
                     orderDetailResponse.setTotal(orderDetail.getSubTotal());
                     orderDetailResponse.setNotes(orderDetail.getNotes());
                     orderDetailResponse.setNoSku(orderDetail.getProductMerchant().getNoSKU());
+                    orderDetailResponse.setProductPrice(orderDetail.getProductPrice());
+
                     List<OrderDetailAddOnResponse> orderDetailAddOns = new ArrayList<>();
                     List<OrderDetailAddOn> orderDetailAddOnList = orderDetail.getOrderDetailAddOns();
                     for (OrderDetailAddOn orderDetailAddOn : orderDetailAddOnList) {
@@ -571,6 +757,7 @@ public class OrderMerchantController extends BaseController {
                 invoicePrintResponse.setServiceFee(orderPayment.getServicePrice());
                 invoicePrintResponse.setLoyaltyUsage(getOrder.getTotalLoyaltyUsage() == null ? BigDecimal.ZERO : getOrder.getTotalLoyaltyUsage());
 
+                invoicePrintResponse.setDeliveryFee(orderPayment.getDeliveryFee() != null ? orderPayment.getDeliveryFee() : BigDecimal.ZERO );
                 invoicePrintResponse.setPaymentFeeType(orderPayment.getPaymentFeeType());
                 invoicePrintResponse.setPaymentFeeOwner(orderPayment.getPaymentFeeOwner());
                 invoicePrintResponse.setPaymentFeeCustomer(orderPayment.getPaymentFeeCustomer());
@@ -610,6 +797,7 @@ public class OrderMerchantController extends BaseController {
 
                 response.setBaseResponse(1, offset, limit, success + " success showing data invoice.",
                         invoicePrintResponse);
+
                 return ok(Json.toJson(response));
             } catch (Exception ex) {
                 ex.printStackTrace();

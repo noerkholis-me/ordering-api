@@ -204,7 +204,11 @@ public class Member extends BaseModel {
     public static Finder<Long, Member> find = new Finder<Long, Member>(Long.class, Member.class);
 
     public static Member findDataCustomer(String email, String phoneNumber){
-        return find.where().raw("t0.email = '" + email + "' or t0.phone = '" + phoneNumber + "'").eq("t0.is_deleted", false).findUnique();
+        return find.where().raw("t0.email = '" + email + "' AND t0.phone = '" + phoneNumber + "'").eq("t0.is_deleted", false).findUnique();
+    }
+
+    public static Member findDataCustomerByName(String name, String phoneNumber){
+        return find.where().raw("t0.full_name = '" + name + "' AND t0.phone = '" + phoneNumber + "'").eq("t0.is_deleted", false).findUnique();
     }
 
     public static Member findByIdMember(Long idUser){
@@ -750,6 +754,10 @@ public class Member extends BaseModel {
 
     public static Member findByPhoneAndMerchantId(String phone, Long merchantId) {
         return find.where().eq("phone", phone).eq("merchant_id", merchantId).findUnique();
+    }
+
+    public static Member findByPhoneNameAndMerchantId(String name, String phone, Long merchantId) {
+        return find.where().eq("full_name", name).eq("phone", phone).eq("merchant_id", merchantId).findUnique();
     }
 
     public Boolean getNewsLetter() {

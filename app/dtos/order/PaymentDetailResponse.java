@@ -29,6 +29,9 @@ public class PaymentDetailResponse {
     @JsonProperty("tax_price")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal taxPrice;
+    @JsonProperty("delivery_fee")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal deliveryFee;
     @JsonProperty("service_price")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal servicePrice;

@@ -1,311 +1,540 @@
 @import models.transaction.Order
 @import models.transaction.OrderPayment
 @(path: String, order: Order, orderPayment: OrderPayment)
-
 <!DOCTYPE html>
-<html lang="en" style="margin: 0;padding: 0;box-sizing: border-box;">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="x-apple-disable-message-reformatting">
+      <title>Pagii App - {{title}}</title>
+      <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700" rel="stylesheet">
+      <style>
+         html,
+         body {
+         margin: 0 auto !important;
+         padding: 0 !important;
+         height: 100% !important;
+         width: 100% !important;
+         background: #f1f1f1;
+         }
+         * {
+         -ms-text-size-adjust: 100%;
+         -webkit-text-size-adjust: 100%;
+         }
+         div[style*="margin: 16px 0"] {
+         margin: 0 !important;
+         }
+         table,
+         td {
+         mso-table-lspace: 0pt !important;
+         mso-table-rspace: 0pt !important;
+         }
+         table {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0px;
+      }
 
-<head style="margin: 0;padding: 0;box-sizing: border-box;">
-  <meta charset="UTF-8" style="margin: 0;padding: 0;box-sizing: border-box;">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" style="margin: 0;padding: 0;box-sizing: border-box;">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"
-        style="margin: 0;padding: 0;box-sizing: border-box;">
-  <title style="margin: 0;padding: 0;box-sizing: border-box;">Notifikasi Email - Customer</title>
-  <style>
-    @@import url('https://fonts.cdnfonts.com/css/d-din');
-    </style>
-</head>
+         table .left {
+         text-align: left;
+         }
 
-<body style="margin: 0;padding: 0;box-sizing: border-box;background-color: #cccc;font-family: D-DIN Exp;">
-<div class="container"
-     style="margin: auto;padding: 0;box-sizing: border-box;width: 600px; background-color: #fcd983;">
-  <!-- header -->
-  <div class="header" style="padding: 28px 20px; background-color: #ffffff; position: relative;">
-    <img src="@path/assets/images/Ordering-Logomark-Default.png" alt=""
-         style="margin: 0;padding: 0;box-sizing: border-box;"
-         height="64px">
-    <img src="@path/assets/email-Invoice/bg-header.png" alt=""
-         style="position: absolute;right: 0;top: 0;height: 100%;"/>
-  </div>
-
-  <div class="customer" style="margin: 40px 0;padding: 0 20px;box-sizing: border-box;">
-    <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 28px;font-weight: bold;text-align: center;">
-      Hello, @order.scalaFetchMemberFullname() </p>
-
-  </div>
-
-  <div class="title-header" style="margin: 40px 23px;padding: 0;box-sizing: border-box;">
-    <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;margin-bottom: 5px;">
-      Verifikasi Pembayaran</p>
-    <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #454545;">Pembayaran telah
-      terverifikasi dan pesanan telah diteruskan ke <span
-              style="margin: 0;padding: 0;box-sizing: border-box;font-weight: bold;">Penjual</span></p>
-  </div>
-  <!-- header -->
-
-  <!-- Container Reciept  -->
-  <div class="container-reciept"
-       style="margin: auto;padding: 40px 20px;box-sizing: border-box;width: 570px;height: auto; background-color: #fff; position: relative;">
-    <img src="@path/assets/email-Invoice/bg-receipt-dot-group.png" alt=""
-         style="position: absolute; top: -12; left: 18; height: 27px;">
-    <img src="@path/assets/email-Invoice/bg-receipt-dot-group.png" alt=""
-         style="position: absolute; bottom: -18; left: 18; height: 27px;">
-    <!-- Start No Antrian -->
-    <div class="antrian"
-         style="margin: 0;padding: 0;box-sizing: border-box;width: 520px;display: flex;justify-content: space-between;align-items: center;">
-      <p
-              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 20px;font-weight: bold;color: #212121; margin-right: auto;">
-        Nomor
-        Antrian</p>
-      <div class="no-antrian" style="margin: 0;padding: 0;box-sizing: border-box;width: 75px;height: 45px;border-radius: 10px; background-color: #fcd983; display: flex;
-          justify-content: center;align-items: center; align-items: center;">
-        <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 25px;font-weight: bold;color: #212121;">
-          @order.scalaFetchOrderQueue()
-        </p>
-      </div>
-    </div>
-    <!-- End No Antrian -->
-
-    <!-- Start Pembayaran -->
-    <div class="pembayaran"
-         style="margin: auto;padding: 0;box-sizing: border-box;width: 520px;height: auto;margin-top: 25px;">
-      <p
-              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;color: #000;text-align: center;">
-        Detail Pembayaran</p>
-
-      <!-- Start Detail -->
-      <div class="detail" style="margin: 0;padding: 0;box-sizing: border-box;margin-top: 30px;">
-        <div class="title-pembayaran"
-             style="margin: 0;padding: 0;box-sizing: border-box;width: 520px;margin-bottom: 20px;">
-          <div class="title-pembayaran-detail"
-               style="margin: 0;padding: 0;box-sizing: border-box;width: 100%;display: flex;justify-content: space-between;align-items: center;">
-            <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #454545;text-align: center;
-                margin-right: auto;">
-              No. Trx</p>
-            <p
-                    style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: bold;color: #212121;text-align: center;">
-              @order.scalaFetchOrderNumber()</p>
-          </div>
-        </div>
-        <div class="title-pembayaran"
-             style="margin: 0;padding: 0;box-sizing: border-box;width: 520px;margin-bottom: 20px;">
-          <div class="title-pembayaran-detail"
-               style="margin: 0;padding: 0;box-sizing: border-box;width: 100%;display: flex;justify-content: space-between;align-items: center;">
-            <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #454545;text-align: center;
-                margin-right: auto;">
-              Waktu Pembayaran</p>
-            <p
-                    style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: bold;color: #212121;text-align: center;">
-              @order.scalaFetchOrderDate() </p>
-          </div>
-        </div>
-        <div class="title-pembayaran"
-             style="margin: 0;padding: 0;box-sizing: border-box;width: 520px;margin-bottom: 20px;">
-          <div class="title-pembayaran-detail"
-               style="margin: 0;padding: 0;box-sizing: border-box;width: 100%;display: flex;justify-content: space-between;align-items: center;">
-            <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #454545;text-align: center;
-                margin-right: auto;">
-              Tipe Pesanan</p>
-            <p
-                    style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: bold;color: #212121;text-align: center;">
-              @order.scalaFetchOrderType()</p>
-          </div>
-        </div>
-      </div>
-      <!-- End Detail -->
-
-      <!-- Start Item -->
-      <div class="item" style="margin: 0;padding: 0;box-sizing: border-box;margin-top: 40px;">
-        <div class="title-item"
-             style="margin: 0;padding: 0;box-sizing: border-box;width: 520px;height: 45px;background-color: #fcd983;padding-left: 10px;display: flex;text-align: center;">
-          <p
-                  style="margin: 13px 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: bold;color: #212121;text-align: center;margin-right: 52px;">
-            QTY</p>
-          <p
-                  style="margin: 13px 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: bold;color: #212121;text-align: left;width: 260px;margin-right: 60px;">
-            Item</p>
-          <p
-                  style="margin: 13px 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: bold;color: #212121;text-align: center;">
-            Harga</p>
-        </div>
-        @for(o <- order.getProductDetail()){
-        <div class="item-produk"
-             style="margin: 40px auto;padding: 0;box-sizing: border-box;width: 479px;height: 20px;display: flex;">
-
-          <p style="
-              margin: 0;
-              padding: 0;
-              box-sizing: border-box;font-size: 18px;font-weight: 100;color: #454545;
-              text-align: center;
-              margin-right: 68px;">
-            @o.fetchQuantity()</p>
-
-          <p style="margin: 0;
-              padding: 0;
-              box-sizing: border-box;
-              font-size: 18px;
-              font-weight: 100;
-              color: #636B78;
-              text-align: left;
-              width: 260px;
-              height: auto;
-              margin-right: auto;">
-            @o.getNamaProduk()</p>
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;
-              text-align: center;">
-            @o.fetchPrice()</p>
-        </div>
-        }
-
-      </div>
-      <!-- End Item -->
-
-      <div class="line-dot"
-           style="margin: 40px auto;padding: 0;box-sizing: border-box;width: 500px;border: 2px dashed #ccc;">
-      </div>
-
-      <!-- Start Detail Harga -->
-      <div class="detail-harga" style="margin: auto;padding: 0;box-sizing: border-box;width: 520px;">
-        <div class="harga"
-             style="margin: auto;padding: 0;box-sizing: border-box;width: 491px;display: flex;justify-content: space-between;margin-bottom: 15px;">
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 700;color: #212121;text-align: center;
-              margin-right: auto;">
-            Sub Total</p>
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 700;color: #212121;text-align: left;
-              width: auto;">
-            @order.scalaFetchSubTotal() </p>
-        </div>
-        <div class="harga"
-             style="margin: auto;padding: 0;box-sizing: border-box;width: 491px;display: flex;justify-content: space-between;margin-bottom: 15px;">
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: center;
-              margin-right: auto;">
-            Pajak (@orderPayment.scalaFetchTaxPercentage()%)</p>
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: left;
-              width: auto;">
-            @orderPayment.scalaFetchTaxPrice() </p>
-        </div>
-        <div class="harga"
-             style="margin: auto;padding: 0;box-sizing: border-box;width: 491px;display: flex;justify-content: space-between;margin-bottom: 15px;">
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: center;
-              margin-right: auto;">
-            Services (@orderPayment.scalaFetchServicePercentage()%)</p>
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: left;
-              width: auto;">
-            @orderPayment.scalaFetchServicePrice() </p>
-        </div>
-        <div class="harga"
-             style="margin: auto;padding: 0;box-sizing: border-box;width: 491px;display: flex;justify-content: space-between;margin-bottom: 15px;">
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: center;
-              margin-right: auto;">
-            Biaya Layanan</p>
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #636B78;text-align: left;
-              width: auto;">
-            @orderPayment.scalaFetchFeeCustomer() </p>
-        </div>
-        <div class="harga-total"
-             style="margin: auto;padding: 0;box-sizing: border-box;width: 491px;display: flex;justify-content: space-between;">
-          <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 25px;font-weight: bold;color: #000;text-align: center;
-              margin-right: auto;">
-            Total</p>
-          <p
-                  style="margin: 0;padding: 0;box-sizing: border-box;font-size: 25px;font-weight: bold;color: #000;text-align: center;">
-            @order.scalaFetchTotalPrice() </p>
-        </div>
-      </div>
-      <!-- End Detail Harga -->
-
-      <!-- End Pembayaran -->
-
-      <div class="line-dot"
-           style="margin: 40px auto;padding: 0;box-sizing: border-box;width: 500px;border: 2px dashed #ccc; position: relative;">
-        <span
-                style="position: absolute; left: -46px; top: -11px; border-radius: 999px; height: 20px; width: 20px; background: #fcd983;"></span>
-        <span
-                style="position: absolute; right: -46px; top: -11px; border-radius: 999px; height: 20px; width: 20px; background: #fcd983;"></span>
-      </div>
-
-      <!-- Start QR -->
-      <div class="qr-code"
-           style="margin: 40px auto;padding: 0;box-sizing: border-box;width: 500px;display: flex;align-items: center;">
-        <p
-                style="margin: 0;padding: 0;box-sizing: border-box;text-align: center;font-size: 18px;line-height: 20px;color: #454545;margin-right: auto;">
-          Cek Status Pesanan Anda</p>
-        <a href="@order.scalaFetchStoreQrUrl()" style="color: #16479C;
-        margin: 0;padding: 0;box-sizing: border-box;text-align: center;font-size: 18px;line-height: 20px;">Lihat
-          Pesanan</a>
-      </div>
-      <!-- <div class="qr-code"
-        style="margin: 40px auto;padding: 0;box-sizing: border-box;width: 500px;display: flex;align-items: center;">
-        <div style="margin: 0;padding: 0;box-sizing: border-box;">
-          <img src="@path/assets/QR.png" alt="">
-        </div>
-        <p
-          style="margin: 0;padding: 0;box-sizing: border-box;text-align: center;font-size: 18px;line-height: 20px;color: #636B78;">
-          Untuk cek informasi pesanan kamu, Silahkan <span
-            style="margin: 0;padding: 0;box-sizing: border-box;font-weight: bold;"> Scan QR Code </span>di
-          sebelah.Terima Kasih.</p>
-      </div> -->
-      <!-- End QR -->
-    </div>
-  </div>
-  <!-- Container Reciept  -->
-
-  <!-- Start Detail Toko -->
-  <div class="detail-toko" style="margin: 50px;padding: 0;box-sizing: border-box;width: auto;">
-    <p
-            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 30px;text-align: center;font-weight: bold;color: #000;">
-      @order.scalaFetchStoreName()</p>
-    <p
-            style="margin: 0;padding: 0;box-sizing: border-box;font-size: 20px;text-align: center;font-weight: 100;color: #636B78;margin-top: 10px;">
-      @order.scalaFetchStoreAddress() <br><span
-            style="margin: 0;padding: 0;box-sizing: border-box;font-weight: bold;">Nomor Telepon :
-        @order.scalaFetchStorePhone()</span></p>
-  </div>
-  <!-- End Detail Toko -->
-
-  <!-- Footer -->
-  <footer
-          style="position: relative; margin: 0;padding: 0;box-sizing: border-box;width: 600px;height: 291px;background-color: #fff;margin-top: 100px;">
-    <div class="service"
-         style="margin: auto;padding: 30px 0;box-sizing: border-box;width: 524px;display: flex;justify-content: space-between;">
-      <div class="us" style="margin: 0;padding: 0;box-sizing: border-box; margin-right: auto;">
-        <p
-                style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;margin-bottom: 10px;color: #212121;">
-          Kunjungi Kami</p>
-        <p style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #454545;">
-          www.sandbox.com</p>
-      </div>
-      <div class="cs" style="margin: 0;padding: 0;box-sizing: border-box;">
-        <p
-                style="margin: 0;padding: 0;box-sizing: border-box;font-size: 22px;font-weight: bold;margin-bottom: 10px;color: #212121;text-align: right;">
-          Customer Services</p>
-        <div class="phone" style="margin: 0;padding: 0;box-sizing: border-box;">
-          <p
-                  style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;margin-bottom: 10px;color: #454545;text-align: right;">
-            021 - 2345 2345</p>
-          <p
-                  style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;font-weight: 100;color: #454545;text-align: right;">
-            0823 2345 6789</p>
-        </div>
-      </div>
-    </div>
-    <div class="line-2"
-         style="margin: auto;padding: 0;box-sizing: border-box;width: 500px;border: 1px solid #ccc;margin-bottom: 30px;">
-    </div>
-    <div class="title-footer" style="margin: 0;padding: 0;box-sizing: border-box;">
-      <p
-              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #454545;text-align: center;margin-bottom: 20px;">
-        Email ini di buat Otomatis, jika anda membutuhkan bantuan silahkan hubungi Customer Service.</p>
-      <p
-              style="margin: 0;padding: 0;box-sizing: border-box;font-size: 18px;color: #454545;text-align: center;margin-bottom: 20px;">
-        2023 Pagii Sandbox | All Rights Reserved.</p>
-    </div>
-    <img src="@path/assets/images/Logo-Pagii-Sandbox-Footer.png" alt=""
-         style="position: absolute; bottom: 0; left: 0; height: 96px;">
-  </footer>
-
-  <!-- Footer -->
-</div>
-</body>
-
+         table .right {
+         text-align: right;
+         }
+         img {
+         -ms-interpolation-mode:bicubic;
+		 width: 100%;
+         }
+         a {
+         text-decoration: none;
+         }
+         *[x-apple-data-detectors],
+         .unstyle-auto-detected-links *,
+         .aBn {
+         border-bottom: 0 !important;
+         cursor: default !important;
+         color: inherit !important;
+         text-decoration: none !important;
+         font-size: inherit !important;
+         font-family: inherit !important;
+         font-weight: inherit !important;
+         line-height: inherit !important;
+         }
+         .a6S {
+         display: none !important;
+         opacity: 0.01 !important;
+         }
+         .im {
+         color: inherit !important;
+         }
+         img.g-img + div {
+         display: none !important;
+         }
+         /* iPhone 4, 4S, 5, 5S, 5C, and 5SE */
+         @@media only screen and (min-device-width: 320px) and (max-device-width: 374px) {
+         u ~ div .email-container {
+         min-width: 320px !important;
+         }
+         }
+         /* iPhone 6, 6S, 7, 8, and X */
+         @@media only screen and (min-device-width: 375px) and (max-device-width: 413px) {
+         u ~ div .email-container {
+         min-width: 375px !important;
+         }
+         }
+         /* iPhone 6+, 7+, and 8+ */
+         @@media only screen and (min-device-width: 414px) {
+         u ~ div .email-container {
+         min-width: 414px !important;
+         }
+         }
+      </style>
+      <style>
+         .primary{
+         background: #ff8b00;
+         }
+         .btn-primary{
+            color: #fff;
+            text-decoration: none;
+            background: #FFC93C;
+            border:1px solid #FFC93C;
+            border-radius: 4px;
+            padding: 5px 20px;
+            /* display: inline-block; */
+            width: fit-content;
+            /* margin: 15px auto;
+            display: flex; */
+            height: 48px;
+            padding: 12px 16px;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+         }
+         .btn-secondary{
+            color: #00AFF0;
+            text-decoration: none;
+            background: #fff;
+            border: 1px solid #00AFF0;
+            border-radius: 5px;
+            padding: 5px 20px;
+            display: inline-block;
+            width: fit-content;
+            margin: 15px auto;
+         }
+         .bg_white{
+         background: #F9F9FA;
+         }
+         .bg_secondary{
+         background: #464646;
+         }
+         .bg_light{
+         background: #FFFFFF;
+         }
+         .bg_black{
+         background: #000000;
+         }
+         .bg_dark{
+         background: rgba(0,0,0,.8);
+         }
+         .email-section{
+         padding:24px;
+         }
+         .btn{
+         padding: 5px 20px;
+         display: inline-block;
+         }
+         .btn.btn-primary{
+         border-radius: 5px;
+         background: #ff8b00;
+         color: #ffffff;
+         }
+         .btn.btn-white{
+         border-radius: 5px;
+         background: #ffffff;
+         color: #000000;
+         }
+         .btn.btn-white-outline{
+         border-radius: 5px;
+         background: transparent;
+         border: 1px solid #fff;
+         color: #fff;
+         }
+         .btn.btn-black{
+         border-radius: 0px;
+         background: #000;
+         color: #fff;
+         }
+         .btn.btn-black-outline{
+         border-radius: 0px;
+         background: transparent;
+         border: 2px solid #000;
+         color: #000;
+         font-weight: 700;
+         }
+         .btn.btn-custom{
+         text-transform: uppercase;
+         font-weight: 600;
+         font-size: 12px;
+         }
+         h1,h2,h3,h4,h5,h6{
+         font-family: 'Poppins';
+         color: #464646;
+         margin-top: 0;
+         font-weight: 400;
+         }
+         body{
+         font-family: 'Poppins';
+         font-weight: 400;
+         font-size: 14px;
+         line-height: 1.8;
+         color: rgba(0,0,0,.5);
+         }
+         a{
+         color: #00AFF0;
+         }
+         p{
+         margin-top: 0;
+         }
+         table{
+         }
+         .img-logo{
+         width: 100px;
+         margin-top: 15px;
+         }
+         .img-svg{
+         width: 19px;
+         }
+         .logo h1{
+         margin: 0;
+         }
+         .logo h1 a{
+         color: #000000;
+         font-size: 20px;
+         font-weight: 700;
+         /*text-transform: uppercase;*/
+         font-family: 'Poppins';
+         }
+         .navigation{
+         padding: 0;
+         padding: 1em 0;
+         /*background: rgba(0,0,0,1);*/
+         border-top: 1px solid rgba(0,0,0,.05);
+         border-bottom: 1px solid rgba(0,0,0,.05);
+         margin-bottom: 0;
+         }
+         .navigation li{
+         list-style: none;
+         display: inline-block;;
+         margin-left: 5px;
+         margin-right: 5px;
+         font-size: 14px;
+         font-weight: 500;
+         }
+         .navigation li a{
+         color: rgba(0,0,0,1);
+         }
+         .btn-download{
+         display: block;
+         width: 100%;
+         margin-bottom: 15px;
+         }
+         .hero{
+         position: relative;
+         z-index: 0;
+         background: url('@order.scalaFetchStoreLogo()');
+         /* background: url('D:/smooets/ordering-api/app/assets/images/mevvah.png'); */
+         background-size: auto;
+         background-repeat: no-repeat;
+         padding: 15px;
+         background-position: center;
+         background-color: #F9F9FA;
+         
+         }
+         .hero .text{
+         color: rgba(255,255,255,.9);
+         max-width: 50%;
+         margin: 0 auto 0;
+         }
+         .hero .text h2{
+         color: #464646;
+         font-size: 34px;
+         margin-bottom: 0;
+         font-weight: 400;
+         line-height: 1;
+         }
+         .hero .text h2 span{
+         font-weight: 400;
+         color: #464646;
+         }
+         .intro{
+         position: relative;
+         z-index: 0;
+         }
+         .intro .text{
+         color: rgba(0,0,0,.3);
+         }
+         .intro .text h2{
+         color: #000;
+         font-size: 34px;
+         margin-bottom: 0;
+         font-weight: 300;
+         }
+         .intro .text h2 span{
+         font-weight: 600;
+         color: #ff8b00;
+         }
+         /*HEADING SECTION*/
+         .heading-section{
+         }
+         .heading-section h2{
+         color: #000000;
+         font-size: 28px;
+         margin-top: 0;
+         line-height: 1.4;
+         font-weight: 400;
+         }
+         .heading-section .subheading{
+         margin-bottom: 20px !important;
+         display: inline-block;
+         font-size: 13px;
+         text-transform: uppercase;
+         letter-spacing: 2px;
+         color: rgba(0,0,0,.4);
+         position: relative;
+         }
+         .heading-section .subheading::after{
+         position: absolute;
+         left: 0;
+         right: 0;
+         bottom: -10px;
+         content: '';
+         width: 100%;
+         height: 2px;
+         background: #ff8b00;
+         margin: 0 auto;
+         }
+         .heading-section-white{
+         color: rgba(255,255,255,.8);
+         }
+         .heading-section-white h2{
+         font-family: inherit ;
+         line-height: 1;
+         padding-bottom: 0;
+         }
+         .heading-section-white h2{
+         color: #ffffff;
+         }
+         .heading-section-black h2{
+         color: #000;
+         }
+         .heading-section-white h2:after{
+         content: '';
+         width: 50px;
+         height: 4px;
+         background: #ff8b00;
+         display: block;
+         margin: auto;
+         margin-top: 5px;
+         }
+         .heading-section-white .subheading{
+         margin-bottom: 0;
+         display: inline-block;
+         font-size: 13px;
+         text-transform: uppercase;
+         letter-spacing: 2px;
+         color: rgba(255,255,255,.4);
+         }
+         ul.social{
+         padding: 0;
+         }
+         ul.social li{
+         display: inline-block;
+         margin-right: 10px;
+         /*border: 1px solid #ff8b00;*/
+         padding: 10px;
+         border-radius: 50%;
+         background: rgba(0,0,0,.05);
+         }
+         /*FOOTER*/
+         .footer{
+         border-top: 1px solid rgba(0,0,0,.05);
+         color: rgba(0,0,0,.5);
+         }
+         .footer .heading{
+         color: #000;
+         font-size: 20px;
+         }
+         .footer ul{
+         margin: 0;
+         padding: 0;
+         }
+         ul li{
+         list-style: none;	
+         }	
+         .footer ul li a{	
+         color: rgba(0,0,0,1);	
+         }	
+		   .footer ul li a:hover{	
+         color: #00AFF0;	
+         }	
+         .account-info{	
+            margin: unset !important;	
+            /* margin-bottom: 15px !important;	 */
+         }	
+         .account-info .description{	
+            font-weight: 400;	
+            color: #464646;	
+            word-break: break-all;
+         }	
+         .account-info .title{	
+            font-weight: 600;	
+            color: #464646;			
+         }	
+         .tbl-download{	
+            background: #fff;	
+            border-top: 1px solid #ccc;	
+         }	
+         .tbl-download td{	
+            text-align: center;	
+            padding-left: 10px;	
+         }	
+         .tbl-download h3{	
+            margin-top: 15px;	
+         }	
+         .btn-download{	
+            display: inline;	
+            width: 180px;	
+            margin-bottom: 15px;	
+         }	
+         h2 .sm-txt{	
+            display: inline;	
+            font-size: 18px;	
+            margin-left: 5px;	
+         }
+         .footer-inner-container{	
+            display: flex; 
+            justify-content: space-between;
+         }
+      </style>
+   </head>
+   <body width="100%" style="margin: 0; padding: 0 !important; mso-line-height-rule: exactly; background-color: #fafafa; border: 2">
+      <center style="width: 100%; background-color: #EFEFEF; height: 100%;">
+         <div style="display: none; font-size: 1px;max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all; font-family: Poppins;">
+            &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
+         </div>
+         <div style="max-width: 600px; margin: 0 autopx;" class="email-container">
+            <!-- <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
+               
+            </table> -->
+            <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
+               
+               <tbody>
+                  <tr style="height: 200px;">
+                     <td class="hero bg_secondary">
+                     </td>
+                  </tr>
+                  <!-- end tr -->
+                  <tr>
+                     <td class="bg_light email-section">
+                        <p style="margin-bottom: 0;  color: #464646;">Hello @order.scalaFetchMemberFullname(),</p>
+                        <p style="margin-bottom: 0; margin-top: -10px;  color: #333; font-size: 24px; font-style: normal; font-weight: 700;">Terima kasih telah melakukan pembayaran</p>
+                        <p style="color: #464646; margin-top: -10px; font-size: 14px; font-weight: 400;">Pembayaran telah terverifikasi dan pesanan telah diteruskan ke <b>Penjual</b>.</p>
+                        <table>
+                           <tbody>
+                               <tr style="color: #464646; font-size: 14px; font-weight: 400;">
+                                 <td class="left">Nomor Pesanan</td>
+                                 <td class="right">Waktu Pemesanan</td>
+                               </tr>
+                               <tr style="color: #464646; font-size: 14px; font-weight: 600;">
+                                 <td class="left">@order.scalaFetchOrderNumber()</td>
+                                 <td class="right">@order.scalaFetchOrderDate()</td>
+                               </tr>
+                           </tbody>
+                         </table>
+                        <div class="bg_light" style="padding: 24px; border-style: groove; border: 1px solid; margin-top: 28px;">
+                           <table>
+                             <tbody>
+                              <p style="color: #333; font-size: 20px; font-style: normal; font-weight: 700; line-height: normal;">Rincian Pembayaran</p>
+                                 <tr style="color: #464646; font-size: 14px; font-weight: 400;">
+                                   <td class="left">Tipe Pesanan</td>
+                                   <td></td>
+                                   <td class="right">@order.scalaFetchOrderType()</td>
+                                 </tr>
+                                 
+                                 <tr><td colspan ="3"><hr style="border: 1px #DEE3ED; border-style: dashed"></td></tr>
+   
+                                 @for(o <- order.getProductDetail()){
+                                 <tr style="color: #464646; font-size: 14px; font-weight: 600;">
+                                    <td style="width:25%">@o.fetchQuantity()</td>
+                                    <td class="left">@o.getNamaProduk()</td>
+                                    <td class="right">@o.fetchPrice()</td>
+                                 </tr>
+                                 }
+   
+                                 <tr><td colspan ="3"><hr style="border: 1px #DEE3ED; border-style: dashed"></td></tr>
+   
+                                 <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                    <td colspan="2" style=" color: #737373;">Subtotal</td>
+                                    <td class="right">@order.scalaFetchSubTotal()</td>
+                                 </tr>
+                                 <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                    <td colspan="2" style=" color: #737373;">Biaya Layanan</td>
+                                    <td class="right">@orderPayment.scalaFetchServicePrice()</td>
+                                 </tr>
+                                 <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                    <td colspan="2" style=" color: #737373;">Biaya Pengiriman</td>
+                                    <td class="right">@orderPayment.scalaFetchDeliveryFee()</td>
+                                 </tr>
+   
+                                 <tr><td colspan ="3"><hr style="border: 1px #DEE3ED; border-style: dashed"></td></tr>
+   
+                                 <tr style="color: #464646; font-size: 14px; font-weight: 700;">
+                                    <td colspan="2" style=" color: #737373;">Total</td>
+                                    <td class="right">@order.scalaFetchTotalPrice()</td>
+                                 </tr>
+   
+                                 <tr><td colspan ="3"><hr style="border: 1px #DEE3ED; border-style: dashed"></td></tr>
+   
+                                 <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                    <td colspan="2" style=" color: #737373;">Metode Pembayaran</td>
+                                    <td class="right">@order.getJenisTransaksi()</td>
+                                 </tr>
+                             </tbody>
+                           </table>
+                         </div>
+   
+                        <p style="color: #464646; margin-top: 32px; font-size: 14px; font-weight: 400;">Kamu bisa lihat status pesanan dengan klik tombol berikut.</p>
+                        <center>
+                        <a href="@order.scalaFetchStoreQrUrl" class="btn-primary" style="margin-top: 16px;">Lihat Status Pesanan</a>
+                        </center>
+   
+                        <div class="heading-section bg_light" style="padding: 24px; border-style: groove; border: 1px solid; margin-top: 32px;">
+                           <p style="color: #333; font-size: 20px; font-style: normal; font-weight: 700; line-height: normal;">Informasi Toko</p>
+                           <p style="color: #333; font-size: 16px; font-style: normal; font-weight: 700; line-height: normal;">@order.scalaFetchStoreName()</p>
+                           <p style="color: #333; font-size: 14px; font-style: normal; font-weight: 400; line-height: normal;"><img src="@path/assets/images/phone.png" style="margin-top: 0px; width: 16px; height: 16px;"> @order.scalaFetchStorePhone()</p>
+                           <p style="color: #333; font-size: 14px; font-style: normal; font-weight: 400; line-height: normal;"><img src="@path/assets/images/location.png" style="margin-top: 0px; width: 16px; height: 16px;"> @order.scalaFetchStoreAddress()</p>
+                        </div>                     
+                     </td>
+                  </tr>   
+                  <tr style="color: #464646; font-size: 14px; font-weight: 400; ">
+                     <td>
+                        <table>
+                           <tbody>
+                               <tr style="color: #464646; font-size: 14px; font-weight: 400;">
+                                 <td class="left">Copyright <img src="@path/assets/images/copyright.png" style="margin-top: 0px; width: 12px; height: 12px;"> 2023 Pagii. All Rights Reserved</td>
+                                 <td class="right"><img src='@path/assets/images/Ordering-Logomark-Default.png' alt="Sandbox" style="width: 66px; height: 20px;"></td>
+                               </tr>
+                           </tbody>
+                         </table>
+                     </td>
+                  </tr>
+               </tbody>
+            </table>
+            
+         </div>
+      </center>
+   </body>
 </html>
