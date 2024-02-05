@@ -24,7 +24,6 @@ public class BannerBazaarController extends BaseController{
   
   public static Result listBannerBazaar() {
     try {
-      System.out.println("TE ayaa");
       int total = BannerBazaarRepository.countAll();
       List<BannerBazaar> bannerBazaar = BannerBazaarRepository.findAll();
 
@@ -33,7 +32,7 @@ public class BannerBazaarController extends BaseController{
 
     } catch (Exception e) {
       e.printStackTrace();
-      response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat list setting delivery", null);
+      response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat list banner bazaar", null);
       return badRequest(Json.toJson(response));
     }
   }
