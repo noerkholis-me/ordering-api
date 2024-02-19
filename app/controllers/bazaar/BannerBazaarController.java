@@ -32,7 +32,7 @@ public class BannerBazaarController extends BaseController{
 
     } catch (Exception e) {
       e.printStackTrace();
-      response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat list banner bazaar", null);
+      response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat list Banner Bazaar", null);
       return badRequest(Json.toJson(response));
     }
   }
