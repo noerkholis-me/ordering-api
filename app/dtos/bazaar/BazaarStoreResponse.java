@@ -1,6 +1,13 @@
 package dtos.bazaar;
 
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.persistence.Column;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -9,28 +16,37 @@ import lombok.*;
 @Builder
 public class BazaarStoreResponse {
 
-    @com.fasterxml.jackson.annotation.JsonProperty("id")
+    @JsonProperty("id")
     public Long id;
 
-    @com.fasterxml.jackson.annotation.JsonProperty("store_name")
+    @JsonProperty("store_name")
     public String storeName;
 
-    @com.fasterxml.jackson.annotation.JsonProperty("store_address")
+    @JsonProperty("store_address")
     public String storeAddress;
 
-    @com.fasterxml.jackson.annotation.JsonProperty("store_image")
+    @JsonProperty("store_image")
     public String storeImage;
 
-    @com.fasterxml.jackson.annotation.JsonProperty("store_distance")
+    @JsonProperty("store_distance")
     public double storeDistance;
 
-    @com.fasterxml.jackson.annotation.JsonProperty("store_rating")
+    @JsonProperty("store_rating")
     public Double storeRating;
 
-    @com.fasterxml.jackson.annotation.JsonProperty("merchant_id")
+    @JsonProperty("merchant_id")
     public Long merchantId;
 
-    @com.fasterxml.jackson.annotation.JsonProperty("slug")
+    @JsonProperty("slug")
     public String slug;
+
+    @JsonProperty("status_open_store")
+    public Boolean statusOpenStore;
+
+    @JsonProperty("open_at")
+    public String openAt;
+
+    @JsonProperty("closed_at")
+    public String closedAt;
 
 }
