@@ -8,7 +8,6 @@ import controllers.stock.StockHistoryController;
 import dtos.bazaar.BazaarStoreResponse;
 import dtos.delivery.DeliveryDirectionRequest;
 import dtos.delivery.DeliveryDirectionResponse;
-
 import models.Store;
 import org.json.JSONObject;
 import play.Logger;
@@ -18,7 +17,6 @@ import repository.StoreRepository;
 import repository.ratings.StoreRatingRepository;
 import service.DeliveryService;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,7 +63,7 @@ public class BazaarController extends BaseController {
 
 
                 double storeRating = StoreRatingRepository.getRatings(store);
-                
+
                 response.setId(store.id);
                 response.setStoreAddress(store.getStoreAddress());
                 response.setStoreName(store.getStoreName());
@@ -74,6 +72,9 @@ public class BazaarController extends BaseController {
                 response.setMerchantId(store.getMerchant().id);
                 response.setStoreRating(change(storeRating));
                 response.setSlug(store.getStoreAlias());
+                response.setStatusOpenStore(store.getStatusOpenStore());
+                response.setOpenAt(store.getOpenAt());
+                response.setClosedAt(store.getClosedAt());
 
                 responses.add(response);
 
@@ -82,7 +83,7 @@ public class BazaarController extends BaseController {
             response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data", responses);
             return ok(Json.toJson(response));
 
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat menampilkan data", null);
             return badRequest(Json.toJson(response));
@@ -93,7 +94,7 @@ public class BazaarController extends BaseController {
         double x = storeRating;
         int angkaSignifikan = 1;
         double temp = Math.pow(10, angkaSignifikan);
-        double y = (double) Math.round(x*temp)/temp;
+        double y = (double) Math.round(x * temp) / temp;
         return y;
     }
 }
