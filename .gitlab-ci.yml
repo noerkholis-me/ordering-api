@@ -42,6 +42,8 @@ prepare-app:
       -Dsbt.ivy.home=$CI_PROJECT_DIR/sbt-cache/ivy    
     SBT_CACHE_DIR: "$CI_PROJECT_DIR/sbt-cache/.ivy/cache"
   script:
+    - echo nameserver 1.1.1.1 >>  /etc/resolv.conf
+    - cat /etc/resolv.conf
     - sbt clean compile
     #- sbt dist
   only:
@@ -66,6 +68,7 @@ build:
   services:
     - name: docker:18.09.7-dind
   script:
+    - echo nameserver 1.1.1.1 >>  /etc/resolv.conf
     - ls -lah target
     - docker info
     - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net
