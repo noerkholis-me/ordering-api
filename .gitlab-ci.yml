@@ -34,13 +34,13 @@ prepare-env:
 prepare-app:
   stage: prepare-app
   image: mozilla/sbt:8u292_1.5.7
-  variables:
-    SBT_VERSION: "1.5.7"
-    SBT_OPTS: >
-      -Dsbt.global.base=$CI_PROJECT_DIR/sbt-cache/sbtboot
-      -Dsbt.boot.directory=$CI_PROJECT_DIR/sbt-cache/boot
-      -Dsbt.ivy.home=$CI_PROJECT_DIR/sbt-cache/ivy    
-    SBT_CACHE_DIR: "$CI_PROJECT_DIR/sbt-cache/.ivy/cache"
+  #variables:
+  #  SBT_VERSION: "1.5.7"
+  #  SBT_OPTS: >
+  #    -Dsbt.global.base=$CI_PROJECT_DIR/sbt-cache/sbtboot
+  #    -Dsbt.boot.directory=$CI_PROJECT_DIR/sbt-cache/boot
+  #    -Dsbt.ivy.home=$CI_PROJECT_DIR/sbt-cache/ivy    
+  #  SBT_CACHE_DIR: "$CI_PROJECT_DIR/sbt-cache/.ivy/cache"
   script:
     - cat /etc/resolv.conf
     - sbt clean compile
