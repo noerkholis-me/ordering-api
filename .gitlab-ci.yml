@@ -76,8 +76,8 @@ build:
   only:
     - staging
     - prod-do
-  #tags:
-  #  - new-shared
+  tags:
+    - new-shared
 deploy_staging:
   image: registry.cn-hangzhou.aliyuncs.com/haoshuwei24/kubectl:1.16.6
   stage: deploy
