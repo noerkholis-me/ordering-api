@@ -1,6 +1,5 @@
 # --- !Ups
-alter table product_store alter COLUMN stock type bigint;
-
+alter table product_store add COLUMN stock bigint;
 CREATE TABLE store_taggings(
                                id						bigint not null,
                                store_id					bigint not null,
