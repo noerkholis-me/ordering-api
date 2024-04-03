@@ -1,7 +1,7 @@
 stages:
   - prepare-env
-  - prepare-app
-  - build
+  - build_staging
+  - build_prod
   - deploy
   - deploy_production
 cache:
@@ -31,42 +31,56 @@ prepare-env:
     expire_in: 1 days
 
 
-prepare-app:
-  stage: prepare-app
-  #image: mozilla/sbt:8u292_1.5.7
-  image: hseeberger/scala-sbt:11.0.5_1.3.6_2.13.1
+build_staging:
+  stage: build_staging
+  image: alpine:latest
+  before_script:
+    - "command -v ssh-agent >/dev/null || ( apk add --update openssh )"
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_WGS" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $VM_IPADDRESS_WGS >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
   script:
-    - sbt clean compile
+    #Build Backend
+    - ssh $SSH_USER_WGS@$VM_IPADDRESS_WGS "source \"/home/sandbox-dev/.sdkman/bin/sdkman-init.sh\" &&
+      cd /home/sandbox-dev/staging/api &&
+      git checkout staging && git pull && 
+      sdk use java 8.0.352.fx-zulu &&
+      sbt clean compile universal:packageBin &&
+      docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net &&
+      docker build -t "${CI_REGISTRY_IMAGE}:latest" . &&
+      docker tag "${CI_REGISTRY_IMAGE}:latest" "${CI_REGISTRY_IMAGE}:$CI_BUILD_REF" &&
+      docker push "${CI_REGISTRY_IMAGE}:$CI_BUILD_REF" && exit"
   only:
     - staging
-    - prod-do
-  tags:
-    - new-shared
-  timeout: 180m
-  artifacts:
-    paths:
-      - "target"
-    expire_in: 1 days
 
-build:
-  stage: build
-  image: docker:18.09.7
-  services:
-    - name: docker:18.09.7-dind
+build_prod:
+  stage: build_prod
+  image: alpine:latest
+  before_script:
+    - "command -v ssh-agent >/dev/null || ( apk add --update openssh )"
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_WGS" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $VM_IPADDRESS_WGS >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
   script:
-    - cat /etc/resolv.conf
-    - ls -lah target
-    - docker info
-    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net
-    - docker build -t "${CI_REGISTRY_IMAGE}:latest" .
-    - docker tag "${CI_REGISTRY_IMAGE}:latest" "${CI_REGISTRY_IMAGE}:$CI_BUILD_REF"
-    - docker push "${CI_REGISTRY_IMAGE}:latest"
-    - docker push "${CI_REGISTRY_IMAGE}:$CI_BUILD_REF"
+    #Build Backend
+    - ssh $SSH_USER_WGS@$VM_IPADDRESS_WGS "source \"/home/sandbox-dev/.sdkman/bin/sdkman-init.sh\" &&
+      cd /home/sandbox-dev/prod/api &&
+      git checkout prod-do && git pull && 
+      sdk use java 8.0.352.fx-zulu &&
+      sbt clean compile universal:packageBin &&
+      docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net &&
+      docker build -t "${CI_REGISTRY_IMAGE_PROD}:latest" . &&
+      docker tag "${CI_REGISTRY_IMAGE_PROD}:latest" "${CI_REGISTRY_IMAGE_PROD}:$CI_BUILD_REF" &&
+      docker push "${CI_REGISTRY_IMAGE_PROD}:$CI_BUILD_REF" && exit"
   only:
-    - staging
     - prod-do
-  tags:
-    - new-shared
+
 deploy_staging:
   image: registry.cn-hangzhou.aliyuncs.com/haoshuwei24/kubectl:1.16.6
   stage: deploy
@@ -101,7 +115,7 @@ deploy_staging:
 deploy_production:
   stage: deploy_production
   script:
-    - sed -i "s,_IMAGE:VERSION_,${CI_REGISTRY_IMAGE}:$CI_BUILD_REF," docker-compose.yml
+    - sed -i "s,_IMAGE:VERSION_,${CI_REGISTRY_IMAGE_PROD}:$CI_BUILD_REF," docker-compose.yml
     - scp -P 222 docker-compose.yml deploy@188.166.206.252:~/api/
     - ssh -p 222 deploy@188.166.206.252 docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net
     - ssh -p 222 deploy@188.166.206.252 "cd api && docker compose up -d"
