@@ -33,7 +33,8 @@ prepare-env:
 
 prepare-app:
   stage: prepare-app
-  image: mozilla/sbt:8u292_1.5.7
+  #image: mozilla/sbt:8u292_1.5.7
+  image: jaceklaskowski/docker-sbt-openjdk-6:0.13.9
   script:
     - sbt clean compile
   only:

@@ -1,4 +1,5 @@
-FROM mozilla/sbt:8u292_1.5.7
+#FROM mozilla/sbt:8u292_1.5.7
+FROM jaceklaskowski/docker-sbt-openjdk-6:0.13.9
 WORKDIR /app
 COPY . /app
 RUN sbt clean stage
