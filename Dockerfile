@@ -1,5 +1,5 @@
 #FROM mozilla/sbt:8u292_1.5.7
-FROM jaceklaskowski/docker-sbt-openjdk-6:0.13.9
+FROM hseeberger/scala-sbt:11.0.5_1.3.6_2.13.1
 WORKDIR /app
 COPY . /app
 RUN sbt clean stage
