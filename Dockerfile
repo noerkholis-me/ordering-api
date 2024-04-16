@@ -9,4 +9,4 @@ RUN ls -lah target/universal/
 RUN unzip -o target/universal/whiz-api-1.0-SNAPSHOT.zip -d target/universal/
 RUN ls -lah target/universal/whiz-api-1.0-SNAPSHOT/bin
 EXPOSE 9001
-ENTRYPOINT ["./target/universal/whiz-api-1.0-SNAPSHOT/bin/whiz-api", "-Dconfig.file=conf/application-staging.conf", "-Dhttp.port=9001"]
+ENTRYPOINT ["./target/universal/whiz-api-1.0-SNAPSHOT/bin/whiz-api", "-Dconfig.file=conf/application-staging.conf", "-Dhttp.port=9001", "-DapplyEvolutions.default=true", "-DapplyDownEvolutions.default=false"]
