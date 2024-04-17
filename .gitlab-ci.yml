@@ -51,9 +51,7 @@ build_prod:
       docker push "${CI_REGISTRY_IMAGE_PROD}:$CI_BUILD_REF" && exit"
   only:
     - prod-do
-  tags:
-    - new-shared
-    
+
 deploy_staging:
   image: registry.cn-hangzhou.aliyuncs.com/haoshuwei24/kubectl:1.16.6
   stage: deploy_staging
