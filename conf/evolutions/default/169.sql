@@ -5,4 +5,4 @@ alter table product_merchant add column product_merchant_detail_id              
 
 # --- !Downs
 
-alter table product_merchant drop column if exist product_merchant_detail_id;
+alter table product_merchant drop column if exists product_merchant_detail_id;
