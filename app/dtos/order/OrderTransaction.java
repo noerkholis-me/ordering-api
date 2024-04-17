@@ -46,6 +46,8 @@ public class OrderTransaction {
     private List<ProductOrderDetail> productOrderDetail;
     @JsonProperty("payment_detail")
     private PaymentDetailResponse paymentDetailResponse;
+    @JsonProperty("address")
+    private DestinationAddressResponse destinationAddressResponse;
     @JsonProperty("pickup_point_id")
     private Long pickupPointId;
     @JsonProperty("table_id")

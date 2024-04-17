@@ -51,6 +51,7 @@ public class BaseController extends Controller {
     public static int checkAccessAuthorization(String type) {
         String apiKey = request().headers().containsKey(API_KEY) ? request().headers().get(API_KEY)[0]: null;
         if (apiKey != null) {
+            System.out.println("API KEY: "+apiKey);
             String token = request().headers().containsKey(TOKEN) ? request().headers().get(TOKEN)[0] : null;
             switch (type) {
                 case "all":

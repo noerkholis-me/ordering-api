@@ -40,5 +40,7 @@ public class ProductStoreResponse implements Serializable {
 
     @JsonProperty("merchant_id")
     private Long merchantId;
+    @JsonProperty("stock")
+    private Long stock;
 
 }

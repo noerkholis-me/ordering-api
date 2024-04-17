@@ -13,7 +13,7 @@ public class ProductMerchantDetailRepository extends Model {
     public static Finder<Long, ProductMerchantDetail> find = new Finder<>(Long.class, ProductMerchantDetail.class);
 
     public static ProductMerchantDetail findByProduct(ProductMerchant productMerchant) {
-        return find.where().eq("productMerchant", productMerchant).findUnique();
+        return find.where().eq("productMerchant", productMerchant).eq("t0.is_deleted", false).findUnique();
     }
     
     public static ProductMerchantDetail findMainProduct(ProductMerchant productMerchant) {
@@ -290,6 +290,108 @@ public class ProductMerchantDetailRepository extends Model {
         query = exp.query();
 
         return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+
+    public static List<ProductMerchantDetail> getTotalDataApp(Long merchantId, Long storeId, String filter, String search, String key, String value, int offset, int limit) {
+        String querySql;
+
+            querySql = "SELECT pmd.id, pm.created_at FROM product_merchant_detail pmd "
+                    + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
+                    + "JOIN product_store ps ON pm.id = ps.product_id "
+                    + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
+                    + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
+                    + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
+                    + "AND ps.store_id = " + storeId + " AND ps.is_active = true AND ps.is_deleted = false "
+                    + "AND bm.is_active = true "
+                    + "ORDER BY pm.id DESC";
+        
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<ProductMerchantDetail> query = Ebean.find(ProductMerchantDetail.class).setRawSql(rawSql);
+
+        if (!"".equals(filter)) {
+            if (filter.equals("baru")) {
+                query = query.orderBy("created_at desc");
+            } else if (filter.equals("hemat")) {
+                query = query.orderBy("product_price_after_discount asc");
+            } else {
+                query = query.orderBy("created_at asc");
+            }
+        } else {
+            query = query.orderBy("created_at asc");
+        }
+
+        ExpressionList<ProductMerchantDetail> exp = query.where();
+
+        if (key != null && value != null) {
+            try {
+                exp = exp.eq( key, Long.parseLong(value));
+            } catch (Exception e) {
+                exp = exp.ilike(key, "%" + value + "%");
+            }
+        }
+
+        if (search != null) {
+            exp = exp.ilike("pm.product_name", "%" + search + "%");
+        }
+
+        if (key != "" && key != null) {
+            offset = 0;
+        }
+        if (search != "" && search != null) {
+            offset = 0;
+        }
+
+        query = exp.query();
+
+        return query.findPagingList(limit).getPage(offset).getList();
+    }
+
+
+    public static int countTotalDataApp(Long merchantId, Long storeId, String filter, String search, String key, String value) {
+        String querySql;
+            querySql = "SELECT pmd.id, pm.created_at FROM product_merchant_detail pmd "
+                    + "JOIN product_merchant pm ON pmd.product_merchant_id = pm.id "
+                    + "JOIN product_store ps ON pm.id = ps.product_id "
+                    + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
+                    + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
+                    + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
+                    + "AND ps.store_id = " + storeId + " AND ps.is_active = true AND ps.is_deleted = false "
+                    + "AND bm.is_active = true "
+                    + "ORDER BY pm.id DESC";
+
+        RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+        Query<ProductMerchantDetail> query = Ebean.find(ProductMerchantDetail.class).setRawSql(rawSql);
+
+        if (!"".equals(filter)) {
+            if (filter.equals("baru")) {
+                query = query.orderBy("created_at desc");
+            } else if (filter.equals("hemat")) {
+                query = query.orderBy("product_price_after_discount asc");
+            } else {
+                query = query.orderBy("created_at asc");
+            }
+        } else {
+            query = query.orderBy("created_at asc");
+        }
+
+        ExpressionList<ProductMerchantDetail> exp = query.where();
+
+        if (key != null && value != null) {
+            try {
+                exp = exp.eq( key, Long.parseLong(value));
+            } catch (Exception e) {
+                exp = exp.ilike(key, "%" + value + "%");
+            }
+        }
+
+        if (search != null) {
+            exp = exp.ilike("pm.product_name", "%" + search + "%");
+        }
+
+        query = exp.query();
+
+        return query.findList().size();
     }
 
 }

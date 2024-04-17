@@ -36,6 +36,4 @@ public class SubCategoryMerchantResponse  {
 
     @JsonProperty("merchant_id")
     private Long merchantId;
-
-
 }

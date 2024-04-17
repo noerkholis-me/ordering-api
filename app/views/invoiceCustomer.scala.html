@@ -1,0 +1,535 @@
+@import models.transaction.Order
+@import models.transaction.OrderPayment
+@(path: String, order: Order, orderPayment: OrderPayment)
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="x-apple-disable-message-reformatting">
+      <title>Pagii App - {{title}}</title>
+      <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700" rel="stylesheet">
+      <style>
+         html,
+         body {
+         margin: 0 auto !important;
+         padding: 0 !important;
+         height: 100% !important;
+         width: 100% !important;
+         background: #f1f1f1;
+         }
+         * {
+         -ms-text-size-adjust: 100%;
+         -webkit-text-size-adjust: 100%;
+         }
+         div[style*="margin: 16px 0"] {
+         margin: 0 !important;
+         }
+         table,
+         td {
+         mso-table-lspace: 0pt !important;
+         mso-table-rspace: 0pt !important;
+         }
+         table {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0px;
+      }
+
+         table .left {
+         text-align: left;
+         }
+
+         table .right {
+         text-align: right;
+         }
+         img {
+         -ms-interpolation-mode:bicubic;
+		 width: 100%;
+         }
+         a {
+         text-decoration: none;
+         }
+         *[x-apple-data-detectors],
+         .unstyle-auto-detected-links *,
+         .aBn {
+         border-bottom: 0 !important;
+         cursor: default !important;
+         color: inherit !important;
+         text-decoration: none !important;
+         font-size: inherit !important;
+         font-family: inherit !important;
+         font-weight: inherit !important;
+         line-height: inherit !important;
+         }
+         .a6S {
+         display: none !important;
+         opacity: 0.01 !important;
+         }
+         .im {
+         color: inherit !important;
+         }
+         img.g-img + div {
+         display: none !important;
+         }
+         /* iPhone 4, 4S, 5, 5S, 5C, and 5SE */
+         @@media only screen and (min-device-width: 320px) and (max-device-width: 374px) {
+         u ~ div .email-container {
+         min-width: 320px !important;
+         }
+         }
+         /* iPhone 6, 6S, 7, 8, and X */
+         @@media only screen and (min-device-width: 375px) and (max-device-width: 413px) {
+         u ~ div .email-container {
+         min-width: 375px !important;
+         }
+         }
+         /* iPhone 6+, 7+, and 8+ */
+         @@media only screen and (min-device-width: 414px) {
+         u ~ div .email-container {
+         min-width: 414px !important;
+         }
+         }
+      </style>
+      <style>
+         .primary{
+         background: #ff8b00;
+         }
+         .btn-primary{
+            color: #fff;
+            text-decoration: none;
+            background: #FFC93C;
+            border:1px solid #FFC93C;
+            border-radius: 4px;
+            padding: 5px 20px;
+            /* display: inline-block; */
+            width: fit-content;
+            /* margin: 15px auto;
+            display: flex; */
+            height: 48px;
+            padding: 12px 16px;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+         }
+         .btn-secondary{
+            color: #00AFF0;
+            text-decoration: none;
+            background: #fff;
+            border: 1px solid #00AFF0;
+            border-radius: 5px;
+            padding: 5px 20px;
+            display: inline-block;
+            width: fit-content;
+            margin: 15px auto;
+         }
+         .bg_white{
+         background: #F9F9FA;
+         }
+         .bg_secondary{
+         background: #464646;
+         }
+         .bg_light{
+         background: #FFFFFF;
+         }
+         .bg_black{
+         background: #000000;
+         }
+         .bg_dark{
+         background: rgba(0,0,0,.8);
+         }
+         .email-section{
+         padding:24px;
+         }
+         .btn{
+         padding: 5px 20px;
+         display: inline-block;
+         }
+         .btn.btn-primary{
+         border-radius: 5px;
+         background: #ff8b00;
+         color: #ffffff;
+         }
+         .btn.btn-white{
+         border-radius: 5px;
+         background: #ffffff;
+         color: #000000;
+         }
+         .btn.btn-white-outline{
+         border-radius: 5px;
+         background: transparent;
+         border: 1px solid #fff;
+         color: #fff;
+         }
+         .btn.btn-black{
+         border-radius: 0px;
+         background: #000;
+         color: #fff;
+         }
+         .btn.btn-black-outline{
+         border-radius: 0px;
+         background: transparent;
+         border: 2px solid #000;
+         color: #000;
+         font-weight: 700;
+         }
+         .btn.btn-custom{
+         text-transform: uppercase;
+         font-weight: 600;
+         font-size: 12px;
+         }
+         h1,h2,h3,h4,h5,h6{
+         font-family: 'Poppins';
+         color: #464646;
+         margin-top: 0;
+         font-weight: 400;
+         }
+         body{
+         font-family: 'Poppins';
+         font-weight: 400;
+         font-size: 14px;
+         line-height: 1.8;
+         color: rgba(0,0,0,.5);
+         }
+         a{
+         color: #00AFF0;
+         }
+         p{
+         margin-top: 0;
+         }
+         table{
+         }
+         .img-logo{
+         width: 100px;
+         margin-top: 15px;
+         }
+         .img-svg{
+         width: 19px;
+         }
+         .logo h1{
+         margin: 0;
+         }
+         .logo h1 a{
+         color: #000000;
+         font-size: 20px;
+         font-weight: 700;
+         /*text-transform: uppercase;*/
+         font-family: 'Poppins';
+         }
+         .navigation{
+         padding: 0;
+         padding: 1em 0;
+         /*background: rgba(0,0,0,1);*/
+         border-top: 1px solid rgba(0,0,0,.05);
+         border-bottom: 1px solid rgba(0,0,0,.05);
+         margin-bottom: 0;
+         }
+         .navigation li{
+         list-style: none;
+         display: inline-block;;
+         margin-left: 5px;
+         margin-right: 5px;
+         font-size: 14px;
+         font-weight: 500;
+         }
+         .navigation li a{
+         color: rgba(0,0,0,1);
+         }
+         .btn-download{
+         display: block;
+         width: 100%;
+         margin-bottom: 15px;
+         }
+         .hero{
+         position: relative;
+         z-index: 0;
+         background: url('@order.scalaFetchStoreLogo()');
+         background-size: cover;
+         background-repeat: no-repeat;
+         padding: 15px;
+         background-color: #F9F9FA;
+         }
+         .hero .text{
+         color: rgba(255,255,255,.9);
+         max-width: 50%;
+         margin: 0 auto 0;
+         }
+         .hero .text h2{
+         color: #464646;
+         font-size: 34px;
+         margin-bottom: 0;
+         font-weight: 400;
+         line-height: 1;
+         }
+         .hero .text h2 span{
+         font-weight: 400;
+         color: #464646;
+         }
+         .intro{
+         position: relative;
+         z-index: 0;
+         }
+         .intro .text{
+         color: rgba(0,0,0,.3);
+         }
+         .intro .text h2{
+         color: #000;
+         font-size: 34px;
+         margin-bottom: 0;
+         font-weight: 300;
+         }
+         .intro .text h2 span{
+         font-weight: 600;
+         color: #ff8b00;
+         }
+         /*HEADING SECTION*/
+         .heading-section{
+         }
+         .heading-section h2{
+         color: #000000;
+         font-size: 28px;
+         margin-top: 0;
+         line-height: 1.4;
+         font-weight: 400;
+         }
+         .heading-section .subheading{
+         margin-bottom: 20px !important;
+         display: inline-block;
+         font-size: 13px;
+         text-transform: uppercase;
+         letter-spacing: 2px;
+         color: rgba(0,0,0,.4);
+         position: relative;
+         }
+         .heading-section .subheading::after{
+         position: absolute;
+         left: 0;
+         right: 0;
+         bottom: -10px;
+         content: '';
+         width: 100%;
+         height: 2px;
+         background: #ff8b00;
+         margin: 0 auto;
+         }
+         .heading-section-white{
+         color: rgba(255,255,255,.8);
+         }
+         .heading-section-white h2{
+         font-family: inherit ;
+         line-height: 1;
+         padding-bottom: 0;
+         }
+         .heading-section-white h2{
+         color: #ffffff;
+         }
+         .heading-section-black h2{
+         color: #000;
+         }
+         .heading-section-white h2:after{
+         content: '';
+         width: 50px;
+         height: 4px;
+         background: #ff8b00;
+         display: block;
+         margin: auto;
+         margin-top: 5px;
+         }
+         .heading-section-white .subheading{
+         margin-bottom: 0;
+         display: inline-block;
+         font-size: 13px;
+         text-transform: uppercase;
+         letter-spacing: 2px;
+         color: rgba(255,255,255,.4);
+         }
+         ul.social{
+         padding: 0;
+         }
+         ul.social li{
+         display: inline-block;
+         margin-right: 10px;
+         /*border: 1px solid #ff8b00;*/
+         padding: 10px;
+         border-radius: 50%;
+         background: rgba(0,0,0,.05);
+         }
+         /*FOOTER*/
+         .footer{
+         border-top: 1px solid rgba(0,0,0,.05);
+         color: rgba(0,0,0,.5);
+         }
+         .footer .heading{
+         color: #000;
+         font-size: 20px;
+         }
+         .footer ul{
+         margin: 0;
+         padding: 0;
+         }
+         ul li{
+         list-style: none;	
+         }	
+         .footer ul li a{	
+         color: rgba(0,0,0,1);	
+         }	
+		   .footer ul li a:hover{	
+         color: #00AFF0;	
+         }	
+         .account-info{	
+            margin: unset !important;	
+            /* margin-bottom: 15px !important;	 */
+         }	
+         .account-info .description{	
+            font-weight: 400;	
+            color: #464646;	
+            word-break: break-all;
+         }	
+         .account-info .title{	
+            font-weight: 600;	
+            color: #464646;			
+         }	
+         .tbl-download{	
+            background: #fff;	
+            border-top: 1px solid #ccc;	
+         }	
+         .tbl-download td{	
+            text-align: center;	
+            padding-left: 10px;	
+         }	
+         .tbl-download h3{	
+            margin-top: 15px;	
+         }	
+         .btn-download{	
+            display: inline;	
+            width: 180px;	
+            margin-bottom: 15px;	
+         }	
+         h2 .sm-txt{	
+            display: inline;	
+            font-size: 18px;	
+            margin-left: 5px;	
+         }
+      </style>
+   </head>
+   <body width="100%" style="margin: 0; padding: 0 !important; mso-line-height-rule: exactly; background-color: #fafafa; border: 2">
+      <center style="width: 100%; background-color: #EFEFEF; height: 100%;">
+         <div style="display: none; font-size: 1px;max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden; mso-hide: all; font-family: Poppins;">
+            &zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;
+         </div>
+         <div style="max-width: 600px; margin: 0 auto;" class="email-container">
+            <table align="center" role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: auto;">
+               <tr style="height: 200px;">
+                  <td class="hero bg_secondary">
+                  </td>
+               </tr>
+               <!-- end tr -->
+               <tr>
+                  <td class="bg_light email-section">
+                     <p style="margin-bottom: 0;  color: #464646;">Hello @order.scalaFetchMemberFullname(),</p>
+                     <p style="margin-bottom: 0; margin-top: -10px;  color: #333; font-size: 24px; font-style: normal; font-weight: 700;">Terima kasih telah melakukan pembayaran</p>
+                     <p style="color: #464646; margin-top: -10px; font-size: 14px; font-weight: 400;">Pembayaran telah terverifikasi dan pesanan telah diteruskan ke <b>Penjual</b>.</p>
+                     <table>
+                        <tbody>
+                         <p style="color: #333; font-size: 20px; font-style: normal; font-weight: 700; line-height: normal;">Rincian Pembayaran</p>
+                            <tr style="color: #464646; font-size: 14px; font-weight: 400;">
+                              <td class="left">Nomor Pesanan</td>
+                              <td class="right">Waktu Pemesanan</td>
+                            </tr>
+                            <tr style="color: #464646; font-size: 14px; font-weight: 600;">
+                              <td class="left">@order.scalaFetchOrderNumber()</td>
+                              <td class="right">@order.scalaFetchOrderDate()</td>
+                            </tr>
+                        </tbody>
+                      </table>
+                     <div class="bg_light" style="padding: 24px; border-style: groove; border: 1px solid; margin-top: 28px;">
+                        <table>
+                          <tbody>
+                           <p style="color: #333; font-size: 20px; font-style: normal; font-weight: 700; line-height: normal;">Rincian Pembayaran</p>
+                              <tr style="color: #464646; font-size: 14px; font-weight: 400;">
+                                <td class="left">Tipe Pesanan</td>
+                                <td></td>
+                                <td class="right">@order.scalaFetchOrderType()</td>
+                              </tr>
+                              
+                              <tr><td colspan ="3"><hr style="border: 1px #DEE3ED; border-style: dashed"></td></tr>
+
+                              @for(o <- order.getProductDetail()){
+                              <tr style="color: #464646; font-size: 14px; font-weight: 600;">
+                                 <td style="width:25%">@o.fetchQuantity()</td>
+                                 <td class="left">@o.getNamaProduk()</td>
+                                 <td class="right">@o.fetchPrice()</td>
+                              </tr>
+                              }
+
+                              <tr><td colspan ="3"><hr style="border: 1px #DEE3ED; border-style: dashed"></td></tr>
+
+                              <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                 <td colspan="2" style=" color: #737373;">Subtotal</td>
+                                 <td class="right">@order.scalaFetchSubTotal()</td>
+                              </tr>
+                              <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                 <td colspan="2" style=" color: #737373;">Pajak (@orderPayment.scalaFetchTaxPercentage()%)</td>
+                                 <td class="right"> @orderPayment.scalaFetchTaxPrice()</td>
+                              </tr>
+                              <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                 <td colspan="2" style=" color: #737373;">Layanan (@orderPayment.scalaFetchServicePercentage()%)</td>
+                                 <td class="right">@orderPayment.scalaFetchServicePrice()</td>
+                              </tr>
+                              <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                 <td colspan="2" style=" color: #737373;">Biaya Pemesanan</td>
+                                 <td class="right">@orderPayment.scalaFetchFeeCustomer()</td>
+                              </tr>
+
+                              <tr><td colspan ="3"><hr style="border: 1px #DEE3ED; border-style: dashed"></td></tr>
+
+                              <tr style="color: #464646; font-size: 14px; font-weight: 700;">
+                                 <td colspan="2" style=" color: #737373;">Total</td>
+                                 <td class="right">@order.scalaFetchTotalPrice()</td>
+                              </tr>
+
+                              <tr><td colspan ="3"><hr style="border: 1px #DEE3ED; border-style: dashed"></td></tr>
+
+                              <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                 <td colspan="2" style=" color: #737373;">Metode Pembayaran</td>
+                                 <td class="right">@order.getJenisTransaksi()</td>
+                              </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                 <p style="color: #464646; margin-top: 32px; font-size: 14px; font-weight: 400;">Kamu bisa lihat status pesanan dengan klik tombol berikut.</p>
+                 <center>
+                  <a href="@order.scalaFetchStoreQrUrl" class="btn-primary" style="margin-top: 16px;">Lihat Status Pesanan</a>
+                 </center>
+
+                 <div class="heading-section bg_light" style="padding: 24px; border-style: groove; border: 1px solid; margin-top: 32px;">
+                  <p style="color: #333; font-size: 20px; font-style: normal; font-weight: 700; line-height: normal;">Informasi Toko</p>
+                  <p style="color: #333; font-size: 16px; font-style: normal; font-weight: 700; line-height: normal;">@order.scalaFetchStoreName()</p>
+                  <p style="color: #333; font-size: 14px; font-style: normal; font-weight: 400; line-height: normal;"><img src="@path/assets/images/phone.png" style="margin-top: 0px; width: 16px; height: 16px;"> @order.scalaFetchStorePhone()</p>
+                  <p style="color: #333; font-size: 14px; font-style: normal; font-weight: 400; line-height: normal;"><img src="@path/assets/images/location.png" style="margin-top: 0px; width: 16px; height: 16px;"> @order.scalaFetchStoreAddress()</p>
+               </div>
+               <tr>
+                  <td class="bg_light email-section">
+                     <div style="display: flex; justify-content: space-between;">
+                        <div style="font-size: 12px;
+                        font-style: normal;
+                        font-weight: 400;
+                        line-height: normal;
+                        color: #464646;"> Copyright <img src="@path/assets/images/copyright.png" style="margin-top: 0px; width: 12px; height: 12px;"> 2023 Pagii. All Rights Reserved</div>
+                        <div style="display: flex;
+                        width: 66px;
+                        height: 20px;
+                        justify-content: center;
+                        align-items: center;"><img src='@path/assets/images/Logo-Pagii-Sandbox.png' alt="Sandbox" width="100%"></div>
+                     </div>
+                  </td>
+               </tr>
+               </tr>
+               
+            </table>
+         </div>
+      </center>
+   </body>
+</html>

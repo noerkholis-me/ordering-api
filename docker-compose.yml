@@ -9,7 +9,7 @@ services:
            - export:/app/sandbox-export/
         restart: always
         ports:
-           - "9001:9001"
+           - "9002:9001"
 volumes:
    media:
    elasticsearch:

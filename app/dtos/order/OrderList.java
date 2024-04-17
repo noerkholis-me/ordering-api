@@ -31,11 +31,23 @@ public class OrderList {
     @JsonProperty("invoice_number")
     private String invoiceNumber;
 
+    @JsonProperty("delivery_fee")
+    private BigDecimal deliveryFee;
+
+    @JsonProperty("service_price")
+    private BigDecimal servicePrice;
+
+    @JsonProperty("destination_address")
+    private String destinationAddress;
+
     @JsonProperty("order_number")
     private String orderNumber;
 
     @JsonProperty("customer_name")
     private String customerName;
+
+    @JsonProperty("customer_email")
+    private String customerEmail;
 
     @JsonProperty("cashier_name")
     private String cashierName;
@@ -45,6 +57,9 @@ public class OrderList {
 
     @JsonProperty("merchant_name")
     private String merchantName;
+
+    @JsonProperty("merchant_address")
+    private String merchantAddress;
 
     @JsonProperty("total_amount")
     @JsonSerialize(using = BigDecimalSerialize.class)
@@ -56,11 +71,20 @@ public class OrderList {
     @JsonProperty("status_order")
     private String statusOrder;
 
+    @JsonProperty("table_id")
+    private Long tableId;
+
+    @JsonProperty("table_name")
+    private String tableName;
+
     @JsonProperty("order_queue")
     private Integer orderQueue;
 
     @JsonProperty("order_detail")
     private List<ProductOrderDetail> productOrderDetail;
+
+    @JsonProperty("is_rated")
+    private Boolean isRated;
 
     @JsonProperty("status")
     private String status;
@@ -68,8 +92,14 @@ public class OrderList {
     @JsonProperty("payment_type")
     private String paymentType;
 
+    @JsonProperty("payment_status")
+    private String paymentStatus;
+
     @JsonProperty("payment_channel")
     private String paymentChannel;
+
+    @JsonProperty("bank_code")
+    private String bankCode;
 
     @JsonProperty("total_amount_payment")
     @JsonSerialize(using = BigDecimalSerialize.class)

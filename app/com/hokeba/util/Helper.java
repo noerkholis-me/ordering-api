@@ -313,7 +313,7 @@ public class Helper {
     	DecimalFormat rupiah = (DecimalFormat) DecimalFormat.getCurrencyInstance();
 	    DecimalFormatSymbols formatRp = new DecimalFormatSymbols();
 	
-	    formatRp.setCurrencySymbol("Rp. ");
+	    formatRp.setCurrencySymbol("Rp ");
 	    formatRp.setMonetaryDecimalSeparator(',');
 	    formatRp.setGroupingSeparator('.');
 	

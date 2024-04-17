@@ -35,6 +35,9 @@ public class ProductStore extends BaseModel {
     @JsonProperty("final_price")
     public BigDecimal finalPrice;
 
+    @JsonProperty("stock")
+    public Long stock;
+
     @JsonProperty("is_active")
     @Column(name = "is_active")
     public boolean isActive;
@@ -63,6 +66,7 @@ public class ProductStore extends BaseModel {
         this.setMerchant(merchant);
         this.setActive(isActive != null || productStoreRequest.getIsActive());
         this.setStorePrice(productStoreRequest.getStorePrice());
+        this.setStock(productStoreRequest.getStock());
         this.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode + "/" + store.id + "/" + merchant.id + "/product/" + productMerchant.id + "/detail"));
         if (productStoreRequest.getDiscountType() != null) {
             this.setDiscountType(productStoreRequest.getDiscountType());
@@ -98,6 +102,7 @@ public class ProductStore extends BaseModel {
         productStore.setProductMerchant(productMerchant);
         productStore.setMerchant(merchant);
         productStore.setActive(productStoreRequest.getIsActive());
+        productStore.setStock(productStoreRequest.getStock());
         productStore.setStorePrice(productStoreRequest.getStorePrice());
         productStore.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode + "/" + store.id + "/" + merchant.id + "/product/" + productMerchant.id + "/detail"));
         if (productStoreRequest.getDiscountType() != null) {
