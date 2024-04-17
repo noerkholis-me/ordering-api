@@ -1,86 +1,62 @@
 stages:
-  - prepare-env
-  - prepare-app
-  - build
-  - deploy
+  - build_staging
+  - build_prod
+  - deploy_staging
   - deploy_production
-cache:
-  key: "$CI_BUILD_REF_NAME"
-  untracked: true    
-  paths:
-    - target/
-    - sbt-cache/
 
-prepare-env:
-  stage: prepare-env
-  variables:
-    SOURCE_BRANCH: conf/application-local.conf
-  rules:
-    - if: $CI_COMMIT_REF_NAME =~ /prod-do/
-      variables:
-        SOURCE_BRANCH: conf/application-prod.conf
-    - if: $CI_COMMIT_REF_NAME =~ /staging/
-      variables:
-        SOURCE_BRANCH: conf/application-staging.conf
+build_staging:
+  stage: build_staging
+  image: alpine:latest
+  before_script:
+    - "command -v ssh-agent >/dev/null || ( apk add --update openssh )"
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_WGS" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $VM_IPADDRESS_WGS >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
   script:
-    - echo $SOURCE_BRANCH
-    - cp $SOURCE_BRANCH conf/application.conf
-  artifacts:
-    paths:
-      - "conf/"
-    expire_in: 1 days
-
-
-prepare-app:
-  stage: prepare-app
-  image: mozilla/sbt:8u292_1.5.7
-  variables:
-    SBT_VERSION: "1.5.7"
-    SBT_OPTS: >
-      -Dsbt.global.base=$CI_PROJECT_DIR/sbt-cache/sbtboot
-      -Dsbt.boot.directory=$CI_PROJECT_DIR/sbt-cache/boot
-      -Dsbt.ivy.home=$CI_PROJECT_DIR/sbt-cache/ivy    
-    SBT_CACHE_DIR: "$CI_PROJECT_DIR/sbt-cache/.ivy/cache"
-  script:
-    - sbt clean compile
-    #- sbt dist
+    - ssh $SSH_USER_WGS@$VM_IPADDRESS_WGS "source \"/home/sandbox-dev/.sdkman/bin/sdkman-init.sh\" &&
+      cd /home/sandbox-dev/staging/api &&
+      git checkout staging && git pull && 
+      sdk use java 8.0.352.fx-zulu &&
+      sbt clean compile universal:packageBin &&
+      docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net &&
+      docker build -t "${CI_REGISTRY_IMAGE}:latest" . &&
+      docker tag "${CI_REGISTRY_IMAGE}:latest" "${CI_REGISTRY_IMAGE}:$CI_BUILD_REF" &&
+      docker push "${CI_REGISTRY_IMAGE}:$CI_BUILD_REF" && exit"
   only:
     - staging
+
+build_prod:
+  stage: build_prod
+  image: alpine:latest
+  before_script:
+    - "command -v ssh-agent >/dev/null || ( apk add --update openssh )"
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_WGS" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan $VM_IPADDRESS_WGS >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+  script:
+    - ssh $SSH_USER_WGS@$VM_IPADDRESS_WGS "source \"/home/sandbox-dev/.sdkman/bin/sdkman-init.sh\" &&
+      cd /home/sandbox-dev/prod/api &&
+      git checkout prod-do && git pull && 
+      sdk use java 8.0.352.fx-zulu &&
+      sbt clean compile universal:packageBin &&
+      docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net &&
+      docker build -t "${CI_REGISTRY_IMAGE_PROD}:latest" . &&
+      docker tag "${CI_REGISTRY_IMAGE_PROD}:latest" "${CI_REGISTRY_IMAGE_PROD}:$CI_BUILD_REF" &&
+      docker push "${CI_REGISTRY_IMAGE_PROD}:$CI_BUILD_REF" && exit"
+  only:
     - prod-do
   tags:
     - new-shared
-  timeout: 180m
-  artifacts:
-    paths:
-      - "target"
-  #    - "project/target"
-  #    - "project/project/target"
-  #    - "*/target"
-  #    - "*/project/target"
-  #    - "*/project/project/target"
-    expire_in: 1 days
-
-build:
-  stage: build
-  image: docker:18.09.7
-  services:
-    - name: docker:18.09.7-dind
-  script:
-    - ls -lah target
-    - docker info
-    - docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net
-    - docker build -t "${CI_REGISTRY_IMAGE}:latest" .
-    - docker tag "${CI_REGISTRY_IMAGE}:latest" "${CI_REGISTRY_IMAGE}:$CI_BUILD_REF"
-    - docker push "${CI_REGISTRY_IMAGE}:latest"
-    - docker push "${CI_REGISTRY_IMAGE}:$CI_BUILD_REF"
-  only:
-    - staging
-    - prod-do
-  tags:
-    - new-shared
+    
 deploy_staging:
   image: registry.cn-hangzhou.aliyuncs.com/haoshuwei24/kubectl:1.16.6
-  stage: deploy
+  stage: deploy_staging
   environment:
     name: stg-sandbox-api
     url: https://${URL_STAGING}
@@ -97,7 +73,6 @@ deploy_staging:
       fi 
     - sed -i "s/__CI_ENVIRONMENT_SLUG__/${CI_ENVIRONMENT_SLUG}/" deployment.yaml service.yaml ingress.yaml
     - sed -i "s/__CI_PROJECT_NAME__/${CI_PROJECT_NAME}/" deployment.yaml service.yaml ingress.yaml pvc.yaml
-#    - sed -i "s/__VERSION__/$CI_BUILD_REF/" deployment.yaml
     - sed -i "s/__URL_STAGING__/${URL_STAGING}/" ingress.yaml
     - sed -i "s,__IMAGE__:__VERSION__,${CI_REGISTRY_IMAGE}:$CI_BUILD_REF," deployment.yaml
     - kubectl apply -f pvc.yaml
@@ -112,7 +87,7 @@ deploy_staging:
 deploy_production:
   stage: deploy_production
   script:
-    - sed -i "s,_IMAGE:VERSION_,${CI_REGISTRY_IMAGE}:$CI_BUILD_REF," docker-compose.yml
+    - sed -i "s,_IMAGE:VERSION_,${CI_REGISTRY_IMAGE_PROD}:$CI_BUILD_REF," docker-compose.yml
     - scp -P 222 docker-compose.yml deploy@188.166.206.252:~/api/
     - ssh -p 222 deploy@188.166.206.252 docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net
     - ssh -p 222 deploy@188.166.206.252 "cd api && docker compose up -d"
