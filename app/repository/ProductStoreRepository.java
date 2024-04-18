@@ -50,6 +50,19 @@ public class ProductStoreRepository extends Model {
 		}
 	}
 
+	public static ProductStore findByProductIdAndStoreId(Long id, Store store) {
+		try {
+			return find.where()
+					.eq("t0.product_id", id)
+					.eq("store", store)
+					.eq("t0.is_deleted", Boolean.FALSE)
+					.findUnique();
+		} catch (PersistenceException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
     public static ProductStore findForCust(Long productId, Long storeId, Merchant merchant) {
         try {
 			return find.where()

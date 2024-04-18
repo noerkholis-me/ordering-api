@@ -50,12 +50,12 @@ public class SubCategoryMerchantRepository extends Model {
     	}
     }
 
-    public static List<SubCategoryMerchant> getDataSubCategory(Query<SubCategoryMerchant> reqQuery, String sort, String filter, int offset, int limit)
+	public static List<SubCategoryMerchant> getDataSubCategory(Query<SubCategoryMerchant> reqQuery, String sort, String filter, int offset, int limit)
 			throws IOException {
 		Query<SubCategoryMerchant> query = reqQuery;
 
 		if (!"".equals(sort)) {
-            query = query.orderBy(sort);
+			query = query.orderBy(sort);
 		} else {
 			query = query.orderBy("t0.updated_at desc");
 		}
@@ -66,7 +66,7 @@ public class SubCategoryMerchantRepository extends Model {
 
 		exp = exp.disjunction();
 		exp = exp.ilike("t0.subcategory_name", "%" + filter + "%");
-        // exp = exp.endjunction();
+		// exp = exp.endjunction();
 
 		query = exp.query();
 
@@ -75,9 +75,9 @@ public class SubCategoryMerchantRepository extends Model {
 		if (limit != 0) {
 			query = query.setMaxRows(limit);
 		}
-        if (filter != "" && filter != null) {
-            offset = 0;
-        }
+		if (filter != "" && filter != null) {
+			offset = 0;
+		}
 
 		List<SubCategoryMerchant> resData = query.findPagingList(limit).getPage(offset).getList();
 
@@ -171,5 +171,50 @@ public class SubCategoryMerchantRepository extends Model {
 		Query<SubCategoryMerchant> query = Ebean.find(SubCategoryMerchant.class).setRawSql(rawSql);
 
 		return query.findPagingList(0).getPage(0).getList();
+	}
+
+	public static List<SubCategoryMerchant> findAllByCategory(Long categoryId) {
+		String querySql = "SELECT scm.id FROM sub_category_merchant scm "
+				+ "WHERE scm.category_id = " + categoryId + " AND scm.is_deleted = false "
+				+ "ORDER BY scm.id DESC";
+
+		RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+		Query<SubCategoryMerchant> query = Ebean.find(SubCategoryMerchant.class).setRawSql(rawSql);
+
+		return query.findPagingList(0).getPage(0).getList();
+	}
+
+	public static List<SubCategoryMerchant> getDataSubCategoryFE(Query<SubCategoryMerchant> reqQuery, String sort, String filter, int offset, int limit)
+			throws IOException {
+		Query<SubCategoryMerchant> query = reqQuery;
+
+		if (!"".equals(sort)) {
+			query = query.orderBy(sort);
+		} else {
+			query = query.orderBy("t0.updated_at desc");
+		}
+
+		ExpressionList<SubCategoryMerchant> exp = query.where();
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+
+		exp = exp.disjunction();
+		exp = exp.ilike("t0.subcategory_name", "%" + filter + "%");
+		// exp = exp.endjunction();
+
+		query = exp.query();
+
+		int total = query.findList().size();
+
+		if (limit != 0) {
+			query = query.setMaxRows(limit);
+		}
+		if (filter != "" && filter != null) {
+			offset = 0;
+		}
+
+		List<SubCategoryMerchant> resData = query.findPagingList(limit).getPage(offset).getList();
+
+		return resData;
 	}
 }

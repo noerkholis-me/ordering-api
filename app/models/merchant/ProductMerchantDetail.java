@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import models.BaseModel;
+import models.Store;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -68,6 +69,8 @@ public class ProductMerchantDetail extends BaseModel {
 
     @Transient
     public Long total_penjualan;
+
+    public static Finder<Long, ProductMerchantDetail> find = new Finder<Long, ProductMerchantDetail>(Long.class, ProductMerchantDetail.class);
 
     public ProductMerchantDetail(ProductMerchant productMerchant, ProductRequest productRequest) {
         this.setProductType(productRequest.getProductDetailRequest().getProductType());
