@@ -1288,7 +1288,7 @@ public class ProductStoreController extends BaseController {
                         response.setBaseResponse(0, 0, 0, error + " produk store tidak tersedia.", null);
                         return badRequest(Json.toJson(response));
                     }
-                    productStore.setActive(request.getIsPublish());
+                    productStore.setPublish(request.getIsPublish());
                     productStore.update();
 
                     trx.commit();
