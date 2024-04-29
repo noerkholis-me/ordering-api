@@ -32,4 +32,6 @@ public class StoreRequest {
     public String openAt;
     @JsonProperty("closed_at")
     public String closedAt;
+    @JsonProperty("is_publish")
+    public Boolean isPublish;
 }

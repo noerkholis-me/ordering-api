@@ -95,7 +95,9 @@ public class StoreRepository {
         query = exp.query();
 
         return query.findPagingList(limit).getPage(offset).getList();
-    }public static Query<Store> query(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
+    }
+    
+    public static Query<Store> query(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
         Query<Store> query = find.query();
 
         // SQL for get range distance
@@ -144,9 +146,9 @@ public class StoreRepository {
 
         }
 
-
         query = query.where()
                 .eq("is_active", true)
+                .eq("is_publish", true)
                 .eq("is_deleted", false)
                 .query();
 
@@ -172,8 +174,6 @@ public class StoreRepository {
 
         return query;
     }
-
-
 
     public static List<Store> findAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
 
