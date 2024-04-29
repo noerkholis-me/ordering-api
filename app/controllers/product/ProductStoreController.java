@@ -1039,6 +1039,7 @@ public class ProductStoreController extends BaseController {
                         responsePStore.setStoreId(dataPStore.getStore().id);
                         responsePStore.setProductId(dataPStore.getProductMerchant().id);
                         responsePStore.setIsActive(dataPStore.isActive);
+                        responsePStore.setIsPublish(dataPStore.isPublish);
                         responsePStore.setStorePrice(dataPStore.getStorePrice());
                         responsePStore.setDiscountType(dataPStore.getDiscountType());
                         responsePStore.setDiscount(dataPStore.getDiscount());
@@ -1272,5 +1273,42 @@ public class ProductStoreController extends BaseController {
         }
 
         return responses;
+    }
+
+    public static Result setPublish(Long id) {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if (ownMerchant != null) {
+            try {
+                JsonNode json = request().body().asJson();
+                ProductStoreResponse request = objectMapper.readValue(json.toString(), ProductStoreResponse.class);
+                Transaction trx = Ebean.beginTransaction();
+                try {
+                    ProductStore productStore = ProductStoreRepository.findByIdAndMerchantId(id, ownMerchant);
+                    if (productStore == null) {
+                        response.setBaseResponse(0, 0, 0, error + " produk store tidak tersedia.", null);
+                        return badRequest(Json.toJson(response));
+                    }
+                    productStore.setPublish(request.getIsPublish());
+                    productStore.update();
+
+                    trx.commit();
+                    response.setBaseResponse(1, offset, 1, success + " mengubah status produk store", productStore);
+                    return ok(Json.toJson(response));
+                } catch (Exception e) {
+                    logger.error("Error saat mengubah status produk store", e);
+                    e.printStackTrace();
+                    trx.rollback();
+                } finally {
+                    trx.end();
+                }
+                response.setBaseResponse(0, 0, 0, error, null);
+                return badRequest(Json.toJson(response));
+            } catch (Exception e) {
+                logger.error("Error saat parsing json", e);
+                e.printStackTrace();
+            }
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
     }
 }

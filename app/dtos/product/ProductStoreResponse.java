@@ -2,6 +2,8 @@ package dtos.product;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import javafx.beans.DefaultProperty;
 import lombok.*;
 import utils.BigDecimalSerialize;
 
@@ -42,5 +44,13 @@ public class ProductStoreResponse implements Serializable {
     private Long merchantId;
     @JsonProperty("stock")
     private Long stock;
+    @JsonProperty("is_publish")
+    @Builder.Default
+    private Boolean isPublish = true;
+
+    public static ProductStoreResponseBuilder builder() {
+        return new ProductStoreResponseBuilder().isPublish(true); // Default value
+    }
+     
 
 }

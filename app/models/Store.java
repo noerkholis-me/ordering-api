@@ -135,6 +135,9 @@ public class Store extends BaseModel {
     @Column(name = "closed_at")
     public String closedAt;
 
+    @Column(name = "is_publish")
+    public Boolean isPublish;
+
     public Store(StoreRequest request, Merchant merchant) {
         this.setMerchant(merchant);
         this.setStoreName(request.getStoreName());
@@ -145,6 +148,7 @@ public class Store extends BaseModel {
         this.setStoreBanner(request.getStoreBanner());
         this.setIsActive(true);
         this.setStatusOpenStore(true);
+        this.setIsPublish(request.getIsPublish() != null ? request.getIsPublish() : false);
         this.setShipperProvince(ShipperProvince.findById(request.getProvinceId()));
         this.setShipperCity(ShipperCity.findById(request.getCityId()));
         this.setShipperSuburb(ShipperSuburb.findById(request.getSuburbId()));
@@ -170,6 +174,7 @@ public class Store extends BaseModel {
         store.setStoreBanner(request.getStoreBanner());
         store.setIsActive(true);
         store.setStatusOpenStore(request.getStatusOpenStore() != null && request.getStatusOpenStore());
+        store.setIsPublish(request.getIsPublish() != null && request.getIsPublish());
         store.setOpenAt("".equals(request.getOpenAt()) ? null : request.getOpenAt());
         store.setClosedAt("".equals(request.getClosedAt()) ? null : request.getClosedAt());
         store.setShipperProvince(ShipperProvince.findById(request.getProvinceId()));
