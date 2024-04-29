@@ -46,10 +46,10 @@ public class ProductStoreResponse implements Serializable {
     private Long stock;
     @JsonProperty("is_publish")
     @Builder.Default
-    private Boolean isPublish = false;
+    private Boolean isPublish = true;
 
     public static ProductStoreResponseBuilder builder() {
-        return new ProductStoreResponseBuilder().isPublish(false); // Default value
+        return new ProductStoreResponseBuilder().isPublish(true); // Default value
     }
      
 

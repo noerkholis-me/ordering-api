@@ -497,6 +497,7 @@ GET    /merchant/productstore/v2/list                    controllers.product.Pro
 GET    /merchant/productstore/:id                        controllers.product.ProductStoreController.viewProductStore(id: Long)
 DELETE    /merchant/productstore/:id                     controllers.product.ProductStoreController.deleteProductStore(id: Long)
 PUT   /merchant/productstore/:id/status                  controllers.product.ProductStoreController.setStatus(id: Long)
+PUT   /merchant/productstore/:id/publish                  controllers.product.ProductStoreController.setPublish(id: Long)
 GET    /merchant/productstore/detail/v2/:id              controllers.product.ProductStoreController.viewProductStoreV2(id: Long, store_code: String ?= "")
 GET		/merchant/productstore/import/template			 controllers.product.ProductStoreController.getImportTemplateStore()
 POST	/merchant/productstore/import/save				 controllers.product.ProductStoreController.importProductStore()
