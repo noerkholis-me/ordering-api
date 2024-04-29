@@ -88,6 +88,9 @@ public class StoreResponse {
     @JsonProperty("closed_at")
     private String closedAt;
 
+    @JsonProperty("is_publish")
+    private Boolean isPublish;
+
     @JsonProperty("product_stores")
     private List<ProductStoreResponseForStore> productStoreResponses;
 
@@ -116,5 +119,6 @@ public class StoreResponse {
         this.setStatusOpenStore(store.getStatusOpenStore());
         this.setOpenAt(store.getOpenAt());
         this.setClosedAt(store.getClosedAt());
+        this.setIsPublish(store.getIsPublish());
     }
 }

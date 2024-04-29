@@ -38,6 +38,10 @@ public class ProductStore extends BaseModel {
     @JsonProperty("stock")
     public Long stock;
 
+    @JsonProperty("is_publish")
+    @Column(name = "is_publish")
+    public boolean isPublish;
+
     @JsonProperty("is_active")
     @Column(name = "is_active")
     public boolean isActive;
@@ -67,6 +71,7 @@ public class ProductStore extends BaseModel {
         this.setActive(isActive != null || productStoreRequest.getIsActive());
         this.setStorePrice(productStoreRequest.getStorePrice());
         this.setStock(productStoreRequest.getStock());
+        this.setPublish(productStoreRequest.getIsPublish() != null ? productStoreRequest.getIsPublish() : false);
         this.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode + "/" + store.id + "/" + merchant.id + "/product/" + productMerchant.id + "/detail"));
         if (productStoreRequest.getDiscountType() != null) {
             this.setDiscountType(productStoreRequest.getDiscountType());
@@ -103,6 +108,7 @@ public class ProductStore extends BaseModel {
         productStore.setMerchant(merchant);
         productStore.setActive(productStoreRequest.getIsActive());
         productStore.setStock(productStoreRequest.getStock());
+        productStore.setPublish(productStoreRequest.getIsPublish() != null ? productStoreRequest.getIsPublish() : false);
         productStore.setStorePrice(productStoreRequest.getStorePrice());
         productStore.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode + "/" + store.id + "/" + merchant.id + "/product/" + productMerchant.id + "/detail"));
         if (productStoreRequest.getDiscountType() != null) {
