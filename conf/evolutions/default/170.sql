@@ -1,6 +1,6 @@
 # --- !Ups
 
-alter table product_store add column is_publish boolean default false;
+alter table product_store add column is_publish boolean default true;
 
 
 # --- !Downs
