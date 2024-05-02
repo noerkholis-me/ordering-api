@@ -302,7 +302,7 @@ public class ProductMerchantDetailRepository extends Model {
                     + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
                     + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
                     + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
-                    + "AND ps.store_id = " + storeId + " AND ps.is_active = true AND ps.is_deleted = false "
+                    + "AND ps.store_id = " + storeId + " AND ps.is_active = true AND ps.is_publish = true AND ps.is_deleted = false "
                     + "AND bm.is_active = true "
                     + "ORDER BY pm.id DESC";
         
@@ -356,7 +356,7 @@ public class ProductMerchantDetailRepository extends Model {
                     + "JOIN brand_merchant bm ON pm.brand_merchant_id = bm.id "
                     + "WHERE pmd.product_type = 'MAIN' AND pmd.is_deleted = false "
                     + "AND pm.merchant_id = " + merchantId + " AND pm.is_active = true AND pm.is_deleted = false "
-                    + "AND ps.store_id = " + storeId + " AND ps.is_active = true AND ps.is_deleted = false "
+                    + "AND ps.store_id = " + storeId + " AND ps.is_active = true AND ps.is_publish = true AND ps.is_deleted = false "
                     + "AND bm.is_active = true "
                     + "ORDER BY pm.id DESC";
 
