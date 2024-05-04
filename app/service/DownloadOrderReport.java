@@ -124,7 +124,7 @@ public class DownloadOrderReport {
                         rowSheet.getCell(6).setCellStyle(cellStyle);
 
                         // Antrian
-                        rowSheet.createCell(7).setCellValue(data.getOrderQueue());
+                        rowSheet.createCell(7).setCellValue(data.getOrderQueue() != null ? data.getOrderQueue() : 0);
                         rowSheet.getCell(7).setCellStyle(cellStyle);
 
                         // Nama Produk
