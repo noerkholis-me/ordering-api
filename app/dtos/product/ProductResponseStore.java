@@ -73,6 +73,9 @@ public class ProductResponseStore implements Serializable {
         @JsonProperty("is_publish")
         private Boolean isPublish;
 
+        @JsonProperty("is_stock")
+        private Boolean isStock;
+
         @JsonProperty("is_deleted")
         private Boolean isDeleted;
         private Long stock;
@@ -82,7 +85,8 @@ public class ProductResponseStore implements Serializable {
             this.setStoreId(productStore.getStore().id);
             this.setProductId(productStore.getProductMerchant().id);
             this.setIsActive(productStore.isActive);
-            this.setIsActive(productStore.isPublish);
+            this.setIsPublish(productStore.isPublish);
+            this.setIsStock(productStore.isStock);
             this.setStorePrice(productStore.getStorePrice());
             this.setDiscountType(productStore.getDiscountType());
             this.setDiscount(productStore.getDiscount());

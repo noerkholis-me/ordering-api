@@ -42,6 +42,10 @@ public class ProductStore extends BaseModel {
     @Column(name = "is_publish")
     public boolean isPublish;
 
+    @JsonProperty("is_stock")
+    @Column(name = "is_stock")
+    public boolean isStock;
+
     @JsonProperty("is_active")
     @Column(name = "is_active")
     public boolean isActive;
@@ -64,6 +68,14 @@ public class ProductStore extends BaseModel {
     @Column(name = "product_store_qr_code")
     public String productStoreQrCode;
 
+    public void setIsStock(boolean isStock) {
+        this.isStock = isStock;
+    }
+
+    public boolean getIsStock(){
+        return this.isStock;
+    }
+
     public ProductStore(Merchant merchant, Store store, ProductMerchant productMerchant, ProductStoreResponse productStoreRequest, Boolean isActive) {
         this.setStore(store);
         this.setProductMerchant(productMerchant);
@@ -72,6 +84,7 @@ public class ProductStore extends BaseModel {
         this.setStorePrice(productStoreRequest.getStorePrice());
         this.setStock(productStoreRequest.getStock());
         this.setPublish(productStoreRequest.getIsPublish() != null ? productStoreRequest.getIsPublish() : false);
+        this.setIsStock(productStoreRequest.getIsStock() != null ? productStoreRequest.getIsStock() : false);
         this.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode + "/" + store.id + "/" + merchant.id + "/product/" + productMerchant.id + "/detail"));
         if (productStoreRequest.getDiscountType() != null) {
             this.setDiscountType(productStoreRequest.getDiscountType());
@@ -109,6 +122,7 @@ public class ProductStore extends BaseModel {
         productStore.setActive(productStoreRequest.getIsActive());
         productStore.setStock(productStoreRequest.getStock());
         productStore.setPublish(productStoreRequest.getIsPublish() != null ? productStoreRequest.getIsPublish() : false);
+        productStore.setIsStock(productStoreRequest.getIsStock() != null ? productStoreRequest.getIsStock() : false);
         productStore.setStorePrice(productStoreRequest.getStorePrice());
         productStore.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode + "/" + store.id + "/" + merchant.id + "/product/" + productMerchant.id + "/detail"));
         if (productStoreRequest.getDiscountType() != null) {
