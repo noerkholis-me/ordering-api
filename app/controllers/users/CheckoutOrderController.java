@@ -378,23 +378,24 @@ public class CheckoutOrderController extends BaseController {
                     ProductMerchant productMerchant = ProductMerchantRepository.findById(productOrderDetail.getProductId());
                     if (productMerchant != null) {
                         ProductStore psStore = ProductStoreRepository.findForCust(productMerchant.id, store.id, store.getMerchant());
-                        if(psStore.getStock() == null) {
-                            response.setBaseResponse(0, 0, 0, "Stok Produk Kosong", null);
-                            return notFound(Json.toJson(response));
+                        if (psStore.getIsStock() == true) {
+                            if(psStore.getStock() == null) {
+                                response.setBaseResponse(0, 0, 0, "Stok Produk Kosong", null);
+                                return notFound(Json.toJson(response));
+                            }
+                            if(productOrderDetail.getProductQty().longValue() > psStore.getStock()) {
+                                response.setBaseResponse(0, 0, 0, "Stok Produk Kurang", null);
+                                return notFound(Json.toJson(response));
+                            }
+                            psStore.setStock(psStore.getStock() - productOrderDetail.getProductQty().longValue());
+                            psStore.update();
+    
+                            Long stock = productOrderDetail.getProductQty().longValue();
+                            Long stockChanges = psStore.getStock();
+                            String notes = order.getOrderNumber();
+                            StockHistory newStockHistory = new StockHistory(merchant, store, productMerchant, psStore, stockChanges, stock, notes);
+                            newStockHistory.save();
                         }
-
-                        if(productOrderDetail.getProductQty().longValue() > psStore.getStock()) {
-                            response.setBaseResponse(0, 0, 0, "Stok Produk Kurang", null);
-                            return notFound(Json.toJson(response));
-                        }
-                        psStore.setStock(psStore.getStock() - productOrderDetail.getProductQty().longValue());
-                        psStore.update();
-
-                        Long stock = productOrderDetail.getProductQty().longValue();
-                        Long stockChanges = psStore.getStock();
-                        String notes = order.getOrderNumber();
-                        StockHistory newStockHistory = new StockHistory(merchant, store, productMerchant, psStore, stockChanges, stock, notes);
-                        newStockHistory.save();
 
                         OrderDetail orderDetail = new OrderDetail();
                         orderDetail.setProductMerchant(productMerchant);

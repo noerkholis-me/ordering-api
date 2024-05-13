@@ -40,6 +40,9 @@ public class ProductStoreResponse implements Serializable {
     @JsonProperty("is_deleted")
     private Boolean isDeleted;
 
+    @JsonProperty("is_stock")
+    private Boolean isStock;
+
     @JsonProperty("merchant_id")
     private Long merchantId;
     @JsonProperty("stock")
