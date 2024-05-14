@@ -1040,6 +1040,7 @@ public class ProductStoreController extends BaseController {
                         responsePStore.setProductId(dataPStore.getProductMerchant().id);
                         responsePStore.setIsActive(dataPStore.isActive);
                         responsePStore.setIsPublish(dataPStore.isPublish);
+                        responsePStore.setIsStock(dataPStore.isStock);
                         responsePStore.setStorePrice(dataPStore.getStorePrice());
                         responsePStore.setDiscountType(dataPStore.getDiscountType());
                         responsePStore.setDiscount(dataPStore.getDiscount());
