@@ -71,6 +71,7 @@ public class ProductAppController extends BaseController {
                 response.setBasePrice(product.getProductPrice().intValue());
                 response.setPrice(product.getProductPriceAfterDiscount().intValue());
                 response.setDiscountType(product.getDiscountType());
+                response.setIsStock(productStore.getIsStock());
                 if (productStore != null && productStore.stock != null) {
                     response.setStock(productStore.stock);
                 }

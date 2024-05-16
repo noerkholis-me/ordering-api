@@ -56,5 +56,8 @@ public class ProductAppResponse {
 
     @com.fasterxml.jackson.annotation.JsonProperty("long_description")
     public String longDescription;
+
+    @com.fasterxml.jackson.annotation.JsonProperty("is_stock")
+    public Boolean isStock;
 }
 
