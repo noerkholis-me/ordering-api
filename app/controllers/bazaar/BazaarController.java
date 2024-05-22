@@ -28,14 +28,12 @@ public class BazaarController extends BaseController {
     public static Result listStore(String search, int rating, int startRange, int endRange, double longitude, double latitude, String sort, int offset, int limit) {
 
         try {
-
             int totalData = StoreRepository.countAll(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit);
             List<Store> list = StoreRepository.findAll(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit);
 
             List<BazaarStoreResponse> responses = new ArrayList<>();
 
             for (Store store : list) {
-
                 double distance = 0;
 
                 if (longitude != 0 && latitude != 0) {
@@ -58,25 +56,43 @@ public class BazaarController extends BaseController {
                 } else {
                     distance = 0;
                 }
-
+                
                 BazaarStoreResponse response = new BazaarStoreResponse();
-
-
-                double storeRating = StoreRatingRepository.getRatings(store);
-
-                response.setId(store.id);
-                response.setStoreAddress(store.getStoreAddress());
-                response.setStoreName(store.getStoreName());
-                response.setStoreImage(store.getStoreBanner());
-                response.setStoreDistance(change(distance));
-                response.setMerchantId(store.getMerchant().id);
-                response.setStoreRating(change(storeRating));
-                response.setSlug(store.getStoreAlias());
-                response.setStatusOpenStore(store.getStatusOpenStore());
-                response.setOpenAt(store.getOpenAt());
-                response.setClosedAt(store.getClosedAt());
-
-                responses.add(response);
+                if (endRange != 0 && startRange != 0) {
+                    if (change(distance) >= startRange && change(distance) <= endRange) {
+                        double storeRating = StoreRatingRepository.getRatings(store);
+        
+                        response.setId(store.id);
+                        response.setStoreAddress(store.getStoreAddress());
+                        response.setStoreName(store.getStoreName());
+                        response.setStoreImage(store.getStoreBanner());
+                        response.setStoreDistance(change(distance));
+                        response.setMerchantId(store.getMerchant().id);
+                        response.setStoreRating(change(storeRating));
+                        response.setSlug(store.getStoreAlias());
+                        response.setStatusOpenStore(store.getStatusOpenStore());
+                        response.setOpenAt(store.getOpenAt());
+                        response.setClosedAt(store.getClosedAt());
+        
+                        responses.add(response);
+                    }
+                } else {
+                    double storeRating = StoreRatingRepository.getRatings(store);
+        
+                    response.setId(store.id);
+                    response.setStoreAddress(store.getStoreAddress());
+                    response.setStoreName(store.getStoreName());
+                    response.setStoreImage(store.getStoreBanner());
+                    response.setStoreDistance(change(distance));
+                    response.setMerchantId(store.getMerchant().id);
+                    response.setStoreRating(change(storeRating));
+                    response.setSlug(store.getStoreAlias());
+                    response.setStatusOpenStore(store.getStatusOpenStore());
+                    response.setOpenAt(store.getOpenAt());
+                    response.setClosedAt(store.getClosedAt());
+        
+                    responses.add(response);
+                }
 
             }
 
