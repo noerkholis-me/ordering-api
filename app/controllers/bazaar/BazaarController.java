@@ -59,7 +59,9 @@ public class BazaarController extends BaseController {
                 
                 BazaarStoreResponse response = new BazaarStoreResponse();
                 if (endRange != 0 && startRange != 0) {
-                    if (change(distance) >= startRange && change(distance) <= endRange) {
+                    System.out.println("DISTANCE"+ distance);
+                    System.out.println("Change-distance"+ change(distance));
+                    if (change(distance) >= Double.valueOf(startRange) && change(distance) <= Double.valueOf(endRange)) {
                         double storeRating = StoreRatingRepository.getRatings(store);
         
                         response.setId(store.id);
