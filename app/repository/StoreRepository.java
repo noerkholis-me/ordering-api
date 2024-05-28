@@ -95,7 +95,9 @@ public class StoreRepository {
         query = exp.query();
 
         return query.findPagingList(limit).getPage(offset).getList();
-    }public static Query<Store> query(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
+    }
+    
+    public static Query<Store> query(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
         Query<Store> query = find.query();
 
         // SQL for get range distance
