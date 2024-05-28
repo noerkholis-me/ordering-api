@@ -95,7 +95,9 @@ public class StoreRepository {
         query = exp.query();
 
         return query.findPagingList(limit).getPage(offset).getList();
-    }public static Query<Store> query(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
+    }
+    
+    public static Query<Store> query(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
         Query<Store> query = find.query();
 
         // SQL for get range distance
@@ -173,17 +175,63 @@ public class StoreRepository {
         return query;
     }
 
+    public static Query<Store> queryv2(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
+        Query<Store> query = find.query();
 
+        // SQL for get rating
+        String sqlRating = "(SELECT AVG(rate) AS RATING FROM store_ratings sr WHERE sr.store_id = s.id)";
+
+        if (rating > 0 || (longitude != 0 && latitude != 0)) {
+
+            String querySql = "select s.id from store s ";
+
+            if (rating > 0) {
+                querySql = querySql +"where"+ sqlRating + " >= " + rating + " AND " + sqlRating + " < " + (rating + 1) + " ";
+            }
+
+            System.out.println(querySql);
+            RawSql rawSql = RawSqlBuilder.parse(querySql).create();
+            query = Ebean.find(Store.class).setRawSql(rawSql);
+
+        }
+
+        query = query.where()
+                .eq("is_active", true)
+                .eq("is_deleted", false)
+                .query();
+
+        if (search != null) {
+            query = query.where().ilike("store_name", "%"+search+"%").query();
+        }
+
+        if (!"".equals(sort)) {
+            query = query.orderBy(sort);
+        } else {
+            query = query.orderBy("updated_at desc");
+        }
+
+        ExpressionList<Store> exp = query.where();
+
+        query = exp.query();
+
+        int total = query.findList().size();
+
+        if (limit != 0) {
+            query = query.setMaxRows(limit);
+        }
+
+        return query;
+    }
 
     public static List<Store> findAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
 
-        return query(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit).findList();
+        return queryv2(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit).findList();
     }
 
     public  static int countAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
 
         try {
-            return query(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit).findRowCount();
+            return queryv2(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit).findRowCount();
         } catch (Exception e) {
             return 0;
         }
