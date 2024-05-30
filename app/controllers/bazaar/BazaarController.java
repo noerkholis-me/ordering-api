@@ -18,6 +18,7 @@ import repository.ratings.StoreRatingRepository;
 import service.DeliveryService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BazaarController extends BaseController {
@@ -37,65 +38,46 @@ public class BazaarController extends BaseController {
                 double distance = 0;
 
                 if (longitude != 0 && latitude != 0) {
-                    DeliveryDirectionRequest base = new DeliveryDirectionRequest();
-                    base.setLat(store.getStoreLatitude());
-                    base.setLong(store.getStoreLongitude());
+                    // DeliveryDirectionRequest base = new DeliveryDirectionRequest();
+                    // base.setLat(store.getStoreLatitude());
+                    // base.setLong(store.getStoreLongitude());
 
-                    DeliveryDirectionRequest target = new DeliveryDirectionRequest();
-                    target.setLat(latitude);
-                    target.setLong(longitude);
+                    // DeliveryDirectionRequest target = new DeliveryDirectionRequest();
+                    // target.setLat(latitude);
+                    // target.setLong(longitude);
 
-                    ServiceResponse serviceResponse = DeliveryService.getInstance().checkDistance(base, target, false);
+                    // ServiceResponse serviceResponse = DeliveryService.getInstance().checkDistance(base, target, false);
 
-                    String object = objectMapper.writeValueAsString(serviceResponse.getData());
-                    JSONObject jsonObject = new JSONObject(object);
-                    String initiate = jsonObject.getJSONArray("routes").getJSONObject(0).getJSONObject("summary").toString();
-                    DeliveryDirectionResponse directionResponse = objectMapper.readValue(initiate, DeliveryDirectionResponse.class);
+                    // String object = objectMapper.writeValueAsString(serviceResponse.getData());
+                    // JSONObject jsonObject = new JSONObject(object);
+                    // String initiate = jsonObject.getJSONArray("routes").getJSONObject(0).getJSONObject("summary").toString();
+                    // DeliveryDirectionResponse directionResponse = objectMapper.readValue(initiate, DeliveryDirectionResponse.class);
 
-                    distance = (double) directionResponse.getDistance() / 1000.0;
+                    // distance = (double) directionResponse.getDistance() / 1000.0;
+                    double storeDistance = StoreRepository.getDistance(store, longitude, latitude);
+                    distance = storeDistance;
                 } else {
                     distance = 0;
                 }
                 
                 BazaarStoreResponse response = new BazaarStoreResponse();
-                if (endRange != 0 && startRange != 0) {
-                    System.out.println("DISTANCE"+ distance);
-                    System.out.println("Change-distance"+ change(distance));
-                    if (change(distance) >= Double.valueOf(startRange) && change(distance) <= Double.valueOf(endRange)) {
-                        double storeRating = StoreRatingRepository.getRatings(store);
-        
-                        response.setId(store.id);
-                        response.setStoreAddress(store.getStoreAddress());
-                        response.setStoreName(store.getStoreName());
-                        response.setStoreImage(store.getStoreBanner());
-                        response.setStoreDistance(change(distance));
-                        response.setMerchantId(store.getMerchant().id);
-                        response.setStoreRating(change(storeRating));
-                        response.setSlug(store.getStoreAlias());
-                        response.setStatusOpenStore(store.getStatusOpenStore());
-                        response.setOpenAt(store.getOpenAt());
-                        response.setClosedAt(store.getClosedAt());
-        
-                        responses.add(response);
-                    }
-                } else {
-                    double storeRating = StoreRatingRepository.getRatings(store);
-        
-                    response.setId(store.id);
-                    response.setStoreAddress(store.getStoreAddress());
-                    response.setStoreName(store.getStoreName());
-                    response.setStoreImage(store.getStoreBanner());
-                    response.setStoreDistance(change(distance));
-                    response.setMerchantId(store.getMerchant().id);
-                    response.setStoreRating(change(storeRating));
-                    response.setSlug(store.getStoreAlias());
-                    response.setStatusOpenStore(store.getStatusOpenStore());
-                    response.setOpenAt(store.getOpenAt());
-                    response.setClosedAt(store.getClosedAt());
-        
-                    responses.add(response);
-                }
 
+                double storeRating = StoreRatingRepository.getRatings(store);
+                    
+                // System.out.println(storeDistance);
+                response.setId(store.id);
+                response.setStoreAddress(store.getStoreAddress());
+                response.setStoreName(store.getStoreName());
+                response.setStoreImage(store.getStoreBanner());
+                response.setStoreDistance(change(distance));
+                response.setMerchantId(store.getMerchant().id);
+                response.setStoreRating(change(storeRating));
+                response.setSlug(store.getStoreAlias());
+                response.setStatusOpenStore(store.getStatusOpenStore());
+                response.setOpenAt(store.getOpenAt());
+                response.setClosedAt(store.getClosedAt());
+        
+                responses.add(response);
             }
 
             response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data", responses);
@@ -115,4 +97,6 @@ public class BazaarController extends BaseController {
         double y = (double) Math.round(x * temp) / temp;
         return y;
     }
+
+
 }
