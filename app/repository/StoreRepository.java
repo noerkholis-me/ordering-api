@@ -1,8 +1,8 @@
 package repository;
 
+import com.avaje.ebean.*;
 import com.avaje.ebean.Ebean;
 import com.avaje.ebean.ExpressionList;
-import com.avaje.ebean.Query;
 import com.avaje.ebean.RawSql;
 import com.avaje.ebean.RawSqlBuilder;
 import models.StockHistory;
@@ -168,6 +168,10 @@ public class StoreRepository {
 
         int total = query.findList().size();
 
+        if (offset > 0) {
+            query = query.setFirstRow(offset);
+        }
+
         if (limit != 0) {
             query = query.setMaxRows(limit);
         }
@@ -178,22 +182,52 @@ public class StoreRepository {
     public static Query<Store> queryv2(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
         Query<Store> query = find.query();
 
+        // SQL for get range distance
+        String sqlDistance = "(SELECT SQRT(\n" +
+                "    POW(69.1 * (sd.store_lat - "+latitude+"), 2) +\n" +
+                "    POW(69.1 * ("+longitude+" - sd.store_long) * COS(sd.store_lat / 57.3), 2)) \n" +
+                "FROM store sd WHERE sd.id = s.id)";
+
         // SQL for get rating
         String sqlRating = "(SELECT AVG(rate) AS RATING FROM store_ratings sr WHERE sr.store_id = s.id)";
 
-        if (rating > 0 || (longitude != 0 && latitude != 0)) {
+        if (rating > 0 || ((endRange > 0 || startRange > 0) && longitude != 0 && latitude != 0)) {
 
-            String querySql = "select s.id from store s ";
+            String queryDistance = "select x.*, ((SELECT SQRT(\n" +
+                    " POW(69.1 * (sd.store_lat - x.store_lat), 2) +\n" +
+                    " POW(69.1 * (x.store_long - sd.store_long) * COS(sd.store_lat / 57.3), 2)) \n" +
+                    " FROM store sd WHERE sd.id = x.id)) as distance from store x";
+
+            String querySql = "select s.id from ("+queryDistance+") s where ";
 
             if (rating > 0) {
-                querySql = querySql +"where"+ sqlRating + " >= " + rating + " AND " + sqlRating + " < " + (rating + 1) + " ";
+                querySql = querySql + sqlRating + " >= " + rating + " AND " + sqlRating + " < " + (rating + 1) + " ";
             }
 
-            System.out.println(querySql);
+            if (((endRange > 0 || startRange > 0) && longitude != 0 && latitude != 0)) {
+
+                if (rating > 0) {
+                    querySql = querySql + " AND ";
+                }
+
+                // mil = km * 0.62137
+                double startMil = (startRange * 0.62137);
+                double endMil = (endRange * 0.62137);
+
+                // X KM - unlimited
+                if (endRange <= 0) {
+                    querySql = querySql + sqlDistance + " >= " + startMil + "  ORDER BY distance ASC";
+                } else {
+                    // Y KM - X KM
+                    querySql = querySql + sqlDistance + " >= " + startMil + " AND " + sqlDistance + " < " + endMil + "  ORDER BY distance ASC";
+                }
+            }
+
             RawSql rawSql = RawSqlBuilder.parse(querySql).create();
             query = Ebean.find(Store.class).setRawSql(rawSql);
 
         }
+
 
         query = query.where()
                 .eq("is_active", true)
@@ -216,24 +250,65 @@ public class StoreRepository {
 
         int total = query.findList().size();
 
-        if (limit != 0) {
-            query = query.setMaxRows(limit);
-        }
+        // if (offset > 0) {
+        //     query = query.setFirstRow(offset);
+        // }
+
+        // if (limit != 0) {
+        //     query = query.setMaxRows(limit);
+        // }
 
         return query;
     }
 
     public static List<Store> findAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
 
-        return queryv2(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit).findList();
+        return query(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit).findList();
     }
 
     public  static int countAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
 
         try {
-            return queryv2(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit).findRowCount();
+            return queryv2(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit).findList().size();
         } catch (Exception e) {
             return 0;
         }
     }
+
+    /**
+     * @param store
+     * @param longitude
+     * @param latitude
+     * @return
+     */
+    public static double getDistance(Store store, double longitude, double latitude) {
+
+        try {
+
+            // String querySql = "(SELECT SQRT(\n" +
+            // "    POW(69.1 * (sd.store_lat - "+latitude+"), 2) +\n" +
+            // "    POW(69.1 * ("+longitude+" - sd.store_long) * COS(sd.store_lat / 57.3), 2)) \n" +
+            // "FROM store sd WHERE sd.id = "+store.id+")";
+
+           String querySqlv1 = " SELECT 6371 * ACOS " +
+            " ( COS(RADIANS(s.store_lat)) * COS(RADIANS(" + latitude + ")) * COS(RADIANS(" + longitude + ") - RADIANS(s.store_long)) + " +
+            "SIN(RADIANS(s.store_lat)) * SIN(RADIANS(" + latitude + "))" +
+            ") AS distance_in_km " +
+            "FROM store s WHERE s.id = " + store.id;
+
+            SqlRow result = Ebean.createSqlQuery(querySqlv1).findUnique();
+            if (result == null) {
+                return  0;
+            }
+            
+            double distance = result.getDouble("DISTANCE_IN_KM");
+            // float distance = result.getFloat("SQRT");
+
+            return distance;
+
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
 }
