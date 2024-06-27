@@ -1811,6 +1811,8 @@ public class SessionsController extends BaseController {
 			responses.put("email", member.email);
 			responses.put("name", member.fullName);
 			responses.put("phone_number", member.phone);
+			// responses.put("loyalty_point", member.loyaltyPoint);
+			responses.put("loyalty_point", String.valueOf(member.loyaltyPoint));
 			responses.put("status", Boolean.TRUE);
 
 			response.setBaseResponse(0, 0, 0, success, responses);
