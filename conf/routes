@@ -68,6 +68,7 @@ GET		/users/loyaltypoint/countpoint				controllers.users.LoyaltyController.resul
 GET		/users/loyaltypoint/history					controllers.users.LoyaltyController.history()
 #POST	/users/loyaltypoint/reduce					controllers.users.LoyaltyController.reducePoint()
 #POST	/users/loyaltypoint/add						controllers.users.LoyaltyController.addPoint()
+POST	/users/loyaltypoint/used						controllers.users.LoyaltyController.usedPoint()
 GET		/users/loyaltypoint/soonexpired				controllers.users.LoyaltyController.soonExpired()
 POST    /users/loyaltypoint/calculate				controllers.users.LoyaltyController.calculateEligibleLoyaltyPoint()
 GET		/users/loyaltypoint/setting					controllers.users.LoyaltyController.getLoyaltySetting()
@@ -739,3 +740,4 @@ POST          /fee-delivery                   controllers.delivery.DeliverySetti
 # Bazaar
 GET           /bazaar                                  controllers.bazaar.BazaarController.listStore(search:String ?= null, rating:Int ?= 0, start_range:Int ?= 0, end_range:Int ?= 0, longitude:Double ?= 0, latitude:Double ?= 0, sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET           /banner-bazaar                            controllers.bazaar.BannerBazaarController.listBannerBazaar()
+
