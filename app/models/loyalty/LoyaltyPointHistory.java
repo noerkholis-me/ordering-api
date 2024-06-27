@@ -48,4 +48,7 @@ public class LoyaltyPointHistory extends BaseModel {
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "merchant_id", referencedColumnName = "id")
     public Merchant merchant;
+
+    public static Finder<Long, LoyaltyPointHistory> find = new Finder<Long, LoyaltyPointHistory>(Long.class, LoyaltyPointHistory.class);
+
 }

@@ -1,11 +1,14 @@
 package controllers.users;
 
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.elasticsearch.common.joda.time.DateTime;
 
@@ -16,6 +19,9 @@ import com.avaje.ebean.Transaction;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.avaje.ebean.Ebean;
+import com.avaje.ebean.Expr;
+import com.avaje.ebean.Expression;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.mapping.request.MapOrder;
 import com.hokeba.mapping.request.MapOrderDetail;
@@ -32,8 +38,10 @@ import models.Category;
 import models.CategoryLoyalty;
 import models.ConfigSettings;
 import models.LoyaltyPoint;
+import models.loyalty.*;
 import models.Member;
 import models.Product;
+import models.Merchant;
 import models.ProductDetailVariance;
 import models.SalesOrder;
 import models.SalesOrderDetail;
@@ -66,6 +74,29 @@ public class LoyaltyController extends BaseController {
 				sum += sumPoints.point-sumPoints.used;
 			}
 		}
+		return sum;
+	}
+
+	public static long countPointv2(Long memberId)  {
+		// Member actor = checkMemberAccessAuthorization();
+		Date currentDate = new Date(System.currentTimeMillis());
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
+		System.out.println(memberId);
+//		String currentDateString = dateFormat.format(currentDate);
+		long sum = 0;
+		//ObjectMapper om = new ObjectMapper();
+		
+			List<LoyaltyPointHistory> data = LoyaltyPointHistory.find.where()
+					.eq("is_deleted", false)
+					.eq("member_id",memberId)
+					.ge("point", 0)
+					// .ge("expired", currentDate)
+					.findList();
+			for(LoyaltyPointHistory sumPoints: data) {
+				sum += sumPoints.added.intValue() - sumPoints.used.intValue();
+			}
+		
 		return sum;
 	}
 
@@ -204,6 +235,85 @@ public class LoyaltyController extends BaseController {
 //		response.setBaseResponse(0, 0, 0, unauthorized, null);
 //		return unauthorized(Json.toJson(response));
 		return false;
+	}
+
+	public static Result usedPoint() {
+		int authority = checkAccessAuthorization("all");
+		Date date = new Date();
+
+		if (authority == 200 || authority == 203) {
+			JsonNode json = request().body().asJson();
+			String phone = json.get("phone").asText().toLowerCase();
+			String email = json.get("email").asText();
+			Long merchantId = json.get("merchant_id").asLong();
+			Long usedLoyaltyPoint = json.get("used_loyalty_point").asLong();
+			long sum = 0;
+			
+
+			System.out.println(usedLoyaltyPoint);
+		
+
+			if (email == null && email == "" || phone == null && phone == "") {
+				response.setBaseResponse(0, 0, 0, "Email atau Nomor Telepon dibutuhkan", null);
+        return badRequest(Json.toJson(response));
+			}
+			if (merchantId == null || merchantId == 0L) {
+				response.setBaseResponse(0, 0, 0, "merchant id tidak boleh null atau nol", Boolean.FALSE);
+				return badRequest(Json.toJson(response));
+			}
+
+			Merchant store = Merchant.merchantGetId(merchantId);
+			if (store == null) {
+				response.setBaseResponse(0, 0, 0, "merchant id tidak ditemukan", Boolean.FALSE);
+				return badRequest(Json.toJson(response));
+			}
+
+			// if (email == null || email.equalsIgnoreCase("")) {
+			// 	response.setBaseResponse(0, 0, 0, "email tidak boleh null atau kosong", Boolean.FALSE);
+			// 	return badRequest(Json.toJson(response));
+			// }
+
+			Member member = Member.findByEmailAndMerchantId(email, merchantId);
+			if (member == null) {
+				response.setBaseResponse(0, 0, 0, "customer tidak terdaftar", Boolean.FALSE);
+				return badRequest(Json.toJson(response));
+			}
+
+			sum = countPointv2(member.id);
+			System.out.println(sum);
+			BigDecimal used = new BigDecimal(usedLoyaltyPoint);
+
+			LoyaltyPointHistory lpHistory = new LoyaltyPointHistory();
+			lpHistory.setPoint(member.loyaltyPoint);
+			lpHistory.setAdded(BigDecimal.ZERO);
+			lpHistory.setUsed(used);
+			lpHistory.setMember(member);
+			lpHistory.setOrder(null);
+			lpHistory.setExpiredDate(date);
+			lpHistory.setMerchant(store);
+			lpHistory.save();
+
+			member.loyaltyPoint =  member.loyaltyPoint.subtract(used);
+      member.update();
+
+			Map<String, Object> responses = new HashMap<>();
+			responses.put("member_id", Integer.valueOf(Math.toIntExact(member.id)));
+			responses.put("email", member.email);
+			responses.put("name", member.fullName);
+			responses.put("phone_number", member.phone);
+			// responses.put("loyalty_point", member.loyaltyPoint);
+			responses.put("loyalty_point", String.valueOf(member.loyaltyPoint));
+			responses.put("status", Boolean.TRUE);
+
+			response.setBaseResponse(0, 0, 0, success, responses);
+			return ok(Json.toJson(response));
+		} else if (authority == 403) {
+			response.setBaseResponse(0, 0, 0, forbidden, null);
+			return forbidden(Json.toJson(response));
+		} else {
+			response.setBaseResponse(0, 0, 0, unauthorized, null);
+			return unauthorized(Json.toJson(response));
+		}
 	}
 
 	public  static Result soonExpired() {
