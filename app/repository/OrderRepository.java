@@ -429,8 +429,10 @@ public class OrderRepository extends Model {
                 + "AND str.merchant_id = " + merchantId + " "
                 + "AND op.status = '" + statusOrder + "' ";
         } else if (statusOrder.equalsIgnoreCase("CLOSED")){
-            whereCondition = "WHERE str.id = " + storeId + " "
-                    + "AND ord.status = '" + statusOrder + "' ";
+            System.out.println("DISINI");
+            // whereCondition = "WHERE str.merchant_id = " + merchantId + " "
+            //         + "AND ord.status = '" + statusOrder + "' ";
+            whereCondition = "WHERE ord.status = '" + statusOrder + "' ";
         } else {
             whereCondition = "WHERE op.status = 'PAID' "
                 + "AND str.merchant_id = " + merchantId + " "
