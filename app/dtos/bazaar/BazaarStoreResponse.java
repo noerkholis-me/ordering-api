@@ -37,6 +37,9 @@ public class BazaarStoreResponse {
     @JsonProperty("merchant_id")
     public Long merchantId;
 
+    @JsonProperty("merchant_type")
+    public String merchantType;
+
     @JsonProperty("slug")
     public String slug;
 

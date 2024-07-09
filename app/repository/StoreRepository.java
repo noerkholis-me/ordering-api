@@ -97,7 +97,7 @@ public class StoreRepository {
         return query.findPagingList(limit).getPage(offset).getList();
     }
     
-    public static Query<Store> query(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
+    public static Query<Store> query(double longitude, double latitude, String search, int rating, int startRange, int endRange, Boolean open, String type, String sort, int offset, int limit) {
         Query<Store> query = find.query();
 
         // SQL for get range distance
@@ -109,22 +109,36 @@ public class StoreRepository {
         // SQL for get rating
         String sqlRating = "(SELECT AVG(rate) AS RATING FROM store_ratings sr WHERE sr.store_id = s.id)";
 
-        if (rating > 0 || ((endRange > 0 || startRange > 0) && longitude != 0 && latitude != 0)) {
+        if (rating > 0 || ((endRange > 0 || startRange > 0) && longitude != 0 && latitude != 0) || !"".equals(type)) {
+            // SQL for filter merchantType
+            String sqlJoinMerchant = "";
+
+            if (!"".equals(type)) {
+                sqlJoinMerchant = "JOIN merchant m ON m.id = s.merchant_id";
+            }
 
             String queryDistance = "select x.*, ((SELECT SQRT(\n" +
                     " POW(69.1 * (sd.store_lat - x.store_lat), 2) +\n" +
                     " POW(69.1 * (x.store_long - sd.store_long) * COS(sd.store_lat / 57.3), 2)) \n" +
                     " FROM store sd WHERE sd.id = x.id)) as distance from store x";
 
-            String querySql = "select s.id from ("+queryDistance+") s where ";
+            String querySql = "select s.id from ("+queryDistance+") s "+sqlJoinMerchant+" where ";
+
+            if (!type.equals("")) {
+                querySql = querySql + "m.merchant_type = '" + type + "'";
+            }
 
             if (rating > 0) {
+                if (!"".equals(type)) {
+                    querySql = querySql + " AND ";
+                }
+
                 querySql = querySql + sqlRating + " >= " + rating + " AND " + sqlRating + " < " + (rating + 1) + " ";
             }
 
             if (((endRange > 0 || startRange > 0) && longitude != 0 && latitude != 0)) {
 
-                if (rating > 0) {
+                if (rating > 0 || !"".equals(type)) {
                     querySql = querySql + " AND ";
                 }
 
@@ -147,19 +161,31 @@ public class StoreRepository {
         }
 
         query = query.where()
-                .eq("is_active", true)
-                .eq("is_publish", true)
-                .eq("is_deleted", false)
+                .eq("s.is_active", true)
+                .eq("s.is_publish", true)
+                .eq("s.is_deleted", false)
                 .query();
 
         if (search != null) {
             query = query.where().ilike("store_name", "%"+search+"%").query();
         }
 
+        // Query open/closed store
+        if (open == true) {
+            query = query
+                .where()
+                .or(
+                    Expr.eq("status_open_store", true),
+                    Expr.eq("status_open_store", null)
+                ).query();
+        } else {
+            query = query.where().eq("status_open_store", false).query();
+        }
+
         if (!"".equals(sort)) {
             query = query.orderBy(sort);
         } else {
-            query = query.orderBy("updated_at desc");
+            query = query.orderBy("s.updated_at desc");
         }
 
         ExpressionList<Store> exp = query.where();
@@ -179,7 +205,7 @@ public class StoreRepository {
         return query;
     }
 
-    public static Query<Store> queryv2(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
+    public static Query<Store> queryv2(double longitude, double latitude, String search, int rating, int startRange, int endRange, Boolean open, String type, String sort, int offset, int limit) {
         Query<Store> query = find.query();
 
         // SQL for get range distance
@@ -191,22 +217,36 @@ public class StoreRepository {
         // SQL for get rating
         String sqlRating = "(SELECT AVG(rate) AS RATING FROM store_ratings sr WHERE sr.store_id = s.id)";
 
-        if (rating > 0 || ((endRange > 0 || startRange > 0) && longitude != 0 && latitude != 0)) {
+        if (rating > 0 || ((endRange > 0 || startRange > 0) && longitude != 0 && latitude != 0) || !"".equals(type)) {
+            // SQL for filter merchantType
+            String sqlJoinMerchant = "";
+
+            if (!"".equals(type)) {
+                sqlJoinMerchant = "JOIN merchant m ON m.id = s.merchant_id";
+            }
 
             String queryDistance = "select x.*, ((SELECT SQRT(\n" +
                     " POW(69.1 * (sd.store_lat - x.store_lat), 2) +\n" +
                     " POW(69.1 * (x.store_long - sd.store_long) * COS(sd.store_lat / 57.3), 2)) \n" +
                     " FROM store sd WHERE sd.id = x.id)) as distance from store x";
 
-            String querySql = "select s.id from ("+queryDistance+") s where ";
+            String querySql = "select s.id from ("+queryDistance+") s "+sqlJoinMerchant+" where ";
+
+            if (!type.equals("")) {
+                querySql = querySql + "m.merchant_type = '" + type + "'";
+            }
 
             if (rating > 0) {
+                if (!"".equals(type)) {
+                    querySql = querySql + " AND ";
+                }
+
                 querySql = querySql + sqlRating + " >= " + rating + " AND " + sqlRating + " < " + (rating + 1) + " ";
             }
 
             if (((endRange > 0 || startRange > 0) && longitude != 0 && latitude != 0)) {
 
-                if (rating > 0) {
+                if (rating > 0 || !"".equals(type)) {
                     querySql = querySql + " AND ";
                 }
 
@@ -229,19 +269,31 @@ public class StoreRepository {
         }
 
         query = query.where()
-                .eq("is_active", true)
-                .eq("is_publish", true)
-                .eq("is_deleted", false)
+                .eq("s.is_active", true)
+                .eq("s.is_publish", true)
+                .eq("s.is_deleted", false)
                 .query();
 
         if (search != null) {
             query = query.where().ilike("store_name", "%"+search+"%").query();
         }
 
+        // Query open/closed store
+        if (open == true) {
+            query = query
+                .where()
+                .or(
+                    Expr.eq("status_open_store", true),
+                    Expr.eq("status_open_store", null)
+                ).query();
+        } else {
+            query = query.where().eq("status_open_store", false).query();
+        }
+
         if (!"".equals(sort)) {
             query = query.orderBy(sort);
         } else {
-            query = query.orderBy("updated_at desc");
+            query = query.orderBy("s.updated_at desc");
         }
 
         ExpressionList<Store> exp = query.where();
@@ -261,15 +313,15 @@ public class StoreRepository {
         return query;
     }
 
-    public static List<Store> findAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
+    public static List<Store> findAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, Boolean open, String type, String sort, int offset, int limit) {
 
-        return query(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit).findList();
+        return query(longitude, latitude, search, rating, startRange, endRange, open, type, sort, offset, limit).findList();
     }
 
-    public  static int countAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, String sort, int offset, int limit) {
+    public  static int countAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, Boolean open, String type, String sort, int offset, int limit) {
 
         try {
-            return queryv2(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit).findList().size();
+            return queryv2(longitude, latitude, search, rating, startRange, endRange, open, type, sort, offset, limit).findList().size();
         } catch (Exception e) {
             return 0;
         }
