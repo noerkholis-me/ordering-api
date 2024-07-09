@@ -26,11 +26,11 @@ public class BazaarController extends BaseController {
     private static BaseResponse response = new BaseResponse();
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static Result listStore(String search, int rating, int startRange, int endRange, double longitude, double latitude, String sort, int offset, int limit) {
+    public static Result listStore(String search, int rating, int startRange, int endRange, double longitude, double latitude, Boolean open, String type, String sort, int offset, int limit) {
 
         try {
-            int totalData = StoreRepository.countAll(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit);
-            List<Store> list = StoreRepository.findAll(longitude, latitude, search, rating, startRange, endRange, sort, offset, limit);
+            int totalData = StoreRepository.countAll(longitude, latitude, search, rating, startRange, endRange, open, type, sort, offset, limit);
+            List<Store> list = StoreRepository.findAll(longitude, latitude, search, rating, startRange, endRange, open, type, sort, offset, limit);
 
             List<BazaarStoreResponse> responses = new ArrayList<>();
 
@@ -71,6 +71,7 @@ public class BazaarController extends BaseController {
                 response.setStoreImage(store.getStoreBanner());
                 response.setStoreDistance(change(distance));
                 response.setMerchantId(store.getMerchant().id);
+                response.setMerchantType(store.getMerchant().merchantType);
                 response.setStoreRating(change(storeRating));
                 response.setSlug(store.getStoreAlias());
                 response.setStatusOpenStore(store.getStatusOpenStore());
