@@ -100,6 +100,11 @@ public class StoreRepository {
     public static Query<Store> query(double longitude, double latitude, String search, int rating, int startRange, int endRange, Boolean open, String type, String sort, int offset, int limit) {
         Query<Store> query = find.query();
 
+        String colIsActive = "is_active";
+        String colIsPublish = "is_publish";
+        String colIsDelete = "is_deleted";
+        String colUpdatedAt = "updated_at";
+
         // SQL for get range distance
         String sqlDistance = "(SELECT SQRT(\n" +
                 "    POW(69.1 * (sd.store_lat - "+latitude+"), 2) +\n" +
@@ -123,6 +128,11 @@ public class StoreRepository {
                     " FROM store sd WHERE sd.id = x.id)) as distance from store x";
 
             String querySql = "select s.id from ("+queryDistance+") s "+sqlJoinMerchant+" where ";
+
+            colIsActive = "s.is_active";
+            colIsPublish = "s.is_publish";
+            colIsDelete = "s.is_deleted";
+            colUpdatedAt = "s.updated_at";
 
             if (!type.equals("")) {
                 querySql = querySql + "m.merchant_type = '" + type + "'";
@@ -161,9 +171,9 @@ public class StoreRepository {
         }
 
         query = query.where()
-                .eq("s.is_active", true)
-                .eq("s.is_publish", true)
-                .eq("s.is_deleted", false)
+                .eq(colIsActive, true)
+                .eq(colIsPublish, true)
+                .eq(colIsDelete, false)
                 .query();
 
         if (search != null) {
@@ -185,7 +195,7 @@ public class StoreRepository {
         if (!"".equals(sort)) {
             query = query.orderBy(sort);
         } else {
-            query = query.orderBy("s.updated_at desc");
+            query = query.orderBy(colUpdatedAt + " desc");
         }
 
         ExpressionList<Store> exp = query.where();
@@ -208,6 +218,11 @@ public class StoreRepository {
     public static Query<Store> queryv2(double longitude, double latitude, String search, int rating, int startRange, int endRange, Boolean open, String type, String sort, int offset, int limit) {
         Query<Store> query = find.query();
 
+        String colIsActive = "is_active";
+        String colIsPublish = "is_publish";
+        String colIsDelete = "is_deleted";
+        String colUpdatedAt = "updated_at";
+
         // SQL for get range distance
         String sqlDistance = "(SELECT SQRT(\n" +
                 "    POW(69.1 * (sd.store_lat - "+latitude+"), 2) +\n" +
@@ -231,6 +246,11 @@ public class StoreRepository {
                     " FROM store sd WHERE sd.id = x.id)) as distance from store x";
 
             String querySql = "select s.id from ("+queryDistance+") s "+sqlJoinMerchant+" where ";
+
+            colIsActive = "s.is_active";
+            colIsPublish = "s.is_publish";
+            colIsDelete = "s.is_deleted";
+            colUpdatedAt = "s.updated_at";
 
             if (!type.equals("")) {
                 querySql = querySql + "m.merchant_type = '" + type + "'";
@@ -269,9 +289,9 @@ public class StoreRepository {
         }
 
         query = query.where()
-                .eq("s.is_active", true)
-                .eq("s.is_publish", true)
-                .eq("s.is_deleted", false)
+                .eq(colIsActive, true)
+                .eq(colIsPublish, true)
+                .eq(colIsDelete, false)
                 .query();
 
         if (search != null) {
@@ -293,7 +313,7 @@ public class StoreRepository {
         if (!"".equals(sort)) {
             query = query.orderBy(sort);
         } else {
-            query = query.orderBy("s.updated_at desc");
+            query = query.orderBy(colUpdatedAt+" desc");
         }
 
         ExpressionList<Store> exp = query.where();
