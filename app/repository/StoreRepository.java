@@ -13,6 +13,8 @@ import java.util.List;
 
 public class StoreRepository {
     public static Model.Finder<Long, Store> find = new Model.Finder<Long, Store>(Long.class, Store.class);
+    private static final String open = "open";
+    private static final String closed = "closed";
 
     public static Store findByName(String storeName) {
         String querySql = "SELECT s.id FROM store s "
@@ -97,7 +99,7 @@ public class StoreRepository {
         return query.findPagingList(limit).getPage(offset).getList();
     }
     
-    public static Query<Store> query(double longitude, double latitude, String search, int rating, int startRange, int endRange, Boolean open, String type, String sort, int offset, int limit) {
+    public static Query<Store> query(double longitude, double latitude, String search, int rating, int startRange, int endRange, String statusOpen, String type, String sort, int offset, int limit) {
         Query<Store> query = find.query();
 
         String colIsActive = "is_active";
@@ -181,14 +183,9 @@ public class StoreRepository {
         }
 
         // Query open/closed store
-        if (open == true) {
-            query = query
-                .where()
-                .or(
-                    Expr.eq("status_open_store", true),
-                    Expr.eq("status_open_store", null)
-                ).query();
-        } else {
+        if (statusOpen.equals(open)) {
+            query = query.where().eq("status_open_store", true).query();
+        } else if (statusOpen.equals(closed)) {
             query = query.where().eq("status_open_store", false).query();
         }
 
@@ -215,7 +212,7 @@ public class StoreRepository {
         return query;
     }
 
-    public static Query<Store> queryv2(double longitude, double latitude, String search, int rating, int startRange, int endRange, Boolean open, String type, String sort, int offset, int limit) {
+    public static Query<Store> queryv2(double longitude, double latitude, String search, int rating, int startRange, int endRange, String statusOpen, String type, String sort, int offset, int limit) {
         Query<Store> query = find.query();
 
         String colIsActive = "is_active";
@@ -299,14 +296,9 @@ public class StoreRepository {
         }
 
         // Query open/closed store
-        if (open == true) {
-            query = query
-                .where()
-                .or(
-                    Expr.eq("status_open_store", true),
-                    Expr.eq("status_open_store", null)
-                ).query();
-        } else {
+        if (statusOpen.equals(open)) {
+            query = query.where().eq("status_open_store", true).query();
+        } else if (statusOpen.equals(closed)) {
             query = query.where().eq("status_open_store", false).query();
         }
 
@@ -333,15 +325,15 @@ public class StoreRepository {
         return query;
     }
 
-    public static List<Store> findAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, Boolean open, String type, String sort, int offset, int limit) {
+    public static List<Store> findAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, String statusOpen, String type, String sort, int offset, int limit) {
 
-        return query(longitude, latitude, search, rating, startRange, endRange, open, type, sort, offset, limit).findList();
+        return query(longitude, latitude, search, rating, startRange, endRange, statusOpen, type, sort, offset, limit).findList();
     }
 
-    public  static int countAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, Boolean open, String type, String sort, int offset, int limit) {
+    public  static int countAll(double longitude, double latitude, String search, int rating, int startRange, int endRange, String statusOpen, String type, String sort, int offset, int limit) {
 
         try {
-            return queryv2(longitude, latitude, search, rating, startRange, endRange, open, type, sort, offset, limit).findList().size();
+            return queryv2(longitude, latitude, search, rating, startRange, endRange, statusOpen, type, sort, offset, limit).findList().size();
         } catch (Exception e) {
             return 0;
         }
