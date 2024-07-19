@@ -742,4 +742,4 @@ GET           /bazaar                                  controllers.bazaar.Bazaar
 GET           /banner-bazaar                            controllers.bazaar.BannerBazaarController.listBannerBazaar()
 
 # Register Merchant
-POST         /register-merchant                     controllers.merchants.MerchantController.registerMerchant() 
+#POST         /register-merchant                     controllers.merchants.MerchantController.registerMerchant() 
