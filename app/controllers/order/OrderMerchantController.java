@@ -253,7 +253,7 @@ public class OrderMerchantController extends BaseController {
                 if (statusOrder.equalsIgnoreCase("ALL")) {
                     query = OrderRepository.find.where().eq("store", store)
                             .order("t0.id desc");
-                } else if (statusOrder.equalsIgnoreCase("CANCELED")) {
+                } else if (statusOrder.equalsIgnoreCase("CANCELLED")) {
                     query = OrderRepository.find.where().eq("t0.status", statusOrder).eq("store", store)
                             .order("t0.id desc");
                 } else if (statusOrder.equalsIgnoreCase("PENDING")) {

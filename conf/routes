@@ -741,3 +741,5 @@ POST          /fee-delivery                   controllers.delivery.DeliverySetti
 GET           /bazaar                                  controllers.bazaar.BazaarController.listStore(search:String ?= null, rating:Int ?= 0, startRange:Int ?= 0, endRange:Int ?= 0, longitude:Double ?= 0, latitude:Double ?= 0, statusOpen:String ?= "all", type:String ?= "", sort:String ?= "", offset:Int ?= 0, limit:Int ?= 10)
 GET           /banner-bazaar                            controllers.bazaar.BannerBazaarController.listBannerBazaar()
 
+# Register Merchant
+#POST         /register-merchant                     controllers.merchants.MerchantController.registerMerchant() 

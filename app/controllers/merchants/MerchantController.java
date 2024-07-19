@@ -1,5 +1,6 @@
 package controllers.merchants;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
 import com.wordnik.swagger.annotations.Api;
@@ -7,15 +8,19 @@ import com.wordnik.swagger.annotations.ApiOperation;
 import controllers.BaseController;
 import dtos.merchant.MerchantDetailResponse;
 import dtos.merchant.MerchantResponse;
+import dtos.merchant.MerchantRequest;
 import models.Merchant;
 import models.UserMerchant;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.UserMerchantRepository;
+import service.MerchantService;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import validator.MerchantValidator;
 
 @Api(value = "/merchants", description = "Merchant")
 public class MerchantController extends BaseController {
@@ -109,5 +114,32 @@ public class MerchantController extends BaseController {
         return unauthorized(Json.toJson(response));
     }
     
-    
+    /**
+     * Register a new merchant by parsing the request JSON, validating the input,
+     * registering the merchant, and returning the response.
+     *
+     * @return         	Result object containing the response data
+     */
+    @ApiOperation(value = "Register Merchant", notes = "Register Merchant.\n" + swaggerInfo + "", response = BaseResponse.class, httpMethod = "POST")
+    public static Result registerMerchant() {
+        try {
+            // Parse Request
+            JsonNode json = request().body().asJson();
+            MerchantRequest request = objectMapper.readValue(json.toString(), MerchantRequest.class);
+
+            // Validation
+            MerchantValidator.validateCreate(request);
+
+            // Register Merchant
+            Merchant merchant = MerchantService.registerMerchant(request);
+
+            // Response
+            response.setBaseResponse(0, 0, 0, success + " Creating Merchant Data", merchant);
+            return ok(Json.toJson(response));
+        } catch (Exception e) {
+            Logger.error("Error: " + e.getMessage());
+            response.setBaseResponse(0, 0, 0, e.getMessage(), null);
+            return badRequest(Json.toJson(response));
+        }
+    }
 }
