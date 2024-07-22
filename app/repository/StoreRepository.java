@@ -1,10 +1,7 @@
 package repository;
 
 import com.avaje.ebean.*;
-import com.avaje.ebean.Ebean;
-import com.avaje.ebean.ExpressionList;
-import com.avaje.ebean.RawSql;
-import com.avaje.ebean.RawSqlBuilder;
+
 import models.StockHistory;
 import models.Store;
 import play.db.ebean.Model;
@@ -105,7 +102,7 @@ public class StoreRepository {
         String colIsActive = "is_active";
         String colIsPublish = "is_publish";
         String colIsDelete = "is_deleted";
-        String colUpdatedAt = "updated_at";
+        String colRating = "s_rating";
 
         // SQL for get range distance
         String sqlDistance = "(SELECT SQRT(\n" +
@@ -115,6 +112,8 @@ public class StoreRepository {
 
         // SQL for get rating
         String sqlRating = "(SELECT AVG(rate) AS RATING FROM store_ratings sr WHERE sr.store_id = s.id)";
+        String sqlInnerJoinRating = "LEFT JOIN (SELECT sr.store_id, COALESCE( AVG(sr.rate), 0 ) AS rating FROM store_ratings sr GROUP BY sr.store_id) r ON r.store_id = x.id";
+        String sqlSelectRating = ", (case when s.rating is null then 0 else s.rating end) as s_rating ";
 
         if (rating > 0 || ((endRange > 0 || startRange > 0) && longitude != 0 && latitude != 0) || !"".equals(type)) {
             // SQL for filter merchantType
@@ -127,14 +126,14 @@ public class StoreRepository {
             String queryDistance = "select x.*, ((SELECT SQRT(\n" +
                     " POW(69.1 * (sd.store_lat - x.store_lat), 2) +\n" +
                     " POW(69.1 * (x.store_long - sd.store_long) * COS(sd.store_lat / 57.3), 2)) \n" +
-                    " FROM store sd WHERE sd.id = x.id)) as distance from store x";
+                    " FROM store sd WHERE sd.id = x.id)) as distance, r.* from store x \n" +
+                    " "+sqlInnerJoinRating;
 
-            String querySql = "select s.id from ("+queryDistance+") s "+sqlJoinMerchant+" where ";
+            String querySql = "select s.id"+sqlSelectRating+" from ("+queryDistance+") s "+sqlJoinMerchant+" where ";
 
             colIsActive = "s.is_active";
             colIsPublish = "s.is_publish";
             colIsDelete = "s.is_deleted";
-            colUpdatedAt = "s.updated_at";
 
             if (!type.equals("")) {
                 querySql = querySql + "m.merchant_type = '" + type + "'";
@@ -169,7 +168,12 @@ public class StoreRepository {
 
             RawSql rawSql = RawSqlBuilder.parse(querySql).create();
             query = Ebean.find(Store.class).setRawSql(rawSql);
+        } else {
+            String queryJoinRating = "select x.*, r.* from store x "+sqlInnerJoinRating;
+            String sqlStore = "select s.id"+sqlSelectRating+" from ("+queryJoinRating+") s";
+            RawSql rawSql2 = RawSqlBuilder.parse(sqlStore).create();
 
+            query = Ebean.find(Store.class).setRawSql(rawSql2);
         }
 
         query = query.where()
@@ -186,13 +190,16 @@ public class StoreRepository {
         if (statusOpen.equals(open)) {
             query = query.where().eq("status_open_store", true).query();
         } else if (statusOpen.equals(closed)) {
-            query = query.where().eq("status_open_store", false).query();
+            query = query.where().or(
+                Expr.eq("status_open_store", false),
+                Expr.isNull("status_open_store")
+            ).query();
         }
 
         if (!"".equals(sort)) {
             query = query.orderBy(sort);
         } else {
-            query = query.orderBy(colUpdatedAt + " desc");
+            query = query.orderBy(colRating + " desc");
         }
 
         ExpressionList<Store> exp = query.where();
@@ -218,7 +225,7 @@ public class StoreRepository {
         String colIsActive = "is_active";
         String colIsPublish = "is_publish";
         String colIsDelete = "is_deleted";
-        String colUpdatedAt = "updated_at";
+        String colRating = "s_rating";
 
         // SQL for get range distance
         String sqlDistance = "(SELECT SQRT(\n" +
@@ -228,6 +235,8 @@ public class StoreRepository {
 
         // SQL for get rating
         String sqlRating = "(SELECT AVG(rate) AS RATING FROM store_ratings sr WHERE sr.store_id = s.id)";
+        String sqlInnerJoinRating = "LEFT JOIN (SELECT sr.store_id, COALESCE( AVG(sr.rate), 0 ) AS rating FROM store_ratings sr GROUP BY sr.store_id) r ON r.store_id = x.id";
+        String sqlSelectRating = ", (case when s.rating is null then 0 else s.rating end) as s_rating ";
 
         if (rating > 0 || ((endRange > 0 || startRange > 0) && longitude != 0 && latitude != 0) || !"".equals(type)) {
             // SQL for filter merchantType
@@ -240,14 +249,14 @@ public class StoreRepository {
             String queryDistance = "select x.*, ((SELECT SQRT(\n" +
                     " POW(69.1 * (sd.store_lat - x.store_lat), 2) +\n" +
                     " POW(69.1 * (x.store_long - sd.store_long) * COS(sd.store_lat / 57.3), 2)) \n" +
-                    " FROM store sd WHERE sd.id = x.id)) as distance from store x";
+                    " FROM store sd WHERE sd.id = x.id)) as distance, r.* from store x \n" +
+                    " "+sqlInnerJoinRating;
 
-            String querySql = "select s.id from ("+queryDistance+") s "+sqlJoinMerchant+" where ";
+            String querySql = "select s.id"+sqlSelectRating+" from ("+queryDistance+") s "+sqlJoinMerchant+" where ";
 
             colIsActive = "s.is_active";
             colIsPublish = "s.is_publish";
             colIsDelete = "s.is_deleted";
-            colUpdatedAt = "s.updated_at";
 
             if (!type.equals("")) {
                 querySql = querySql + "m.merchant_type = '" + type + "'";
@@ -282,7 +291,12 @@ public class StoreRepository {
 
             RawSql rawSql = RawSqlBuilder.parse(querySql).create();
             query = Ebean.find(Store.class).setRawSql(rawSql);
+        } else {
+            String queryJoinRating = "select x.*, r.* from store x "+sqlInnerJoinRating;
+            String sqlStore = "select s.id"+sqlSelectRating+" from ("+queryJoinRating+") s";
+            RawSql rawSql2 = RawSqlBuilder.parse(sqlStore).create();
 
+            query = Ebean.find(Store.class).setRawSql(rawSql2);
         }
 
         query = query.where()
@@ -299,13 +313,16 @@ public class StoreRepository {
         if (statusOpen.equals(open)) {
             query = query.where().eq("status_open_store", true).query();
         } else if (statusOpen.equals(closed)) {
-            query = query.where().eq("status_open_store", false).query();
+            query = query.where().or(
+                Expr.eq("status_open_store", false),
+                Expr.isNull("status_open_store")
+            ).query();
         }
 
         if (!"".equals(sort)) {
             query = query.orderBy(sort);
         } else {
-            query = query.orderBy(colUpdatedAt+" desc");
+            query = query.orderBy(colRating+" desc");
         }
 
         ExpressionList<Store> exp = query.where();
