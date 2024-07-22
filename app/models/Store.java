@@ -138,6 +138,9 @@ public class Store extends BaseModel {
     @Column(name = "is_publish")
     public Boolean isPublish;
 
+    @javax.persistence.Transient
+    public Integer s_rating;
+
     public Store(StoreRequest request, Merchant merchant) {
         this.setMerchant(merchant);
         this.setStoreName(request.getStoreName());
