@@ -743,3 +743,6 @@ GET           /banner-bazaar                            controllers.bazaar.Banne
 
 # Register Merchant
 POST         /register-merchant                     controllers.merchants.MerchantController.registerMerchant() 
+
+# Shop Checkout
+POST         /shop/order/checkout            controllers.shop.order.ShopOrderController.checkout()
