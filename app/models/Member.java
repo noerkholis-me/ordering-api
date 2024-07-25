@@ -764,6 +764,10 @@ public class Member extends BaseModel {
         return find.where().eq("email", email).eq("phone", phone).findUnique();
     }
 
+    public static Member findByGGUID(String gguid) {
+        return find.where().eq("google_user_id", gguid).eq("is_deleted", false).findUnique();
+    }
+
     public Boolean getNewsLetter() {
         return newsLetter == null ? true : newsLetter;
     }
