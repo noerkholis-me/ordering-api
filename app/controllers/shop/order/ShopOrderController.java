@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hokeba.api.BaseResponse;
 import com.hokeba.http.response.global.ServiceResponse;
 import controllers.BaseController;
-import controllers.users.CheckoutOrderController;
 import dtos.loyalty.OrderForLoyaltyData;
 import dtos.order.OrderTransaction;
 import dtos.order.OrderTransactionResponse;
@@ -58,12 +57,10 @@ import java.util.Optional;
 
 public class ShopOrderController extends BaseController {
 
-    private final static Logger.ALogger logger = Logger.of(CheckoutOrderController.class);
-
     @SuppressWarnings("rawtypes")
     private static BaseResponse response = new BaseResponse();
-
     private static ObjectMapper objectMapper = new ObjectMapper();
+    private final static Logger.ALogger logger = Logger.of(ShopOrderController.class);
 
     @SuppressWarnings("deprecation")
     public static Result checkout() {
@@ -133,19 +130,11 @@ public class ShopOrderController extends BaseController {
             String gguid = orderRequest.getCustomerGoogleId();
 
             if (gguid != null && !gguid.trim().isEmpty()) {
-                member = Member.find.where()
-                    .eq("t0.google_user_id", gguid)
-                    .eq("t0.is_deleted", false)
-                    .setMaxRows(1)
-                    .findUnique();
+                member = Member.findByGGUID(gguid);
             }
 
             if (member == null && email != null && !email.trim().isEmpty()) {
-                member = Member.find.where()
-                    .eq("t0.email", email)
-                    .eq("t0.is_deleted", false)
-                    .setMaxRows(1)
-                    .findUnique();
+                member = Member.findByEmailAndMerchantId(email, store.getMerchant().id);
             }
 
             if (member == null) {

@@ -47,7 +47,7 @@ public class AuthController extends BaseController {
 				return badRequest(Json.toJson(response));
 			}
 
-			Member member = Member.findByEmailAndPhone(email, phone);
+			Member member = Member.findByEmailAndMerchantId(email, merchantId);
 
 			if (member == null) {
 				response.setBaseResponse(0, 0, 0, "customer tidak terdaftar", Boolean.FALSE);
