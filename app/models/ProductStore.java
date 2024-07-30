@@ -83,7 +83,7 @@ public class ProductStore extends BaseModel {
         this.setActive(isActive != null || productStoreRequest.getIsActive());
         this.setStorePrice(productStoreRequest.getStorePrice());
         this.setStock(productStoreRequest.getStock());
-        this.setPublish(productStoreRequest.getIsPublish() != null ? productStoreRequest.getIsPublish() : false);
+        this.setPublish(productStoreRequest.getIsPublish() != null ? productStoreRequest.getIsPublish() : true);
         this.setIsStock(productStoreRequest.getIsStock() != null ? productStoreRequest.getIsStock() : false);
         this.setProductStoreQrCode(Constant.getInstance().getFrontEndUrl().concat(store.storeCode + "/" + store.id + "/" + merchant.id + "/product/" + productMerchant.id + "/detail"));
         if (productStoreRequest.getDiscountType() != null) {
