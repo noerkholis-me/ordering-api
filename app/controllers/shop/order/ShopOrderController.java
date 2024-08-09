@@ -19,7 +19,6 @@ import dtos.payment.InitiatePaymentResponse;
 import dtos.payment.PaymentServiceRequest;
 import models.*;
 import models.loyalty.LoyaltyPointHistory;
-import models.loyalty.LoyaltyPointMerchant;
 import models.merchant.MerchantPayment;
 import models.merchant.ProductMerchant;
 import models.merchant.TableMerchant;
@@ -40,7 +39,6 @@ import play.libs.Json;
 import play.mvc.Result;
 import repository.*;
 import repository.loyalty.LoyaltyPointHistoryRepository;
-import repository.loyalty.LoyaltyPointMerchantRepository;
 import repository.pickuppoint.PickUpPointRepository;
 import service.EmailService;
 import service.PaymentService;
@@ -384,8 +382,6 @@ public class ShopOrderController extends BaseController {
                 }
             }
 
-            List<LoyaltyPointMerchant> lpMerchant = LoyaltyPointMerchantRepository.find.where().eq("merchant", store.merchant).eq("t0.is_deleted", false).findList();
-
             if (orderRequest.getUseLoyalty() == true && orderRequest.getLoyaltyUsage() != null) {
                 member.loyaltyPoint = member.loyaltyPoint.subtract(orderRequest.getLoyaltyUsage());
                 member.update();
@@ -393,59 +389,6 @@ public class ShopOrderController extends BaseController {
 
             if (member != null) {
                 BigDecimal loyaltyMine = member.loyaltyPoint != null ? member.loyaltyPoint : BigDecimal.ZERO;
-                BigDecimal loyaltyPointGet = BigDecimal.ZERO;
-
-                if (!lpMerchant.isEmpty()) {
-                    for (LoyaltyPointMerchant lPoint: lpMerchant) {
-                        BigDecimal subTotalPerCategory = BigDecimal.ZERO;
-                        BigDecimal totalLoyalty = BigDecimal.ZERO;
-
-                        for (OrderForLoyaltyData ofLD : listOrderData) {
-                            if (ofLD.getSubsCategoryId() == lPoint.getSubsCategoryMerchant().id) {
-                                System.out.print("Category "+ ofLD.getSubsCategoryName() + " Total : ");
-                                subTotalPerCategory = subTotalPerCategory.add(ofLD.getSubTotal());
-                                System.out.println(subTotalPerCategory);
-                                System.out.println("=================");
-                            }
-                        }
-
-                        // GET TOTAL LOYALTY
-                        if (lPoint.getCashbackType().equalsIgnoreCase("Percentage")) {
-                            loyaltyPointGet = BigDecimal.ZERO;
-                            totalLoyalty = subTotalPerCategory.multiply(lPoint.getCashbackValue());
-                            totalLoyalty = totalLoyalty.divide(new BigDecimal(100), 0, RoundingMode.DOWN);
-
-                            if (totalLoyalty.compareTo(lPoint.getMaxCashbackValue()) > 0) {
-                                System.out.print("Loyalty nya (max): ");
-                                System.out.println(lPoint.getMaxCashbackValue());
-                                loyaltyPointGet = loyaltyPointGet.add(lPoint.getMaxCashbackValue());
-                                loyaltyMine = loyaltyMine.add(lPoint.getMaxCashbackValue());
-                                member.loyaltyPoint = loyaltyMine;
-                                member.update();
-                            } else {
-                                System.out.print("Loyalty nya: ");
-                                System.out.println(totalLoyalty);
-                                loyaltyMine = loyaltyMine.add(totalLoyalty);
-                                loyaltyPointGet = loyaltyPointGet.add(totalLoyalty);
-                                member.loyaltyPoint = loyaltyMine;
-                                member.update();
-                            }
-                        } else {
-                            loyaltyPointGet = BigDecimal.ZERO;
-                            totalLoyalty = lPoint.getCashbackValue();
-                            System.out.print("Loyalty nya (max point): ");
-                            System.out.println(totalLoyalty);
-                            loyaltyPointGet = loyaltyPointGet.add(totalLoyalty);
-                            member.loyaltyPoint = loyaltyMine != null ? loyaltyMine.add(totalLoyalty) : totalLoyalty;
-                            member.update();
-                        }
-                    }
-                }
-
-                System.out.print("Existing loyalty: ");
-                System.out.println(loyaltyMine);
-                System.out.print("Get Loyalty: ");
-                System.out.println(loyaltyPointGet);
 
                 LoyaltyPointHistory lPointHistory = LoyaltyPointHistoryRepository.findByMember(member);
                 Date date = new Date();
@@ -460,7 +403,6 @@ public class ShopOrderController extends BaseController {
                 LoyaltyPointHistory lpHistory = new LoyaltyPointHistory();
 
                 lpHistory.setPoint(loyaltyMine);
-                lpHistory.setAdded(loyaltyPointGet);
                 lpHistory.setUsed(orderRequest.getLoyaltyUsage());
                 lpHistory.setMember(member);
                 lpHistory.setOrder(order);
