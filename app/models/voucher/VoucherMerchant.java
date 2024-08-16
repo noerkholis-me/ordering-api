@@ -81,6 +81,10 @@ public class VoucherMerchant extends BaseModel{
 	public static VoucherMerchant findById(Long id) {
         return find.where().eq("id", id).eq("isDeleted", false).eq("available", true).findUnique();
     }
+
+	public static VoucherMerchant findByCode(String code, Merchant merchant) {
+        return find.where().eq("merchant", merchant).eq("code", code).eq("isDeleted", false).eq("available", true).findUnique();
+    }
 	
 	public static Query<VoucherMerchant> findAllVoucerFromAllMerchant() {
         return find.where().eq("isDeleted", false).order("id");
