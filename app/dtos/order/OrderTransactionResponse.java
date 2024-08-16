@@ -28,6 +28,8 @@ public class OrderTransactionResponse {
     @JsonProperty("total_amount")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal totalAmount;
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal discountAmount;
     @JsonProperty("status")
     private String status;
     @JsonProperty("payment_method")

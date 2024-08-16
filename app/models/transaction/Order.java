@@ -127,6 +127,9 @@ public class Order extends BaseModel {
     @Column(name = "discount_amount")
     private BigDecimal discountAmount;
 
+    @Column(name = "voucher_code")
+    private String voucherCode;
+
     // ================================================================ //
 
     public static Finder<Long, Order> find = new Finder<>(Long.class, Order.class);
