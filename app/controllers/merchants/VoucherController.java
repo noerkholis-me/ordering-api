@@ -476,7 +476,9 @@ public class VoucherController extends BaseController {
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         }
-        VoucherMerchant voucherMerchant = VoucherMerchant.findById(voucherId);
+
+        VoucherMerchant voucherMerchant = VoucherMerchant.findByIdAndMerchant(voucherId, merchant);
+
         if (voucherMerchant == null) {
             response.setBaseResponse(0, 0, 0, "Voucher Tidak Ditemukan", null);
             return notFound(Json.toJson(response));
@@ -570,7 +572,7 @@ public class VoucherController extends BaseController {
     }
 
     private static VoucherStoreResponse toStoreResponse2(Store store) {
-        return new VoucherStoreResponse(store.id, store.storeName);
+        return new VoucherStoreResponse(store.id, store.getStoreName());
     }
 
     private static String validateRequest(CreateVoucherRequest request) {
