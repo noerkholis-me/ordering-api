@@ -265,6 +265,14 @@ public class VoucherController extends BaseController {
                     response.setBaseResponse(0, 0, 0, "Voucher dengan nama yang sama sudah ada", null);
                     return badRequest(Json.toJson(response));
                 }
+
+                VoucherMerchant uniqueCode = VoucherMerchant.findByCode(request.getCode(), merchantCreator);
+
+                if (uniqueCode != null) {
+                    response.setBaseResponse(0, 0, 0, "Kode voucher sudah ada", null);
+                    return badRequest(Json.toJson(response));
+                }
+
                 VoucherMerchant voucher = new VoucherMerchant(request, merchantCreator);
                 voucher.save();
                 VoucherHowToUse howToUse = new VoucherHowToUse(voucher, request);
