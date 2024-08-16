@@ -69,5 +69,6 @@ public class OrderTransaction {
     @JsonProperty("voucher_id")
     private List<Long> voucherId;
     
-
+    @JsonProperty("voucher_code")
+    private String voucherCode;
 }

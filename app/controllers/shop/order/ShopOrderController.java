@@ -49,6 +49,7 @@ import java.math.BigDecimal;
 
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -186,35 +187,72 @@ public class ShopOrderController extends BaseController {
                 return badRequest(Json.toJson(response));
             }
 
-            if (member != null && orderRequest.getUseVoucher()) {
+            // if (member != null && orderRequest.getUseVoucher()) {
+            //     BigDecimal discount = BigDecimal.ZERO;
+            //     List<VoucherMerchant> vouchers = new ArrayList<>();
+
+            //     for (int i = 0; i < orderRequest.getVoucherId().size(); i++) {
+            //         VoucherMerchant voucher = VoucherMerchant.findById(orderRequest.getVoucherId().get(i));
+            //         vouchers.add(voucher);
+            //     }
+
+            //     if (vouchers.isEmpty()) {
+            //         response.setBaseResponse(0, 0, 0, "Voucher Tidak Ditemukan", null);
+            //         return notFound(Json.toJson(response));
+            //     }
+
+            //     for (VoucherMerchant data : vouchers) {
+            //         if (data.getValueText() != null && data.getValueText().equalsIgnoreCase(VoucherMerchant.NOMINAL)) {
+            //             discount = discount.add(data.getValue());
+            //         } else if (data.getValueText() != null && data.getValueText().equalsIgnoreCase(VoucherMerchant.PERCENT)) {
+            //             BigDecimal countDiscount = data.getValue().divide(new BigDecimal(100).setScale(2, RoundingMode.DOWN));
+            //             discount = discount.add(countDiscount);
+            //         }
+            //     }
+
+            //     order.setDiscountAmount(discount);
+            // }
+
+            // if (member == null && orderRequest.getUseVoucher()) {
+            //     response.setBaseResponse(0, 0, 0, "Ups, anda tidak dapat menggunakan voucher", null);
+            //     return badRequest(Json.toJson(response));
+            // }
+
+            if (orderRequest.getVoucherCode() != null) {
                 BigDecimal discount = BigDecimal.ZERO;
-                List<VoucherMerchant> vouchers = new ArrayList<>();
 
-                for (int i = 0; i < orderRequest.getVoucherId().size(); i++) {
-                    VoucherMerchant voucher = VoucherMerchant.findById(orderRequest.getVoucherId().get(i));
-                    vouchers.add(voucher);
-                }
+                VoucherMerchant voucher = VoucherMerchant.findByCode(orderRequest.getVoucherCode(), merchant);
 
-                if (vouchers.isEmpty()) {
+                if (voucher == null) {
                     response.setBaseResponse(0, 0, 0, "Voucher Tidak Ditemukan", null);
                     return notFound(Json.toJson(response));
                 }
 
-                for (VoucherMerchant data : vouchers) {
-                    if (data.getValueText() != null && data.getValueText().equalsIgnoreCase(VoucherMerchant.NOMINAL)) {
-                        discount = discount.add(data.getValue());
-                    } else if (data.getValueText() != null && data.getValueText().equalsIgnoreCase(VoucherMerchant.PERCENT)) {
-                        BigDecimal countDiscount = data.getValue().divide(new BigDecimal(100).setScale(2, RoundingMode.DOWN));
-                        discount = discount.add(countDiscount);
-                    }
+                Date createdAt = voucher.createdAt;
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(createdAt);
+                cal.add(Calendar.DATE, voucher.getExpiryDay());
+
+                Date expiryDate = cal.getTime();
+                Date now = new Date();
+
+                if (now.after(expiryDate)) {
+                    response.setBaseResponse(0, 0, 0, "Voucher Sudah tidak berlaku", null);
+                    return notFound(Json.toJson(response));
+                }
+
+                if (voucher.getValueText() != null && voucher.getValueText().equalsIgnoreCase(VoucherMerchant.NOMINAL)) {
+                    discount = discount.add(voucher.getValue());
+                } else if (voucher.getValueText() != null && voucher.getValueText().equalsIgnoreCase(VoucherMerchant.PERCENT)) {
+                    BigDecimal countDiscount = voucher.getValue().divide(new BigDecimal(100).setScale(2, RoundingMode.DOWN));
+                    discount = discount.add(countDiscount);
                 }
 
                 order.setDiscountAmount(discount);
-            }
+                order.setVoucherCode(orderRequest.getVoucherCode());
 
-            if (member == null && orderRequest.getUseVoucher()) {
-                response.setBaseResponse(0, 0, 0, "Ups, anda tidak dapat menggunakan voucher", null);
-                return badRequest(Json.toJson(response));
+                voucher.setAvailable(false);
+                voucher.save();
             }
 
             String address = null;
@@ -427,6 +465,12 @@ public class ShopOrderController extends BaseController {
 
             OrderPayment orderPayment = new OrderPayment();
 
+            BigDecimal totalAmount = orderRequest.getPaymentDetailResponse().getTotalAmount();
+
+            if (order.getDiscountAmount() != null) {
+                totalAmount = totalAmount.subtract(order.getDiscountAmount());
+            }
+
             orderPayment.setOrder(order);
             orderPayment.setInvoiceNo(OrderPayment.generateInvoiceCode());
             orderPayment.setStatus(mPayment.typePayment.equalsIgnoreCase("DIRECT_PAYMENT") ? PaymentStatus.PAID.getStatus() : PaymentStatus.PENDING.getStatus());
@@ -442,7 +486,7 @@ public class ShopOrderController extends BaseController {
             orderPayment.setPaymentFeeType(orderRequest.getPaymentDetailResponse().getPaymentFeeType());
             orderPayment.setPaymentFeeCustomer(orderRequest.getPaymentDetailResponse().getPaymentFeeCustomer());
             orderPayment.setPaymentFeeOwner(orderRequest.getPaymentDetailResponse().getPaymentFeeOwner());
-            orderPayment.setTotalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount());
+            orderPayment.setTotalAmount(totalAmount);
             orderPayment.save();
 
             if (mPayment.typePayment.equalsIgnoreCase("PAYMENT_GATEWAY")) {
@@ -477,7 +521,7 @@ public class ShopOrderController extends BaseController {
                     .paymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel())
                     .paymentType(orderRequest.getPaymentDetailResponse().getPaymentType())
                     .bankCode(orderRequest.getPaymentDetailResponse().getBankCode())
-                    .totalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount())
+                    .totalAmount(totalAmount)
                     .build();
 
                 request.setPaymentServiceRequest(paymentServiceRequest);
@@ -571,7 +615,7 @@ public class ShopOrderController extends BaseController {
                     .paymentChannel(orderRequest.getPaymentDetailResponse().getPaymentChannel())
                     .paymentType(orderRequest.getPaymentDetailResponse().getPaymentType())
                     .bankCode(null)
-                    .totalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount())
+                    .totalAmount(totalAmount)
                     .build();
 
                 request.setPaymentServiceRequest(paymentServiceRequest);
@@ -597,7 +641,7 @@ public class ShopOrderController extends BaseController {
                 payDetail.setCreationTime(new Date());
                 payDetail.setStatus(mPayment.typePayment.equalsIgnoreCase("DIRECT_PAYMENT") ? PaymentStatus.PAID.getStatus() : PaymentStatus.PENDING.getStatus());
                 payDetail.setReferenceId(null);
-                payDetail.setTotalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount());
+                payDetail.setTotalAmount(totalAmount);
                 payDetail.setOrderPayment(orderPayment);
                 payDetail.save();
 
@@ -618,6 +662,7 @@ public class ShopOrderController extends BaseController {
 
                 orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
                 orderTransactionResponse.setTotalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount());
+                orderTransactionResponse.setDiscountAmount(order.getDiscountAmount());
                 orderTransactionResponse.setStatus(order.getStatus());
                 orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
                 orderTransactionResponse.setMetadata(null);
