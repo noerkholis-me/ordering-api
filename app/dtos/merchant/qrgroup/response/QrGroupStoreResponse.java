@@ -58,4 +58,16 @@ public class QrGroupStoreResponse {
 
     @JsonProperty("store_queue_url")
     private String storeQueueUrl;
+
+    @JsonProperty("status_open_store")
+    private Boolean statusOpenStore;
+
+    @JsonProperty("slug")
+    private String slug;
+
+    @JsonProperty("open_at")
+    public String openAt;
+
+    @JsonProperty("closed_at")
+    public String closedAt;
 }

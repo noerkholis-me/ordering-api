@@ -742,6 +742,10 @@ public class QrGroupController extends BaseController {
                 storeRes.setStoreLogo(store.getStoreLogo());
                 storeRes.setMerchantType(store.getMerchantType());
                 storeRes.setStoreQueueUrl(Helper.MOBILEQR_URL + store.getStoreCode() + "/queue");
+                storeRes.setStatusOpenStore(getStore.getStatusOpenStore());
+                storeRes.setSlug(getStore.getStoreAlias());
+                storeRes.setClosedAt(getStore.getClosedAt());
+                storeRes.setOpenAt(getStore.getOpenAt());
                 storeResponses.add(storeRes);
             }
         }
