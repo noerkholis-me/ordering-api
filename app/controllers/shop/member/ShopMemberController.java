@@ -1,17 +1,23 @@
 package controllers.shop.member;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import com.avaje.ebean.Expr;
 import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Query;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hokeba.api.BaseResponse;
 
 import controllers.BaseController;
 import dtos.order.OrderList;
+import dtos.voucher.CheckVoucherCodeRequest;
 import models.Member;
+import models.Merchant;
 import models.ProductRatings;
 import models.Store;
 import models.merchant.ProductMerchantDetail;
@@ -19,6 +25,7 @@ import models.transaction.Order;
 import models.transaction.OrderDetail;
 import models.transaction.OrderDetailAddOn;
 import models.transaction.OrderPayment;
+import models.voucher.VoucherMerchant;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
@@ -189,6 +196,69 @@ public class ShopMemberController extends BaseController {
             return ok(Json.toJson(response));
         } catch (Exception ex) {
             logger.error("Error when getting list data orders");
+            ex.printStackTrace();
+
+            response.setBaseResponse(0, 0, 0, ex.getMessage(), null);
+            return badRequest(Json.toJson(response));
+        } catch (Error er) {
+            logger.error(er.getMessage());
+            er.printStackTrace();
+            response.setBaseResponse(0, 0, 0, error, null);
+            return badRequest(Json.toJson(response));
+        }
+    }
+
+    public static Result checkVoucherCode() {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = request().body().asJson();
+            CheckVoucherCodeRequest request = objectMapper.readValue(jsonNode.toString(), CheckVoucherCodeRequest.class);
+
+            // Member member = Member.findByEmail(request.getEmail());
+
+            // if (member == null) {
+            //     response.setBaseResponse(0, 0, 0, "Member Tidak Ditemukan", null);
+            //     return badRequest(Json.toJson(response));
+            // }
+
+            Store store = Store.findByStoreCode(request.getStoreCode());
+
+            if (store == null) {
+                response.setBaseResponse(0, 0, 0, "Store tidak ditemukan", null);
+                return badRequest(Json.toJson(response));
+            }
+
+            Merchant merchant = Merchant.find.byId(store.getMerchant().id);
+
+            if (merchant == null) {
+                response.setBaseResponse(0, 0, 0, "Merchant tidak ditemukan", null);
+                return badRequest(Json.toJson(response));
+            }
+            Logger.info("merchant: "+merchant.id);
+            VoucherMerchant voucher = VoucherMerchant.findByCode(request.getVoucherCode(), merchant);
+
+            if (voucher == null) {
+                response.setBaseResponse(0, 0, 0, "Voucher Tidak Ditemukan atau Sudah Tidak Berlaku", null);
+                return badRequest(Json.toJson(response));
+            }
+
+            Date createdAt = voucher.createdAt;
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(createdAt);
+            cal.add(Calendar.DATE, voucher.getExpiryDay());
+
+            Date expiryDate = cal.getTime();
+            Date now = new Date();
+
+            if (now.after(expiryDate)) {
+                response.setBaseResponse(0, 0, 0, "Masa Berlaku Voucher Sudah Habis", null);
+                return notFound(Json.toJson(response));
+            }
+
+            response.setBaseResponse(1, offset, 1, success, voucher);
+            return ok(Json.toJson(response));
+        } catch (Exception ex) {
+            logger.error("Error when checking voucher code");
             ex.printStackTrace();
 
             response.setBaseResponse(0, 0, 0, ex.getMessage(), null);
