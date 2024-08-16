@@ -750,3 +750,4 @@ POST         /shop/order/checkout                controllers.shop.order.ShopOrde
 # Members V2
 POST         /shop/member/check                  controllers.shop.auth.AuthController.checkMember()
 GET          /shop/member/orders                 controllers.shop.member.ShopMemberController.getMemberOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="", email:String?="" , phone_number:String?="")
+POST         /shop/member/voucher/check          controllers.shop.member.ShopMemberController.checkVoucherCode()
