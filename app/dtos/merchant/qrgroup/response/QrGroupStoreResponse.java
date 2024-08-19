@@ -53,6 +53,9 @@ public class QrGroupStoreResponse {
     @JsonProperty("store_logo")
     public String storeLogo;
 
+    @JsonProperty("store_image")
+    public String storeImage;
+
     @JsonProperty("merchant_type")
     public String merchantType;
 
