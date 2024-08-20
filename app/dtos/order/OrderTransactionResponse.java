@@ -30,6 +30,21 @@ public class OrderTransactionResponse {
     private BigDecimal totalAmount;
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal discountAmount;
+    @JsonProperty("subtotal")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal subtotal;
+    @JsonProperty("service_fee")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal serviceFee;
+    @JsonProperty("tax")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal tax;
+    @JsonProperty("delivery_fee")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal deliveryFee;
+    @JsonProperty("loyalty_point")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal loyaltyPoint;
     @JsonProperty("status")
     private String status;
     @JsonProperty("payment_method")

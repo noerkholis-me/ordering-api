@@ -218,9 +218,16 @@ public class ShopOrderController extends BaseController {
             //     return badRequest(Json.toJson(response));
             // }
 
-            if (orderRequest.getVoucherCode() != null) {
-                BigDecimal discount = BigDecimal.ZERO;
+            BigDecimal totalAmount = orderRequest.getSubTotal();
+            Double taxPercentage = orderRequest.getPaymentDetailResponse().getTaxPercentage();
+            Double servicePercentage = orderRequest.getPaymentDetailResponse().getServicePercentage();
+            BigDecimal taxPrice = orderRequest.getPaymentDetailResponse().getTaxPrice();
+            BigDecimal servicePrice = orderRequest.getPaymentDetailResponse().getServicePrice();
+            BigDecimal deliveryFee = orderRequest.getPaymentDetailResponse().getDeliveryFee();
+            BigDecimal discount = BigDecimal.ZERO;
+            BigDecimal loyaltyPoint = BigDecimal.ZERO;
 
+            if (orderRequest.getVoucherCode() != null) {
                 VoucherMerchant voucher = VoucherMerchant.findByCode(orderRequest.getVoucherCode(), merchant);
 
                 if (voucher == null) {
@@ -247,6 +254,12 @@ public class ShopOrderController extends BaseController {
                     BigDecimal countDiscount = voucher.getValue().divide(new BigDecimal(100).setScale(2, RoundingMode.DOWN));
                     discount = discount.add(countDiscount);
                 }
+
+                if (discount.compareTo(orderRequest.getSubTotal()) >= 0) {
+                    discount = orderRequest.getSubTotal();
+                }
+
+                totalAmount = totalAmount.subtract(discount);
 
                 order.setDiscountAmount(discount);
                 order.setVoucherCode(orderRequest.getVoucherCode());
@@ -322,10 +335,16 @@ public class ShopOrderController extends BaseController {
             }
 
             if (orderRequest.getUseLoyalty() == true) {
-                order.setTotalLoyaltyUsage(orderRequest.getLoyaltyUsage());
-            }
+                loyaltyPoint = orderRequest.getLoyaltyUsage();
 
-            order.save();
+                if (loyaltyPoint.compareTo(totalAmount) >= 0) {
+                    loyaltyPoint = totalAmount;
+                }
+
+                totalAmount = totalAmount.subtract(loyaltyPoint);
+
+                order.setTotalLoyaltyUsage(loyaltyPoint);
+            }
 
             List<ProductOrderDetail> productOrderDetails = orderRequest.getProductOrderDetail();
             ArrayNode countersNode = ((ObjectNode) jsonRequest.get("package")).putArray("items");
@@ -421,7 +440,7 @@ public class ShopOrderController extends BaseController {
             }
 
             if (orderRequest.getUseLoyalty() == true && orderRequest.getLoyaltyUsage() != null) {
-                member.loyaltyPoint = member.loyaltyPoint.subtract(orderRequest.getLoyaltyUsage());
+                member.loyaltyPoint = member.loyaltyPoint.subtract(loyaltyPoint);
                 member.update();
             }
 
@@ -441,7 +460,7 @@ public class ShopOrderController extends BaseController {
                 LoyaltyPointHistory lpHistory = new LoyaltyPointHistory();
 
                 lpHistory.setPoint(loyaltyMine);
-                lpHistory.setUsed(orderRequest.getLoyaltyUsage());
+                lpHistory.setUsed(loyaltyPoint);
                 lpHistory.setMember(member);
                 lpHistory.setOrder(order);
                 lpHistory.setExpiredDate(date);
@@ -449,9 +468,22 @@ public class ShopOrderController extends BaseController {
                 lpHistory.save();
             }
 
+            // CALCULATE TOTAL AMOUNT
+            if (servicePercentage > 0 && servicePercentage != null) {
+                servicePrice = orderRequest.getSubTotal().multiply(new BigDecimal(servicePercentage).setScale(0, RoundingMode.DOWN)).divide(new BigDecimal(100).setScale(0, RoundingMode.DOWN));
+            }
+
+            if (taxPercentage > 0) {
+                taxPrice = orderRequest.getSubTotal().multiply(new BigDecimal(taxPercentage).setScale(0, RoundingMode.DOWN)).divide(new BigDecimal(100).setScale(0, RoundingMode.DOWN));
+            }
+
+            if (servicePrice != null) totalAmount = totalAmount.add(servicePrice);
+            if (taxPrice != null) totalAmount = totalAmount.add(taxPrice);
+            if (deliveryFee != null) totalAmount = totalAmount.add(deliveryFee);
+
             order.setSubTotal(orderRequest.getSubTotal());
-            order.setTotalPrice(orderRequest.getTotalPrice());
-            order.update();
+            order.setTotalPrice(totalAmount);
+            order.save();
 
             // CHECK USAGE PAYMENT
             MerchantPayment mPayment = MerchantPayment.findPayment.where().eq("merchant", store.merchant).eq("t0.device", orderRequest.getDeviceType()).eq("paymentMethod.paymentCode", orderRequest.getPaymentDetailResponse().getPaymentChannel()).findUnique();
@@ -464,12 +496,6 @@ public class ShopOrderController extends BaseController {
             }
 
             OrderPayment orderPayment = new OrderPayment();
-
-            BigDecimal totalAmount = orderRequest.getPaymentDetailResponse().getTotalAmount();
-
-            if (order.getDiscountAmount() != null) {
-                totalAmount = totalAmount.subtract(order.getDiscountAmount());
-            }
 
             orderPayment.setOrder(order);
             orderPayment.setInvoiceNo(OrderPayment.generateInvoiceCode());
@@ -661,8 +687,12 @@ public class ShopOrderController extends BaseController {
                 }
 
                 orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
-                orderTransactionResponse.setTotalAmount(orderRequest.getPaymentDetailResponse().getTotalAmount());
-                orderTransactionResponse.setDiscountAmount(order.getDiscountAmount());
+                orderTransactionResponse.setTotalAmount(totalAmount);
+                orderTransactionResponse.setSubtotal(order.getSubTotal());
+                orderTransactionResponse.setDiscountAmount(discount);
+                orderTransactionResponse.setServiceFee(servicePrice);
+                orderTransactionResponse.setTax(taxPrice);
+                orderTransactionResponse.setDeliveryFee(deliveryFee);
                 orderTransactionResponse.setStatus(order.getStatus());
                 orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
                 orderTransactionResponse.setMetadata(null);
