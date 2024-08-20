@@ -750,7 +750,7 @@ public class QrGroupController extends BaseController {
                 storeResponses.add(storeRes);
             }
         }
-        qrGroupResponses.setStore(storeResponses.size() == 0 ? null : storeResponses);
+        qrGroupResponses.setStore(storeResponses);
 
         return qrGroupResponses;
     }
