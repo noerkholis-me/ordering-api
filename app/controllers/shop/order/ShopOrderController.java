@@ -274,8 +274,30 @@ public class ShopOrderController extends BaseController {
                 address = orderRequest.getDestinationAddressResponse().getAddress() + ',' + orderRequest.getDestinationAddressResponse().getSubDistrict() + ',' + orderRequest.getDestinationAddressResponse().getDistrict() + ',' + orderRequest.getDestinationAddressResponse().getCity() + ',' + orderRequest.getDestinationAddressResponse().getState() + ' ' + orderRequest.getDestinationAddressResponse().getPostcode();
             }
 
+            // Validate BTM Store Group
+            Boolean isBTMStore = false;
+            List<QrGroupStore> qrGroupStores = store.getQrGroupStores();
+
+            if (qrGroupStores.size() > 0) {
+                QrGroupStore btmGroup = qrGroupStores.stream()
+                    .filter(qrGroupStore -> qrGroupStore.getQrGroup().getGroupCode().equalsIgnoreCase("BTM2024"))
+                    .findFirst()
+                    .orElse(null);
+
+                if (btmGroup != null) {
+                    isBTMStore = true;
+                }
+            }
+
             // new oders
-            String orderNumber = Order.generateOrderNumber();
+            String orderNumber = null;
+
+            if (isBTMStore) {
+                orderNumber = Order.generateOrderNumber("PGI");
+            } else {
+                orderNumber = Order.generateOrderNumber();
+            }
+
             order.setOrderDate(new Date());
             order.setOrderNumber(orderNumber);
             order.setOrderType(orderRequest.getOrderType());
