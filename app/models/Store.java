@@ -141,6 +141,9 @@ public class Store extends BaseModel {
     @javax.persistence.Transient
     public Integer s_rating;
 
+    @OneToMany()
+    public List<QrGroupStore> qrGroupStores;
+
     public Store(StoreRequest request, Merchant merchant) {
         this.setMerchant(merchant);
         this.setStoreName(request.getStoreName());
@@ -282,6 +285,14 @@ public class Store extends BaseModel {
         map.put("store_code", (data.storeCode == null) ? "" : data.storeCode);
 
         return Json.toJson(map).toString();
+    }
+
+    public List<QrGroupStore> getQrGroupStore() {
+        return QrGroupStore.find
+                .where()
+                .eq("store", this)
+                .eq("is_deleted", false)
+                .findList();
     }
 
 }

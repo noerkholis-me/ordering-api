@@ -6,10 +6,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -76,4 +79,6 @@ public class QrGroup extends BaseModel {
     @JoinColumn(name = "merchant_id", referencedColumnName = "id")
     public Merchant merchant;
 
+    @OneToMany()
+    public List<QrGroupStore> qrGroupStores;
 }

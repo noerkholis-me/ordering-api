@@ -134,7 +134,7 @@ public class Order extends BaseModel {
 
     public static Finder<Long, Order> find = new Finder<>(Long.class, Order.class);
 
-    public static String generateOrderNumber(){
+    public static String generateOrderNumber() {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyMMDD");
         SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("yyyy-MM");
         Order order = Order.find.where("t0.created_at > '"+simpleDateFormat2.format(new Date())+"-01 00:00:00'")
@@ -153,7 +153,32 @@ public class Order extends BaseModel {
         return code;
     }
 
-    public String getTanggal(){
+    public static String generateOrderNumber(String code) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyMMDD");
+        SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("yyyy-MM");
+
+        Order order = Order.find
+            .where("t0.created_at > '"+simpleDateFormat2.format(new Date())+"-01 00:00:00'")
+            .order("t0.created_at desc")
+            .setMaxRows(1)
+            .findUnique();
+
+        String seqNum = "";
+
+        if (order == null) {
+            seqNum = "00001";
+        } else {
+            seqNum = order.orderNumber.substring(order.orderNumber.length() - 5);
+            int seq = Integer.parseInt(seqNum)+1;
+            seqNum = "00000" + String.valueOf(seq);
+            seqNum = seqNum.substring(seqNum.length() - 5);
+        }
+
+        code += simpleDateFormat.format(new Date()) + seqNum;
+        return code;
+    }
+
+    public String getTanggal() {
         return CommonFunction.getDate(this.orderDate);
     }
 
