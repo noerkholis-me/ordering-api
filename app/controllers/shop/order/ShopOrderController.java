@@ -711,7 +711,7 @@ public class ShopOrderController extends BaseController {
                 orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
                 orderTransactionResponse.setTotalAmount(totalAmount);
                 orderTransactionResponse.setSubtotal(order.getSubTotal());
-                orderTransactionResponse.setDiscountAmount(discount);
+                orderTransactionResponse.setDiscountAmount(order.getDiscountAmount());
                 orderTransactionResponse.setServiceFee(servicePrice);
                 orderTransactionResponse.setTax(taxPrice);
                 orderTransactionResponse.setDeliveryFee(deliveryFee);
@@ -727,6 +727,10 @@ public class ShopOrderController extends BaseController {
                     if (!orderPayment.getPaymentType().equalsIgnoreCase("virtual_account") || !orderPayment.getPaymentType().equalsIgnoreCase("qr_code")) {
                         if (member != null && (member.email != null && member.fullName != null)) EmailService.handleCallbackAndSendEmail(order, false);
                     }
+                // } else {
+                //     Logger.info("SENDING ORDER NOTIFICATION TO MAIL: " + member.email);
+
+                //     EmailService.handleCallbackAndSendEmail(order, false);
                 }
 
                 response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
