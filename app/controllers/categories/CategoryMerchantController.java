@@ -15,6 +15,7 @@ import dtos.category.CategoryAppResponse;
 import dtos.category.CategoryMerchantResponse;
 import models.CategoryMerchant;
 import models.Merchant;
+import models.ProductStore;
 import models.Store;
 import models.SubCategoryMerchant;
 import models.SubsCategoryMerchant;
@@ -352,10 +353,29 @@ public class CategoryMerchantController extends BaseController {
             return badRequest(Json.toJson(response));
         }
         try {
-            int totalData = CategoryMerchantRepository.findMerchantIdWithStatus(merchantId).size();
-            List<CategoryMerchant> categoryMerchants = CategoryMerchantRepository.findMerchantIdWithStatus(merchantId);
-
             List<CategoryAppResponse> responses = new ArrayList<>();
+            List<ProductStore> productStores = store.getProductStores();
+
+            if (productStores.size() == 0) {
+                response.setBaseResponse(0, offset, limit, "Data kategori kosong", responses);
+                return ok(Json.toJson(response));
+            }
+
+            List <Long> categoryIds =  new ArrayList<>();
+            for (ProductStore productStore : productStores) {
+                categoryIds.add(productStore.getProductMerchant().getCategoryMerchant().id);
+            }
+
+            List<CategoryMerchant> categoryMerchants = new ArrayList<>();
+            int totalData = 0;
+
+            if (storeId == null) {
+                totalData = CategoryMerchantRepository.findMerchantIdWithStatus(merchantId).size();
+                categoryMerchants = CategoryMerchantRepository.findMerchantIdWithStatus(merchantId);
+            } else {
+                totalData = CategoryMerchantRepository.findStoreCategories(categoryIds).size();
+                categoryMerchants = CategoryMerchantRepository.findStoreCategories(categoryIds);
+            }
 
             for (CategoryMerchant data : categoryMerchants) {
                 CategoryAppResponse response = new CategoryAppResponse();
