@@ -362,6 +362,7 @@ public class CategoryMerchantController extends BaseController {
             }
 
             List <Long> categoryIds =  new ArrayList<>();
+
             for (ProductStore productStore : productStores) {
                 categoryIds.add(productStore.getProductMerchant().getCategoryMerchant().id);
             }
@@ -402,10 +403,32 @@ public class CategoryMerchantController extends BaseController {
             return badRequest(Json.toJson(response));
         }
         try {
-            int totalData = CategoryMerchantRepository.findAllByMerchant(merchantId).size();
-            List<CategoryMerchant> categoryMerchants = CategoryMerchantRepository.findAllByMerchant(merchantId);
+            List<CategoryMerchantResponse> responses = new ArrayList<>();
+            List<ProductStore> productStores = store.getProductStores();
 
-            List<CategoryMerchantResponse> responses = listResponse(categoryMerchants, merchantId);
+            if (productStores.size() == 0) {
+                response.setBaseResponse(0, offset, limit, "Data kategori kosong", responses);
+                return ok(Json.toJson(response));
+            }
+
+            List <Long> categoryIds =  new ArrayList<>();
+
+            for (ProductStore productStore : productStores) {
+                categoryIds.add(productStore.getProductMerchant().getCategoryMerchant().id);
+            }
+
+            List<CategoryMerchant> categoryMerchants = new ArrayList<>();
+            int totalData = 0;
+
+            if (storeId == null) {
+                totalData = CategoryMerchantRepository.findMerchantIdWithStatus(merchantId).size();
+                categoryMerchants = CategoryMerchantRepository.findMerchantIdWithStatus(merchantId);
+            } else {
+                totalData = CategoryMerchantRepository.findStoreCategories(categoryIds).size();
+                categoryMerchants = CategoryMerchantRepository.findStoreCategories(categoryIds);
+            }
+
+            responses = listResponse(categoryMerchants, merchantId);
 
             response.setBaseResponse(totalData, offset, limit, "Berhasil menampilkan data", responses);
             return ok(Json.toJson(response));
