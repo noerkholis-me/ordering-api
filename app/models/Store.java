@@ -144,6 +144,9 @@ public class Store extends BaseModel {
     @OneToMany()
     public List<QrGroupStore> qrGroupStores;
 
+    @OneToMany()
+    public List<ProductStore> productStores;
+
     public Store(StoreRequest request, Merchant merchant) {
         this.setMerchant(merchant);
         this.setStoreName(request.getStoreName());
@@ -289,6 +292,14 @@ public class Store extends BaseModel {
 
     public List<QrGroupStore> getQrGroupStore() {
         return QrGroupStore.find
+                .where()
+                .eq("store", this)
+                .eq("is_deleted", false)
+                .findList();
+    }
+
+    public List<ProductStore> getProductStores() {
+        return ProductStore.find
                 .where()
                 .eq("store", this)
                 .eq("is_deleted", false)

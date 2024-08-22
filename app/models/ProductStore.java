@@ -23,6 +23,8 @@ import java.math.BigDecimal;
 public class ProductStore extends BaseModel {
     private static final long serialVersionUID = 1L;
 
+    public static Finder<Long, ProductStore> find = new Finder<Long, ProductStore>(Long.class, ProductStore.class);
+
     @JsonProperty("discount_type")
     public String discountType;
 
