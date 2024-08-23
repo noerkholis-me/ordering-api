@@ -628,6 +628,11 @@ public class ShopOrderController extends BaseController {
                     orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
                     orderTransactionResponse.setTotalAmount(initiatePaymentResponse.getTotalAmount());
                     orderTransactionResponse.setStatus(order.getStatus());
+                    orderTransactionResponse.setSubtotal(order.getSubTotal());
+                    orderTransactionResponse.setDiscountAmount(order.getDiscountAmount());
+                    orderTransactionResponse.setServiceFee(servicePrice);
+                    orderTransactionResponse.setTax(taxPrice);
+                    orderTransactionResponse.setDeliveryFee(deliveryFee);
                     orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
                     orderTransactionResponse.setMetadata(initiatePaymentResponse.getMetadata());
 
