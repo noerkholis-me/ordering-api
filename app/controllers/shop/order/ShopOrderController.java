@@ -379,19 +379,23 @@ public class ShopOrderController extends BaseController {
 
                 if (productMerchant != null) {
                     ProductStore psStore = ProductStoreRepository.findForCust(productMerchant.id, store.id, store.getMerchant());
-                        
-                    if (psStore.getStock() == null) {
-                        response.setBaseResponse(0, 0, 0, "Stok Produk Kosong", null);
-                        return notFound(Json.toJson(response));
-                    }
 
-                    if (productOrderDetail.getProductQty().longValue() > psStore.getStock()) {
-                        response.setBaseResponse(0, 0, 0, "Stok Produk Kurang", null);
-                        return notFound(Json.toJson(response));
-                    }
+                    Boolean limitedStock = psStore.getIsStock();
 
-                    psStore.setStock(psStore.getStock() - productOrderDetail.getProductQty().longValue());
-                    psStore.update();
+                    if (limitedStock) {
+                        if (psStore.getStock() == null || psStore.getStock() == 0) {
+                            response.setBaseResponse(0, 0, 0, "Produk "+productMerchant.getProductName()+" telah habis terjual.", null);
+                            return notFound(Json.toJson(response));
+                        }
+
+                        if (productOrderDetail.getProductQty().longValue() > psStore.getStock()) {
+                            response.setBaseResponse(0, 0, 0, "Produk "+productMerchant.getProductName()+" tidak memiliki stok yg mencukupi.", null);
+                            return notFound(Json.toJson(response));
+                        }
+
+                        psStore.setStock(psStore.getStock() - productOrderDetail.getProductQty().longValue());
+                        psStore.update();
+                    }
 
                     Long stock = productOrderDetail.getProductQty().longValue();
                     Long stockChanges = psStore.getStock();
