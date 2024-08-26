@@ -146,6 +146,7 @@ public class ShopMemberController extends BaseController {
                 orderRes.setMerchantName(order.getStore().getMerchant().name != null || order.getStore().getMerchant().name != "" ? order.getStore().getMerchant().name : null);
                 orderRes.setMerchantAddress(order.getStore().getMerchant().address != null || order.getStore().getMerchant().address != "" ? order.getStore().getMerchant().address : null);
                 orderRes.setTotalAmount(order.getTotalPrice());
+                orderRes.setSubtotal(order.getSubTotal());
                 orderRes.setOrderType(order.getOrderType());
                 orderRes.setOrderQueue(order.getOrderQueue());
                 orderRes.setStatusOrder(order.getStatus());
@@ -157,6 +158,9 @@ public class ShopMemberController extends BaseController {
                 orderRes.setTotalAmountPayment(getOrderPayment.getTotalAmount());
                 orderRes.setPaymentDate(getOrderPayment.getPaymentDate());
                 orderRes.setBankCode(getOrderPayment.getBankCode());
+                orderRes.setLoyaltyPoint(order.getTotalLoyaltyUsage());
+                orderRes.setDiscountAmount(order.getDiscountAmount());
+                orderRes.setVoucherCode(order.getVoucherCode());
 
                 List<OrderDetail> orderDetails = OrderRepository.findOrderDetailByOrderId(order.id);
                 List<OrderList.ProductOrderDetail> productOrderDetails = new ArrayList<>();

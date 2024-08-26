@@ -61,6 +61,10 @@ public class OrderList {
     @JsonProperty("merchant_address")
     private String merchantAddress;
 
+    @JsonProperty("subtotal")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal subtotal;
+
     @JsonProperty("total_amount")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal totalAmount;
@@ -111,6 +115,17 @@ public class OrderList {
 
     @JsonProperty("shipper_order_id")
     private String shipperOrderId;
+
+    @JsonProperty("loyalty_point")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal loyaltyPoint;
+
+    @JsonProperty("discount_amount")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal discountAmount;
+
+    @JsonProperty("voucher_code")
+    private String voucherCode;
 
     public OrderList(Order order) {
         OrderPayment orderPayment = order.getOrderPayment();
