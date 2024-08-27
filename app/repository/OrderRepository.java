@@ -115,7 +115,7 @@ public class OrderRepository extends Model {
         query = query.orderBy("t0.created_at desc");
 
         ExpressionList<Order> exp = query.where();
-        exp = exp.eq("t0.device_type", DeviceType.MINIPOS.getDevice());
+        // exp = exp.eq("t0.device_type", DeviceType.MINIPOS.getDevice());
         exp.raw("t0.order_date between '" + startDateString + "'" + " and " + "'" + endDateString + "'");
 
         query = exp.query();
