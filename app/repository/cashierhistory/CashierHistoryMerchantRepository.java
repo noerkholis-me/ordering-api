@@ -192,4 +192,12 @@ public class CashierHistoryMerchantRepository extends Model {
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
+    public static List<CashierHistoryMerchant> findActiveCashierByStoreId(Long storeId) {
+        return Ebean.find(CashierHistoryMerchant.class)
+                .where()
+                .eq("isActive", true)
+                .eq("store.id", storeId)
+                .isNull("endTime")
+                .findList();
+    }
 }
