@@ -19,6 +19,7 @@ import dtos.payment.InitiatePaymentResponse;
 import dtos.payment.PaymentServiceRequest;
 import models.*;
 import models.loyalty.LoyaltyPointHistory;
+import models.merchant.CashierHistoryMerchant;
 import models.merchant.MerchantPayment;
 import models.merchant.ProductMerchant;
 import models.merchant.TableMerchant;
@@ -38,6 +39,7 @@ import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 import repository.*;
+import repository.cashierhistory.CashierHistoryMerchantRepository;
 import repository.loyalty.LoyaltyPointHistoryRepository;
 import repository.pickuppoint.PickUpPointRepository;
 import service.EmailService;
@@ -509,6 +511,15 @@ public class ShopOrderController extends BaseController {
 
             order.setSubTotal(orderRequest.getSubTotal());
             order.setTotalPrice(totalAmount);
+
+            List<CashierHistoryMerchant> cashiers = CashierHistoryMerchantRepository.findActiveCashierByStoreId(store.id);
+
+            if (cashiers.size() > 0) {
+                CashierHistoryMerchant cashier = cashiers.get(0);
+                UserMerchant userMerchant = cashier.getUserMerchant();
+                order.setUserMerchant(userMerchant);
+            }
+
             order.save();
 
             // CHECK USAGE PAYMENT
