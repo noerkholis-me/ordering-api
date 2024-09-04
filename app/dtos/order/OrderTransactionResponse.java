@@ -54,4 +54,8 @@ public class OrderTransactionResponse {
     @JsonProperty("shipper_order_id")
     private String shipperOrderId;
 
+    @JsonProperty("total_price")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal totalPrice;
+
 }
