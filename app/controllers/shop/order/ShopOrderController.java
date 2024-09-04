@@ -650,6 +650,8 @@ public class ShopOrderController extends BaseController {
                     orderTransactionResponse.setDeliveryFee(deliveryFee);
                     orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
                     orderTransactionResponse.setMetadata(initiatePaymentResponse.getMetadata());
+                    orderTransactionResponse.setTotalPrice(BigDecimal.valueOf(jsonNode.get("total_price").asDouble()));
+
 
                     if (member != null) {
                         member.lastPurchase = new Date();
@@ -738,6 +740,8 @@ public class ShopOrderController extends BaseController {
                 orderTransactionResponse.setStatus(order.getStatus());
                 orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
                 orderTransactionResponse.setMetadata(null);
+                orderTransactionResponse.setTotalPrice(BigDecimal.valueOf(jsonNode.get("total_price").asDouble()));
+
 
                 if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
                     FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order);
