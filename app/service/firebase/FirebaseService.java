@@ -14,6 +14,8 @@ import org.apache.http.util.EntityUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.File;
+
 import controllers.store.StoreAccessController;
 import models.transaction.Order;
 import play.Logger;
@@ -32,6 +34,7 @@ public class FirebaseService {
     private final static Logger.ALogger logger = Logger.of(FirebaseService.class);
 	private static String pushNotifUrl = Play.application().configuration().getString("firebase.push-notif.url");
 	private static String pushNotifKey = Play.application().configuration().getString("firebase.push-notif.key");
+	private static String pathServiceAccountJson = Play.application().configuration().getString("firebase.path-service-account-json");
 	
 	private static FirebaseService instance;
 	
@@ -63,7 +66,7 @@ public class FirebaseService {
     
     public void sendPushNotif(FirebaseRequest request) throws Exception {
 			// obtain OAuth 2.0 access token
-			GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream("/app/service/firebase/firebaseJson/first-cloud-messaging-d0d2b-aa636783b068.json"))
+			GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(pathServiceAccountJson))
 				.createScoped(Collections.singleton("https://www.googleapis.com/auth/cloud-platform"));
 
 			AccessToken token = credentials.refreshAccessToken();
