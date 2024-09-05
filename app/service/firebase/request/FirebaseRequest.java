@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FirebaseRequest {
-	private String to;
+	private String topic;
 	private FirebaseNotificationRequest notification; //for background handler
-	private FirebaseDataRequest data; //for foreground handler
+	// private FirebaseDataRequest data; //for foreground handler
 	
 }

@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "first-cloud-messaging-d0d2b",
+  "private_key_id": "aa636783b0688497dc056957758d212115dacf3d",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDYKc12km6/hL9s\nYrsXeEXu4+NXSbu/mKe4ONM2mkiGKPjXb88BnEhQs7B223GqDD/UEd0mrlO5Rmk9\nUYKgVo2mgnF8CRsbOqFnkY5uxc+1JoHc1QNjNNlWla2wrDs7nvGAY9CacxZlRSOm\nzXZkrmvXATTqJuz2BFahYZPsobxFXtJBUSFCAmXvPu4z/EEsEb2EqsGkKIuwXy0U\nGHaj6r0ejJw0+MdM2s0W43+Zq2cnEkk+gzVQyhOREiUR7tgBg/7pFMyYwKLG4KCa\n0J5rUg0y96A99hVkSuxQgUoS7G4Z+C/TB/VoOOY+/nDPe1395/PQ4SoIkKZae4cp\n/2HDV3HjAgMBAAECggEAWJ+C2ksc1q5hINm1pOCto0yRJ3dWXy4CDVhW1/sXItHn\ne8QeVaWyTEvvXDuJ9VLCVHridXphXwOMIBSr/nqd5pdyWY0OLPKzu9eEUswM5VMd\nSOGYWvMO7B2/sUBbpIz8rEu/+aKXmvtmq3tvP8X29pZLEHjXC+Ipdk6gLBL/Mlz1\nqGMIJPJacSK8xJ1zNWnH8T3pSomjiKD/xC9F/onPV19eOXC/UMhxOda6oA4eVQTQ\ngEslDkFk8J73VmBYu5EuuhJKEkL8/AOmwSwHOE2OpvJz1n7+/n4bq3i9p6cy7Pv5\n2Xag7K8grGCX1ZVo6R2heTUxokuPvFtiaVS2yO3QuQKBgQD3jMuGl2xZmadzZBuN\npqNxzVzFPv5yFloJj1a/lb8QqvFfL4O0ESBMInXTRvhHz3zf+giTXouZFyndCg0L\n2XizFFjgl5VqlJVr0BhQfh27Fu9kX+AMyjU1N6r0AUMrHRj14/VIgJHnbR/qw3DJ\nomrMnnqA9Od0z+D00akuzowxZQKBgQDfirx/bUVEwLXE7Lm+f5mYhzg9FYNzPsv1\njh8/MtXIUYJumvdlv2w+OFUzmXlVS9WmzlHcNsNXKCamcAXb2+Fj+zdhbaaXapZC\nGCAHYVlpnAujJfvWVqzhWz3QwOfc28h+qZ71K2mzQqCLOnogDqIbAMFbMVGdUdO4\nl41HEpdFpwKBgFCBMDsgCXOGHcfP+YnydFrxH0diOhteG3/aZqq9hzpjbUW4TQuF\nOkyoNEs2XE32MzUfuiQ67gkmWE3zE9UTr0YFyvWXNldH5OP/87hRm1eZmNa6u0FN\njUo2RVk/A9oEh3aH4N/oOArcGTIexxI7yKGstEg13QPHCvBzMqLvNvZlAoGAEn9Z\nb7XsCG9l2yC3kgLfA9cUmUFhejTVDcGv5jvfos7T2zEpjZrUayWgLz/g4WUADeh+\nr5k8esbQw+77HSFJuks8XuyC336rZla2t8Wfb3TBJcPr3eWYMqGpMM/1n7n0Ej8Y\n7zKjcXju7fZtyp9LXK6oUVJ4bWsq+NhZkWsBZ3sCgYBiSD02qNZj7C5fXxq+eTaM\nafJ8FZtrExd7bqojV0WTdqapd+jaKxjrtOM/w+m2lxC6eT2UgGWlQi/nWv0d0tpq\nZhmy0mkVWqWAwFn72cimJUcIil8Est3qnDuY++WQB9guFJgdCkoi74xXORizER+t\npUEq6QNPPvDxo6Ep3J1B1g==\n-----END PRIVATE KEY-----\n",
+  "client_email": "new-firebase-ordering@first-cloud-messaging-d0d2b.iam.gserviceaccount.com",
+  "client_id": "104325217458757714267",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/new-firebase-ordering%40first-cloud-messaging-d0d2b.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
