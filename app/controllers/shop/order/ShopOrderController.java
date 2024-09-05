@@ -38,6 +38,7 @@ import org.json.JSONObject;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import play.Play;
 import repository.*;
 import repository.cashierhistory.CashierHistoryMerchantRepository;
 import repository.loyalty.LoyaltyPointHistoryRepository;
@@ -55,6 +56,18 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Arrays;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+
+import com.google.firebase.messaging.TopicManagementResponse;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+// import com.google.firebase.FirebaseInitializer;
+
 
 public class ShopOrderController extends BaseController {
 
@@ -62,6 +75,7 @@ public class ShopOrderController extends BaseController {
     private static BaseResponse response = new BaseResponse();
     private static ObjectMapper objectMapper = new ObjectMapper();
     private final static Logger.ALogger logger = Logger.of(ShopOrderController.class);
+    private static String pathServiceAccountJson = Play.application().configuration().getString("firebase.path-service-account-json");
 
     @SuppressWarnings("deprecation")
     public static Result checkout() {
@@ -773,5 +787,89 @@ public class ShopOrderController extends BaseController {
 
         response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat pembayaran, silahkan refresh halaman dan ulangi pemesanan", null);
         return badRequest(Json.toJson(response));
+    }
+
+    // @PostConstruct()
+    public static void initializeFirebase() throws IOException {
+        // try {
+        //     FileInputStream serviceAccount = new FileInputStream(pathServiceAccountJson);
+
+        //     FirebaseOptions options = new FirebaseOptions.Builder()
+        //         .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+        //         .build();
+
+        //     FirebaseApp.initializeApp(options);
+        // } catch (IOException e) {
+        //     e.printStackTrace();
+        //     throw new RuntimeException("Failed to initialize Firebase", e);
+        // }
+
+        if (FirebaseApp.getApps().isEmpty()) {
+            try {
+                FileInputStream serviceAccount = new FileInputStream("./app/service/firebase/firebaseJson/first-cloud-messaging-d0d2b-aa636783b068.json");
+
+                FirebaseOptions options = new FirebaseOptions.Builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .build();
+
+                FirebaseApp.initializeApp(options);
+                logger.info("Firebase initialized successfully.");
+            } catch (IOException e) {
+                e.printStackTrace();
+                throw new RuntimeException("Failed to initialize Firebase", e);
+            }
+        } else {
+            logger.info("Firebase app already initialized.");
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    public static Result subcribeTopic() {
+        JsonNode jsonNode = request().body().asJson();
+        String topic = jsonNode.get("topic").asText();
+        String token = jsonNode.get("token").asText();
+        List<String> registrationTokens = Arrays.asList(token);
+
+        try {
+            initializeFirebase();
+
+            FirebaseMessaging firebaseMessaging = FirebaseMessaging.getInstance();
+
+            TopicManagementResponse response = firebaseMessaging.subscribeToTopic(registrationTokens, topic);
+            logger.info("Successfully subscribed to topic: " + topic + ", Success Count: " + response.getSuccessCount());
+
+            return ok("Successfully subscribed to topic: " + topic + ", Success Count: " + response.getSuccessCount());
+        } catch (IOException e) {
+            logger.error("Failed to initialize Firebase: " + e.getMessage());
+            return internalServerError("Failed to initialize Firebase: " + e.getMessage());
+        } catch (Exception e) {
+            logger.error("Failed to subscribe to topic: " + topic + ", Error: " + e.getMessage());
+            return internalServerError("Failed to subscribe to topic: " + topic + " " + e);
+        }
+    }
+    
+    @SuppressWarnings("deprecation")
+    public static Result unSubcribeFromTopic() {
+        JsonNode jsonNode = request().body().asJson();
+        String topic = jsonNode.get("topic").asText();
+        String token = jsonNode.get("token").asText();
+        List<String> registrationTokens = Arrays.asList(token);
+
+        try {
+            initializeFirebase();
+
+            FirebaseMessaging firebaseMessaging = FirebaseMessaging.getInstance();
+
+            TopicManagementResponse response = firebaseMessaging.unsubscribeFromTopic(registrationTokens, topic);
+            logger.info("Successfully unsubscribed to topic: " + topic + ", Success Count: " + response.getSuccessCount());
+
+            return ok("Successfully unsubscribed to topic: " + topic + ", Success Count: " + response.getSuccessCount());
+        } catch (IOException e) {
+            logger.error("Failed to initialize Firebase: " + e.getMessage());
+            return internalServerError("Failed to initialize Firebase: " + e.getMessage());
+        } catch (Exception e) {
+            logger.error("Failed to unsubscribe to topic: " + topic + ", Error: " + e.getMessage());
+            return internalServerError("Failed to unsubscribe to topic: " + topic + " " + e);
+        }
     }
 }
