@@ -40,13 +40,13 @@ public class PaymentDetailResponse {
     @JsonProperty("payment_fee_customer")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal paymentFeeCustomer;
+    @JsonProperty("platform_fee")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal platformFee;
     @JsonProperty("payment_fee_owner")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal paymentFeeOwner;
     @JsonProperty("total_amount")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal totalAmount;
-
-
-
 }

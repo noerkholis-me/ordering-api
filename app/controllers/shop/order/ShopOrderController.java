@@ -227,6 +227,7 @@ public class ShopOrderController extends BaseController {
             BigDecimal servicePrice = orderRequest.getPaymentDetailResponse().getServicePrice();
             BigDecimal deliveryFee = orderRequest.getPaymentDetailResponse().getDeliveryFee();
             BigDecimal paymentFeeCustomer = orderRequest.getPaymentDetailResponse().getPaymentFeeCustomer();
+            BigDecimal platformFee = orderRequest.getPaymentDetailResponse().getPlatformFee();
             BigDecimal discount = BigDecimal.ZERO;
             BigDecimal loyaltyPoint = BigDecimal.ZERO;
 
@@ -510,6 +511,7 @@ public class ShopOrderController extends BaseController {
             if (taxPrice != null) totalAmount = totalAmount.add(taxPrice);
             if (deliveryFee != null) totalAmount = totalAmount.add(deliveryFee);
             if (paymentFeeCustomer != null) totalAmount = totalAmount.add(paymentFeeCustomer);
+            if (platformFee != null) totalAmount = totalAmount.add(platformFee);
 
             order.setSubTotal(orderRequest.getSubTotal());
             order.setTotalPrice(totalAmount);
