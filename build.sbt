@@ -23,6 +23,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk" % "1.3.11",
   "com.sendinblue" % "sib-api-v3-sdk" % "5.1.0",
   "jakarta.xml.bind" % "jakarta.xml.bind-api" % "2.3.2",
+  "com.google.firebase" % "firebase-admin" % "9.1.1",
   "javax.xml.ws" % "jaxws-api" % "2.3.1",
   "org.projectlombok" % "lombok" % "1.16.16",
   "org.json" % "json" % "20210307",
