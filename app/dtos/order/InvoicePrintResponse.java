@@ -96,6 +96,10 @@ public class InvoicePrintResponse {
     @JsonProperty("payment_method")
     private String paymentMethod;
 
+    @JsonProperty("discount_amount")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal discountAmount;
+
 
     // ----- # -----
     @JsonProperty("tax")
