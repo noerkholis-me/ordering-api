@@ -806,7 +806,7 @@ public class ShopOrderController extends BaseController {
 
         if (FirebaseApp.getApps().isEmpty()) {
             try {
-                FileInputStream serviceAccount = new FileInputStream("./app/service/firebase/firebaseJson/first-cloud-messaging-d0d2b-aa636783b068.json");
+                FileInputStream serviceAccount = new FileInputStream(pathServiceAccountJson);
 
                 FirebaseOptions options = new FirebaseOptions.Builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
