@@ -430,9 +430,9 @@ public class OrderRepository extends Model {
                 + "AND op.status = '" + statusOrder + "' ";
         } else if (statusOrder.equalsIgnoreCase("CLOSED")){
             System.out.println("DISINI");
-            // whereCondition = "WHERE str.merchant_id = " + merchantId + " "
-            //         + "AND ord.status = '" + statusOrder + "' ";
-            whereCondition = "WHERE ord.status = '" + statusOrder + "' ";
+            whereCondition = "WHERE str.merchant_id = " + merchantId + " "
+                    + "AND ord.status = '" + statusOrder + "' ";
+            // whereCondition = "WHERE ord.status = '" + statusOrder + "' ";
         } else {
             whereCondition = "WHERE op.status = 'PAID' "
                 + "AND str.merchant_id = " + merchantId + " "
@@ -458,7 +458,12 @@ public class OrderRepository extends Model {
             }
         }
 
+        // System.out.println("whereCondition " + whereCondition);
+        // System.out.println("statusOrder " + statusOrder);
+
         String querySql = checkProductType(productType, whereCondition);
+
+        System.out.println("checkProductType " + querySql);
 
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
         Query<Order> query = Ebean.find(Order.class).setRawSql(rawSql);
