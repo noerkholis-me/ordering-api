@@ -794,6 +794,7 @@ public class OrderMerchantController extends BaseController {
 
                 invoicePrintResponse.setOrderQrCode(orderDetailUrl);
                 invoicePrintResponse.setShipperOrderId(getOrder.getShipperOrderId());
+                invoicePrintResponse.setDiscountAmount(getOrder.getDiscountAmount());
 
                 response.setBaseResponse(1, offset, limit, success + " success showing data invoice.",
                         invoicePrintResponse);
@@ -808,6 +809,7 @@ public class OrderMerchantController extends BaseController {
             response.setBaseResponse(0, 0, 0, forbidden, null);
             return forbidden(Json.toJson(response));
         } else {
+            System.out.println("authority " + authority);
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         }
