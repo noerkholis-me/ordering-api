@@ -484,12 +484,25 @@
                                     <td colspan="2" style=" color: #737373;">Biaya Layanan</td>
                                     <td class="right">@orderPayment.scalaFetchServicePrice()</td>
                                  </tr>
-                                 if(!orderPayment.scalaFetchServiceFeeCostumer().trim().equals("Rp 0,00")) {
+                                 
+                                 @if(!orderPayment.scalaFetchServiceFeeCostumer().trim().equals("Rp 0,00")) {
                                     <tr style="color: #464646; font-size: 14px; font-weight: 500;">
                                        <td colspan="2" style=" color: #737373;">Biaya Transaksi</td>
                                        <td class="right">@orderPayment.scalaFetchServiceFeeCostumer()</td>
                                     </tr>
                                  }
+                                 
+                                 @if(!order.scalaFetchDiscount().trim().equals("Rp 0,00")) {
+                                    <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                       <td colspan="2" style=" color: #737373;">Diskon</td>
+                                       <td class="right">- @order.scalaFetchDiscount()</td>
+                                    </tr>
+                                 }
+                                 
+                                 <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                    <td colspan="2" style=" color: #737373;">Pajak</td>
+                                    <td class="right">- @orderPayment.scalaFetchTax()</td>
+                                 </tr>
 
                                  @if(!orderPayment.scalaFetchDeliveryFee().trim().equals("Rp 0,00")) {
                                     <tr style="color: #464646; font-size: 14px; font-weight: 500;">
