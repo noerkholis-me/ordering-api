@@ -240,6 +240,13 @@ public class Order extends BaseModel {
     	return Helper.getRupiahFormat(this.totalPrice.doubleValue());
     }
     
+    public String scalaFetchDiscount () {
+        if (this.discountAmount == null) {
+            return "Rp 0,00";
+        }
+    	return Helper.getRupiahFormat(this.discountAmount.doubleValue());
+    }
+    
     public String scalaFetchOrderType() {
     	return this.orderType;
     }
