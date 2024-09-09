@@ -1,6 +1,7 @@
 package com.hokeba.util;
 
 import java.util.Properties;
+import java.math.BigDecimal;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -162,7 +163,21 @@ public class MailConfig {
 //	}
 	
 	public static String renderMailInvoiceTemplateNew(String imagePath,Order order, OrderPayment orderPayment) {
-		String html = views.html.invoiceMailNew.render(imagePath,order, orderPayment).toString();
+		BigDecimal totalPrice = order.getTotalPrice(); // Get total price as BigDecimal
+		int platformFeeValue = 0; // Initialize platformFee as an integer
+		if(totalPrice.compareTo(BigDecimal.valueOf(10000)) <= 0) {
+				platformFeeValue = (int)(totalPrice.multiply(BigDecimal.valueOf(0.05)).doubleValue());
+		} else if(totalPrice.compareTo(BigDecimal.valueOf(25000)) <= 0) {
+				platformFeeValue = 500;
+		} else if(totalPrice.compareTo(BigDecimal.valueOf(150000)) <= 0) {
+				platformFeeValue = 1000;
+		} else if(totalPrice.compareTo(BigDecimal.valueOf(500000)) <= 0) {
+				platformFeeValue = 1500;
+		} else {
+				platformFeeValue = 5000;
+		}
+		String platformFee = "Rp " + platformFeeValue + ",00"; 
+		String html = views.html.invoiceMailNew.render(imagePath,order, orderPayment, platformFee).toString();
 		return html;
 	}
 	
