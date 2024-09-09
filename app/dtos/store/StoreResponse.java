@@ -14,6 +14,9 @@ import models.Store;
 import utils.ShipperHelper;
 
 import java.util.List;
+import java.util.ArrayList;
+
+import models.QrGroupStore;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -94,6 +97,9 @@ public class StoreResponse {
     @JsonProperty("product_stores")
     private List<ProductStoreResponseForStore> productStoreResponses;
 
+    @JsonProperty("group_merchant")
+    private List<QrGroupResponseDto> groupMerchant; 
+
     public StoreResponse(Store store) {
         this.setId(store.id);
         this.setStoreCode(store.getStoreCode());
@@ -120,5 +126,15 @@ public class StoreResponse {
         this.setOpenAt(store.getOpenAt());
         this.setClosedAt(store.getClosedAt());
         this.setIsPublish(store.getIsPublish());
-    }
+
+        // Populate groupMerchant with group names
+        this.groupMerchant = new ArrayList<>();
+            for (QrGroupStore qrGroupStore : store.getQrGroupStore()) { 
+                QrGroupResponseDto qrGroupResponseDto = new QrGroupResponseDto(); // Create a new instance
+                qrGroupResponseDto.setGroupName(qrGroupStore.getQrGroup().getGroupName()); // Set the group name
+                qrGroupResponseDto.setGroupCode(qrGroupStore.getQrGroup().getGroupCode()); // Set the group code
+                
+                this.groupMerchant.add(qrGroupResponseDto); // Add to the list
+            }
+        }
 }
