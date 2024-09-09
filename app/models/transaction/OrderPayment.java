@@ -148,4 +148,8 @@ public class OrderPayment extends BaseModel {
     	return Helper.getRupiahFormat(this.paymentFeeCustomer.doubleValue());
     }
     
+    public String scalaFetchTax () {
+    	return Helper.getRupiahFormat(this.taxPrice.doubleValue());
+    }
+    
 }
