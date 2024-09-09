@@ -499,6 +499,23 @@
                                     </tr>
                                  }
                                  
+                                 @var platformFee = 0
+                                 @if(@order.getSubTotal() <= 10000) {
+                                     platformFee = (int)(@order.getSubTotal() * 0.05)
+                                 } else if(@order.getSubTotal() <= 25000) {
+                                     platformFee = 500
+                                 } else if(@order.getSubTotal() <= 150000) {
+                                     platformFee = 1000
+                                 } else if(@order.getSubTotal() <= 500000) {
+                                     platformFee = 1500
+                                 } else {
+                                     platformFee = 5000
+                                 }
+                                 <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                    <td colspan="2" style=" color: #737373;">Platform Fee</td>
+                                    <td class="right">@platformFee</td>
+                                 </tr>
+
                                  <tr style="color: #464646; font-size: 14px; font-weight: 500;">
                                     <td colspan="2" style=" color: #737373;">Pajak</td>
                                     <td class="right">- @orderPayment.scalaFetchTax()</td>
