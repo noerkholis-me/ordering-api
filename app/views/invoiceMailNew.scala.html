@@ -1,6 +1,6 @@
 @import models.transaction.Order
 @import models.transaction.OrderPayment
-@(path: String, order: Order, orderPayment: OrderPayment)
+@(path: String, order: Order, orderPayment: OrderPayment, platformFee: String)
 <!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
    <head>
@@ -499,18 +499,6 @@
                                     </tr>
                                  }
                                  
-                                 @var platformFee = 0
-                                 @if(@order.getSubTotal() <= 10000) {
-                                     platformFee = (int)(@order.getSubTotal() * 0.05)
-                                 } else if(@order.getSubTotal() <= 25000) {
-                                     platformFee = 500
-                                 } else if(@order.getSubTotal() <= 150000) {
-                                     platformFee = 1000
-                                 } else if(@order.getSubTotal() <= 500000) {
-                                     platformFee = 1500
-                                 } else {
-                                     platformFee = 5000
-                                 }
                                  <tr style="color: #464646; font-size: 14px; font-weight: 500;">
                                     <td colspan="2" style=" color: #737373;">Platform Fee</td>
                                     <td class="right">@platformFee</td>
