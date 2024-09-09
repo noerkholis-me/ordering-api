@@ -484,10 +484,19 @@
                                     <td colspan="2" style=" color: #737373;">Biaya Layanan</td>
                                     <td class="right">@orderPayment.scalaFetchServicePrice()</td>
                                  </tr>
-                                 <tr style="color: #464646; font-size: 14px; font-weight: 500;">
-                                    <td colspan="2" style=" color: #737373;">Biaya Pengiriman</td>
-                                    <td class="right">@orderPayment.scalaFetchDeliveryFee()</td>
-                                 </tr>
+                                 if(!orderPayment.scalaFetchServiceFeeCostumer().trim().equals("Rp 0,00")) {
+                                    <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                       <td colspan="2" style=" color: #737373;">Biaya Transaksi</td>
+                                       <td class="right">@orderPayment.scalaFetchServiceFeeCostumer()</td>
+                                    </tr>
+                                 }
+
+                                 @if(!orderPayment.scalaFetchDeliveryFee().trim().equals("Rp 0,00")) {
+                                    <tr style="color: #464646; font-size: 14px; font-weight: 500;">
+                                       <td colspan="2" style=" color: #737373;">Biaya Pengiriman</td>
+                                       <td class="right">@orderPayment.scalaFetchDeliveryFee()</td>
+                                    </tr>
+                                 }
    
                                  <tr><td colspan ="3"><hr style="border: 1px #DEE3ED; border-style: dashed"></td></tr>
    
