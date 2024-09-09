@@ -500,13 +500,13 @@
                                  }
                                  
                                  @var platformFee = 0
-                                 @if(@order.getTotalPrice() <= 10000) {
-                                     platformFee = (int)(@order.getTotalPrice() * 0.05)
-                                 } else if(@order.getTotalPrice() <= 25000) {
+                                 @if(@order.getSubTotal() <= 10000) {
+                                     platformFee = (int)(@order.getSubTotal() * 0.05)
+                                 } else if(@order.getSubTotal() <= 25000) {
                                      platformFee = 500
-                                 } else if(@order.getTotalPrice() <= 150000) {
+                                 } else if(@order.getSubTotal() <= 150000) {
                                      platformFee = 1000
-                                 } else if(@order.getTotalPrice() <= 500000) {
+                                 } else if(@order.getSubTotal() <= 500000) {
                                      platformFee = 1500
                                  } else {
                                      platformFee = 5000
