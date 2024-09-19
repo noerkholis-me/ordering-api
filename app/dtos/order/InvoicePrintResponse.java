@@ -152,4 +152,7 @@ public class InvoicePrintResponse {
     @JsonProperty("image_store_url")
     private String imageStoreUrl;
 
+    @JsonProperty("device_type")
+    private String deviceType;
+
 }
