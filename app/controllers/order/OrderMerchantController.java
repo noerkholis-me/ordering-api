@@ -766,6 +766,7 @@ public class OrderMerchantController extends BaseController {
                 invoicePrintResponse.setTotal(getOrder.getTotalPrice());
                 invoicePrintResponse.setOrderQueue(getOrder.getOrderQueue());
                 invoicePrintResponse.setReferenceNumber("-");
+                invoicePrintResponse.setDeviceType(getOrder.getDeviceType());
                 
                 Member memberTarget = getOrder.getMember();
                 if (memberTarget != null) {

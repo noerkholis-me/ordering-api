@@ -2,6 +2,7 @@ package com.hokeba.util;
 
 import java.util.Properties;
 import java.math.BigDecimal;
+import com.hokeba.util.Helper;
 
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -164,19 +165,19 @@ public class MailConfig {
 	
 	public static String renderMailInvoiceTemplateNew(String imagePath,Order order, OrderPayment orderPayment) {
 		BigDecimal totalPrice = order.getTotalPrice(); // Get total price as BigDecimal
-		int platformFeeValue = 0; // Initialize platformFee as an integer
+		double platformFeeValue = 0.0; // Initialize platformFee as an integer
 		if(totalPrice.compareTo(BigDecimal.valueOf(10000)) <= 0) {
-				platformFeeValue = (int)(totalPrice.multiply(BigDecimal.valueOf(0.05)).doubleValue());
+				platformFeeValue = totalPrice.multiply(BigDecimal.valueOf(0.05)).doubleValue();
 		} else if(totalPrice.compareTo(BigDecimal.valueOf(25000)) <= 0) {
-				platformFeeValue = 500;
+				platformFeeValue = 500.0;
 		} else if(totalPrice.compareTo(BigDecimal.valueOf(150000)) <= 0) {
-				platformFeeValue = 1000;
+				platformFeeValue = 1000.0;
 		} else if(totalPrice.compareTo(BigDecimal.valueOf(500000)) <= 0) {
-				platformFeeValue = 1500;
+				platformFeeValue = 1500.0;
 		} else {
-				platformFeeValue = 5000;
+				platformFeeValue = 5000.0;
 		}
-		String platformFee = "Rp " + platformFeeValue + ",00"; 
+		String platformFee = Helper.getRupiahFormat(platformFeeValue); 
 		String html = views.html.invoiceMailNew.render(imagePath,order, orderPayment, platformFee).toString();
 		return html;
 	}
