@@ -1100,64 +1100,75 @@ public class CheckoutOrderController extends BaseController {
             List<LoyaltyPointMerchant> lpMerchant = LoyaltyPointMerchantRepository.find.where().eq("merchant", merchant).eq("t0.is_deleted", false).findList();
             Member member = order.getMember();
 
-            BigDecimal loyaltyMine = member.getLoyaltyPoint() != null ? member.getLoyaltyPoint() : BigDecimal.ZERO;
-            BigDecimal loyaltyPointGet = BigDecimal.ZERO;
+            BigDecimal loyaltyMine = BigDecimal.ZERO;
 
-            if (!lpMerchant.isEmpty()) {
-                for (LoyaltyPointMerchant lPoint: lpMerchant) {
-                    BigDecimal subTotalPerCategory = BigDecimal.ZERO;
-                    BigDecimal totalLoyalty = BigDecimal.ZERO;
+            if(member != null) {
+                loyaltyMine = member.getLoyaltyPoint();
 
-                    for (OrderForLoyaltyData ofLD : listOrderData) {
-                        if (ofLD.getSubsCategoryId().longValue() == lPoint.getSubsCategoryMerchant().id.longValue()) {
-                            subTotalPerCategory = subTotalPerCategory.add(ofLD.getSubTotal());
+                BigDecimal loyaltyPointGet = BigDecimal.ZERO;
+
+                if (!lpMerchant.isEmpty()) {
+                    for (LoyaltyPointMerchant lPoint: lpMerchant) {
+                        BigDecimal subTotalPerCategory = BigDecimal.ZERO;
+                        BigDecimal totalLoyalty = BigDecimal.ZERO;
+
+                        for (OrderForLoyaltyData ofLD : listOrderData) {
+                            if (ofLD.getSubsCategoryId().longValue() == lPoint.getSubsCategoryMerchant().id.longValue()) {
+                                subTotalPerCategory = subTotalPerCategory.add(ofLD.getSubTotal());
+                            }
                         }
-                    }
 
-                    // GET TOTAL LOYALTY
-                    if (lPoint.getCashbackType().equalsIgnoreCase("Percentage")) {
-                        totalLoyalty = subTotalPerCategory.multiply(lPoint.getCashbackValue());
-                        totalLoyalty = totalLoyalty.divide(new BigDecimal(100), 0, RoundingMode.DOWN);
+                        // GET TOTAL LOYALTY
+                        if (lPoint.getCashbackType().equalsIgnoreCase("Percentage")) {
+                            totalLoyalty = subTotalPerCategory.multiply(lPoint.getCashbackValue());
+                            totalLoyalty = totalLoyalty.divide(new BigDecimal(100), 0, RoundingMode.DOWN);
 
-                        if (totalLoyalty.compareTo(lPoint.getMaxCashbackValue()) > 0) {
-                            loyaltyPointGet = loyaltyPointGet.add(lPoint.getMaxCashbackValue());
-                            loyaltyMine = loyaltyMine.add(lPoint.getMaxCashbackValue());
-                            member.loyaltyPoint = loyaltyMine;
-                            member.update();
+                            System.out.println("totalLoyalty >>>>>>> " + totalLoyalty);
+
+                            if (totalLoyalty.compareTo(lPoint.getMaxCashbackValue()) > 0) {
+                                loyaltyPointGet = loyaltyPointGet.add(lPoint.getMaxCashbackValue());
+                                loyaltyMine = loyaltyMine.add(lPoint.getMaxCashbackValue());
+                                member.loyaltyPoint = loyaltyMine;
+                                member.update();
+                            } else {
+                                loyaltyMine = loyaltyMine.add(totalLoyalty);
+                                loyaltyPointGet = loyaltyPointGet.add(totalLoyalty);
+                                member.loyaltyPoint = loyaltyMine;
+                                member.update();
+                            }
                         } else {
-                            loyaltyMine = loyaltyMine.add(totalLoyalty);
+                            totalLoyalty = lPoint.getCashbackValue();
                             loyaltyPointGet = loyaltyPointGet.add(totalLoyalty);
-                            member.loyaltyPoint = loyaltyMine;
+                            member.loyaltyPoint = loyaltyMine != null ? loyaltyMine.add(totalLoyalty) : totalLoyalty;
                             member.update();
                         }
-                    } else {
-                        totalLoyalty = lPoint.getCashbackValue();
-                        loyaltyPointGet = loyaltyPointGet.add(totalLoyalty);
-                        member.loyaltyPoint = loyaltyMine != null ? loyaltyMine.add(totalLoyalty) : totalLoyalty;
-                        member.update();
                     }
                 }
+
+                LoyaltyPointHistory lPointHistory = LoyaltyPointHistoryRepository.findByMember(member);
+                System.out.println("lPointHistory >>>>>>");
+
+                Date date = new Date();
+
+                if (lPointHistory != null) {
+                    date = lPointHistory.getExpiredDate();
+                    date.setYear(date.getYear()+1);
+                } else {
+                    date.setYear(date.getYear()+1);
+                }
+
+                LoyaltyPointHistory lpHistory = new LoyaltyPointHistory();
+
+                System.out.println("lpHistory >>>>>>");
+
+                lpHistory.setPoint(loyaltyMine);
+                lpHistory.setAdded(loyaltyPointGet);
+                lpHistory.setMember(member);
+                lpHistory.setOrder(order);
+                lpHistory.setExpiredDate(date);
+                lpHistory.setMerchant(merchant);
+                lpHistory.save();
             }
-
-            LoyaltyPointHistory lPointHistory = LoyaltyPointHistoryRepository.findByMember(member);
-            Date date = new Date();
-
-            if (lPointHistory != null) {
-                date = lPointHistory.getExpiredDate();
-                date.setYear(date.getYear()+1);
-            } else {
-                date.setYear(date.getYear()+1);
-            }
-
-            LoyaltyPointHistory lpHistory = new LoyaltyPointHistory();
-
-            lpHistory.setPoint(loyaltyMine);
-            lpHistory.setAdded(loyaltyPointGet);
-            lpHistory.setMember(member);
-            lpHistory.setOrder(order);
-            lpHistory.setExpiredDate(date);
-            lpHistory.setMerchant(merchant);
-            lpHistory.save();
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
