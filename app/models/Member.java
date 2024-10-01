@@ -789,6 +789,6 @@ public class Member extends BaseModel {
     }
 
     public BigDecimal getLoyaltyPoint () {
-        return this.loyaltyPoint;
+        return this.loyaltyPoint != null ? this.loyaltyPoint : BigDecimal.ZERO;
     }
 }
