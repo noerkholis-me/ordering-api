@@ -33,6 +33,7 @@ public class MerchantLog extends BaseModel {
     public static final String DEV_TYPE_IOS = "IOS";
     public static final String DEV_TYPE_ANDROID = "ANDROID";
     public static final String DEV_TYPE_MINI_POS = "MINIPOS";
+    public static final String DEV_TYPE_KITCHEN = "KITCHEN";
 
     @JsonProperty("member_type")
     public String memberType;
@@ -90,6 +91,22 @@ public class MerchantLog extends BaseModel {
                 } else {
                     RoleMerchant roleMerchant = RoleMerchantRepository.find.where().eq("id", userMerchant.getRole().id).findUnique();
                     if(roleMerchant != null && roleMerchant.isCashier()) {
+                        log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
+                    } else {
+                        return null;
+                    }
+                }
+            } else if (deviceType.equalsIgnoreCase(DEV_TYPE_KITCHEN)) {
+                if (userType) {
+                    List<RoleMerchant> roleMerchant = RoleMerchantRepository.findByMerchantId(member);
+                    if (!roleMerchant.isEmpty() && roleMerchant.stream().findFirst().get().isCashier()) {
+                        log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
+                    } else {
+                        return null;
+                    }
+                } else {
+                    RoleMerchant roleMerchant = RoleMerchantRepository.find.where().eq("id", userMerchant.getRole().id).findUnique();
+                    if (roleMerchant != null && roleMerchant.getKey().equals("kitchen")) {
                         log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
                     } else {
                         return null;
