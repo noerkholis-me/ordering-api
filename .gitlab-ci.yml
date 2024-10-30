@@ -26,6 +26,8 @@ build_staging:
       docker build -t "${CI_REGISTRY_IMAGE}:latest" . &&
       docker tag "${CI_REGISTRY_IMAGE}:latest" "${CI_REGISTRY_IMAGE}:$CI_BUILD_REF" &&
       docker push "${CI_REGISTRY_IMAGE}:$CI_BUILD_REF" && exit"
+  only:
+    - staging
 
 build_prod:
   stage: build_prod
