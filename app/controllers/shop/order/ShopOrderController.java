@@ -87,6 +87,7 @@ public class ShopOrderController extends BaseController {
             logger.info(">>> incoming order request..." + jsonNode.toString());
 
             String orderType = jsonNode.get("order_type").asText();
+            String deviceToken = jsonNode.get("device_token").asText();
 
             ObjectMapper mapper = new ObjectMapper();
             String requestDomesticOrderShipper = "{\n" + "\"consignee\": {\n" + "\"name\": \"Penerima\",\n" +
@@ -324,6 +325,7 @@ public class ShopOrderController extends BaseController {
             order.setDeviceType(orderRequest.getDeviceType());
             order.setDestinationAddress(address);
             order.setReferenceNumber(orderRequest.getReferenceNumber());
+            order.setDeviceToken(orderRequest.getDeviceToken() != null ? orderRequest.getDeviceToken() : null);
 
             if (orderRequest.getDeviceType().equalsIgnoreCase("MINIPOS")) {
                 System.out.println("Out");

@@ -885,6 +885,17 @@ public class CheckoutOrderController extends BaseController {
 
                         trx.commit();
 
+                        if (statusRequest.getDeviceType() != null && !statusRequest.getDeviceType().isEmpty() && "KITCHEN".equals(statusRequest.getDeviceType()) && "READY_TO_PICKUP".equals(statusRequest.getStatusOrder())) {
+
+                            String title = "Pesanan telah dibuat " ;
+
+                            String message = "Nomor order " + orderData.get().getOrderNumber() + " telah dibuat";
+
+                            String device_token = orders.getDeviceToken() != null ? orders.getDeviceToken() : "";
+
+                            FirebaseService.getInstance().sendNotification(device_token, title, message);
+                        }
+
                         if ("NEW_ORDER".equals(statusRequest.getStatusOrder())) {
                             FirebaseService.getInstance().sendFirebaseNotifOrderToStore(orderData.get());
                         }

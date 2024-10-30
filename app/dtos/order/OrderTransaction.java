@@ -71,4 +71,7 @@ public class OrderTransaction {
     
     @JsonProperty("voucher_code")
     private String voucherCode;
+
+    @JsonProperty("device_token")
+    private String deviceToken;
 }
