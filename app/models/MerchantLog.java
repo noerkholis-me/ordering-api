@@ -173,10 +173,14 @@ public class MerchantLog extends BaseModel {
         String keyMiniPos = Constant.getInstance().getApiKeyMiniPos();
 
         Date today = new Date();
-        if (log != null && ((log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_WEB) && apiKey.equalsIgnoreCase(keyWeb))
+        if (log != null && (
+            (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_WEB) && apiKey.equalsIgnoreCase(keyWeb))
                 || (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_IOS) && apiKey.equalsIgnoreCase(keyIos))
                 || (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_ANDROID) && apiKey.equalsIgnoreCase(keyAndroid))
-                || (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_MINI_POS) && (apiKey.equalsIgnoreCase(keyMiniPos) || apiKey.equalsIgnoreCase(keyWeb))))) {
+                || (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_MINI_POS) && (apiKey.equalsIgnoreCase(keyMiniPos) 
+                || apiKey.equalsIgnoreCase(keyWeb)))
+                || (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_KITCHEN) && apiKey.equalsIgnoreCase(keyMiniPos))
+            )) {
             if (today.before(log.expiredDate)) {
                 return log;
             } else {
