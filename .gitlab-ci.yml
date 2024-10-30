@@ -85,9 +85,9 @@ deploy_docker_staging:
   stage: deploy_docker_staging
   script:
     - sed -i "s,_IMAGE:VERSION_,${CI_REGISTRY_IMAGE}:$CI_BUILD_REF," docker-compose.yml
-    - scp docker-compose.yml sandbox@192.168.0.112:~/app/sandbox-api/
-    - ssh sandbox@192.168.0.112 docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net
-    - ssh sandbox@192.168.0.112 "cd ~/app/sandbox-api && docker compose up -d"
+    - scp docker-compose.yml ${USER_STG}@${HOST_STG}:~/app/sandbox-api/
+    - ssh ${USER_STG}@${HOST_STG} docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net
+    - ssh ${USER_STG}@${HOST_STG} "cd ~/app/sandbox-api && docker compose up -d"
   only:
     - staging
   tags:
@@ -104,4 +104,3 @@ deploy_production:
     - prod-do
   tags:
     - production
-  when: manual
