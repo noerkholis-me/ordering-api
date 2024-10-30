@@ -28,7 +28,16 @@ import service.firebase.request.FirebaseMessageRequest;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.AccessToken;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Collections;
+
+import com.google.firebase.messaging.Notification;
+import com.google.firebase.messaging.Message;
+import org.springframework.stereotype.Service;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.FirebaseApp; // Import for FirebaseApp
+import com.google.firebase.FirebaseOptions;
 
 public class FirebaseService {
     private final static Logger.ALogger logger = Logger.of(FirebaseService.class);
@@ -38,12 +47,27 @@ public class FirebaseService {
 	
 	private static FirebaseService instance;
 	
+	private void initializeFirebase() throws IOException {
+		if (FirebaseApp.getApps().isEmpty()) {
+				FileInputStream serviceAccount = new FileInputStream(pathServiceAccountJson);
+				FirebaseOptions options = new FirebaseOptions.Builder()
+						.setCredentials(GoogleCredentials.fromStream(serviceAccount))
+						.build();
+				FirebaseApp.initializeApp(options);
+		}
+	}
+
 	public static FirebaseService getInstance() {
-        if (instance == null) {
-            instance = new FirebaseService();
-        }
-        return instance;
-    }
+		if (instance == null) {
+				instance = new FirebaseService();
+				try {
+						instance.initializeFirebase(); // Initialize Firebase here
+				} catch (IOException e) {
+						logger.error("Failed to initialize Firebase: " + e.getMessage());
+				}
+		}
+		return instance;
+	}
 	
 	private String getPushNotifAuthorization() {
 		return "key=" + pushNotifKey;
@@ -111,5 +135,28 @@ public class FirebaseService {
     		logger.error("Firebase ERROR : " +e.getMessage());
     	}
     }
-    
+
+		public void sendNotification(String device_token, String title, String body) throws Exception {
+			if (FirebaseApp.getApps().isEmpty()) {
+				logger.error("FirebaseApp is not initialized. Cannot send notification.");
+				throw new IllegalStateException("FirebaseApp is not initialized.");
+		}
+			try {
+				Notification notification = Notification.builder().setBody(body).setTitle(title).build();
+
+				Message message = Message.builder()
+									.setToken(device_token)
+									.setNotification(notification)
+									.build();
+
+				System.out.println("Sending message: " + message);
+
+				// Send the message and return the response
+				FirebaseMessaging.getInstance().send(message);
+			} catch (Exception e) {
+				// TODO: handle exception
+				logger.error("Firebase ERROR : " + e.getMessage());
+				System.out.println("Firebase ERROR : " +e.toString());
+			}
+		}
 }

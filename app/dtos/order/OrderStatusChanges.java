@@ -20,5 +20,8 @@ public class OrderStatusChanges {
     private String orderNumber;
     @JsonProperty("status_order")
     private String statusOrder;
+    
+    @JsonProperty("device_type")
+    private String deviceType;
 
 }

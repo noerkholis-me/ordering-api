@@ -129,6 +129,9 @@ public class Order extends BaseModel {
 
     @Column(name = "voucher_code")
     private String voucherCode;
+    
+    @Column(name = "device_token")
+    private String deviceToken;
 
     // ================================================================ //
 
