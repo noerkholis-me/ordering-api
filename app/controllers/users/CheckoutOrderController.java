@@ -896,6 +896,16 @@ public class CheckoutOrderController extends BaseController {
                             FirebaseService.getInstance().sendNotification(device_token, title, message);
                         }
 
+                        if ( statusRequest.getDeviceType() != null && !statusRequest.getDeviceType().isEmpty() && "KITCHEN".equals(statusRequest.getDeviceType()) && "PROCESS".equals(statusRequest.getStatusOrder())) {
+                            String title = "Pesanan Anda Sedang Diproses" ;
+
+                            String message = "Pesanan " + orderData.get().getOrderNumber() + " sedang kami persiapkan. Terima kasih atas kesabaran Anda!";
+
+                            String device_token = orders.getDeviceToken() != null ? orders.getDeviceToken() : "";
+
+                            FirebaseService.getInstance().sendNotification(device_token, title, message);
+                        }
+
                         if ("NEW_ORDER".equals(statusRequest.getStatusOrder())) {
                             FirebaseService.getInstance().sendFirebaseNotifOrderToStore(orderData.get());
                         }

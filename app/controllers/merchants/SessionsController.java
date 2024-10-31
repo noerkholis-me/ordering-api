@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static models.MerchantLog.DEV_TYPE_KITCHEN;
 import static models.MerchantLog.DEV_TYPE_MINI_POS;
 
 /**
@@ -132,6 +133,12 @@ public class SessionsController extends BaseController {
                             MerchantLog log = MerchantLog.loginMerchant(deviceModel, deviceType, deviceId, member, userMerchant, userType);
 //                            response.setBaseResponse(0, 0, 0, "Email Sudah Terdaftar Sebagai Merchant, Tidak Dapat Melanjutkan Login", null);
 //                            return forbidden(Json.toJson(response));
+                            
+                            if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_KITCHEN) || log != null && deviceType.equalsIgnoreCase(DEV_TYPE_KITCHEN)){
+                                response.setBaseResponse(0, 0, 0, "Anda Tidak Memiliki Hak Akses Ke Kitchen", null);
+                                return forbidden(Json.toJson(response));
+                            }
+
                              if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_MINI_POS) || log != null && deviceType.equalsIgnoreCase(DEV_TYPE_MINI_POS)){
                                  response.setBaseResponse(0, 0, 0, "Akun Anda sudah tercatat sebagai Superadmin Marketplace, silahkan mendaftarkan akun PoS menggunakan email lain.", null);
                                  return forbidden(Json.toJson(response));
