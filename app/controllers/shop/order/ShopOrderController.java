@@ -87,7 +87,7 @@ public class ShopOrderController extends BaseController {
             logger.info(">>> incoming order request..." + jsonNode.toString());
 
             String orderType = jsonNode.get("order_type").asText();
-            String deviceToken = jsonNode.get("device_token").asText();
+            String deviceToken = jsonNode.has("device_token") ? jsonNode.get("device_token").asText() : "";
 
             ObjectMapper mapper = new ObjectMapper();
             String requestDomesticOrderShipper = "{\n" + "\"consignee\": {\n" + "\"name\": \"Penerima\",\n" +
