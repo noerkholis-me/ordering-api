@@ -127,7 +127,7 @@ public class FirebaseService {
     //TODO custom method
     public void sendFirebaseNotifOrderToStore(Order orderData) {
     	try {
-    		String storeCode = orderData.getStore().storeCode;
+    		String storeCode = orderData.getStore().getStoreCode();
     		String title = "Pesanan Baru";
     		String message = "Pesanan baru atas nama " + orderData.getMemberName();
     		String to = "store" + storeCode;
