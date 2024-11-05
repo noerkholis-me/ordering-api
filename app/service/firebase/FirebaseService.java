@@ -98,6 +98,8 @@ public class FirebaseService {
 			FirebaseMessageRequest messageRequest = new FirebaseMessageRequest();
 			messageRequest.setMessage(request);
 
+			System.out.println("Token : " + token.getTokenValue());
+
     	JsonNode jsonRequest = new ObjectMapper().valueToTree(messageRequest);
 			URIBuilder builder = new URIBuilder(getPushNotifUrl());
 			HttpPost firebaseRequest = new HttpPost(builder.build());
@@ -129,6 +131,7 @@ public class FirebaseService {
     		String title = "Pesanan Baru";
     		String message = "Pesanan baru atas nama " + orderData.getMemberName();
     		String to = "store" + storeCode;
+				System.out.println("to : " + to);
         	FirebaseRequest request = buildFirebaseRequest(to, title, message);
         	sendPushNotif(request);
     	} catch (Exception e) {
