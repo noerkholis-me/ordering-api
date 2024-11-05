@@ -858,16 +858,24 @@ public class CheckoutOrderController extends BaseController {
                 OrderStatusChanges statusRequest = objectMapper.readValue(json.toString(), OrderStatusChanges.class);
                 Transaction trx = Ebean.beginTransaction();
 
+                System.out.println("ORDER NUMBER : " + statusRequest.getOrderNumber());
+
                 try {
                     Optional<Order> orderData = OrderRepository.findByOrderNumber(statusRequest.getOrderNumber());
 
                     if (orderData.isPresent()) {
+
+                        System.out.println("ORDERDATA IS PRESENT");
                         Order orders = OrderRepository.find.where().eq("t0.order_number", statusRequest.getOrderNumber()).findUnique();
 
                         if (orders != null && orders.getStatus().equalsIgnoreCase("PENDING")) {
+                        System.out.println("ORDER STATUS PENDING");
+
                             OrderPayment ordpayment = OrderPaymentRepository.find.where().eq("order", orders).findUnique();
 
                             if (ordpayment != null) {
+                        System.out.println("ORDER PAYMENT NOT NULL");
+
                                 ordpayment.setStatus("PAID");
                                 ordpayment.update();
                             }
@@ -875,6 +883,8 @@ public class CheckoutOrderController extends BaseController {
                             PaymentDetail paydetails = PaymentDetail.find.where().eq("t0.order_number", statusRequest.getOrderNumber()).findUnique();
 
                             if (paydetails != null) {
+                        System.out.println("ORDER PAYMENT DETAIL NOT NULL");
+
                                 paydetails.setStatus("PAID");
                                 paydetails.update();
                             }
@@ -883,20 +893,29 @@ public class CheckoutOrderController extends BaseController {
                         orderData.get().setStatus(statusRequest.getStatusOrder());
                         orderData.get().update();
 
+                        System.out.println("ORDER TRANSACTION COMMIT");
+
+
                         trx.commit();
 
                         if (statusRequest.getDeviceType() != null && !statusRequest.getDeviceType().isEmpty() && "KITCHEN".equals(statusRequest.getDeviceType()) && "READY_TO_PICKUP".equals(statusRequest.getStatusOrder())) {
+
+                        System.out.println("ORDER KITCHEN READY TO PICKUP");
+
 
                             String title = "Pesanan telah dibuat " ;
 
                             String message = "Nomor order " + orderData.get().getOrderNumber() + " telah dibuat";
 
-                            String device_token = orders.getDeviceToken() != null ? orders.getDeviceToken() : "";
+                            String device_token = "fwiJSriLQEu3YlEL5cJlHF:APA91bEHgPFRgS4x-ay0yllhHVSDHHEFOTB_P3bPKHrAHQRwV_JuP9fHBAwTykR2Y11BGNCLcN29G0vwkzJoKsy101jclMT20FflX9QKFnEDBkJGOiYWnSE";
+                            // String device_token = orders.getDeviceToken() != null ? orders.getDeviceToken() : "";
 
                             FirebaseService.getInstance().sendNotification(device_token, title, message);
                         }
 
                         if ( statusRequest.getDeviceType() != null && !statusRequest.getDeviceType().isEmpty() && "KITCHEN".equals(statusRequest.getDeviceType()) && "PROCESS".equals(statusRequest.getStatusOrder())) {
+                        System.out.println("ORDER KITCHEN PROCESS");
+
                             String title = "Pesanan Anda Sedang Diproses" ;
 
                             String message = "Pesanan " + orderData.get().getOrderNumber() + " sedang kami persiapkan. Terima kasih atas kesabaran Anda!";
@@ -907,22 +926,30 @@ public class CheckoutOrderController extends BaseController {
                         }
 
                         if ("NEW_ORDER".equals(statusRequest.getStatusOrder())) {
+                        System.out.println("ORDER NEW ORDER STATUS");
+
                             FirebaseService.getInstance().sendFirebaseNotifOrderToStore(orderData.get());
                         }
 
                         if ("CLOSED".equals(statusRequest.getStatusOrder())) {
+                        System.out.println("ORDER CLOSED STATUS");
                             Order order = orderData.get();
                             
                             addLoyaltyPoint(order);
                         }
 
+                        System.out.println("Berhasil mengubah status Nomor Order " + orderData.get().getOrderNumber(), orderData.get().getOrderNumber());
+
                         response.setBaseResponse(1, 0, 0, "Berhasil mengubah status Nomor Order " + orderData.get().getOrderNumber(), orderData.get().getOrderNumber());
                         return ok(Json.toJson(response));
                     }
 
+                    System.out.println("Nomor order tidak ditemukan");
+
                     response.setBaseResponse(0, 0, 0, "Nomor order tidak ditemukan", null);
                     return badRequest(Json.toJson(response));
                 } catch (Exception e) {
+                    System.out.println("Error saat mengubah status");
                     logger.error("Error saat mengubah status", e);
                     e.printStackTrace();
                     trx.rollback();
@@ -935,6 +962,7 @@ public class CheckoutOrderController extends BaseController {
             } catch (Exception e) {
                 logger.error("Error saat parsing json", e);
                 e.printStackTrace();
+                return badRequest(Json.toJson(e.getMessage()));
             }
         }
 
