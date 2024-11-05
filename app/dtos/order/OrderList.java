@@ -126,11 +126,17 @@ public class OrderList {
 
     @JsonProperty("voucher_code")
     private String voucherCode;
+    
+    @JsonProperty("device_type")
+    private String deviceType;
 
     public OrderList(Order order) {
         OrderPayment orderPayment = order.getOrderPayment();
         this.setInvoiceNumber(orderPayment.getInvoiceNo());
         this.setOrderNumber(order.getOrderNumber());
+        this.setDeviceType(order.getDeviceType());
+        this.setTableName(order.getTableName());
+        this.setTableId(order.getTable_id());
 
         if (order.getMember() != null) {
             Member member = order.getMember();
