@@ -938,7 +938,7 @@ public class CheckoutOrderController extends BaseController {
                             addLoyaltyPoint(order);
                         }
 
-                        System.out.println("Berhasil mengubah status Nomor Order " + orderData.get().getOrderNumber(), orderData.get().getOrderNumber());
+                        System.out.println("Berhasil mengubah status Nomor Order " + orderData.get().getOrderNumber());
 
                         response.setBaseResponse(1, 0, 0, "Berhasil mengubah status Nomor Order " + orderData.get().getOrderNumber(), orderData.get().getOrderNumber());
                         return ok(Json.toJson(response));
