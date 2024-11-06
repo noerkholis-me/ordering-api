@@ -14,6 +14,7 @@ import models.merchant.ProductMerchantDetail;
 import models.transaction.Order;
 import models.transaction.OrderDetail;
 import models.transaction.OrderDetailAddOn;
+import models.transaction.OrderDetailStatus;
 import models.transaction.OrderPayment;
 import repository.UserMerchantRepository;
 import utils.BigDecimalSerialize;
@@ -21,6 +22,7 @@ import utils.BigDecimalSerialize;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -171,6 +173,9 @@ public class OrderList {
     @Data
     public static class ProductOrderDetail {
 
+        @JsonProperty("id")
+        private Long id;
+
         @JsonProperty("product_id")
         private Long productId;
 
@@ -190,15 +195,67 @@ public class OrderList {
         @JsonProperty("notes")
         private String notes;
 
+        @JsonProperty("order_status_detail")
+        private List<ProductOrderDetailStatuses> orderDetailStatuses;
+
         private List<ProductOrderDetailAddOn> productAddOn;
 
         public ProductOrderDetail(OrderDetail orderDetail, ProductMerchantDetail productMerchantDetail) {
+            // System.out.println("orderDetail.getOrderDetailStatuses()" + orderDetail.getOrderDetailStatuses());
             this.setProductId(orderDetail.getProductMerchant().id);
             this.setProductName(orderDetail.getProductName());
             this.setProductImage(productMerchantDetail != null ? productMerchantDetail.getProductImageMain() : null);
             this.setProductPrice(orderDetail.getProductPrice());
             this.setProductQty(orderDetail.getQuantity());
             this.setNotes(orderDetail.getNotes());
+            this.setId(orderDetail.id);
+            this.setOrderDetailStatuses(orderDetail.getOrderDetailStatuses()
+                .stream()
+                .map(item -> {
+                    return new ProductOrderDetailStatuses(item);   
+                }).collect(Collectors.toList()));
+            // this.setOrderDetailStatuses(orderDetail.getOrderDetailstatuses());
+        }
+
+        @NoArgsConstructor
+        @Data
+        public static class ProductOrderDetailStatuses {
+
+            @JsonProperty("code")
+            private String code;
+
+            @JsonProperty("name")
+            private String name;
+
+            @JsonProperty("description")
+            private String description;
+
+            @JsonProperty("is_active")
+            private Boolean isActive;
+
+            @JsonProperty("created_at")
+            @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+            private Date createdAt;
+
+            // Constructor to initialize from an existing OrderDetailStatus
+            public ProductOrderDetailStatuses(OrderDetailStatus orderDetailStatus) {
+                System.out.println("code");
+                System.out.println("orderDetailStatus: " + orderDetailStatus.getCode());
+                this.code = orderDetailStatus.getCode();
+                this.name = orderDetailStatus.getName();
+                this.description = orderDetailStatus.getDescription();
+                this.isActive = orderDetailStatus.getIsActive();
+                this.createdAt = orderDetailStatus.getCreatedAt();
+            }
+
+            // Additional constructor for creating a new instance
+            public ProductOrderDetailStatuses(String code, String name, String description, Boolean isActive, Date createdAt) {
+                this.code = code;
+                this.name = name;
+                this.description = description;
+                this.isActive = isActive;
+                this.createdAt = createdAt;
+            }
         }
 
         @NoArgsConstructor

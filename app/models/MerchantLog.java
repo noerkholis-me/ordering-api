@@ -166,6 +166,8 @@ public class MerchantLog extends BaseModel {
                 .eq("is_active", true)
                 .setMaxRows(1).findUnique();
 
+        System.out.println("log: " + log);
+
         // validate api key
         String keyWeb = Constant.getInstance().getApiKeyWeb();
         String keyIos = Constant.getInstance().getApiKeyIOS();
