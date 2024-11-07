@@ -172,12 +172,10 @@ public static Result changeStatus(String orderNumber, Long orderDetailId) throws
                   if (orderDetail.isPresent()) {
                       Optional<OrderDetailStatus> orderDetailStatusOpt =
                               Optional.ofNullable(OrderDetailStatusRepository.findByCodeAndOrderDetailId(status_code, orderDetailId));
-                      System.out.println("orderDetailStatus : " + orderDetailStatusOpt);
                       System.out.println("Order detail found with order detail id: " + orderDetailId);
 
                       if (orderDetailStatusOpt.isPresent()) {
                           OrderDetailStatus orderDetailStatus = orderDetailStatusOpt.get();
-                          System.out.println("Retrieved OrderDetailStatus: " + orderDetailStatus); // Print the retrieved object
                           logger.info("Order detail status found with status code: " + status_code);
                           System.out.println("Order detail status found with status code: " + status_code);
                           // Logic to update OrderDetailStatus
