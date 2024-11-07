@@ -221,7 +221,8 @@ public class SessionsController extends BaseController {
                     return badRequest(Json.toJson(response));
                 }
             }
-            response.setBaseResponse(0, 0, 0, "User tidak terdaftar", null);
+            // response.setBaseResponse(0, 0, 0, "User tidak terdaftar", null);
+            response.setBaseResponse(0, 0, 0, "Email atau password yang anda masukkan salah!", null);
             return badRequest(Json.toJson(response));
         }
         response.setBaseResponse(0, 0, 0, unauthorized, null);
