@@ -914,7 +914,8 @@ public class CheckoutOrderController extends BaseController {
                         }
 
                         if ( statusRequest.getDeviceType() != null && !statusRequest.getDeviceType().isEmpty() && "KITCHEN".equals(statusRequest.getDeviceType()) && "PROCESS".equals(statusRequest.getStatusOrder())) {
-                        System.out.println("ORDER KITCHEN PROCESS");
+                        
+                            System.out.println("ORDER KITCHEN PROCESS");
 
                             String title = "Pesanan Anda Sedang Diproses" ;
 

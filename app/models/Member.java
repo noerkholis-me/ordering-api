@@ -134,6 +134,9 @@ public class Member extends BaseModel {
     @JsonProperty("shipping_address")
     public Address shippingAddress;
 
+    @Column(name = "device_token")
+    public String deviceToken;
+
     @JsonProperty("has_password")
     public boolean hasSetPassword() {
         return (this.password != null);
