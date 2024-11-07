@@ -5,7 +5,11 @@ import lombok.EqualsAndHashCode;
 import models.BaseModel;
 import lombok.*;
 
+import java.util.Date;
+
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "order_detail_status")
@@ -28,6 +32,14 @@ public class OrderDetailStatus extends BaseModel {
   
   @Column(name = "is_active")
   private Boolean isActive;
+
+  @JsonProperty("created_at")
+  private Date createdAt;
+
+  // Getter method
+  public Date getCreatedAt() {
+      return createdAt;
+  }
 
   public OrderDetailStatus(OrderDetail orderDetail, String code, String name, String description, Boolean isActive) {
     this.orderDetail = orderDetail;
