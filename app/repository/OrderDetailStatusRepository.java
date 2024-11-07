@@ -14,8 +14,6 @@ public class OrderDetailStatusRepository extends Model {
   public static OrderDetailStatus findByCodeAndOrderDetailId(String code, Long order_detail_id) {
     OrderDetailStatus orderDetailStatus = find.where().eq("code", code).eq("order_detail_id", order_detail_id).findUnique();
 
-    System.out.println("orderDetailStatus: " + orderDetailStatus);
-
     return orderDetailStatus;
   }
 }

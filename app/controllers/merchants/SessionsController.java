@@ -175,7 +175,7 @@ public class SessionsController extends BaseController {
                             if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_MINI_POS)){
                                 response.setBaseResponse(0, 0, 0, "Akun anda tidak memiliki akses ke perangkat kasir, Silahkan hubungi administrator.", null);
                                 return forbidden(Json.toJson(response));
-                            } else if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_KITCHEN) || log != null && deviceType.equalsIgnoreCase(DEV_TYPE_KITCHEN)){
+                            } else if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_KITCHEN)){
                                 response.setBaseResponse(0, 0, 0, "Anda Tidak Memiliki Hak Akses Ke Kitchen, Silahkan hubungi administrator.", null);
                                 return forbidden(Json.toJson(response));
                             } else if (log == null) {
