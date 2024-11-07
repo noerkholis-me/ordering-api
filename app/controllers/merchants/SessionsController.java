@@ -135,7 +135,7 @@ public class SessionsController extends BaseController {
 //                            return forbidden(Json.toJson(response));
                             
                             if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_KITCHEN) || log != null && deviceType.equalsIgnoreCase(DEV_TYPE_KITCHEN)){
-                                response.setBaseResponse(0, 0, 0, "Anda Tidak Memiliki Hak Akses Ke Kitchen", null);
+                                response.setBaseResponse(0, 0, 0, "Anda Tidak Memiliki Hak Akses Ke Kitchen, Silahkan Hubungi Admin", null);
                                 return forbidden(Json.toJson(response));
                             }
 
@@ -174,6 +174,9 @@ public class SessionsController extends BaseController {
                             MerchantLog log = MerchantLog.loginMerchant(deviceModel, deviceType, deviceId, member, userMerchant, userType);
                             if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_MINI_POS)){
                                 response.setBaseResponse(0, 0, 0, "Akun anda tidak memiliki akses ke perangkat kasir, Silahkan hubungi administrator.", null);
+                                return forbidden(Json.toJson(response));
+                            } else if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_KITCHEN) || log != null && deviceType.equalsIgnoreCase(DEV_TYPE_KITCHEN)){
+                                response.setBaseResponse(0, 0, 0, "Anda Tidak Memiliki Hak Akses Ke Kitchen, Silahkan hubungi administrator.", null);
                                 return forbidden(Json.toJson(response));
                             } else if (log == null) {
                                 response.setBaseResponse(0, 0, 0, "User tidak terdaftar", null);

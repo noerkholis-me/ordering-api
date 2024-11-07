@@ -6,11 +6,14 @@ import models.BaseModel;
 import models.ProductStore;
 import models.merchant.ProductMerchant;
 import models.merchant.ProductMerchantDetail;
+import repository.OrderDetailStatusRepository;
 import repository.ProductMerchantDetailRepository;
 
 import javax.persistence.*;
 
 import com.hokeba.util.Helper;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -51,6 +54,8 @@ public class OrderDetail extends BaseModel {
     @OneToMany(mappedBy = "orderDetail")
     private List<OrderDetailAddOn> orderDetailAddOns;
 
+    @OneToMany(mappedBy = "orderDetail", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<OrderDetailStatus> orderDetailstatuses;
 
     public static Finder<Long, OrderDetail> find = new Finder<>(Long.class, OrderDetail.class);
 
@@ -73,6 +78,10 @@ public class OrderDetail extends BaseModel {
     public String fetchMainImage() {
     	ProductMerchantDetail productDetail = ProductMerchantDetailRepository.findByProduct(this.productMerchant);
     	return productDetail.getProductImageMain();
+    }
+
+    public List<OrderDetailStatus> getOrderDetailStatuses() {
+        return this.orderDetailstatuses;
     }
 
 }

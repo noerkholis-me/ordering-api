@@ -754,3 +754,5 @@ POST         /shop/member/voucher/check          controllers.shop.member.ShopMem
 
 POST         /firebase/subcribe-topic            controllers.shop.order.ShopOrderController.subcribeTopic()
 POST         /firebase/unsubcribe-topic          controllers.shop.order.ShopOrderController.unSubcribeFromTopic()
+
+POST         /kitchen/order/detail/changestatus             controllers.kitchen.order.KitchenOrderController.changeStatus(order_number:String, order_detail_id:Long)
