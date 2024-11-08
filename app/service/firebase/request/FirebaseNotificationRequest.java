@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import models.transaction.Order;
 
 @Data
 @AllArgsConstructor
@@ -13,5 +14,4 @@ import lombok.NoArgsConstructor;
 public class FirebaseNotificationRequest {
 	private String body;
     private String title;
-    
 }
