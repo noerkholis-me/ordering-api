@@ -391,7 +391,7 @@ public class OrderRepository extends Model {
                 + whereCondition
                 + "AND od.product_id in (SELECT ps.product_id FROM product_store ps) "
                 + "GROUP BY ord.id, ord.order_number "
-                + "ORDER BY ord.id DESC ";
+                + "ORDER BY ord.created_at ASC ";
         } else if (productType.equalsIgnoreCase("GLOBAL")) {
             querySql = "SELECT ord.id, ord.order_number FROM orders ord "
                 + "JOIN store str ON ord.store_id = str.id "
@@ -402,7 +402,7 @@ public class OrderRepository extends Model {
                 + whereCondition
                 + "AND ps.product_id IS NULL "
                 + "GROUP BY ord.id, ord.order_number "
-                + "ORDER BY ord.id DESC ";
+                + "ORDER BY ord.created_at ASC ";
         } else {
             querySql = "SELECT ord.id, ord.order_number FROM orders ord "
                 + "JOIN store str ON ord.store_id = str.id "
@@ -411,7 +411,7 @@ public class OrderRepository extends Model {
                 + "LEFT JOIN member mbr ON ord.user_id = mbr.id "
                 + whereCondition
                 + "GROUP BY ord.id, ord.order_number "
-                + "ORDER BY ord.id DESC ";
+                + "ORDER BY ord.created_at ASC ";
         }
 
         return querySql;
