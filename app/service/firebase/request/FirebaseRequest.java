@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class FirebaseRequest {
 	private String topic;
 	private FirebaseNotificationRequest notification; //for background handler
-	private FirebaseOrderDataRequest data;
-	// private FirebaseDataRequest data; //for foreground handler
+	// private String data;
+	private FirebaseOrderDataRequest data; //for foreground handler
 	
 }
