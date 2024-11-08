@@ -83,10 +83,22 @@ public class FirebaseService {
     }
     
     //TODO services method
-    public FirebaseRequest buildFirebaseRequest(String to, String title, String message, FirebaseOrderDataRequest data) {
-			// FirebaseDataRequest data = new FirebaseDataRequest(message, title);
+    public FirebaseRequest buildFirebaseRequest(String to, String title, String message, FirebaseOrderDataRequest order) {
+			// Convert FirebaseOrderDataRequest to JSON string
+			String bodyJson = "";
+			try {
+					ObjectMapper objectMapper = new ObjectMapper();
+					bodyJson = objectMapper.writeValueAsString(order);
+			} catch (IOException e) {
+					logger.error("Failed to convert order to JSON: " + e.getMessage());
+			}
+
+			// Log the JSON payload for debugging
+			System.out.println("Sending JSON payload: " + bodyJson);
+			logger.info("Sending JSON payload: " + bodyJson);
+
 			FirebaseNotificationRequest notification = new FirebaseNotificationRequest(message, title);
-			return new FirebaseRequest(to, notification, data);
+			return new FirebaseRequest(to, notification, order);
     }
     
     public void sendPushNotif(FirebaseRequest request) throws Exception {
@@ -118,8 +130,10 @@ public class FirebaseService {
 		
 				HttpEntity entity = response.getEntity();
 				String responseString = EntityUtils.toString(entity, "UTF-8");		
+				System.out.println("Firebase Response : " + responseString);
 				logger.info("Firebase Response : " + responseString);
 			} catch (Exception e) {
+				System.out.println("Firebase ERROR : " +e.getMessage());
 				logger.error("Firebase ERROR : " +e.getMessage());
 			} finally {
 				client.close();
