@@ -54,6 +54,7 @@ import repository.pickuppoint.PickUpPointRepository;
 import service.EmailService;
 import service.PaymentService;
 import service.firebase.FirebaseService;
+import service.firebase.request.FirebaseOrderDataRequest;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -906,11 +907,12 @@ public class CheckoutOrderController extends BaseController {
                             String title = "Pesanan telah dibuat " ;
 
                             String message = "Nomor order " + orderData.get().getOrderNumber() + " telah dibuat";
+                            FirebaseOrderDataRequest orderList = new FirebaseOrderDataRequest(orderData.get());
 
-                            String device_token = "fwiJSriLQEu3YlEL5cJlHF:APA91bEHgPFRgS4x-ay0yllhHVSDHHEFOTB_P3bPKHrAHQRwV_JuP9fHBAwTykR2Y11BGNCLcN29G0vwkzJoKsy101jclMT20FflX9QKFnEDBkJGOiYWnSE";
-                            // String device_token = orders.getDeviceToken() != null ? orders.getDeviceToken() : "";
+                            // String device_token = "cIHUOq1jdaq8Y7zJYICGQO:APA91bGX3xW73zrHOQth0pUwhluqrmuNS8LnpxQXn9AlGR5gaFeaMWhJif5eXzf3xAHPhx5aJ0Ul5cpkRNJ9-DQXExdkWuJkCJ643w-FcdX9SPBzLs_cyFM";
+                            String device_token = orders.getDeviceToken() != null ? orders.getDeviceToken() : "";
 
-                            FirebaseService.getInstance().sendNotification(device_token, title, message);
+                            FirebaseService.getInstance().sendNotification(device_token, title, message, orderList);
                         }
 
                         if ( statusRequest.getDeviceType() != null && !statusRequest.getDeviceType().isEmpty() && "KITCHEN".equals(statusRequest.getDeviceType()) && "PROCESS".equals(statusRequest.getStatusOrder())) {
@@ -920,10 +922,11 @@ public class CheckoutOrderController extends BaseController {
                             String title = "Pesanan Anda Sedang Diproses" ;
 
                             String message = "Pesanan " + orderData.get().getOrderNumber() + " sedang kami persiapkan. Terima kasih atas kesabaran Anda!";
+                            FirebaseOrderDataRequest orderList = new FirebaseOrderDataRequest(orderData.get());
 
                             String device_token = orders.getDeviceToken() != null ? orders.getDeviceToken() : "";
 
-                            FirebaseService.getInstance().sendNotification(device_token, title, message);
+                            FirebaseService.getInstance().sendNotification(device_token, title, message, orderList);
                         }
 
                         if ("NEW_ORDER".equals(statusRequest.getStatusOrder())) {

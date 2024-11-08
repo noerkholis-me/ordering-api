@@ -22,6 +22,7 @@ import play.Logger;
 import play.Play;
 import service.firebase.request.FirebaseDataRequest;
 import service.firebase.request.FirebaseNotificationRequest;
+import service.firebase.request.FirebaseOrderDataRequest;
 import service.firebase.request.FirebaseRequest;
 import service.firebase.request.FirebaseMessageRequest;
 
@@ -82,10 +83,10 @@ public class FirebaseService {
     }
     
     //TODO services method
-    public FirebaseRequest buildFirebaseRequest(String to, String title, String message) {
-			FirebaseDataRequest data = new FirebaseDataRequest(message, title);
+    public FirebaseRequest buildFirebaseRequest(String to, String title, String message, FirebaseOrderDataRequest data) {
+			// FirebaseDataRequest data = new FirebaseDataRequest(message, title);
 			FirebaseNotificationRequest notification = new FirebaseNotificationRequest(message, title);
-			return new FirebaseRequest(to, notification);
+			return new FirebaseRequest(to, notification, data);
     }
     
     public void sendPushNotif(FirebaseRequest request) throws Exception {
@@ -106,6 +107,7 @@ public class FirebaseService {
 			firebaseRequest.setHeader("Authorization", "Bearer " + token.getTokenValue());
 			firebaseRequest.setHeader("Content-Type", "application/json");
 			firebaseRequest.setEntity(new StringEntity(jsonRequest.toString()));
+			System.out.println("Firebase Request : " + jsonRequest.toString());
 			logger.info("Firebase Request : " + jsonRequest.toString());
 			
 			CloseableHttpAsyncClient client = HttpAsyncClients.createDefault();
@@ -131,28 +133,37 @@ public class FirebaseService {
     		String title = "Pesanan Baru";
     		String message = "Pesanan baru atas nama " + orderData.getMemberName();
     		String to = "store" + storeCode;
+				FirebaseOrderDataRequest data = new FirebaseOrderDataRequest(orderData);
 				System.out.println("to : " + to);
-        	FirebaseRequest request = buildFirebaseRequest(to, title, message);
+        	FirebaseRequest request = buildFirebaseRequest(to, title, message, data);
         	sendPushNotif(request);
     	} catch (Exception e) {
     		logger.error("Firebase ERROR : " +e.getMessage());
     	}
     }
 
-		public void sendNotification(String device_token, String title, String body) throws Exception {
+		public void sendNotification(String device_token, String title, String body, FirebaseOrderDataRequest order) throws Exception {
 			if (FirebaseApp.getApps().isEmpty()) {
 				logger.error("FirebaseApp is not initialized. Cannot send notification.");
 				throw new IllegalStateException("FirebaseApp is not initialized.");
 		}
 			try {
+				System.out.println("Sending message: ");
+
+
+				ObjectMapper ObjectMapper = new ObjectMapper();
+				String bodyJson = ObjectMapper.writeValueAsString(order);
+
 				Notification notification = Notification.builder().setBody(body).setTitle(title).build();
 
 				Message message = Message.builder()
 									.setToken(device_token)
 									.setNotification(notification)
+									.putData("body", bodyJson)
 									.build();
 
 				System.out.println("Sending message: " + message);
+
 
 				// Send the message and return the response
 				FirebaseMessaging.getInstance().send(message);
