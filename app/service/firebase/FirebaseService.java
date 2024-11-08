@@ -156,7 +156,7 @@ public class FirebaseService {
     	}
     }
 
-		public void sendNotification(String device_token, String title, String body, FirebaseOrderDataRequest order) throws Exception {
+		public void sendNotification(String device_token, String title, String body) throws Exception {
 			if (FirebaseApp.getApps().isEmpty()) {
 				logger.error("FirebaseApp is not initialized. Cannot send notification.");
 				throw new IllegalStateException("FirebaseApp is not initialized.");
@@ -165,15 +165,15 @@ public class FirebaseService {
 				System.out.println("Sending message: ");
 
 
-				ObjectMapper ObjectMapper = new ObjectMapper();
-				String bodyJson = ObjectMapper.writeValueAsString(order);
+				// ObjectMapper ObjectMapper = new ObjectMapper();
+				// String bodyJson = ObjectMapper.writeValueAsString(order);
 
 				Notification notification = Notification.builder().setBody(body).setTitle(title).build();
 
 				Message message = Message.builder()
 									.setToken(device_token)
 									.setNotification(notification)
-									.putData("body", bodyJson)
+									// .putData("body", bodyJson)
 									.build();
 
 				System.out.println("Sending message: " + message);
