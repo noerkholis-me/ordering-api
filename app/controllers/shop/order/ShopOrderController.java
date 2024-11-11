@@ -839,6 +839,7 @@ public class ShopOrderController extends BaseController {
             FirebaseMessaging firebaseMessaging = FirebaseMessaging.getInstance();
 
             TopicManagementResponse response = firebaseMessaging.subscribeToTopic(registrationTokens, topic);
+            System.out.println("Successfully subscribed to topic: " + topic + ", With Token: " + registrationTokens + ", Success Count: " + response.getSuccessCount());
             logger.info("Successfully subscribed to topic: " + topic + ", Success Count: " + response.getSuccessCount());
 
             return ok("Successfully subscribed to topic: " + topic + ", Success Count: " + response.getSuccessCount());
@@ -864,6 +865,8 @@ public class ShopOrderController extends BaseController {
             FirebaseMessaging firebaseMessaging = FirebaseMessaging.getInstance();
 
             TopicManagementResponse response = firebaseMessaging.unsubscribeFromTopic(registrationTokens, topic);
+            System.out.println("Successfully unsubscribed to topic: " + topic + ", With Token: " + registrationTokens + ", Success Count: " + response.getSuccessCount());
+
             logger.info("Successfully unsubscribed to topic: " + topic + ", Success Count: " + response.getSuccessCount());
 
             return ok("Successfully unsubscribed to topic: " + topic + ", Success Count: " + response.getSuccessCount());
