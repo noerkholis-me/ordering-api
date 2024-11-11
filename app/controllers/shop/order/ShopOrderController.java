@@ -844,9 +844,11 @@ public class ShopOrderController extends BaseController {
 
             return ok("Successfully subscribed to topic: " + topic + ", Success Count: " + response.getSuccessCount());
         } catch (IOException e) {
+            System.out.println("Failed to initialize Firebase: " + e.getMessage());
             logger.error("Failed to initialize Firebase: " + e.getMessage());
             return internalServerError("Failed to initialize Firebase: " + e.getMessage());
         } catch (Exception e) {
+            System.out.println("Failed to unsubscribe to topic: " + topic + ", Error: " + e.getMessage());
             logger.error("Failed to subscribe to topic: " + topic + ", Error: " + e.getMessage());
             return internalServerError("Failed to subscribe to topic: " + topic + " " + e);
         }
@@ -871,9 +873,11 @@ public class ShopOrderController extends BaseController {
 
             return ok("Successfully unsubscribed to topic: " + topic + ", Success Count: " + response.getSuccessCount());
         } catch (IOException e) {
+            System.out.println("Failed to initialize Firebase: " + e.getMessage());
             logger.error("Failed to initialize Firebase: " + e.getMessage());
             return internalServerError("Failed to initialize Firebase: " + e.getMessage());
         } catch (Exception e) {
+            System.out.println("Failed to unsubscribe to topic: " + topic + ", Error: " + e.getMessage());
             logger.error("Failed to unsubscribe to topic: " + topic + ", Error: " + e.getMessage());
             return internalServerError("Failed to unsubscribe to topic: " + topic + " " + e);
         }
