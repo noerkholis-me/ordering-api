@@ -23,5 +23,7 @@ public class RoleMerchantRequest {
     private String description;
     @JsonProperty("is_cashier")
     private Boolean isCashier;
+    @JsonProperty("is_kitchen")
+    private Boolean isKitchen = false;
     private List<FeatureAssignRequest> features;
 }

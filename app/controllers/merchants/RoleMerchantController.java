@@ -58,6 +58,7 @@ public class RoleMerchantController extends BaseController {
                         newRoleMerchant.setMerchant(ownMerchant);
                         newRoleMerchant.setCashier(request.getIsCashier());
                         newRoleMerchant.setActive(Boolean.TRUE);
+                        newRoleMerchant.setKitchen(request.getIsKitchen() != null ? request.getIsKitchen() : false);
                         newRoleMerchant.save();
                         // ============================ start to set role feature ============================ //
                         if (request.getFeatures() != null) {
