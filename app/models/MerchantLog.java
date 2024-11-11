@@ -99,14 +99,14 @@ public class MerchantLog extends BaseModel {
             } else if (deviceType.equalsIgnoreCase(DEV_TYPE_KITCHEN)) {
                 if (userType) {
                     List<RoleMerchant> roleMerchant = RoleMerchantRepository.findByMerchantId(member);
-                    if (!roleMerchant.isEmpty() && roleMerchant.stream().findFirst().get().isCashier()) {
+                    if (!roleMerchant.isEmpty() && roleMerchant.stream().findFirst().get().isKitchen()) {
                         log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
                     } else {
                         return null;
                     }
                 } else {
                     RoleMerchant roleMerchant = RoleMerchantRepository.find.where().eq("id", userMerchant.getRole().id).findUnique();
-                    if (roleMerchant != null && roleMerchant.getKey().equals("kitchen")) {
+                    if (roleMerchant != null && roleMerchant.isKitchen()) {
                         log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
                     } else {
                         return null;
@@ -165,8 +165,6 @@ public class MerchantLog extends BaseModel {
         MerchantLog log = MerchantLog.find.where().eq("token", token)
                 .eq("is_active", true)
                 .setMaxRows(1).findUnique();
-
-        System.out.println("log: " + log);
 
         // validate api key
         String keyWeb = Constant.getInstance().getApiKeyWeb();
