@@ -912,7 +912,7 @@ public class CheckoutOrderController extends BaseController {
                             // String device_token = "cIHUOq1jdaq8Y7zJYICGQO:APA91bGX3xW73zrHOQth0pUwhluqrmuNS8LnpxQXn9AlGR5gaFeaMWhJif5eXzf3xAHPhx5aJ0Ul5cpkRNJ9-DQXExdkWuJkCJ643w-FcdX9SPBzLs_cyFM";
                             String device_token = orders.getDeviceToken() != null ? orders.getDeviceToken() : "";
 
-                            FirebaseService.getInstance().sendNotification(device_token, title, message);
+                            FirebaseService.getInstance().sendNotification(device_token, title, message, orderData.get());
                         }
 
                         if ( statusRequest.getDeviceType() != null && !statusRequest.getDeviceType().isEmpty() && "KITCHEN".equals(statusRequest.getDeviceType()) && "PROCESS".equals(statusRequest.getStatusOrder())) {
@@ -926,7 +926,7 @@ public class CheckoutOrderController extends BaseController {
 
                             String device_token = orders.getDeviceToken() != null ? orders.getDeviceToken() : "";
 
-                            FirebaseService.getInstance().sendNotification(device_token, title, message);
+                            FirebaseService.getInstance().sendNotification(device_token, title, message, orderData.get());
                         }
 
                         if ("NEW_ORDER".equals(statusRequest.getStatusOrder())) {

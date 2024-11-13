@@ -45,6 +45,7 @@ public class FirebaseService {
 	private static String pushNotifUrl = Play.application().configuration().getString("firebase.push-notif.url");
 	private static String pushNotifKey = Play.application().configuration().getString("firebase.push-notif.key");
 	private static String pathServiceAccountJson = Play.application().configuration().getString("firebase.path-service-account-json");
+	private static String frontedOrderingURL = Play.application().configuration().getString("whizliz.frontend_ordering.url");
 	
 	private static FirebaseService instance;
 	
@@ -145,7 +146,7 @@ public class FirebaseService {
     	try {
     		String storeCode = orderData.getStore().getStoreCode();
     		String title = "Pesanan Baru";
-    		String message = "Pesanan baru atas nama " + orderData.getMemberName();
+    		String message = "Pesanan baru atas nama " + orderData.getMemberName() + ", dengan code number " + orderData.getOrderNumber();
     		String to = "store" + storeCode;
 				FirebaseOrderDataRequest data = new FirebaseOrderDataRequest(orderData);
 				System.out.println("to : " + to);
@@ -156,28 +157,29 @@ public class FirebaseService {
     	}
     }
 
-		public void sendNotification(String device_token, String title, String body) throws Exception {
+		public void sendNotification(String device_token, String title, String body, Order order) throws Exception {
 			if (FirebaseApp.getApps().isEmpty()) {
 				logger.error("FirebaseApp is not initialized. Cannot send notification.");
 				throw new IllegalStateException("FirebaseApp is not initialized.");
 		}
 			try {
-				System.out.println("Sending message: ");
+				String storeName = order.getStore().getStoreName();
+				String storeNamTemp = storeName.replaceAll("\\s","").toLowerCase() + "-1";
+				String orderNumber = order.getOrderNumber();
 
+				String url = frontedOrderingURL + storeNamTemp + "/check-order/detail/process?order=" + orderNumber ;
 
-				// ObjectMapper ObjectMapper = new ObjectMapper();
-				// String bodyJson = ObjectMapper.writeValueAsString(order);
+				System.out.println("url : " + url);
 
 				Notification notification = Notification.builder().setBody(body).setTitle(title).build();
 
 				Message message = Message.builder()
 									.setToken(device_token)
 									.setNotification(notification)
-									// .putData("body", bodyJson)
+									.putData("url", url)
 									.build();
 
 				System.out.println("Sending message: " + message);
-
 
 				// Send the message and return the response
 				FirebaseMessaging.getInstance().send(message);
