@@ -146,7 +146,7 @@ public class FirebaseService {
     	try {
     		String storeCode = orderData.getStore().getStoreCode();
     		String title = "Pesanan Baru";
-    		String message = "Pesanan baru atas nama " + orderData.getMemberName() + ", dengan code number " + orderData.getOrderNumber();
+    		String message = "Pesanan baru atas nama " + orderData.getMemberName() + ", dengan kode pesanan " + orderData.getOrderNumber();
     		String to = "store" + storeCode;
 				FirebaseOrderDataRequest data = new FirebaseOrderDataRequest(orderData);
 				System.out.println("to : " + to);
