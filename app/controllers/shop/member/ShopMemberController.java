@@ -15,6 +15,8 @@ import com.hokeba.api.BaseResponse;
 
 import controllers.BaseController;
 import dtos.order.OrderList;
+import dtos.shop.ShopMemberCheckOrderResponse;
+import dtos.shop.ShopMemberOrderDetail;
 import dtos.voucher.CheckVoucherCodeRequest;
 import models.Member;
 import models.Merchant;
@@ -273,5 +275,86 @@ public class ShopMemberController extends BaseController {
             response.setBaseResponse(0, 0, 0, error, null);
             return badRequest(Json.toJson(response));
         }
+    }
+
+    public static Result getMemberOrderDetail(String orderNumber) throws Exception {
+        try {
+            if (orderNumber == null || orderNumber.isEmpty() || orderNumber == "") {
+                throw new Exception("order number cannot be null");
+            }
+
+            Optional<Order> order = OrderRepository.findByOrderNumber(orderNumber);
+
+            if (!order.isPresent()) {
+                throw new Exception("Nomor transaksi tidak valid atau tidak ditemukan. Mohon periksa kembali Nomor Transaksi Anda atau hubungi layanan pelanggan untuk bantuan.");
+            }
+
+            ShopMemberOrderDetail orderRes = new ShopMemberOrderDetail(order.get());
+
+            System.out.println("Success get detail order");
+
+            response.setBaseResponse(1, offset, 1, success, orderRes);
+            return ok(Json.toJson(response));
+        } catch (Exception ex) {
+            System.out.println("Error when getting detail order : " + ex.getMessage());
+            logger.error("Error when getting detail order");
+            ex.printStackTrace();
+
+            response.setBaseResponse(0, 0, 0, ex.getMessage(), null);
+            return badRequest(Json.toJson(response));
+        }
+    }
+    
+    public static Result getMemberOrderCheckOrder(String orderNumber, String deviceToken) throws Exception {
+        try {
+            if (orderNumber == null || orderNumber.isEmpty() || orderNumber == "") {
+                throw new Exception("order number cannot be null");
+            }
+
+            
+            System.out.println("deviceToken : " + deviceToken);
+            if (deviceToken == null || deviceToken.isEmpty() || deviceToken == "") {
+                throw new Exception("device token cannot be null");
+            }
+
+            Optional<Order> order = OrderRepository.findByOrderNumber(orderNumber);
+
+            if (!order.isPresent()) {
+                throw new Exception("Nomor transaksi tidak valid atau tidak ditemukan. Mohon periksa kembali Nomor Transaksi Anda atau hubungi layanan pelanggan untuk bantuan.");
+            }
+
+            order.get().setDeviceToken(deviceToken);
+            order.get().update();
+
+            System.out.println("Success update device token");
+
+            String storeName = order.get().getStore().getStoreName();
+            String storeNamTemp = storeName.replaceAll("\\s","").toLowerCase() + "-1";
+            String status = order.get().getStatus();
+            String url = storeNamTemp + "/check-order/detail/" + status.toLowerCase() + "?order=" + orderNumber;
+
+            System.out.println("url : " + url);
+
+            ShopMemberCheckOrderResponse urlResponse = new ShopMemberCheckOrderResponse();
+            urlResponse.setUrl(url);
+
+            System.out.println("Success get detail order");
+
+            response.setBaseResponse(0, 0, 0, success + " mendapatkan detail order dengan orderNumber " + orderNumber, urlResponse);
+            return ok(Json.toJson(response));
+        } catch (Exception e) {
+            // TODO: handle exception
+            logger.error("Error when getting list data orders");
+            e.printStackTrace();
+
+            response.setBaseResponse(0, 0, 0, e.getMessage(), null);
+            return badRequest(Json.toJson(response));
+        } catch (Error er) {
+            logger.error(er.getMessage());
+            er.printStackTrace();
+            response.setBaseResponse(0, 0, 0, error, null);
+            return badRequest(Json.toJson(response));
+        }
+
     }
 }
