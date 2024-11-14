@@ -328,15 +328,35 @@ public class ShopMemberController extends BaseController {
 
             System.out.println("Success update device token");
 
+            String status = order.get().getStatus();
+
+            switch (status) {
+                case "NEW_ORDER":
+                    status = "baru";
+                    break;
+                case "CANCELED":
+                    status = "cancel";
+                    break;
+                case "READY_TO_PICKUP":
+                    status = "ready";
+                    break;
+                case "CLOSED":
+                    status = "done";
+                    break;
+                default:
+                    status = status.toLowerCase();
+                    break;
+            }
+
             String storeName = order.get().getStore().getStoreName();
             String storeNamTemp = storeName.replaceAll("\\s","").toLowerCase() + "-1";
-            String status = order.get().getStatus();
-            String url = storeNamTemp + "/check-order/detail/" + status.toLowerCase() + "?order=" + orderNumber;
+            String url = storeNamTemp + "/check-order/detail/" + status + "?order=" + orderNumber;
 
             System.out.println("url : " + url);
 
             ShopMemberCheckOrderResponse urlResponse = new ShopMemberCheckOrderResponse();
             urlResponse.setUrl(url);
+            urlResponse.setOrderNumber(orderNumber);
 
             System.out.println("Success get detail order");
 
