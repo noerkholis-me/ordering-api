@@ -9,4 +9,7 @@ import lombok.Setter;
 @Setter
 public class ShopMemberCheckOrderResponse {
   private String url;
+
+  @JsonProperty("order_number")
+  private String orderNumber;
 }
