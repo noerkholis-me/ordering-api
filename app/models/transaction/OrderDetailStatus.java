@@ -35,6 +35,9 @@ public class OrderDetailStatus extends BaseModel {
 
   @JsonProperty("created_at")
   private Date createdAt;
+  
+  @JsonProperty("updated_at")
+  private Date updatedAt;
 
   // Getter method
   public Date getCreatedAt() {
