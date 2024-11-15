@@ -163,7 +163,7 @@ public static Result changeStatus(String orderNumber, Long orderDetailId) throws
 
               Order orders = OrderRepository.find.where().eq("t0.order_number", orderNumber).findUnique();
 
-              if (orders != null && orders.getStatus().equalsIgnoreCase("PROCESS")) {
+              if (orders != null && (orders.getStatus().equalsIgnoreCase("PROCESS") || orders.getStatus().equalsIgnoreCase("READY_TO_PICKUP"))) {
                   logger.info("Order status is PROCESS");
                   Optional<OrderDetail> orderDetail = OrderDetailRepository.findById(orderDetailId);
                   System.out.println("PROCESS");

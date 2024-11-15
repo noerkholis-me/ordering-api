@@ -236,6 +236,10 @@ public class OrderList {
             @JsonProperty("created_at")
             @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
             private Date createdAt;
+            
+            @JsonProperty("updated_at")
+            @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+            private Date updatedAt;
 
             // Constructor to initialize from an existing OrderDetailStatus
             public ProductOrderDetailStatuses(OrderDetailStatus orderDetailStatus) {
@@ -246,15 +250,17 @@ public class OrderList {
                 this.description = orderDetailStatus.getDescription();
                 this.isActive = orderDetailStatus.getIsActive();
                 this.createdAt = orderDetailStatus.getCreatedAt();
+                this.updatedAt = orderDetailStatus.getUpdatedAt();
             }
 
             // Additional constructor for creating a new instance
-            public ProductOrderDetailStatuses(String code, String name, String description, Boolean isActive, Date createdAt) {
+            public ProductOrderDetailStatuses(String code, String name, String description, Boolean isActive, Date createdAt, Date updatedAt) {
                 this.code = code;
                 this.name = name;
                 this.description = description;
                 this.isActive = isActive;
                 this.createdAt = createdAt;
+                this.updatedAt = updatedAt;
             }
         }
 
