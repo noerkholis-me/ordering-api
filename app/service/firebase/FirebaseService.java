@@ -167,7 +167,26 @@ public class FirebaseService {
 				String storeNamTemp = storeName.replaceAll("\\s","").toLowerCase() + "-1";
 				String orderNumber = order.getOrderNumber();
 
-				String url = frontedOrderingURL + storeNamTemp + "/check-order/detail/process?order=" + orderNumber ;
+				String status = order.getStatus();
+				switch (status) {
+					case "NEW_ORDER":
+							status = "baru";
+							break;
+					case "CANCELED":
+							status = "cancel";
+							break;
+					case "READY_TO_PICKUP":
+							status = "ready";
+							break;
+					case "CLOSED":
+							status = "done";
+							break;
+					default:
+							status = status.toLowerCase();
+							break;
+			}
+
+				String url = frontedOrderingURL + storeNamTemp + "/check-order/detail/" + status + "?order=" + orderNumber;
 
 				System.out.println("url : " + url);
 
