@@ -379,7 +379,12 @@ public class OrderRepository extends Model {
         return query.findList();
     }
 
-    public static String checkProductType(String productType, String whereCondition) {
+    public static String checkProductType(String productType, String whereCondition, String sortBy) {
+
+        if (sortBy == null || sortBy.isEmpty()) {
+            sortBy = "DESC"; // Default value
+        }
+
         String querySql;
 
         if (productType.equalsIgnoreCase("STORE")) {
@@ -391,7 +396,7 @@ public class OrderRepository extends Model {
                 + whereCondition
                 + "AND od.product_id in (SELECT ps.product_id FROM product_store ps) "
                 + "GROUP BY ord.id, ord.order_number "
-                + "ORDER BY ord.created_at ASC ";
+                + "ORDER BY ord.created_at " + sortBy;
         } else if (productType.equalsIgnoreCase("GLOBAL")) {
             querySql = "SELECT ord.id, ord.order_number FROM orders ord "
                 + "JOIN store str ON ord.store_id = str.id "
@@ -402,7 +407,7 @@ public class OrderRepository extends Model {
                 + whereCondition
                 + "AND ps.product_id IS NULL "
                 + "GROUP BY ord.id, ord.order_number "
-                + "ORDER BY ord.created_at ASC ";
+                + "ORDER BY ord.created_at " + sortBy;
         } else {
             querySql = "SELECT ord.id, ord.order_number FROM orders ord "
                 + "JOIN store str ON ord.store_id = str.id "
@@ -411,13 +416,13 @@ public class OrderRepository extends Model {
                 + "LEFT JOIN member mbr ON ord.user_id = mbr.id "
                 + whereCondition
                 + "GROUP BY ord.id, ord.order_number "
-                + "ORDER BY ord.created_at ASC ";
+                + "ORDER BY ord.created_at " + sortBy;
         }
 
         return querySql;
     }
 
-    public static Query<Order> queryGetOrderListWithFilter(Long merchantId, Long storeId, String statusOrder, String filter, String productType) {
+    public static Query<Order> queryGetOrderListWithFilter(Long merchantId, Long storeId, String statusOrder, String filter, String productType, String sortBy) {
         String whereCondition;
 
         // default query find by merchant id
@@ -461,7 +466,7 @@ public class OrderRepository extends Model {
         // System.out.println("whereCondition " + whereCondition);
         // System.out.println("statusOrder " + statusOrder);
 
-        String querySql = checkProductType(productType, whereCondition);
+        String querySql = checkProductType(productType, whereCondition, sortBy);
 
         System.out.println("checkProductType " + querySql);
 
@@ -481,13 +486,13 @@ public class OrderRepository extends Model {
         return query;
     }
 
-    public static List<Order> getOrderListWithFilter(Long merchantId, Long storeId, int offset, int limit, String statusOrder, String filter, String productType) {
-        Query<Order> query = queryGetOrderListWithFilter(merchantId, storeId, statusOrder, filter, productType);
+    public static List<Order> getOrderListWithFilter(Long merchantId, Long storeId, int offset, int limit, String statusOrder, String filter, String productType, String sortBy) {
+        Query<Order> query = queryGetOrderListWithFilter(merchantId, storeId, statusOrder, filter, productType, sortBy);
         return query.findPagingList(limit).getPage(offset).getList();
     }
 
-    public static Integer getTotalOrderListWithFilter(Long merchantId, Long storeId, String statusOrder, String filter, String productType) {
-        Query<Order> query = queryGetOrderListWithFilter(merchantId, storeId, statusOrder, filter, productType);
+    public static Integer getTotalOrderListWithFilter(Long merchantId, Long storeId, String statusOrder, String filter, String productType, String sortBy) {
+        Query<Order> query = queryGetOrderListWithFilter(merchantId, storeId, statusOrder, filter, productType, sortBy);
         return query.findList().size();
     }
 
@@ -547,7 +552,7 @@ public class OrderRepository extends Model {
             }
         }
 
-        String querySql = checkProductType(productType, whereCondition);
+        String querySql = checkProductType(productType, whereCondition, "ASC");
 
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
         return Ebean.find(Order.class).setRawSql(rawSql);

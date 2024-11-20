@@ -45,7 +45,7 @@ public class OrderController extends BaseController {
         if (actor != null) {
             String message;
             Query<SalesOrderSeller> query = SalesOrderSeller.find.where().eq("merchant", actor).eq("t0.is_deleted", false)
-            		.ne("salesOrder.status", SalesOrder.ORDER_STATUS_CHECKOUT).orderBy("t0.id DESC");
+            		.ne("salesOrder.status", SalesOrder.ORDER_STATUS_CHECKOUT).orderBy("t0.id ASC");
             BaseResponse<SalesOrderSeller> responseIndex;
             try {
                 responseIndex = SalesOrderSeller.getDataMerchant(query, type, sort, filter, offset, limit);

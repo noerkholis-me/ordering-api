@@ -631,7 +631,7 @@ GET         /merchant/finance/transaction/active-balance                 control
 GET			/merchant/finance/withdraw/success/:reqNum				controllers.finance.FinanceWithdrawController.callbackWithdrawSuccess(reqNum: String)
 
 # ORDER LIST
-GET         /merchant/orders/list                 controllers.order.OrderMerchantController.getOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="", filter:String?="", product_type:String  ?= "ALL")
+GET         /merchant/orders/list                 controllers.order.OrderMerchantController.getOrderList(store_id:Long ?= 0, offset:Int ?= 0, limit:Int ?= 10, status_order: String?="", filter:String?="", product_type:String  ?= "ALL", sortBy: String?="")
 GET         /orders/status                       controllers.order.OrderMerchantController.statusOrderMQ(order_number:String ?= "")
 # UPDATE PROFILE
 PUT         /merchant/update/profile              controllers.users.UpdateProfileController.updateMerchantData()
