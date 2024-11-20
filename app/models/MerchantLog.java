@@ -34,6 +34,7 @@ public class MerchantLog extends BaseModel {
     public static final String DEV_TYPE_ANDROID = "ANDROID";
     public static final String DEV_TYPE_MINI_POS = "MINIPOS";
     public static final String DEV_TYPE_KITCHEN = "KITCHEN";
+    public static final String DEV_TYPE_WAITERS = "WAITERS";
 
     @JsonProperty("member_type")
     public String memberType;
@@ -112,6 +113,22 @@ public class MerchantLog extends BaseModel {
                         return null;
                     }
                 }
+            } else if (deviceType.equalsIgnoreCase(DEV_TYPE_WAITERS)) {
+                if (userType) {
+                    List<RoleMerchant> roleMerchant = RoleMerchantRepository.findByMerchantId(member);
+                    if (!roleMerchant.isEmpty() && roleMerchant.stream().findFirst().get().isWaiters()) {
+                        log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
+                    } else {
+                        return null;
+                    }
+                } else {
+                    RoleMerchant roleMerchant = RoleMerchantRepository.find.where().eq("id", userMerchant.getRole().id).findUnique();
+                    if (roleMerchant != null && roleMerchant.isWaiters()) {
+                        log.expiredDate = new DateTime(new Date()).plusDays(1).toDate();
+                    } else {
+                        return null;
+                    }
+                }
             } else {
                 return null;
             }
@@ -180,6 +197,7 @@ public class MerchantLog extends BaseModel {
                 || (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_MINI_POS) && (apiKey.equalsIgnoreCase(keyMiniPos) 
                 || apiKey.equalsIgnoreCase(keyWeb)))
                 || (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_KITCHEN) && apiKey.equalsIgnoreCase(keyMiniPos))
+                || (log.deviceType.equalsIgnoreCase(MerchantLog.DEV_TYPE_WAITERS) && apiKey.equalsIgnoreCase(keyMiniPos))
             )) {
             if (today.before(log.expiredDate)) {
                 return log;
