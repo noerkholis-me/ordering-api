@@ -25,5 +25,7 @@ public class RoleMerchantRequest {
     private Boolean isCashier;
     @JsonProperty("is_kitchen")
     private Boolean isKitchen = false;
+    @JsonProperty("is_waiters")
+    private Boolean isWaiters = false;
     private List<FeatureAssignRequest> features;
 }

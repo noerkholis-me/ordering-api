@@ -39,6 +39,11 @@ public class RoleMerchant extends BaseModel {
     @Getter @Setter
     @Column(name = "is_kitchen")
     public boolean isKitchen;
+    
+    @JsonProperty("is_waiters")
+    @Getter @Setter
+    @Column(name = "is_waiters")
+    public boolean isWaiters;
 
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "merchant_id", referencedColumnName = "id")

@@ -70,6 +70,7 @@ import java.util.Optional;
 
 import static models.MerchantLog.DEV_TYPE_KITCHEN;
 import static models.MerchantLog.DEV_TYPE_MINI_POS;
+import static models.MerchantLog.DEV_TYPE_WAITERS;
 
 /**
  * Created by hendriksaragih on 2/28/17.
@@ -138,6 +139,11 @@ public class SessionsController extends BaseController {
                                 response.setBaseResponse(0, 0, 0, "Anda Tidak Memiliki Hak Akses Ke Kitchen, Silahkan Hubungi Admin", null);
                                 return forbidden(Json.toJson(response));
                             }
+                            
+                            if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_WAITERS) || log != null && deviceType.equalsIgnoreCase(DEV_TYPE_WAITERS)){
+                                response.setBaseResponse(0, 0, 0, "Anda Tidak Memiliki Hak Akses Ke Waiters, Silahkan Hubungi Admin", null);
+                                return forbidden(Json.toJson(response));
+                            }
 
                              if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_MINI_POS) || log != null && deviceType.equalsIgnoreCase(DEV_TYPE_MINI_POS)){
                                  response.setBaseResponse(0, 0, 0, "Akun Anda sudah tercatat sebagai Superadmin Marketplace, silahkan mendaftarkan akun PoS menggunakan email lain.", null);
@@ -177,6 +183,9 @@ public class SessionsController extends BaseController {
                                 return forbidden(Json.toJson(response));
                             } else if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_KITCHEN)){
                                 response.setBaseResponse(0, 0, 0, "Anda Tidak Memiliki Hak Akses Ke Kitchen, Silahkan hubungi administrator.", null);
+                                return forbidden(Json.toJson(response));
+                            } else if (log == null && deviceType.equalsIgnoreCase(DEV_TYPE_WAITERS)){
+                                response.setBaseResponse(0, 0, 0, "Anda Tidak Memiliki Hak Akses Ke Waiters, Silahkan hubungi administrator.", null);
                                 return forbidden(Json.toJson(response));
                             } else if (log == null) {
                                 response.setBaseResponse(0, 0, 0, "User tidak terdaftar", null);
