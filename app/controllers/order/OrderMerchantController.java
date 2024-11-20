@@ -65,13 +65,13 @@ public class OrderMerchantController extends BaseController {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static BaseResponse response = new BaseResponse();
 
-    public static Result getOrderList(Long storeId, int offset, int limit, String statusOrder, String filter, String productType) throws Exception {
+    public static Result getOrderList(Long storeId, int offset, int limit, String statusOrder, String filter, String productType, String sortBy) throws Exception {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
                 System.out.println("MERCHANT ID : "+merchant.id);
-                int totalData = OrderRepository.getTotalOrderListWithFilter(merchant.id, storeId, statusOrder, filter, productType);
-                List<Order> orders = OrderRepository.getOrderListWithFilter(merchant.id, storeId, offset, limit, statusOrder, filter, productType);
+                int totalData = OrderRepository.getTotalOrderListWithFilter(merchant.id, storeId, statusOrder, filter, productType, sortBy);
+                List<Order> orders = OrderRepository.getOrderListWithFilter(merchant.id, storeId, offset, limit, statusOrder, filter, productType, sortBy);
                 List<OrderList> orderLists = new ArrayList<>();
 
                 // check store id --> mandatory
