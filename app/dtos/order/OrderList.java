@@ -16,6 +16,7 @@ import models.transaction.OrderDetail;
 import models.transaction.OrderDetailAddOn;
 import models.transaction.OrderDetailStatus;
 import models.transaction.OrderPayment;
+import repository.StoreRepository;
 import repository.UserMerchantRepository;
 import utils.BigDecimalSerialize;
 
@@ -140,21 +141,24 @@ public class OrderList {
         this.setTableName(order.getTableName());
         this.setTableId(order.getTable_id());
 
+        Store store = StoreRepository.findByStoreId(order.getStore().id);
+
+        String storeName = store.getStoreName() != null ? store.getStoreName() : "toko";
+        
         if (order.getMember() != null) {
             Member member = order.getMember();
-            this.setCustomerName(member.fullName != null ? member.fullName : "GENERAL CUSTOMER (" + order.getStore().storeName + ")");
+            this.setCustomerName(member.fullName != null ? member.fullName : "GENERAL CUSTOMER (" + storeName + ")");
         } else {
-            this.setCustomerName("GENERAL CUSTOMER (" + order.getStore().storeName + ")");
+            this.setCustomerName("GENERAL CUSTOMER (" + storeName + ")");
         }
 
         if (order.getUserMerchant() != null) {
             UserMerchant cashier = UserMerchantRepository.find.byId(order.getUserMerchant().id);
-            this.setCashierName(cashier.fullName != null && !cashier.fullName.equals("") ? cashier.fullName : "GENERAL CASHIER (" + order.getStore().storeName + ")");
+            this.setCashierName(cashier.fullName != null && !cashier.fullName.equals("") ? cashier.fullName : "GENERAL CASHIER (" + storeName + ")");
         } else {
-            this.setCashierName("GENERAL CASHIER (" + order.getStore().storeName + ")");
+            this.setCashierName("GENERAL CASHIER (" + storeName + ")");
         }
 
-        Store store = order.getStore();
         this.setMerchantName(store != null ? store.getMerchant().name : null);
 
         this.setCustomerPhone(order.getPhoneNumber());
