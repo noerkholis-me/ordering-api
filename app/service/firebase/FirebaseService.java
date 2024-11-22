@@ -143,6 +143,7 @@ public class FirebaseService {
     
     //TODO custom method
     public void sendFirebaseNotifOrderToStore(Order orderData) {
+			System.out.println("Send Firebase Notif Order To Store");
     	try {
     		String storeCode = orderData.getStore().getStoreCode();
     		String title = "Pesanan Baru";
@@ -153,6 +154,7 @@ public class FirebaseService {
         	FirebaseRequest request = buildFirebaseRequest(to, title, message, data);
         	sendPushNotif(request);
     	} catch (Exception e) {
+				System.out.println("Firebase ERROR : " +e.getMessage());
     		logger.error("Firebase ERROR : " +e.getMessage());
     	}
     }
