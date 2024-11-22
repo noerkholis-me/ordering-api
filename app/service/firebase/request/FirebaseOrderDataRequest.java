@@ -46,7 +46,9 @@ public class FirebaseOrderDataRequest {
 
   public FirebaseOrderDataRequest(Order order) {
     OrderPayment orderPayment = order.getOrderPayment();
-    this.setPaymentDate(orderPayment.getPaymentDate());
+    if (orderPayment != null) this.setPaymentDate(orderPayment.getPaymentDate());
+    else this.setPaymentDate(new Date());
+    
     this.setOrderNumber(order.getOrderNumber());
     this.setTableId(order.getTable_id() != null ? order.getTable_id().toString() : "");
     this.setTableName(order.getTableName() != null ? order.getTableName() : "");
