@@ -20,6 +20,7 @@ import controllers.store.StoreAccessController;
 import models.transaction.Order;
 import play.Logger;
 import play.Play;
+import play.libs.Json;
 import service.firebase.request.FirebaseDataRequest;
 import service.firebase.request.FirebaseNotificationRequest;
 import service.firebase.request.FirebaseOrderDataRequest;
@@ -145,6 +146,7 @@ public class FirebaseService {
     public void sendFirebaseNotifOrderToStore(Order orderData) {
 			System.out.println("Send Firebase Notif Order To Store");
     	try {
+				System.out.println("orderData : " + orderData);
     		String storeCode = orderData.getStore().getStoreCode();
     		String title = "Pesanan Baru";
     		String message = "Pesanan baru atas nama " + orderData.getMemberName() + ", dengan kode pesanan " + orderData.getOrderNumber();
