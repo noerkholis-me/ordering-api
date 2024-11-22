@@ -536,6 +536,11 @@ public class CheckoutOrderController extends BaseController {
                 order.setTotalPrice(orderRequest.getTotalPrice());
                 order.update();
 
+                System.out.println("Store Merchant : " + store.merchant);
+                System.out.println("Device Type : " + orderRequest.getDeviceType());
+
+                System.out.print("Payment response : " + orderRequest.getPaymentDetailResponse().getPaymentChannel());
+
                 // CHECK USAGE PAYMENT
                 MerchantPayment mPayment = MerchantPayment.findPayment.where().eq("merchant", store.merchant).eq("t0.device", orderRequest.getDeviceType()).eq("paymentMethod.paymentCode", orderRequest.getPaymentDetailResponse().getPaymentChannel()).findUnique();
                 System.out.print("Payload Merchant Payment: ");
@@ -774,7 +779,11 @@ public class CheckoutOrderController extends BaseController {
                     orderTransactionResponse.setMetadata(null);
 
                     
+
+                    System.out.println("payment type : " + mPayment.getTypePayment());
+
                     if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
+                        System.out.println("direct payment");
                     	FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order);
                     }
 
@@ -936,7 +945,8 @@ public class CheckoutOrderController extends BaseController {
                         }
 
                         if ("CLOSED".equals(statusRequest.getStatusOrder())) {
-                        System.out.println("ORDER CLOSED STATUS");
+                            System.out.println("ORDER CLOSED STATUS");
+                            FirebaseService.getInstance().sendFirebaseNotifOrderToStore(orderData.get());
                             Order order = orderData.get();
                             
                             addLoyaltyPoint(order);
