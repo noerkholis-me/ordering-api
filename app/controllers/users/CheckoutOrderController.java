@@ -936,7 +936,8 @@ public class CheckoutOrderController extends BaseController {
                         }
 
                         if ("CLOSED".equals(statusRequest.getStatusOrder())) {
-                        System.out.println("ORDER CLOSED STATUS");
+                            System.out.println("ORDER CLOSED STATUS");
+                            FirebaseService.getInstance().sendFirebaseNotifOrderToStore(orderData.get());
                             Order order = orderData.get();
                             
                             addLoyaltyPoint(order);
