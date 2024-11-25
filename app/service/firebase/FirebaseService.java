@@ -146,7 +146,6 @@ public class FirebaseService {
     public void sendFirebaseNotifOrderToStore(Order orderData) {
 			System.out.println("Send Firebase Notif Order To Store");
     	try {
-				System.out.println("orderData : " + orderData);
 				System.out.println("storeCode : " + orderData.getStore().getStoreCode());
     		String storeCode = orderData.getStore().getStoreCode();
     		String title = "Pesanan Baru";

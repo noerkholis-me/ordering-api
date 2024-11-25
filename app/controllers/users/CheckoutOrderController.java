@@ -784,7 +784,6 @@ public class CheckoutOrderController extends BaseController {
 
                     if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
                         System.out.println("direct payment");
-                        System.out.println("Order Controller : " + order);
                     	FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order);
                     }
 
