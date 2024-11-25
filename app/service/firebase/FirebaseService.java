@@ -106,7 +106,7 @@ public class FirebaseService {
 		public String buildStatus(String status) {
 			String result = null;
 			switch (status) {
-				case "CLOSED":
+				case "DELIVERY":
 					result = "Selesai";
 					break;
 				case "NEW_ORDER":
@@ -170,7 +170,17 @@ public class FirebaseService {
 				System.out.println("orderData.getStatus() : " + orderData.getStatus());
 				
     		String title = "Pesanan " + status;
-    		String message = "Pesanan " + status +  " atas nama " + orderData.getMemberName() + ", dengan kode pesanan " + orderData.getOrderNumber();
+				StringBuilder messageBuilder = new StringBuilder("Pesanan");
+				if (!"Selesai".equals(status)) {
+					messageBuilder.append(" baru");
+				} 
+				messageBuilder.append(" atas nama ").append(orderData.getMemberName())
+					.append(", dengan kode pesanan ").append(orderData.getOrderNumber());
+				if("Selesai".equals(status)) {
+					messageBuilder.append(" telah selesai dihidangkan!");
+				}
+				String message = messageBuilder.toString();
+
 
     		String to = "store" + storeCode;
 				System.out.println("memberName : " + orderData.getMemberName());
