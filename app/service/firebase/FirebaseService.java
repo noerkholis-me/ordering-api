@@ -102,6 +102,22 @@ public class FirebaseService {
 			FirebaseNotificationRequest notification = new FirebaseNotificationRequest(message, title);
 			return new FirebaseRequest(to, notification, order);
     }
+
+		public String buildStatus(String status) {
+			String result = null;
+			switch (status) {
+				case "CLOSED":
+					result = "Selesai";
+					break;
+				case "NEW_ORDER":
+					result = "Baru";
+					break;
+				default:
+					result = null;
+					break;
+			}
+			return result;
+		}
     
     public void sendPushNotif(FirebaseRequest request) throws Exception {
 			// obtain OAuth 2.0 access token
@@ -148,9 +164,14 @@ public class FirebaseService {
     	try {
 				System.out.println("storeCode : " + orderData.getStore().getStoreCode());
     		String storeCode = orderData.getStore().getStoreCode();
-				String status = orderData.getStatus() == "CLOSED" ? "Selesai" : orderData.getStatus() == "NEW_ORDER" ? "Baru" : null ;
+
+				String status = buildStatus(orderData.getStatus());
+
+				System.out.println("orderData.getStatus() : " + orderData.getStatus());
+				
     		String title = "Pesanan " + status;
-    		String message = "Pesanan" + status +  "atas nama " + orderData.getMemberName() + ", dengan kode pesanan " + orderData.getOrderNumber();
+    		String message = "Pesanan " + status +  " atas nama " + orderData.getMemberName() + ", dengan kode pesanan " + orderData.getOrderNumber();
+
     		String to = "store" + storeCode;
 				System.out.println("memberName : " + orderData.getMemberName());
 				System.out.println("orderNumber : " + orderData.getOrderNumber());
