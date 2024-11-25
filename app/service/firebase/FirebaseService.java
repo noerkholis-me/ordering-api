@@ -148,11 +148,13 @@ public class FirebaseService {
     	try {
 				System.out.println("storeCode : " + orderData.getStore().getStoreCode());
     		String storeCode = orderData.getStore().getStoreCode();
-    		String title = "Pesanan Baru";
-    		String message = "Pesanan baru atas nama " + orderData.getMemberName() + ", dengan kode pesanan " + orderData.getOrderNumber();
+				String status = orderData.getStatus() == "CLOSED" ? "Selesai" : orderData.getStatus() == "NEW_ORDER" ? "Baru" : null ;
+    		String title = "Pesanan " + status;
+    		String message = "Pesanan" + status +  "atas nama " + orderData.getMemberName() + ", dengan kode pesanan " + orderData.getOrderNumber();
     		String to = "store" + storeCode;
 				System.out.println("memberName : " + orderData.getMemberName());
 				System.out.println("orderNumber : " + orderData.getOrderNumber());
+				System.out.println("message : " + message);
 				FirebaseOrderDataRequest data = new FirebaseOrderDataRequest(orderData);
 				System.out.println("to : " + to);
         	FirebaseRequest request = buildFirebaseRequest(to, title, message, data);
