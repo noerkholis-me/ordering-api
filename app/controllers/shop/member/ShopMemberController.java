@@ -348,9 +348,8 @@ public class ShopMemberController extends BaseController {
                     break;
             }
 
-            String storeName = order.get().getStore().getStoreName();
-            String storeNamTemp = storeName.replaceAll("\\s","").toLowerCase() + "-1";
-            String url = storeNamTemp + "/check-order/detail/" + status + "?order=" + orderNumber;
+            String storeAlias = order.get().getStore().getStoreAlias();
+            String url = storeAlias + "/check-order/detail/" + status + "?order=" + orderNumber;
 
             System.out.println("url : " + url);
 
