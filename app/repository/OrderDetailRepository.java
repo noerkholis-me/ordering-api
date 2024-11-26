@@ -1,5 +1,6 @@
 package repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import models.transaction.Order;
@@ -14,5 +15,9 @@ public class OrderDetailRepository extends Model {
   // Added method to find OrderDetail by ID
   public static Optional<OrderDetail> findById(Long id) {
     return Optional.ofNullable(find.byId(id));
+  }
+
+  public static List<OrderDetail> findByOrderId(Long orderId) {
+    return find.where().eq("order.id", orderId).findList(); // Return a list of OrderDetail
   }
 }
