@@ -181,7 +181,6 @@ public class FirebaseService {
 				}
 				String message = messageBuilder.toString();
 
-
     		String to = "store" + storeCode;
 				System.out.println("memberName : " + orderData.getMemberName());
 				System.out.println("orderNumber : " + orderData.getOrderNumber());
@@ -202,8 +201,7 @@ public class FirebaseService {
 				throw new IllegalStateException("FirebaseApp is not initialized.");
 		}
 			try {
-				String storeName = order.getStore().getStoreName();
-				String storeNamTemp = storeName.replaceAll("\\s","").toLowerCase() + "-1";
+				String storeAlias = order.getStore().getStoreAlias();
 				String orderNumber = order.getOrderNumber();
 
 				String status = order.getStatus();
@@ -225,7 +223,7 @@ public class FirebaseService {
 							break;
 			}
 
-				String url = frontedOrderingURL + storeNamTemp + "/check-order/detail/" + status + "?order=" + orderNumber;
+				String url = frontedOrderingURL + storeAlias + "/check-order/detail/" + status + "?order=" + orderNumber;
 
 				System.out.println("url : " + url);
 
