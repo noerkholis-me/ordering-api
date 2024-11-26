@@ -1,7 +1,9 @@
 package service.firebase.request;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -16,6 +18,8 @@ import lombok.Builder;
 import models.transaction.Order;
 import models.transaction.OrderDetail;
 import models.transaction.OrderPayment;
+
+import repository.OrderDetailRepository;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -52,8 +56,8 @@ public class FirebaseOrderDataRequest {
     this.setOrderNumber(order.getOrderNumber());
     this.setTableId(order.getTable_id() != null ? order.getTable_id().toString() : "");
     this.setTableName(order.getTableName() != null ? order.getTableName() : "");
-    this.setOrderType(order.getOrderType());
-    this.setDeviceType(order.getDeviceType());
+    this.setOrderType(order.getOrderType() != null ? order.getOrderType() : "");
+    this.setDeviceType(order.getDeviceType() != null ? order.getDeviceType() : "");
     // this.setProductOrderDetail(
     //   order.getOrderDetails()
     //   .stream()
@@ -64,13 +68,24 @@ public class FirebaseOrderDataRequest {
 
     try {
       ObjectMapper objectMapper = new ObjectMapper();
+      System.out.println("order.getOrderDetails() id : " + order.getOrderDetails());
+      List<OrderDetail> orderDetail = OrderDetailRepository.findByOrderId(order.id);
+      // this.productOrderDetail = objectMapper.writeValueAsString(
+      //     orderDetail
+      //         .stream()
+      //         .map(ProductOrderDetail::new)
+      //         .collect(Collectors.toList())
+      // );
+
       this.productOrderDetail = objectMapper.writeValueAsString(
-          order.getOrderDetails()
+        orderDetail
               .stream()
               .map(ProductOrderDetail::new)
               .collect(Collectors.toList())
       );
+      
     } catch (Exception e) {
+        System.out.println("Exception : " + e.getMessage());
         // Handle the exception (e.g., log it)
         this.productOrderDetail = "[]"; // Default to an empty JSON array if serialization fails
     }
