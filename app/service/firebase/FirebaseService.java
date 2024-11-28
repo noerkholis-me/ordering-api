@@ -233,6 +233,8 @@ public class FirebaseService {
 									.setToken(device_token)
 									.setNotification(notification)
 									.putData("url", url)
+									.putData("title", title)
+									.putData("body", body)
 									.build();
 
 				System.out.println("Sending message: " + message);
