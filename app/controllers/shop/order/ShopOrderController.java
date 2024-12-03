@@ -679,6 +679,8 @@ public class ShopOrderController extends BaseController {
                         member.update();
                     }
 
+                    FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order);
+
                     response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
                     return ok(Json.toJson(response));
                 }
@@ -764,9 +766,9 @@ public class ShopOrderController extends BaseController {
                 orderTransactionResponse.setTotalPrice(BigDecimal.valueOf(jsonNode.get("total_price").asDouble()));
 
 
-                if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
+                // if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
                     FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order);
-                }
+                // }
 
                 if (order.getDeviceType().equalsIgnoreCase("MINIPOS")) {
                     if (!orderPayment.getPaymentType().equalsIgnoreCase("virtual_account") || !orderPayment.getPaymentType().equalsIgnoreCase("qr_code")) {
