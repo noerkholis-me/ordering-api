@@ -679,8 +679,6 @@ public class ShopOrderController extends BaseController {
                         member.update();
                     }
 
-                    FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order);
-
                     response.setBaseResponse(1, offset, 1, success, orderTransactionResponse);
                     return ok(Json.toJson(response));
                 }
