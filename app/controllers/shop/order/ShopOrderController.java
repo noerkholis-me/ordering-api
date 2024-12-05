@@ -747,8 +747,10 @@ public class ShopOrderController extends BaseController {
                 orderTransactionResponse.setOrderNumber(order.getOrderNumber());
 
                 if (orderRequest.getOrderType().equalsIgnoreCase("DINE IN")) {
-                    orderTransactionResponse.setTableId(order.getTableMerchant().id);
-                    orderTransactionResponse.setTableName(order.getTableName());
+                    if (order.getTableMerchant() != null) {
+                        orderTransactionResponse.setTableId(order.getTableMerchant().id);
+                        orderTransactionResponse.setTableName(order.getTableName());
+                    }
                 }
 
                 orderTransactionResponse.setInvoiceNumber(orderPayment.getInvoiceNo());
@@ -764,9 +766,9 @@ public class ShopOrderController extends BaseController {
                 orderTransactionResponse.setTotalPrice(BigDecimal.valueOf(jsonNode.get("total_price").asDouble()));
 
 
-                // if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
+                if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
                     FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order);
-                // }
+                }
 
                 if (order.getDeviceType().equalsIgnoreCase("MINIPOS")) {
                     if (!orderPayment.getPaymentType().equalsIgnoreCase("virtual_account") || !orderPayment.getPaymentType().equalsIgnoreCase("qr_code")) {
