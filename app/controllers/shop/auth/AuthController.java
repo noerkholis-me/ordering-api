@@ -26,8 +26,8 @@ public class AuthController extends BaseController {
 
 		if (authority == 200 || authority == 203) {
 			JsonNode json = request().body().asJson();
-			String phone = json.get("phone").asText().toLowerCase();
-			String email = json.get("email").asText();
+			String phone = json.get("phone") != null ? json.get("phone").asText().toLowerCase():null;
+			String email = json.get("email") != null ? json.get("email").asText():null;
 			Long merchantId = json.get("merchant_id").asLong();
 
 			if ((email == null && email == "") || (phone == null && phone == "")) {
