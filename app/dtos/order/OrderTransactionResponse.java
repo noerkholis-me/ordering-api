@@ -46,6 +46,11 @@ public class OrderTransactionResponse {
     @JsonProperty("loyalty_point")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal loyaltyPoint;
+    @JsonProperty("used_loyalty_point")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal usedLoyaltyPoint;
+    @JsonProperty("is_used_loyalty_point")
+    private Boolean isUsedLoyaltyPoint;
     @JsonProperty("status")
     private String status;
     @JsonProperty("payment_method")
