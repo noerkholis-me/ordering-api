@@ -29,7 +29,7 @@ libraryDependencies ++= Seq(
   "org.json" % "json" % "20210307",
   "com.google.auth" % "google-auth-library-oauth2-http" % "1.19.0",
   "org.apache.httpcomponents" % "httpasyncclient" % "4.1.1",
-  ("com.clever-age" % "play2-elasticsearch" % "2.1-SNAPSHOT")
+  ("com.clever-age" % "play2-elasticsearch" % "1.4-SNAPSHOT")
           .exclude("com.typesafe.play", "play-functional_2.4.6")
           .exclude("com.typesafe.akka", "akka-actor_2.10")
           .exclude("com.typesafe.play", "play-json_2.10")
