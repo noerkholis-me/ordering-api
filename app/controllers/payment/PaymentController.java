@@ -170,18 +170,18 @@ public class PaymentController extends BaseController {
                 }
                 
                 if(Boolean.parseBoolean(toAdmin)) {
-                    if (order.get().getMember() != null) {
-                        EmailService.handleCallbackAndSendEmail(order.get(), true);
-                    }
+                    // if (order.get().getMember() != null) {
+                    //     EmailService.handleCallbackAndSendEmail(order.get(), true);
+                    // }
                     
                     FirebaseService.getInstance().sendFirebaseNotifOrderToStore(order.get());
                     
                     response.setBaseResponse(1, 0, 0, success, "SENT");
                     return ok(Json.toJson(response));
                 } else {
-                    if (order.get().getMember() != null) {
-                        EmailService.handleCallbackAndSendEmail(order.get(), false);
-                    }
+                    // if (order.get().getMember() != null) {
+                    //     EmailService.handleCallbackAndSendEmail(order.get(), false);
+                    // }
                     
                     response.setBaseResponse(1, 0, 0, success, "SENT");
                     return ok(Json.toJson(response));
