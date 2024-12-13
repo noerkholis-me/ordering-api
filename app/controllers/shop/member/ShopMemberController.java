@@ -324,9 +324,9 @@ public class ShopMemberController extends BaseController {
 
             
             System.out.println("deviceToken : " + deviceToken);
-            if (deviceToken == null || deviceToken.isEmpty() || deviceToken == "") {
-                throw new Exception("device token cannot be null");
-            }
+            // if (deviceToken == null || deviceToken.isEmpty() || deviceToken == "") {
+            //     throw new Exception("device token cannot be null");
+            // }
 
             Optional<Order> order = OrderRepository.findByOrderNumber(orderNumber);
 
