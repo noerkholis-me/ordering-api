@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import models.Member;
+import models.ProductRatings;
 import models.Store;
 import models.UserMerchant;
 import models.merchant.ProductMerchantDetail;
@@ -18,6 +19,7 @@ import models.transaction.OrderDetailStatus;
 import models.transaction.OrderPayment;
 import repository.ProductMerchantDetailRepository;
 import repository.UserMerchantRepository;
+import repository.ratings.ProductRatingRepository;
 import utils.BigDecimalSerialize;
 
 import java.math.BigDecimal;
@@ -136,14 +138,18 @@ public class ShopMemberOrderDetail {
     public ShopMemberOrderDetail(Order order) {
         OrderPayment orderPayment = order.getOrderPayment();
         this.setInvoiceNumber(orderPayment.getInvoiceNo());
+        this.setDeliveryFee(orderPayment.getDeliveryFee());
+        this.setServicePrice(orderPayment.getServicePrice());
         this.setOrderNumber(order.getOrderNumber());
         this.setDeviceType(order.getDeviceType());
         this.setTableName(order.getTableName());
         this.setTableId(order.getTable_id());
+        this.setDestinationAddress(order.getDestinationAddress());
 
         if (order.getMember() != null) {
             Member member = order.getMember();
             this.setCustomerName(member.fullName != null ? member.fullName : "GENERAL CUSTOMER (" + order.getStore().storeName + ")");
+            this.setCustomerEmail(member.email);
         } else {
             this.setCustomerName("GENERAL CUSTOMER (" + order.getStore().storeName + ")");
         }
@@ -155,19 +161,35 @@ public class ShopMemberOrderDetail {
             this.setCashierName("GENERAL CASHIER (" + order.getStore().storeName + ")");
         }
 
+        // get rating
+        List<ProductRatings> productRatings = ProductRatingRepository.findByProductRating(order.getOrderNumber());
+
+        if (productRatings.isEmpty() || productRatings.size() == 0) {
+            this.setIsRated(false);
+        } else {
+            this.setIsRated(true);
+        }
+
         Store store = order.getStore();
         this.setMerchantName(store != null ? store.getMerchant().name : null);
 
+        this.setMerchantAddress(store.getMerchant().address != null || store.getMerchant().address != "" ? store.getMerchant().address : null);
+        this.setSubtotal(order.getSubTotal());
         this.setCustomerPhone(order.getPhoneNumber());
         this.setTotalAmount(order.getTotalPrice());
         this.setOrderType(order.getOrderType());
         this.setOrderQueue(order.getOrderQueue());
         this.setStatusOrder(order.getStatus());
         this.setStatus(order.getStatus());
+        this.setPaymentStatus(orderPayment.getStatus());
         this.setPaymentType(orderPayment.getPaymentType());
+        this.setBankCode(orderPayment.getBankCode());
         this.setPaymentChannel(orderPayment.getPaymentChannel());
         this.setTotalAmountPayment(orderPayment.getTotalAmount());
+        this.setLoyaltyPoint(order.getTotalLoyaltyUsage());
         this.setPaymentDate(orderPayment.getPaymentDate());
+        this.setDiscountAmount(order.getDiscountAmount());
+        this.setVoucherCode(order.getVoucherCode());
         this.setProductOrderDetail(order.getOrderDetails()
             .stream()
             .map(item -> {
