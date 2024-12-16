@@ -769,9 +769,12 @@ public class ShopOrderController extends BaseController {
                 orderTransactionResponse.setPaymentMethod(orderPayment.getPaymentChannel());
                 orderTransactionResponse.setMetadata(null);
                 orderTransactionResponse.setTotalPrice(BigDecimal.valueOf(jsonNode.get("total_price").asDouble()));
-                orderTransactionResponse.setLoyaltyPoint(member.loyaltyPoint);
-                orderTransactionResponse.setUsedLoyaltyPoint(loyaltyPoint);
-                orderTransactionResponse.setIsUsedLoyaltyPoint(orderRequest.getUseLoyalty());
+                
+                if (member != null) {
+                    orderTransactionResponse.setLoyaltyPoint(member.loyaltyPoint);
+                    orderTransactionResponse.setUsedLoyaltyPoint(loyaltyPoint);
+                    orderTransactionResponse.setIsUsedLoyaltyPoint(orderRequest.getUseLoyalty());
+                }
 
 
                 if (mPayment.getTypePayment().equalsIgnoreCase("DIRECT_PAYMENT")) {
