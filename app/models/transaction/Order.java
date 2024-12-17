@@ -12,6 +12,7 @@ import models.internal.PaymentMethod;
 import models.internal.PaymentMethodConfig;
 import models.merchant.TableMerchant;
 import models.pupoint.PickUpPointMerchant;
+import models.LoyaltyHistory;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -102,6 +103,9 @@ public class Order extends BaseModel {
     @ManyToOne(cascade = { CascadeType.ALL })
     @JoinColumn(name = "table_id", referencedColumnName = "id")
     private TableMerchant tableMerchant;
+
+    @OneToOne(mappedBy = "order")
+    private LoyaltyHistory historyLoyalty;
 
     @javax.persistence.Transient
     public Long table_id;
