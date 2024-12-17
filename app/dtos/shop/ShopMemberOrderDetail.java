@@ -37,9 +37,11 @@ public class ShopMemberOrderDetail {
     private String invoiceNumber;
 
     @JsonProperty("delivery_fee")
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal deliveryFee;
 
     @JsonProperty("service_price")
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal servicePrice;
 
     @JsonProperty("destination_address")
@@ -85,6 +87,10 @@ public class ShopMemberOrderDetail {
 
     @JsonProperty("table_name")
     private String tableName;
+
+    @JsonProperty("sub_total")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal subTotal;
 
     @JsonProperty("order_queue")
     private Integer orderQueue;
@@ -145,6 +151,7 @@ public class ShopMemberOrderDetail {
         this.setTableName(order.getTableName());
         this.setTableId(order.getTable_id());
         this.setDestinationAddress(order.getDestinationAddress());
+        this.setSubtotal(order.getSubTotal());
 
         if (order.getMember() != null) {
             Member member = order.getMember();
