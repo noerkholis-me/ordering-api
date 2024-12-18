@@ -37,4 +37,11 @@ public class OrderPaymentResponse {
     @JsonProperty("payment_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Jakarta")
     private Date paymentDate;
+    @JsonProperty("loyalty_point")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal loyaltyPoint;
+    @JsonProperty("used_loyalty_point")
+    private Integer usedLoyaltyPoint;
+    @JsonProperty("is_used_loyalty_point")
+    private Boolean isUsedLoyaltyPoint;
 }

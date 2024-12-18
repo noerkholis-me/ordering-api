@@ -43,6 +43,7 @@ public class PaymentController extends BaseController {
                 return badRequest(Json.toJson(response));
             }
             OrderPayment getOrderPayment = orderPayment.get();
+            
             OrderPaymentResponse orderPaymentResponse = OrderPaymentResponse.builder()
                     .orderNumber(getOrderPayment.getOrder().getOrderNumber())
                     .tableId(getOrderPayment.getOrder().getTableMerchant() == null ? null : getOrderPayment.getOrder().getTableMerchant().id)
@@ -53,7 +54,11 @@ public class PaymentController extends BaseController {
                     .totalAmount(getOrderPayment.getTotalAmount())
                     .paymentDate(getOrderPayment.getPaymentDate())
                     .queueNumber(getOrderPayment.getOrder().getOrderQueue())
+                    .loyaltyPoint(getOrderPayment.getOrder().getMember().getLoyaltyPoint())
+                    .usedLoyaltyPoint(getOrderPayment.getOrder().getHistoryLoyalty().usedPoint)
+                    .isUsedLoyaltyPoint(getOrderPayment.getOrder().getHistoryLoyalty().usedPoint != null ? true : false)
                     .build();
+
             response.setBaseResponse(1, offset, 1, success, orderPaymentResponse);
             return ok(Json.toJson(response));
         } else if (authority == 403) {

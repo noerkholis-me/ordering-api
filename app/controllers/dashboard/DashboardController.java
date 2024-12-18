@@ -115,7 +115,14 @@ public class DashboardController extends BaseController {
                 Query<FinanceTransaction> financeTransactionQuery = FinanceTransactionRepository.findAllTransactionByMerchantId(merchant.id);
                 List<FinanceTransaction> financeTransactions = FinanceTransactionRepository.findListTransaction(financeTransactionQuery, startDate, endDate, "IN");
                 BigDecimal totalActiveBalance = BigDecimal.ZERO;
+                List<String> preferenceNumberList = new ArrayList<String>();
                 for (FinanceTransaction financeTransaction : financeTransactions) {
+                    if (preferenceNumberList.indexOf(financeTransaction.getReferenceNumber()) > -1) {
+                        System.out.println("preference_number: " + financeTransaction.getReferenceNumber());
+                        continue;
+                    }
+                    
+                    preferenceNumberList.add(financeTransaction.getReferenceNumber());
                     totalActiveBalance = totalActiveBalance.add(financeTransaction.getAmount());
                 }
                 Map<String, Integer> data = new HashMap<>();
