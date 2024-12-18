@@ -97,7 +97,7 @@ deploy_docker_staging:
   only:
     - staging
   tags:
-    new-shared
+    - new-shared
 
 deploy_production:
   stage: deploy_production
