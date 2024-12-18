@@ -23,6 +23,8 @@ import service.PaymentService;
 import service.firebase.FirebaseService;
 
 import javax.swing.text.html.Option;
+
+import java.math.BigDecimal;
 import java.util.Optional;
 
 public class PaymentController extends BaseController {
@@ -44,7 +46,8 @@ public class PaymentController extends BaseController {
             }
             OrderPayment getOrderPayment = orderPayment.get();
             
-            OrderPaymentResponse orderPaymentResponse = OrderPaymentResponse.builder()
+            if (getOrderPayment.getOrder().getMember() != null) {
+                OrderPaymentResponse orderPaymentResponse = OrderPaymentResponse.builder()
                     .orderNumber(getOrderPayment.getOrder().getOrderNumber())
                     .tableId(getOrderPayment.getOrder().getTableMerchant() == null ? null : getOrderPayment.getOrder().getTableMerchant().id)
                     .tableName(getOrderPayment.getOrder().getTableName())
@@ -58,8 +61,26 @@ public class PaymentController extends BaseController {
                     .usedLoyaltyPoint(getOrderPayment.getOrder().getHistoryLoyalty().usedPoint)
                     .isUsedLoyaltyPoint(getOrderPayment.getOrder().getHistoryLoyalty().usedPoint != null ? true : false)
                     .build();
+                response.setBaseResponse(1, offset, 1, success, orderPaymentResponse);
+            }else {
+                OrderPaymentResponse orderPaymentResponse = OrderPaymentResponse.builder()
+                    .orderNumber(getOrderPayment.getOrder().getOrderNumber())
+                    .tableId(getOrderPayment.getOrder().getTableMerchant() == null ? null : getOrderPayment.getOrder().getTableMerchant().id)
+                    .tableName(getOrderPayment.getOrder().getTableName())
+                    .invoiceNo(getOrderPayment.getInvoiceNo())
+                    .status(getOrderPayment.getStatus())
+                    .paymentChannel(getOrderPayment.getPaymentChannel())
+                    .totalAmount(getOrderPayment.getTotalAmount())
+                    .paymentDate(getOrderPayment.getPaymentDate())
+                    .queueNumber(getOrderPayment.getOrder().getOrderQueue())
+                    .loyaltyPoint(new BigDecimal(0))
+                    .usedLoyaltyPoint(0)
+                    .isUsedLoyaltyPoint(false)
+                    .build();
 
-            response.setBaseResponse(1, offset, 1, success, orderPaymentResponse);
+                response.setBaseResponse(1, offset, 1, success, orderPaymentResponse);
+            }
+
             return ok(Json.toJson(response));
         } else if (authority == 403) {
             response.setBaseResponse(0, 0, 0, forbidden, null);
