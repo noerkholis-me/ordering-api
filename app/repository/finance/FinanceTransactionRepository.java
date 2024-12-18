@@ -13,6 +13,7 @@ import play.Logger;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -232,7 +233,22 @@ public class FinanceTransactionRepository extends BaseModel {
         Timestamp startTimestamp = new Timestamp(start.getTime());
         Timestamp endTimestamp = new Timestamp(end.getTime());
         exp.between("t0.date", startTimestamp, endTimestamp);
-        return finance.findList().size();
+        
+        List<FinanceTransaction>financeTransactions = finance.findList();
+        List<String> preferenceNumberList = new ArrayList<String>();
+        Integer totalTransaction = 0;
+
+        for (FinanceTransaction financeTransaction : financeTransactions) {
+            if (preferenceNumberList.indexOf(financeTransaction.getReferenceNumber()) > -1) {
+                System.out.println("preference_number: " + financeTransaction.getReferenceNumber());
+                continue;
+            }
+            
+            preferenceNumberList.add(financeTransaction.getReferenceNumber());
+            totalTransaction++;
+        }
+        
+        return totalTransaction;
     }
 
     public static List<FinanceTransaction> findAllTransactionByDate(String startDate, String endDate) throws Exception {
