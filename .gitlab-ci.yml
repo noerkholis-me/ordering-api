@@ -22,7 +22,7 @@ build_staging:
       git checkout staging && git pull && 
       sdk use java 8.0.352.fx-zulu &&
       sbt clean compile universal:packageBin &&
-      docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net &&
+      docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry.stagingapps.net &&
       docker build -t "${CI_REGISTRY_IMAGE}:latest" . &&
       docker tag "${CI_REGISTRY_IMAGE}:latest" "${CI_REGISTRY_IMAGE}:$CI_BUILD_REF" &&
       docker push "${CI_REGISTRY_IMAGE}:$CI_BUILD_REF" && exit"
@@ -48,7 +48,7 @@ build_prod:
       git checkout prod-do && git pull && 
       sdk use java 8.0.352.fx-zulu &&
       sbt clean compile universal:packageBin &&
-      docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net &&
+      docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry.stagingapps.net &&
       docker build -t "${CI_REGISTRY_IMAGE_PROD}:latest" . &&
       docker tag "${CI_REGISTRY_IMAGE_PROD}:latest" "${CI_REGISTRY_IMAGE_PROD}:$CI_BUILD_REF" &&
       docker push "${CI_REGISTRY_IMAGE_PROD}:$CI_BUILD_REF" && exit"
@@ -70,9 +70,9 @@ deploy_staging:
       if kubectl get secret | grep regcred; then
           echo "already exist"
           kubectl delete secret regcred
-          kubectl create secret docker-registry regcred --docker-server=registry-v2.stagingapps.net --docker-username="${CI_REGISTRY_USER}" --docker-password="${CI_REGISTRY_PASSWORD}" || exit 1
+          kubectl create secret docker-registry regcred --docker-server=registry.stagingapps.net --docker-username="${CI_REGISTRY_USER}" --docker-password="${CI_REGISTRY_PASSWORD}" || exit 1
       else
-         kubectl create secret docker-registry regcred --docker-server=registry-v2.stagingapps.net --docker-username="${CI_REGISTRY_USER}" --docker-password="${CI_REGISTRY_PASSWORD}" || exit 1
+         kubectl create secret docker-registry regcred --docker-server=registry.stagingapps.net --docker-username="${CI_REGISTRY_USER}" --docker-password="${CI_REGISTRY_PASSWORD}" || exit 1
       fi 
     - sed -i "s/__CI_ENVIRONMENT_SLUG__/${CI_ENVIRONMENT_SLUG}/" deployment.yaml service.yaml ingress.yaml
     - sed -i "s/__CI_PROJECT_NAME__/${CI_PROJECT_NAME}/" deployment.yaml service.yaml ingress.yaml pvc.yaml
@@ -92,7 +92,7 @@ deploy_docker_staging:
   script:
     - sed -i "s,_IMAGE:VERSION_,${CI_REGISTRY_IMAGE}:$CI_BUILD_REF," docker-compose.yml
     - scp docker-compose.yml ${USER_STG}@${HOST_STG}:~/app/sandbox-api/
-    - ssh ${USER_STG}@${HOST_STG} docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net
+    - ssh ${USER_STG}@${HOST_STG} docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry.stagingapps.net
     - ssh ${USER_STG}@${HOST_STG} "cd ~/app/sandbox-api && docker compose up -d"
   only:
     - staging
@@ -104,7 +104,7 @@ deploy_production:
   script:
     - sed -i "s,_IMAGE:VERSION_,${CI_REGISTRY_IMAGE_PROD}:$CI_BUILD_REF," docker-compose.yml
     - scp -P 222 docker-compose.yml deploy@188.166.206.252:~/api/
-    - ssh -p 222 deploy@188.166.206.252 docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry-v2.stagingapps.net
+    - ssh -p 222 deploy@188.166.206.252 docker login -u "${CI_REGISTRY_USER}" -p "${CI_REGISTRY_PASSWORD}" registry.stagingapps.net
     - ssh -p 222 deploy@188.166.206.252 "cd api && docker compose up -d"
   only:
     - prod-do
