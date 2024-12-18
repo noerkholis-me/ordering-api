@@ -96,6 +96,8 @@ deploy_docker_staging:
     - ssh ${USER_STG}@${HOST_STG} "cd ~/app/sandbox-api && docker compose up -d"
   only:
     - staging
+  tags:
+    new-shared
 
 deploy_production:
   stage: deploy_production
