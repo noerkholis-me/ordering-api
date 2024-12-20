@@ -86,22 +86,17 @@ public class DashboardPOSController extends BaseController {
 
             List<Order> orders = OrderRepository.findOrdersByRangeToday(orderQuery, cashierHistoryMerchant.get().getStartTime(), new Date());
             Integer totalOrderWaitingPayment = 0;
-            for (Order order : orders) {
-                Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderIdAndStatus(order.id, "PENDING");
-                if (orderPayment.isPresent()) {
-                    totalOrderWaitingPayment = totalOrderWaitingPayment + 1;
-                }
-            }
-            responses.put("total_order_waiting_payment", totalOrderWaitingPayment);
-
-
             Integer totalOrderPaid = 0;
+
             for (Order order : orders) {
-                Optional<OrderPayment> orderPayment = OrderPaymentRepository.findByOrderIdAndStatus(order.id, "PAID");
-                if (orderPayment.isPresent()) {
+                if ("PENDING".equals(order.getOrderPayment().getStatus())) {
+                    totalOrderWaitingPayment = totalOrderWaitingPayment + 1;
+                }else if ("PAID".equals(order.getOrderPayment().getStatus())) {
                     totalOrderPaid = totalOrderPaid + 1;
                 }
             }
+
+            responses.put("total_order_waiting_payment", totalOrderWaitingPayment);
             responses.put("total_order_paid", totalOrderPaid);
 
             Integer totalOrderCancelled = OrderRepository.getTotalOrder(orderQuery, "CANCELLED", cashierHistoryMerchant.get().getStartTime(), new Date());
