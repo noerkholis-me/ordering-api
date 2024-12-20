@@ -105,6 +105,7 @@ public class OrderPosController extends BaseController {
             orderResponse.setOrderNumber(getOrder.getOrderNumber());
             orderResponse.setOrderDate(getOrder.getOrderDate());
             orderResponse.setReferenceNumber(getOrder.getReferenceNumber());
+            orderResponse.setDestinationAddress(getOrder.getDestinationAddress());
             Member member = getOrder.getMember();
             if (member == null) {
                 orderResponse.setCustomerName("-");
