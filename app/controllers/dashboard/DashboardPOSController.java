@@ -79,7 +79,7 @@ public class DashboardPOSController extends BaseController {
 
             Map<String, Integer> responses = new HashMap<>();
 
-            Query<Order> orderQuery = OrderRepository.findAllOrderByUserMerchantIdAndStoreId(userMerchant.id, storeId);
+            Query<Order> orderQuery = OrderRepository.findAllOrderByStoreId2(storeId);
 
             Integer totalOrder = OrderRepository.getTotalOrder(orderQuery, "", cashierHistoryMerchant.get().getStartTime(), new Date());
             responses.put("total_order", totalOrder);
@@ -87,19 +87,20 @@ public class DashboardPOSController extends BaseController {
             List<Order> orders = OrderRepository.findOrdersByRangeToday(orderQuery, cashierHistoryMerchant.get().getStartTime(), new Date());
             Integer totalOrderWaitingPayment = 0;
             Integer totalOrderPaid = 0;
+            Integer totalOrderCancelled = 0;
 
             for (Order order : orders) {
                 if ("PENDING".equals(order.getOrderPayment().getStatus())) {
                     totalOrderWaitingPayment = totalOrderWaitingPayment + 1;
                 }else if ("PAID".equals(order.getOrderPayment().getStatus())) {
                     totalOrderPaid = totalOrderPaid + 1;
+                }else if ("CANCELLED".equals(order.getOrderPayment().getStatus())) {
+                    totalOrderCancelled = totalOrderCancelled + 1;
                 }
             }
 
             responses.put("total_order_waiting_payment", totalOrderWaitingPayment);
             responses.put("total_order_paid", totalOrderPaid);
-
-            Integer totalOrderCancelled = OrderRepository.getTotalOrder(orderQuery, "CANCELLED", cashierHistoryMerchant.get().getStartTime(), new Date());
             responses.put("total_order_cancelled", totalOrderCancelled);
 
             response.setBaseResponse(1, 0, 0, success, responses);
