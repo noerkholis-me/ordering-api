@@ -204,6 +204,17 @@ public class OrderRepository extends Model {
                 .query();
     }
 
+    public static Query<Order> findAllOrderByStoreId2(Long storeId) {
+        return Ebean.find(Order.class)
+                .select("orders.*")
+                .fetch("userMerchant")
+                .fetch("store")
+                .fetch("member")
+                .where()
+                .eq("store.id", storeId)
+                .query();
+    }
+
     public static Query<Order> findAllOrderByMemberIdAndStoreId(Long memberId, Long storeId) {
         return Ebean.find(Order.class)
                 .fetch("store")
