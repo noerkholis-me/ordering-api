@@ -50,6 +50,9 @@ public class OrderDetailPosResponse {
     @JsonProperty("service_fee")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal paymentFeeCustomer;
+    @JsonProperty("delivery_fee")
+    @JsonSerialize(using = BigDecimalSerialize.class)
+    private BigDecimal deliveryFee;
     @JsonProperty("total")
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal total;

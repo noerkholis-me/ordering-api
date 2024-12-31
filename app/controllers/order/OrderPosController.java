@@ -149,6 +149,7 @@ public class OrderPosController extends BaseController {
 
             orderResponse.setSubTotal(getOrder.getSubTotal());
             orderResponse.setTaxPrice(orderPayment.getTaxPrice());
+            orderResponse.setDeliveryFee(orderPayment.getDeliveryFee());
             orderResponse.setTaxPercentage(orderPayment.getTaxPercentage());
             orderResponse.setPaymentFeeOwner(orderPayment.getPaymentFeeOwner());
             orderResponse.setServicePercentage(orderPayment.getServicePercentage());
