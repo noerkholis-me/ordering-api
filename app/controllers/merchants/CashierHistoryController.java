@@ -644,8 +644,6 @@ public class CashierHistoryController extends BaseController {
         Merchant ownUser = checkMerchantAccessAuthorization();
         if (ownUser != null) {
             try {
-                System.out.println("user merchant id >>> ");
-                System.out.println(Json.toJson(ownUser));
                 if (startDate.compareTo(endDate) > 0) {
                         response.setBaseResponse(0, 0, 0, "tanggal awal tidak boleh melebihi tanggal akhir", null);
                         return badRequest(Json.toJson(response));
@@ -680,7 +678,7 @@ public class CashierHistoryController extends BaseController {
                             cashierHistoryMerchant1.getEndTotalAmountCash().toString() : "0");
                     cashierReportResponse.setId(cashierHistoryMerchant1.id);
                     cashierReportResponse.setCashierName(cashierHistoryMerchant1.getUserMerchant().getFullName());
-                    if(cashierHistoryMerchant1.getStore() != null && !cashierHistoryMerchant1.getStore().storeName.isEmpty()){
+                    if(cashierHistoryMerchant1.getStore() != null && cashierHistoryMerchant1.getStore().storeName != null){
                         cashierReportResponse.setStoreName(cashierHistoryMerchant1.getStore().storeName);
                     } else if(cashierHistoryMerchant1.getStore() != null && cashierHistoryMerchant1.getStore().id != null){
                         store = Store.findById(cashierHistoryMerchant1.getStore().id);
