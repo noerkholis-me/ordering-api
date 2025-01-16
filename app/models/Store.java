@@ -4,6 +4,7 @@ import com.avaje.ebean.ExpressionList;
 import com.avaje.ebean.Page;
 import com.avaje.ebean.Query;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hokeba.util.CommonFunction;
 import com.hokeba.util.Constant;
 import dtos.store.StoreRequest;
@@ -137,6 +138,9 @@ public class Store extends BaseModel {
 
     @Column(name = "is_publish")
     public Boolean isPublish;
+
+    @Column(name = "is_new_order")
+    public Boolean isNewOrder;
 
     @javax.persistence.Transient
     public Integer s_rating;

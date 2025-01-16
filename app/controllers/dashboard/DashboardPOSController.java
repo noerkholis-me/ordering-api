@@ -1,8 +1,13 @@
 package controllers.dashboard;
 
+import com.avaje.ebean.Ebean;
 import com.avaje.ebean.Query;
+import com.avaje.ebean.Transaction;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.hokeba.api.BaseResponse;
 import controllers.BaseController;
+import dtos.DashboardPOSResponse;
+import models.Store;
 import models.UserMerchant;
 import models.merchant.CashierHistoryMerchant;
 import models.transaction.Order;
@@ -10,9 +15,11 @@ import models.transaction.OrderPayment;
 import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
+import repository.MerchantRepository;
 import repository.OrderPaymentRepository;
 import repository.OrderRepository;
 import repository.cashierhistory.CashierHistoryMerchantRepository;
+import service.StoreService;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -70,6 +77,11 @@ public class DashboardPOSController extends BaseController {
             response.setBaseResponse(0, 0, 0, unauthorized, null);
             return unauthorized(Json.toJson(response));
         } else {
+            Optional<Store> store = StoreService.findById(storeId);
+            if (!store.isPresent()) {
+                response.setBaseResponse(0, 0, 0, inputParameter + " toko tidak ditemukan", null);
+                return ok(Json.toJson(response));
+            }
 
             Optional<CashierHistoryMerchant> cashierHistoryMerchant = CashierHistoryMerchantRepository.findByUserActiveCashierAndStoreIdOpen(userMerchant.id, storeId);
             if (!cashierHistoryMerchant.isPresent()) {
@@ -77,7 +89,7 @@ public class DashboardPOSController extends BaseController {
                 return ok(Json.toJson(response));
             }
 
-            Map<String, Integer> responses = new HashMap<>();
+            Map<String, Object> responses = new HashMap<>();
 
             Query<Order> orderQuery = OrderRepository.findAllOrderByStoreId2(storeId);
 
@@ -102,11 +114,52 @@ public class DashboardPOSController extends BaseController {
             responses.put("total_order_waiting_payment", totalOrderWaitingPayment);
             responses.put("total_order_paid", totalOrderPaid);
             responses.put("total_order_cancelled", totalOrderCancelled);
+            responses.put("is_new_order", store.get().isNewOrder);
 
             response.setBaseResponse(1, 0, 0, success, responses);
             return ok(Json.toJson(response));
         }
     }
 
+    public static Result changeNewOrderStatus() {
+        JsonNode jsonNode = request().body().asJson();
+        UserMerchant userMerchant = checkUserMerchantAccessAuthorization();
+        if (userMerchant == null) {
+            response.setBaseResponse(0, 0, 0, unauthorized, null);
+            return unauthorized(Json.toJson(response));
+        } else {
+            Transaction txn = Ebean.beginTransaction();
 
+            try {
+                Long storeId = Long.valueOf(jsonNode.get("storeId").toString());
+                Boolean isNewOrder = jsonNode.get("isNewOrder").asBoolean();
+                System.out.println(isNewOrder);
+                Store store = Store.findById(storeId);
+                if (store == null) {
+                    response.setBaseResponse(0, 0, 0, inputParameter + " toko tidak ditemukan", null);
+                    return ok(Json.toJson(response));
+                }
+    
+                store.setIsNewOrder(isNewOrder);
+                store.update();
+                txn.commit();
+
+                DashboardPOSResponse newResponse = new DashboardPOSResponse();
+                newResponse.setId(storeId);
+                newResponse.setIsNewOrder(store.isNewOrder);
+    
+                response.setBaseResponse(1, offset, 1, success, newResponse);
+
+                return ok(Json.toJson(response));
+            }catch (Exception e) {
+                e.printStackTrace();
+                txn.rollback();
+            } finally {
+                txn.end();
+            }
+
+            response.setBaseResponse(0, 0, 0, "ada kesalahan pada saat perubahan status pesanan baru", null);
+            return badRequest(Json.toJson(response));
+        }
+    }
 }

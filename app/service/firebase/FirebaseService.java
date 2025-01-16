@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 
 import controllers.store.StoreAccessController;
+import models.Store;
 import models.transaction.Order;
 import play.Logger;
 import play.Play;
@@ -163,6 +164,7 @@ public class FirebaseService {
 			System.out.println("Send Firebase Notif Order To Store");
     	try {
 				System.out.println("storeCode : " + orderData.getStore().getStoreCode());
+				System.out.println("store Id : " + orderData.getStore().id);
     		String storeCode = orderData.getStore().getStoreCode();
 
 				String status = buildStatus(orderData.getStatus());
@@ -173,6 +175,10 @@ public class FirebaseService {
 				StringBuilder messageBuilder = new StringBuilder("Pesanan");
 				if (!"Selesai".equals(status)) {
 					messageBuilder.append(" baru");
+					Store store = Store.findById(orderData.getStore().id);
+					
+					store.setIsNewOrder(true);
+					store.update();
 				} 
 				messageBuilder.append(" atas nama ").append(orderData.getMemberName())
 					.append(", dengan kode pesanan ").append(orderData.getOrderNumber());
