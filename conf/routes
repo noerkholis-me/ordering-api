@@ -677,6 +677,7 @@ GET         /merchant/cashier-history                      controllers.merchants
 # Dashboard Mini POS
 GET         /pos/:storeId/get-total-cash                        controllers.dashboard.DashboardPOSController.getTotalCashPos(storeId: Long)
 GET         /pos/:storeId/get-order-information                       controllers.dashboard.DashboardPOSController.getOrderInformation(storeId: Long)
+POST         /pos/change-new-order-status                       controllers.dashboard.DashboardPOSController.changeNewOrderStatus()
 GET         /pos/category-list                             controllers.minipos.ProductController.listCategoryMiniPOS()
 GET         /pos/product-list                             controllers.minipos.ProductController.listProductMiniPos(offset:Int ?= 0, limit:Int ?= 10, store_id:Long ?= 0, category_id:Long ?= 0, keyword:String ?= "")
 
