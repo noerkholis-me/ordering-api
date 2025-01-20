@@ -106,6 +106,12 @@ public class OrderPosController extends BaseController {
             orderResponse.setOrderDate(getOrder.getOrderDate());
             orderResponse.setReferenceNumber(getOrder.getReferenceNumber());
             orderResponse.setDestinationAddress(getOrder.getDestinationAddress());
+
+            String longitude = getOrder.getLongLatDestination().split(",")[0];
+            String latitude = getOrder.getLongLatDestination().split(",")[1];
+            orderResponse.setLongDestination(longitude);
+            orderResponse.setLatDestination(latitude);
+            
             Member member = getOrder.getMember();
             if (member == null) {
                 orderResponse.setCustomerName("-");
