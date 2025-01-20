@@ -289,9 +289,12 @@ public class ShopOrderController extends BaseController {
             }
 
             String address = null;
+            String longLat = null;
 
             if (orderType.equalsIgnoreCase("DELIVERY")) {
                 address = orderRequest.getDestinationAddressResponse().getAddress() + ',' + orderRequest.getDestinationAddressResponse().getSubDistrict() + ',' + orderRequest.getDestinationAddressResponse().getDistrict() + ',' + orderRequest.getDestinationAddressResponse().getCity() + ',' + orderRequest.getDestinationAddressResponse().getState() + ' ' + orderRequest.getDestinationAddressResponse().getPostcode();
+
+                longLat = orderRequest.getDestinationAddressResponse().getLongitude() + "," + orderRequest.getDestinationAddressResponse().getLatitude();
             }
 
             // Validate BTM Store Group
@@ -325,6 +328,7 @@ public class ShopOrderController extends BaseController {
             order.setStore(store);
             order.setDeviceType(orderRequest.getDeviceType());
             order.setDestinationAddress(address);
+            order.setLongLatDestination(longLat);
             order.setReferenceNumber(orderRequest.getReferenceNumber());
             order.setDeviceToken(orderRequest.getDeviceToken() != null ? orderRequest.getDeviceToken() : null);
 
