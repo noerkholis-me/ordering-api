@@ -29,6 +29,10 @@ public class OrderDetailPosResponse {
     private String referenceNumber;
     @JsonProperty("destination_address")
     private String destinationAddress;
+    @JsonProperty("long_destination")
+    private String longDestination;
+    @JsonProperty("lat_destination")
+    private String latDestination;
 
     @JsonProperty("product_detail")
     private List<ProductDetailPosResponse> productDetailPosResponses;
