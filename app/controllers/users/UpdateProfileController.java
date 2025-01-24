@@ -158,7 +158,7 @@ public class UpdateProfileController extends BaseController {
                 getMerchantData.update();
                 trx.commit();
 
-                response.setBaseResponse(1, 0, 1, "Berhasil mengupdate data", getMerchantData.id);
+                response.setBaseResponse(1, 0, 1, "Berhasil mengupdate data", getMerchantData);
                 return ok(Json.toJson(response));
 
             } catch (Exception e) {
