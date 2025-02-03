@@ -650,6 +650,7 @@ public class CashierHistoryController extends BaseController {
                 }
                 Query<CashierHistoryMerchant> query = CashierHistoryMerchantRepository.findAllCashierReportByMerchant(ownUser);
                 List<CashierHistoryMerchant> cashierHistoryMerchant = new ArrayList<>();
+                query = query.where().eq("t0.is_active", false).query();
                 Store store = null;
                 if (storeId != null && storeId != 0L) {
                     store = Store.findById(storeId);
