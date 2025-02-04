@@ -570,7 +570,7 @@ public class CashierHistoryController extends BaseController {
                 }
 
 
-                sessionCashierResponse.setIsOpen(Boolean.TRUE);
+                sessionCashierResponse.setIsOpen(cashierHistoryMerchant.get().getIsActive());
                 sessionCashierResponse.setStartTotalAmount(cashierHistoryMerchant.get().getStartTotalAmount());
                 sessionCashierResponse.setEndTotalAmount(cashierHistoryMerchant.get().getEndTotalAmount());
 
