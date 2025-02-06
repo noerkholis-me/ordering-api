@@ -435,5 +435,16 @@ public class UpdateProfileController extends BaseController {
         response.setBaseResponse(0, 0, 0, unauthorized, null);
         return unauthorized(Json.toJson(response));
     }
+    
+    public static Result getProfile() {
+        Merchant ownMerchant = checkMerchantAccessAuthorization();
+        if(ownMerchant != null) {
+            Merchant getMerchantData = Merchant.merchantGetId(ownMerchant.id);
+            response.setBaseResponse(1, 0, 1, "Berhasil mengambil data", getMerchantData);
+            return ok(Json.toJson(response));
+        }
+        response.setBaseResponse(0, 0, 0, unauthorized, null);
+        return unauthorized(Json.toJson(response));
+    }
 
 }
