@@ -477,8 +477,9 @@ public class CashierHistoryController extends BaseController {
         if (ownUser != null) {
             try {
                 System.out.println("merchant id >>> " + ownUser);
-                Query<CashierHistoryMerchant> query = CashierHistoryMerchantRepository.find.where().eq("store.merchant", ownUser).query();
+                Query<CashierHistoryMerchant> query = CashierHistoryMerchantRepository.findAllCashierReportByMerchant(ownUser);
                 List<CashierHistoryMerchant> cashierHistoryMerchant = new ArrayList<>();
+                query = query.where().eq("t0.is_active", false).query();
                 Store store = null;
                 if (storeId != null && storeId != 0L) {
                     store = Store.findById(storeId);
@@ -486,7 +487,7 @@ public class CashierHistoryController extends BaseController {
                         response.setBaseResponse(0, 0, 0, "store tidak ditemukan", null);
                         return badRequest(Json.toJson(response));
                     }
-                    query = CashierHistoryMerchantRepository.findAllCashierReportByMerchantAndStore(query, storeId, ownUser);
+                    query = CashierHistoryMerchantRepository.findAllCashierReportByMerchant(query, storeId, ownUser);
                 }
                 if(startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
                     query = CashierHistoryMerchantRepository.findAllCashierReportByDate(query, startDate, endDate);
@@ -506,7 +507,7 @@ public class CashierHistoryController extends BaseController {
                             cashierHistoryMerchant1.getEndTotalAmountCash().toString() : "0");
                     cashierReportResponse.setId(cashierHistoryMerchant1.id);
                     cashierReportResponse.setCashierName(cashierHistoryMerchant1.getUserMerchant().getFullName());
-                    if(cashierHistoryMerchant1.getStore() != null && !cashierHistoryMerchant1.getStore().storeName.isEmpty()){
+                    if(cashierHistoryMerchant1.getStore() != null && cashierHistoryMerchant1.getStore().storeName != null){
                         cashierReportResponse.setStoreName(cashierHistoryMerchant1.getStore().storeName);
                     } else if(cashierHistoryMerchant1.getStore() != null && cashierHistoryMerchant1.getStore().id != null){
                         store = Store.findById(cashierHistoryMerchant1.getStore().id);
