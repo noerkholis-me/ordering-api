@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import com.utils.Helper;
 
 public class OrderRepository extends Model {
 
@@ -29,6 +30,7 @@ public class OrderRepository extends Model {
             OrderDetailAddOn.class);
     public static Finder<Long, OrderPayment> findOrderPayment = new Finder<Long, OrderPayment>(Long.class,
             OrderPayment.class);
+    public static SimpleDateFormat filterDateFormat = new SimpleDateFormat("dd-MM-yyyy");
 
     public static Optional<Order> findById(Long id) {
         return Optional.ofNullable(find.where().eq("id", id).findUnique());
@@ -494,7 +496,19 @@ public class OrderRepository extends Model {
         exp = exp.ilike("mbr.last_name", "%" + filter + "%");
         exp = exp.ilike("od.product_name", "%" + filter + "%");
         exp = exp.ilike("order_type", "%" + filter + "%");
-        exp = exp.raw("to_char(op.payment_date, 'yyyy-MM-dd') ILIKE '%" + filter + "%'");
+
+        String regEx = "\\d{2}-\\d{2}-\\d{4}";
+        filterDateFormat.setLenient(false);
+        // System.out.println("is date valid? "+Helper.isValidDate(regEx,filterDateFormat,filter));
+        if(Helper.isValidDate(regEx,filterDateFormat,filter)){
+            String year = filter.split("-")[2];
+            String month = filter.split("-")[1];
+            String day = filter.split("-")[0];
+
+            String dateFilter = year+"-"+month+"-"+day;
+            // System.out.println("dateFilter is: "+dateFilter);
+            exp = exp.raw("to_char(op.payment_date, 'yyyy-MM-dd') ILIKE '%" + dateFilter + "%'");
+        }
 
         exp = exp.endJunction();
         query = exp.query();
