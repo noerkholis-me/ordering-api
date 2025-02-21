@@ -492,6 +492,10 @@ public class OrderRepository extends Model {
         exp = exp.ilike("mbr.full_name", "%" + filter + "%");
         exp = exp.ilike("mbr.first_name", "%" + filter + "%");
         exp = exp.ilike("mbr.last_name", "%" + filter + "%");
+        exp = exp.ilike("od.product_name", "%" + filter + "%");
+        exp = exp.ilike("order_type", "%" + filter + "%");
+        exp = exp.raw("to_char(op.payment_date, 'yyyy-MM-dd') ILIKE '%" + filter + "%'");
+
         exp = exp.endJunction();
         query = exp.query();
 
