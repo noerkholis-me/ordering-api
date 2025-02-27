@@ -60,7 +60,6 @@ public class ProductAppController extends BaseController {
 
                 response.setId(product.getProductMerchant().id);
                 response.setProductName(product.getProductMerchant().getProductName());
-                response.setDiscount(product.getDiscount());
                 response.setImage(product.getProductImageMain());
                 response.setCategoryId(product.getProductMerchant().getCategoryMerchant().id);
                 response.setSubCategoryId(product.getProductMerchant().getSubCategoryMerchant().id);
@@ -70,7 +69,8 @@ public class ProductAppController extends BaseController {
                 response.setLongDescription(description.getLongDescription());
                 response.setBasePrice(productStore.getStorePrice().intValue());
                 response.setPrice(productStore.getFinalPrice().intValue());
-                response.setDiscountType(product.getDiscountType());
+                response.setDiscount(productStore.getDiscount());
+                response.setDiscountType(productStore.getDiscountType());
                 response.setIsStock(productStore.getIsStock());
                 if (productStore != null && productStore.stock != null) {
                     response.setStock(productStore.stock);
