@@ -118,20 +118,24 @@ public class CashierHistoryController extends BaseController {
                         response.setBaseResponse(0, 0, 0, "store tidak ditemukan", null);
                         return badRequest(Json.toJson(response));
                     }
+
                     query = CashierHistoryMerchantRepository.findAllCashierHistoryByStoreId(storeId);
+
                 } else {
                     query = CashierHistoryMerchantRepository.find.where().eq("store.merchant", merchant).eq("end_time", null).eq("end_total_amount", null).eq("end_total_amount_cash", null).order("created_at desc");
                 }
                 List<CashierHistoryMerchant> cashierHistoryMerchants = CashierHistoryMerchantRepository.findAllCashierHistory(query, offset, limit);
                 Integer totalData = CashierHistoryMerchantRepository.getTotalData(query);
                 List<CashierHistoryResponse> responses = new ArrayList<>();
+                
                 for (CashierHistoryMerchant historyMerchant : cashierHistoryMerchants) {
                     CashierHistoryResponse response = new CashierHistoryResponse();
+
                     response.setCashierName(historyMerchant.getUserMerchant().getFullName());
                     response.setSessionCode(historyMerchant.getSessionCode());
                     response.setStartTime(historyMerchant.getStartTime());
                     response.setEndTime(historyMerchant.getEndTime());
-                    response.setStoreName(historyMerchant.getStore().storeName);
+                    response.setStoreName(historyMerchant.getStore().getStoreName());
                     responses.add(response);
                 }
                 response.setBaseResponse(totalData, offset, limit, success + " menampilkan data history cashier", responses);
