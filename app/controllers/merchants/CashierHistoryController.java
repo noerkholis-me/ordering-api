@@ -130,7 +130,6 @@ public class CashierHistoryController extends BaseController {
                 
                 for (CashierHistoryMerchant historyMerchant : cashierHistoryMerchants) {
                     CashierHistoryResponse response = new CashierHistoryResponse();
-                 System.out.println(historyMerchant.getUserMerchant());
 
                     response.setCashierName(historyMerchant.getUserMerchant().getFullName());
                     response.setSessionCode(historyMerchant.getSessionCode());
