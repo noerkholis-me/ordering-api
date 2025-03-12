@@ -155,6 +155,11 @@ public class BannersMerchantController extends BaseController {
                             response.setBaseResponse(0, 0, 0, error + " banner tidak tersedia.", null);
                             return badRequest(Json.toJson(response));
                         }
+                        if (request.getDateTo().compareTo(new Date()) <= 0) {
+                            response.setBaseResponse(0, 0, 0, "Tanggal dan Waktu Sampai tidak boleh kurang dari hari ini", null);
+                            return badRequest(Json.toJson(response));
+                        }
+
                         banners.setBannerName(request.getBannerName());
                         if (request.getBannerImageWeb() != null) {
                             banners.setBannerImageWeb(request.getBannerImageWeb());
@@ -287,6 +292,11 @@ public class BannersMerchantController extends BaseController {
                         response.setBaseResponse(0, 0, 0, error + " banners tidak tersedia.", null);
                         return badRequest(Json.toJson(response));
                     }
+                    if (banners.getDateTo().compareTo(new Date()) <= 0) {
+                        response.setBaseResponse(0, 0, 0, "Masa aktif banner sudah berakhir. Silahkan perbaharui tanggal masa aktif banner", null);
+                        return badRequest(Json.toJson(response));
+                    }
+
                     banners.setActive(request.isActive());
                     banners.update();
 

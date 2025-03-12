@@ -482,7 +482,6 @@ public class OrderRepository extends Model {
 
         String querySql = checkProductType(productType, whereCondition, sortBy);
 
-        System.out.println("checkProductType " + querySql);
 
         RawSql rawSql = RawSqlBuilder.parse(querySql).create();
         Query<Order> query = Ebean.find(Order.class).setRawSql(rawSql);
