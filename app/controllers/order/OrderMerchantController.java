@@ -69,7 +69,6 @@ public class OrderMerchantController extends BaseController {
         Merchant merchant = checkMerchantAccessAuthorization();
         if (merchant != null) {
             try {
-                System.out.println("MERCHANT ID : "+merchant.id);
                 int totalData = OrderRepository.getTotalOrderListWithFilter(merchant.id, storeId, statusOrder, filter, productType, sortBy);
                 List<Order> orders = OrderRepository.getOrderListWithFilter(merchant.id, storeId, offset, limit, statusOrder, filter, productType, sortBy);
                 List<OrderList> orderLists = new ArrayList<>();
