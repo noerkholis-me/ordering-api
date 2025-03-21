@@ -175,14 +175,15 @@ public class ShopOrderController extends BaseController {
                 if (member.email == null && email != null && !email.trim().isEmpty()) {
                     member.email = email; 
                 }
-                
-                if (member.phone == null && phone != null && !phone.trim().isEmpty()) {
+
+                if (phone != null && !phone.trim().isEmpty()) {
                     Member memberDuplicate = Member.find.where().eq("t0.phone", phone).eq("t0.is_deleted", false).setMaxRows(1).findUnique();
-                    
-                    if (memberDuplicate == null) {
-                        member.phone = phone;
+
+                    if (memberDuplicate != null) {
+                        System.out.println("Duplikat ditemukan! Nomor telepon: " + phone + ", digunakan oleh member ID: " + memberDuplicate.id);
                     } else {
-                        //currently do nothing, can throw error here
+                        System.out.println("Tidak ada duplikat untuk nomor telepon: " + phone);
+                        member.phone = phone;
                     }
                 }
 
