@@ -155,7 +155,7 @@ public class ShopMemberOrderDetail {
 
         if (order.getMember() != null) {
             Member member = order.getMember();
-            this.setCustomerName(member.fullName != null ? member.fullName : order.getStore().storeName);
+            this.setCustomerName(order.getMemberName() != null ? order.getMemberName() : order.getStore().storeName);
             this.setCustomerEmail(member.email);
         } else {
             this.setCustomerName(order.getStore().storeName);
